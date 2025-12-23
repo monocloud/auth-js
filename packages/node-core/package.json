@@ -1,0 +1,80 @@
+{
+  "name": "@monocloud/auth-node-core",
+  "version": "0.0.5",
+  "description": "MonoCloud NodeJS Authentication Core SDK",
+  "keywords": [
+    "monocloud",
+    "authentication",
+    "auth",
+    "sdk",
+    "base",
+    "core",
+    "node"
+  ],
+  "homepage": "https://www.monocloud.com",
+  "bugs": {
+    "url": "https://github.com/monocloud/auth-js/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/monocloud/auth-js.git",
+    "directory": "packages/node-core"
+  },
+  "license": "MIT",
+  "author": {
+    "name": "MonoCloud",
+    "email": "support@monocloud.com"
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.mts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs",
+      "default": "./dist/index.mjs"
+    },
+    "./utils": {
+      "types": "./dist/utils/index.d.mts",
+      "import": "./dist/utils/index.mjs",
+      "require": "./dist/utils/index.cjs",
+      "default": "./dist/utils/index.mjs"
+    },
+    "./internal": {
+      "types": "./dist/utils/internal.d.mts",
+      "import": "./dist/utils/internal.mjs",
+      "require": "./dist/utils/internal.cjs",
+      "default": "./dist/utils/internal.mjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsdown",
+    "lint:es": "eslint src tests",
+    "lint:ts": "tsc",
+    "lint": "pnpm run lint:es && pnpm run lint:ts",
+    "test": "eslint tests && rimraf coverage && vitest --config vitest.node.config.mts && vitest --config vitest.edge.config.mts && pnpm report",
+    "report": "shx cp ./coverage/node/coverage-final.json ./coverage/coverage-0.json && shx cp ./coverage/edge/coverage-final.json ./coverage/coverage-1.json && nyc merge ./coverage ./coverage/coverage.json && nyc report --reporter json-summary --reporter html --reporter text -t ./coverage --report-dir ./coverage/summary && npx @monocloud/auth-test-utils check-coverage"
+  },
+  "dependencies": {
+    "@monocloud/auth-core": "workspace:*",
+    "cookie": "1.1.1",
+    "debug": "4.4.3",
+    "joi": "18.0.2",
+    "jose": "6.1.3",
+    "uuid": "13.0.0"
+  },
+  "devDependencies": {
+    "@monocloud/auth-test-utils": "workspace:*",
+    "@types/debug": "4.1.12",
+    "eslint": "9.39.2",
+    "nock": "15.0.0",
+    "type-fest": "5.3.1"
+  },
+  "engines": {
+    "node": ">=16"
+  }
+}

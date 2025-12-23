@@ -1,0 +1,31 @@
+{
+  "name": "@monocloud/auth-test-utils",
+  "private": true,
+  "version": "0.0.4",
+  "description": "MonoCloud Testing Utils",
+  "license": "MIT",
+  "author": "MonoCloud",
+  "exports": {
+    ".": {
+      "default": "./src/index.ts"
+    },
+    "./setup": {
+      "default": "./src/setup.ts"
+    }
+  },
+  "bin": {
+    "check-coverage": "./src/check-coverage.js"
+  },
+  "scripts": {
+    "lint:es": "eslint src",
+    "lint:ts": "tsc",
+    "lint": "pnpm run lint:es && pnpm run lint:ts"
+  },
+  "peerDependencies": {
+    "jose": "6.1.3",
+    "vitest": "4.0.16"
+  },
+  "devDependencies": {
+    "eslint": "9.39.2"
+  }
+}

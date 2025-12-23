@@ -1,0 +1,51 @@
+{
+  "name": "@monocloud/auth-js",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "preinstall": "npx only-allow pnpm",
+    "build": "turbo run build",
+    "gen:docs": "rimraf docs && typedoc --options ./docs-gen/typedoc.json",
+    "lint": "turbo run lint:ts && turbo run lint:es -- --fix",
+    "test": "turbo run test",
+    "changeset": "changeset",
+    "prepare": "husky",
+    "local:registry": "./scripts/publish-local.sh",
+    "local:clean": "./scripts/clean-local.sh",
+    "delete:all": "./scripts/delete-all.sh",
+    "postinstall": "chmod +x ./scripts/delete-all.sh && chmod +x ./scripts/publish-local.sh && chmod +x ./scripts/clean-local.sh"
+  },
+  "devDependencies": {
+    "@changesets/cli": "2.29.8",
+    "@edge-runtime/vm": "5.0.0",
+    "@eslint/js": "9.39.2",
+    "@types/node": "25.0.3",
+    "@vitest/coverage-v8": "4.0.16",
+    "eslint": "9.39.2",
+    "eslint-config-prettier": "10.1.8",
+    "eslint-import-resolver-typescript": "4.4.4",
+    "eslint-plugin-import": "2.32.0",
+    "eslint-plugin-prettier": "5.5.4",
+    "eslint-plugin-react": "7.37.5",
+    "eslint-plugin-react-hooks": "7.0.1",
+    "globals": "16.5.0",
+    "happy-dom": "20.0.11",
+    "husky": "9.1.7",
+    "jose": "6.1.3",
+    "nyc": "17.1.0",
+    "prettier": "3.7.4",
+    "rimraf": "6.1.2",
+    "shx": "0.4.0",
+    "timekeeper": "2.3.1",
+    "tsdown": "0.18.2",
+    "turbo": "2.7.1",
+    "typedoc": "0.28.15",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.50.1",
+    "vitest": "4.0.16"
+  },
+  "engines": {
+    "node": ">=11"
+  },
+  "packageManager": "pnpm@10.26.1"
+}

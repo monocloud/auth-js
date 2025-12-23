@@ -1,0 +1,92 @@
+{
+  "name": "@monocloud/auth-nextjs",
+  "version": "0.0.5",
+  "description": "MonoCloud Next.js Authentication SDK",
+  "keywords": [
+    "monocloud",
+    "authentication",
+    "auth",
+    "sdk",
+    "node",
+    "nextjs"
+  ],
+  "homepage": "https://www.monocloud.com",
+  "bugs": {
+    "url": "https://github.com/monocloud/auth-js/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/monocloud/auth-js.git",
+    "directory": "packages/nextjs"
+  },
+  "license": "MIT",
+  "author": {
+    "name": "MonoCloud",
+    "email": "support@monocloud.com"
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.mts",
+  "files": [
+    "dist",
+    "components",
+    "client"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/cjs/index.cjs"
+    },
+    "./client": {
+      "types": "./dist/client/index.d.mts",
+      "import": "./dist/client/index.mjs",
+      "require": "./dist/client/index.cjs"
+    },
+    "./components": {
+      "types": "./dist/components/index.d.mts",
+      "import": "./dist/components/index.mjs",
+      "require": "./dist/components/index.cjs"
+    },
+    "./components/client": {
+      "types": "./dist/components/client/index.d.mts",
+      "import": "./dist/components/client/index.mjs",
+      "require": "./dist/components/client/index.cjs"
+    }
+  },
+  "scripts": {
+    "build": "tsdown",
+    "lint:es": "eslint src tests",
+    "lint:ts": "tsc",
+    "lint": "pnpm run lint:es && pnpm run lint:ts",
+    "test": "eslint tests && rimraf coverage && vitest --config vitest.node.config.mts && vitest --config vitest.edge.config.mts && vitest --config vitest.browser.config.mts && pnpm run report",
+    "report": "shx cp ./coverage/browser/coverage-final.json ./coverage/coverage-0.json && shx cp ./coverage/node/coverage-final.json ./coverage/coverage-1.json && shx cp ./coverage/edge/coverage-final.json ./coverage/coverage-2.json && nyc merge ./coverage ./coverage/coverage.json && nyc report --reporter json-summary --reporter html --reporter text -t ./coverage --report-dir ./coverage/summary && npx @monocloud/auth-test-utils check-coverage"
+  },
+  "dependencies": {
+    "@monocloud/auth-node-core": "workspace:*",
+    "cookie": "1.1.1",
+    "swr": "2.3.8"
+  },
+  "devDependencies": {
+    "@edge-runtime/vm": "5.0.0",
+    "@monocloud/auth-test-utils": "workspace:*",
+    "@testing-library/dom": "10.4.1",
+    "@testing-library/react": "16.3.1",
+    "@types/body-parser": "1.19.6",
+    "@types/react": "19.2.7",
+    "@types/react-dom": "19.2.3",
+    "body-parser": "2.2.1",
+    "eslint": "9.39.2",
+    "nock": "15.0.0",
+    "tough-cookie": "6.0.0",
+    "url-search-params-polyfill": "8.2.5"
+  },
+  "peerDependencies": {
+    "next": "^13.5.11 || ^14.2.35 || ~15.0.7 || ~15.1.11 || ~15.2.8 || ~15.3.8 || ~15.4.10 || ~15.5.9 || ^16.0.10",
+    "react": "^18.0.0 || ^19.2.3",
+    "react-dom": "^18.3.1 || ^19.2.3"
+  },
+  "engines": {
+    "node": ">=16"
+  }
+}
