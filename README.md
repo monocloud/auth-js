@@ -18,23 +18,32 @@
 
 ## Introduction
 
-_MonoCloud Authentication SDK_ – The easiest way to integrate secure authentication into your JavaScript applications.
+**MonoCloud Authentication SDK for JavaScript – the easiest way to integrate secure, standards-based authentication into JavaScript applications.**
 
-[MonoCloud](https://www.monocloud.com) is a modern, developer-friendly Identity & Access Management platform.
+[MonoCloud](https://www.monocloud.com?utm_source=github&utm_medium=auth_js) is a modern, developer-friendly Identity & Access Management platform.
 
-This repository contains the official SDKs for integrating MonoCloud's into your JavaScript apps.
+This SDK provides a typed JavaScript client for implementing **OAuth 2.0** and **OpenID Connect (OIDC)** authentication with MonoCloud across browser and server-side environments.
+
+### Who is this for?
+
+- Single-page applications (SPAs)
+- Next.js applications (App Router & Pages Router)
+- Node.js backends performing server-side auth flows
+- Applications that need secure redirects, token handling, and session management
 
 ## 📘 Documentation
 
-- **Documentation:** https://www.monocloud.com/docs
+- **Documentation:** [https://www.monocloud.com/docs](https://www.monocloud.com/docs?utm_source=github&utm_medium=auth_js)
 
 ## 📦 Packages
 
 | Package                       | Description                                                  | Links |
 | ----------------------------- | ------------------------------------------------------------ | ----- |
-| **@monocloud/auth-core**      | Framework-agnostic core authentication logic for MonoCloud   | [npm](https://www.npmjs.com/package/@monocloud/auth-core) \| [README](https://github.com/monocloud/auth-js/tree/main/packages/core)  |
-| **@monocloud/auth-node-core** | Core authentication utilities for Node.js environments       | [npm](https://www.npmjs.com/package/@monocloud/auth-node-core) \| [README](https://github.com/monocloud/auth-js/tree/main/packages/node-core)  |
-| **@monocloud/auth-nextjs**    | Authentication SDK for Next.js (App Router and Pages Router) | [npm](https://www.npmjs.com/package/@monocloud/auth-nextjs) \| [README](https://github.com/monocloud/auth-js/tree/main/packages/nextjs)  |
+| **@monocloud/auth-core**      | Framework-agnostic authentication primitives and OAuth/OIDC logic   | [npm](https://www.npmjs.com/package/@monocloud/auth-core) \| [README](https://github.com/monocloud/auth-js/tree/main/packages/core)  |
+| **@monocloud/auth-node-core** | Node.js-specific helpers for server-side authentication flows       | [npm](https://www.npmjs.com/package/@monocloud/auth-node-core) \| [README](https://github.com/monocloud/auth-js/tree/main/packages/node-core)  |
+| **@monocloud/auth-nextjs**    | Authentication SDK for Next.js (App Router & Pages Router) | [npm](https://www.npmjs.com/package/@monocloud/auth-nextjs) \| [README](https://github.com/monocloud/auth-js/tree/main/packages/nextjs)  |
+
+> **Note:** `auth-core` is runtime-agnostic. Environment-specific packages build on top of it.
 
 ## 🤝 Contributing & Support
 
@@ -45,7 +54,7 @@ This repository contains the official SDKs for integrating MonoCloud's into your
 
 ### Security
 
-Do **not** report security issues publicly. Please follow the contact instructions at: https://www.monocloud.com/contact
+Do **not** report security issues publicly. Please follow the contact instructions at: [https://www.monocloud.com/contact](https://www.monocloud.com/contact?utm_source=github&utm_medium=auth_js)
 
 ## 📄 License
 

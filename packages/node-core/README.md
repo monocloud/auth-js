@@ -2,19 +2,24 @@
 
 ## Introduction
 
-**MonoCloud Auth Node SDK – Secure authentication and session management for Node.js applications.**
+**MonoCloud Auth Node SDK – secure authentication and session management for Node.js backends.**
 
-[MonoCloud](https://www.monocloud.com) is a modern, developer-friendly Identity & Access Management platform.
+[MonoCloud](https://www.monocloud.com?utm_source=github&utm_medium=auth_js) is a modern, developer-friendly Identity & Access Management platform.
 
-This SDK provides a robust, high-level client for integrating MonoCloud authentication into Node.js backends. It handles the complexity of the OpenID Connect (OIDC) protocol such as:
+This package provides a **high-level authentication client for Node.js applications**, built on top of MonoCloud’s OpenID Connect (OIDC) implementation. It abstracts the complexity of OAuth/OIDC while remaining framework-agnostic.
 
-- **Authorization Code Flow** with PKCE.
-- **Session Management** (Encrypted Cookies).
-- **Token Rotation** (Automatic Refresh Tokens).
+The SDK handles:
+
+- **Authorization Code Flow** with PKCE
+- **Secure session management** using encrypted cookies
+- **Automatic token rotation** via refresh tokens
+- **State and CSRF validation** out of the box
+
+> This package builds on **`@monocloud/auth-core`** and adds Node.js–specific session and cookie handling.
 
 ## 📘 Documentation
 
-- **Documentation:** https://www.monocloud.com/docs
+- **Documentation:** [https://www.monocloud.com/docs](https://www.monocloud.com/docs?utm_source=github&utm_medium=auth_js)
 
 ## Supported Platforms
 
@@ -23,8 +28,8 @@ This SDK provides a robust, high-level client for integrating MonoCloud authenti
 ## Requirements
 
 - A **MonoCloud Tenant**
-- A **Client ID** and **Client Secret** (configured as a Web Application)
-- A **Random Secret** (32+ characters) for cookie encryption
+- A **Client ID** and **Client Secret** (configured as a *Web Application*)
+- A **Random secret** (32+ characters) for encrypting session cookies
 
 ## 📦 Installation
 
@@ -34,7 +39,7 @@ npm install @monocloud/auth-node-core
 
 ### Initialization
 
-Initialize the client with your tenant configuration.
+Initialize the client with your tenant and application configuration.
 
 ```typescript
 import { MonoCloudCoreClient } from '@monocloud/auth-node-core';
@@ -48,61 +53,79 @@ const nodeClient = new MonoCloudCoreClient({
 });
 ```
 
-⚠️ Security Note: Never commit your credentials to version control. Load them from environment variables.
+⚠️ Security Note: Never commit secrets to source control. Always load them from environment variables.
 
 ## Usage
 
-You need to set up routes to handle the OIDC flow. The SDK expects a generic request and response adapter depending on your framework.
+The SDK is **framework-agnostic**. It operates on generic request/response adapters so it can be used with Express, Fastify, Hapi, or custom servers.
 
 ### Sign In
 
-Redirects the user to MonoCloud to sign in.
+Redirects the user to MonoCloud to start authentication.
 
 ```typescript
 import type { MonoCloudRequest, MonoCloudResponse } from '@monocloud/auth-node-core';
 
-const request: MonoCloudRequest = ...;
-const response: MonoCloudResponse = ...;
+const request: MonoCloudRequest =   /* framework adapter */;
+const response: MonoCloudResponse = /* framework adapter */;
 
-// Mount on any routes. Default - /api/auth/signin
+// Default route: /api/auth/signin
 await nodeClient.signIn(request, response);
 ```
 
 ### Handle Callback
 
-Handles the redirect back from MonoCloud, validates the state, exchanges the code for tokens, and sets the session cookie.
+Handles the redirect from MonoCloud, validates state, exchanges the authorization code for tokens, and sets the encrypted session cookie.
 
 ```typescript
 import type { MonoCloudRequest, MonoCloudResponse } from '@monocloud/auth-node-core';
 
-const request: MonoCloudRequest = ...;
-const response: MonoCloudResponse = ...;
+const request: MonoCloudRequest =   /* framework adapter */;
+const response: MonoCloudResponse = /* framework adapter */;
 
-// Mount on any routes. Default - /api/auth/callback
+// Default route: /api/auth/callback
 await nodeClient.callback(request, response);
 ```
 
-### Sign Out
-
-Destroys the local session and redirects to MonoCloud to end the SSO session.
-
-```typescript
-import type { MonoCloudRequest, MonoCloudResponse } from '@monocloud/auth-node-core';
-
-const request: MonoCloudRequest = ...;
-const response: MonoCloudResponse = ...;
-
-// Mount on any routes. Default - /api/auth/signout
-await nodeClient.signOut(request, response);
-```
-
 ### Get Session
+
+Retrieve the current authenticated session from the request.
 
 ```typescript
 const session = await nodeClient.getSession(request, response);
 
 console.log(session);
 ```
+
+### Sign Out
+
+Clears the local session and redirects the user to MonoCloud to terminate the SSO session.
+
+```typescript
+import type { MonoCloudRequest, MonoCloudResponse } from '@monocloud/auth-node-core';
+
+const request: MonoCloudRequest =   /* framework adapter */;
+const response: MonoCloudResponse = /* framework adapter */;
+
+// Default route: /api/auth/signout
+await nodeClient.signOut(request, response);
+```
+
+## When should I use `auth-node-core`?
+
+Use **`@monocloud/auth-node-core`** if you are building a **Node.js backend** and want a secure authentication solution without tying yourself to a specific framework.
+
+This package is a good fit if you:
+
+- Are building an **API or server-rendered application** in Node.js
+- Want **cookie-based sessions** with encryption handled for you
+- Need built-in handling for **OIDC redirects, state validation, and token exchange**
+- Want to manage authentication in a **custom servers**
+- Prefer a **framework-agnostic** solution with sensible security defaults
+
+`auth-node-core` builds on top of `@monocloud/auth-core` and adds Node-specific features such as encrypted session cookies and refresh token rotation.
+
+Higher-level packages reuse the same underlying OIDC implementation but provide framework-specific ergonomics.
 
 ## 🤝 Contributing & Support
 
@@ -113,7 +136,7 @@ console.log(session);
 
 ### Security
 
-Do **not** report security issues publicly. Please follow the contact instructions at: https://www.monocloud.com/contact
+Do **not** report security issues publicly. Please follow the contact instructions at: [https://www.monocloud.com/contact](https://www.monocloud.com/contact?utm_source=github&utm_medium=auth_js)
 
 ## 📄 License
 
