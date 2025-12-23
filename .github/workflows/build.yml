@@ -105,7 +105,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: "auth-core-tests"
-          path: "**/coverage/junit*.xml"
+          path: "packages/core/coverage/junit*.xml"
           overwrite: true
 
       - name: Report Test Results
@@ -114,7 +114,7 @@ jobs:
         with:
           artifact: "auth-core-tests"
           name: "Core SDK Tests"
-          path: "**/coverage/junit*.xml"
+          path: "packages/core/coverage/junit*.xml"
           reporter: java-junit
           fail-on-error: false
 
@@ -150,7 +150,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: "auth-node-core-tests"
-          path: "**/coverage/junit*.xml"
+          path: "packages/node-core/coverage/junit*.xml"
           overwrite: true
 
       - name: Report Test Results
@@ -159,7 +159,7 @@ jobs:
         with:
           artifact: "auth-node-core-tests"
           name: "Node Core SDK Tests"
-          path: "**/coverage/junit*.xml"
+          path: "packages/node-core/coverage/junit*.xml"
           reporter: java-junit
           fail-on-error: false
 
@@ -195,7 +195,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: "auth-nextjs-tests"
-          path: "**/coverage/junit*.xml"
+          path: "packages/nextjs/coverage/junit*.xml"
           overwrite: true
 
       - name: Report Test Results
@@ -204,7 +204,7 @@ jobs:
         with:
           artifact: "auth-nextjs-tests"
           name: "Next.js SDK Tests"
-          path: "**/coverage/junit*.xml"
+          path: "packages/nextjs/coverage/junit*.xml"
           reporter: java-junit
           fail-on-error: false
 
