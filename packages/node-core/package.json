@@ -56,7 +56,7 @@
     "lint:es": "eslint src tests",
     "lint:ts": "tsc",
     "lint": "pnpm run lint:es && pnpm run lint:ts",
-    "test": "eslint tests && rimraf coverage && vitest --config vitest.node.config.mts && vitest --config vitest.edge.config.mts && pnpm report",
+    "test": "eslint tests && rimraf coverage && vitest --config vitest.node.config.mts --reporter=junit --outputFile=coverage/junit.node.xml && vitest --config vitest.edge.config.mts --reporter=junit --outputFile=coverage/junit.edge.xml && pnpm report",
     "report": "shx cp ./coverage/node/coverage-final.json ./coverage/coverage-0.json && shx cp ./coverage/edge/coverage-final.json ./coverage/coverage-1.json && nyc merge ./coverage ./coverage/coverage.json && nyc report --reporter json-summary --reporter html --reporter text -t ./coverage --report-dir ./coverage/summary && npx @monocloud/auth-test-utils check-coverage"
   },
   "dependencies": {

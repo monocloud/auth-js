@@ -1,0 +1,212 @@
+name: Build & Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  checks: write
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build Projects
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Install PNPM
+        uses: pnpm/action-setup@v4
+
+      - name: NodeJS Setup
+        uses: actions/setup-node@v6
+        with:
+          cache: pnpm
+          node-version: 22
+
+      - name: Install Dependencies
+        run: pnpm install
+
+      - name: Build project
+        run: pnpm build
+
+      - name: Cache Build
+        uses: actions/cache/save@v4
+        with:
+          path: .
+          key: build-${{ github.run_id }}-${{ github.run_attempt }}
+
+  lint-js:
+    name: Lint JavaScript
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Install PNPM
+        uses: pnpm/action-setup@v4
+
+      - name: NodeJS Setup
+        uses: actions/setup-node@v6
+        with:
+          cache: pnpm
+          node-version: 22
+
+      - name: Load Cache
+        uses: actions/cache/restore@v4
+        with:
+          path: .
+          key: build-${{ github.run_id }}-${{ github.run_attempt }}
+
+      - name: Lint JavaScript
+        id: lint_js
+        run: |
+          pnpm lint
+
+  core_test:
+    name: Core SDK Tests
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Install PNPM
+        uses: pnpm/action-setup@v4
+
+      - name: NodeJS Setup
+        uses: actions/setup-node@v6
+        with:
+          cache: pnpm
+          node-version: 22
+
+      - name: Load Cache
+        uses: actions/cache/restore@v4
+        with:
+          path: .
+          key: build-${{ github.run_id }}-${{ github.run_attempt }}
+
+      - name: Test Core
+        run: pnpm --filter @monocloud/auth-core run test
+
+      - name: Upload test results
+        id: upload_artifact
+        if: success() || failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: "@monocloud/auth-core"
+          path: "**/coverage/junit.*.xml"
+          overwrite: true
+
+      - name: Report Test Results
+        if: success() || failure()
+        uses: dorny/test-reporter@v1
+        with:
+          artifact: "@monocloud/auth-core"
+          name: "Core SDK Tests"
+          path: "**/coverage/junit.*.xml"
+          reporter: jest-junit
+          fail-on-error: false
+
+  node_core_test:
+    name: Node Core SDK Tests
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Install PNPM
+        uses: pnpm/action-setup@v4
+
+      - name: NodeJS Setup
+        uses: actions/setup-node@v6
+        with:
+          cache: pnpm
+          node-version: 22
+
+      - name: Load Cache
+        uses: actions/cache/restore@v4
+        with:
+          path: .
+          key: build-${{ github.run_id }}-${{ github.run_attempt }}
+
+      - name: Test Node Core
+        run: pnpm --filter @monocloud/auth-node-core run test
+
+      - name: Upload test results
+        id: upload_artifact
+        if: success() || failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: "@monocloud/auth-node-core"
+          path: "**/coverage/junit.*.xml"
+          overwrite: true
+
+      - name: Report Test Results
+        if: success() || failure()
+        uses: dorny/test-reporter@v1
+        with:
+          artifact: "@monocloud/auth-node-core"
+          name: "Node Core SDK Tests"
+          path: "**/coverage/junit.*.xml"
+          reporter: jest-junit
+          fail-on-error: false
+
+  nextjs_test:
+    name: Next.js SDK Tests
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Install PNPM
+        uses: pnpm/action-setup@v4
+
+      - name: NodeJS Setup
+        uses: actions/setup-node@v6
+        with:
+          cache: pnpm
+          node-version: 22
+
+      - name: Load Cache
+        uses: actions/cache/restore@v4
+        with:
+          path: .
+          key: build-${{ github.run_id }}-${{ github.run_attempt }}
+
+      - name: Test Next.js
+        run: pnpm --filter @monocloud/auth-nextjs run test
+
+      - name: Upload test results
+        id: upload_artifact
+        if: success() || failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: "@monocloud/auth-nextjs"
+          path: "**/coverage/junit.*.xml"
+          overwrite: true
+
+      - name: Report Test Results
+        if: success() || failure()
+        uses: dorny/test-reporter@v1
+        with:
+          artifact: "@monocloud/auth-nextjs"
+          name: "Next.js SDK Tests"
+          path: "**/coverage/junit.*.xml"
+          reporter: jest-junit
+          fail-on-error: false
+
+
