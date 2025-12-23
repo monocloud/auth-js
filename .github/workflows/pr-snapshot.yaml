@@ -130,4 +130,9 @@ jobs:
               markdown += `\`\`\`\nnpm i ${pkg.name}@${pkg.version}\n\`\`\`\n\n`;
             });
 
-            core.setOutput('snapshotDetails', markdown);
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `🚀 Private Snapshot published! \n\n${markdown}`
+            })

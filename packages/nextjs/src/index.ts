@@ -5,6 +5,11 @@ export {
   MonoCloudOPError,
   MonoCloudTokenError,
   type MonoCloudOptions,
+  type MonoCloudSession,
+  type MonoCloudUser,
+  type MonoCloudTokens,
+  type AccessToken,
+  type GetTokensOptions,
 } from '@monocloud/auth-node-core';
 
 export type {

@@ -43,6 +43,7 @@ export {
 export { MonoCloudCoreClient } from './monocloud-node-core-client';
 
 export type {
+  AccessToken,
   AuthenticateOptions,
   ClientAuthMethod,
   MonoCloudClientOptions,
