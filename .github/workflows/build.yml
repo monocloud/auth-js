@@ -105,7 +105,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: "@monocloud/auth-core"
-          path: "**/coverage/junit.*.xml"
+          path: "**/junit.*.xml"
           overwrite: true
 
       - name: Report Test Results
@@ -114,7 +114,7 @@ jobs:
         with:
           artifact: "@monocloud/auth-core"
           name: "Core SDK Tests"
-          path: "**/coverage/junit.*.xml"
+          path: "**/junit.*.xml"
           reporter: jest-junit
           fail-on-error: false
 
@@ -150,7 +150,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: "@monocloud/auth-node-core"
-          path: "**/coverage/junit.*.xml"
+          path: "**/junit.*.xml"
           overwrite: true
 
       - name: Report Test Results
@@ -159,7 +159,7 @@ jobs:
         with:
           artifact: "@monocloud/auth-node-core"
           name: "Node Core SDK Tests"
-          path: "**/coverage/junit.*.xml"
+          path: "**/junit.*.xml"
           reporter: jest-junit
           fail-on-error: false
 
@@ -195,7 +195,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: "@monocloud/auth-nextjs"
-          path: "**/coverage/junit.*.xml"
+          path: "**/junit.*.xml"
           overwrite: true
 
       - name: Report Test Results
@@ -204,7 +204,7 @@ jobs:
         with:
           artifact: "@monocloud/auth-nextjs"
           name: "Next.js SDK Tests"
-          path: "**/coverage/junit.*.xml"
+          path: "**/junit.*.xml"
           reporter: jest-junit
           fail-on-error: false
 
