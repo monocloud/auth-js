@@ -1,7 +1,7 @@
 {
   "name": "@monocloud/auth-test-utils",
   "private": true,
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "MonoCloud Testing Utils",
   "license": "MIT",
   "author": "MonoCloud",
