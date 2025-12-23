@@ -27,7 +27,7 @@ describe('Base Path', () => {
   test('should have the base path in redirect uri', async () => {
     setupOp();
 
-    const middleware = monoCloud.monoCloudMiddleware();
+    const middleware = monoCloud.authMiddleware();
 
     const request = new NextRequest(
       new URL('http://localhost:3000/api/auth/signin')
@@ -57,7 +57,7 @@ describe('Base Path', () => {
 
     await setStateCookie(request);
 
-    const middleware = monoCloud.monoCloudMiddleware();
+    const middleware = monoCloud.authMiddleware();
 
     const response = await middleware(request, defaultEvent());
 
@@ -83,7 +83,7 @@ describe('Base Path', () => {
       returnUrl: encodeURIComponent('/custom'),
     });
 
-    const middleware = monoCloud.monoCloudMiddleware();
+    const middleware = monoCloud.authMiddleware();
 
     const response = await middleware(request, defaultEvent());
 
@@ -106,7 +106,7 @@ describe('Base Path', () => {
 
     await setSessionCookie(request);
 
-    const middleware = monoCloud.monoCloudMiddleware();
+    const middleware = monoCloud.authMiddleware();
 
     const response = await middleware(request, defaultEvent());
 
@@ -139,7 +139,7 @@ describe('Base Path', () => {
 
       await setSessionCookie(request);
 
-      const middleware = monoCloud.monoCloudMiddleware();
+      const middleware = monoCloud.authMiddleware();
 
       const response = await middleware(request, defaultEvent());
 
@@ -168,7 +168,7 @@ describe('Base Path', () => {
 
     const request = new NextRequest('http://localhost:3000/api/auth/signout');
 
-    const middleware = monoCloud.monoCloudMiddleware();
+    const middleware = monoCloud.authMiddleware();
 
     const response = await middleware(request, defaultEvent());
 

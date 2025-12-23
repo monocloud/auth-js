@@ -77,7 +77,7 @@ Protect your application by registering the MonoCloud middleware. Authentication
 ```typescript
 import { monoCloud } from '<shared-config>';
 
-export default monoCloud.monoCloudMiddleware();
+export default monoCloud.authMiddleware();
 
 // Allow static files
 export const config = {

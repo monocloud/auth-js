@@ -28,7 +28,7 @@ describe('MonoCloud Middleware', () => {
   });
 
   it('should redirect unauthenticated requests to signin endpoint', async () => {
-    const middleware = monoCloud.monoCloudMiddleware();
+    const middleware = monoCloud.authMiddleware();
 
     const request = new NextRequest('http://localhost:3000/');
 
@@ -43,7 +43,7 @@ describe('MonoCloud Middleware', () => {
   });
 
   it('should return forbidden for requests with x-middleware-subrequest header', async () => {
-    const middleware = monoCloud.monoCloudMiddleware();
+    const middleware = monoCloud.authMiddleware();
 
     const request = new NextRequest('http://localhost:3000/');
 
@@ -61,7 +61,7 @@ describe('MonoCloud Middleware', () => {
     { body: '{"custom":true}', status: 200 },
   ].forEach((ret: any, i) => {
     it(`can customize onAccessDenied for unauthenticated requests ${i + 1}/2`, async () => {
-      const middleware = monoCloud.monoCloudMiddleware({
+      const middleware = monoCloud.authMiddleware({
         onAccessDenied: () => ret,
       });
 
@@ -77,7 +77,7 @@ describe('MonoCloud Middleware', () => {
   });
 
   it('will continue the request if onAccessDenied returns falsy', async () => {
-    const middleware = monoCloud.monoCloudMiddleware({
+    const middleware = monoCloud.authMiddleware({
       onAccessDenied: () => null,
     });
 
@@ -91,7 +91,7 @@ describe('MonoCloud Middleware', () => {
   });
 
   it('should return 401 unauthorized for api requests', async () => {
-    const middleware = monoCloud.monoCloudMiddleware();
+    const middleware = monoCloud.authMiddleware();
 
     const request = new NextRequest('http://localhost:3000/api/something');
 
@@ -104,7 +104,7 @@ describe('MonoCloud Middleware', () => {
   });
 
   it('should retain the path as return_url in the signin redirect', async () => {
-    const middleware = monoCloud.monoCloudMiddleware();
+    const middleware = monoCloud.authMiddleware();
 
     const request = new NextRequest('http://localhost:3000/path?any=thing');
 
@@ -121,7 +121,7 @@ describe('MonoCloud Middleware', () => {
   });
 
   it('can customize the protected routes', async () => {
-    const middleware = monoCloud.monoCloudMiddleware({
+    const middleware = monoCloud.authMiddleware({
       protectedRoutes: ['/protected'],
     });
 
@@ -142,7 +142,7 @@ describe('MonoCloud Middleware', () => {
   ['/protected', '/secret', '/protected/nested', '/secret/nested'].forEach(
     endpoint => {
       it('can protect routes using regex', async () => {
-        const middleware = monoCloud.monoCloudMiddleware({
+        const middleware = monoCloud.authMiddleware({
           protectedRoutes: ['^/(protected|secret)'],
         });
 
@@ -168,7 +168,7 @@ describe('MonoCloud Middleware', () => {
   );
 
   it('can take in a callback that can decide if the route is protected', async () => {
-    const middleware = monoCloud.monoCloudMiddleware({
+    const middleware = monoCloud.authMiddleware({
       protectedRoutes: req => {
         return req.nextUrl.pathname.includes('/protected');
       },
@@ -194,7 +194,7 @@ describe('MonoCloud Middleware', () => {
   });
 
   it('should allow authenticated users', async () => {
-    const middleware = monoCloud.monoCloudMiddleware();
+    const middleware = monoCloud.authMiddleware();
 
     const request = new NextRequest('http://localhost:3000/test');
 
@@ -207,13 +207,13 @@ describe('MonoCloud Middleware', () => {
     expect(res.status).not.toBe(307);
   });
 
-  it('can return monoCloudMiddleware from a customMiddleware', async () => {
+  it('can return authMiddleware from a customMiddleware', async () => {
     const customMiddleware = async (
       req: NextRequest,
       evt: NextFetchEvent
       // eslint-disable-next-line require-await
     ): Promise<any> => {
-      return monoCloud.monoCloudMiddleware(req, evt);
+      return monoCloud.authMiddleware(req, evt);
     };
 
     const request = new NextRequest('http://localhost:3000/test');
@@ -229,7 +229,7 @@ describe('MonoCloud Middleware', () => {
   });
 
   it('returns forbidden if the user does not belong to a group (Non API)', async () => {
-    const middleware = monoCloud.monoCloudMiddleware({
+    const middleware = monoCloud.authMiddleware({
       protectedRoutes: [{ routes: ['/protected'], groups: ['NOPE'] }],
     });
 
@@ -250,7 +250,7 @@ describe('MonoCloud Middleware', () => {
   });
 
   it('succeeds if the request is a non-group protected route', async () => {
-    const middleware = monoCloud.monoCloudMiddleware({
+    const middleware = monoCloud.authMiddleware({
       protectedRoutes: [{ routes: ['/protected'], groups: ['test'] }],
     });
 
@@ -270,7 +270,7 @@ describe('MonoCloud Middleware', () => {
   });
 
   it('returns forbidden if the user does not belong to a group (API)', async () => {
-    const middleware = monoCloud.monoCloudMiddleware({
+    const middleware = monoCloud.authMiddleware({
       protectedRoutes: [{ routes: ['/api/protected'], groups: ['NOPE'] }],
     });
 
@@ -291,7 +291,7 @@ describe('MonoCloud Middleware', () => {
   });
 
   it('allows the user if the user belongs to the group', async () => {
-    const middleware = monoCloud.monoCloudMiddleware({
+    const middleware = monoCloud.authMiddleware({
       protectedRoutes: [{ routes: ['/protected'], groups: ['test'] }],
     });
 
@@ -311,7 +311,7 @@ describe('MonoCloud Middleware', () => {
   });
 
   it('can set custom groups claim', async () => {
-    const middleware = monoCloud.monoCloudMiddleware({
+    const middleware = monoCloud.authMiddleware({
       groupsClaim: 'CUSTOM_GROUPS',
       protectedRoutes: [{ routes: ['/protected'], groups: ['test'] }],
     });
@@ -348,7 +348,7 @@ describe('MonoCloud Middleware', () => {
     },
   ].forEach(({ ret, expected, route }, i) => {
     it(`can set custom onAccessDenied middleware function ${i + 1}/1`, async () => {
-      const middleware = monoCloud.monoCloudMiddleware({
+      const middleware = monoCloud.authMiddleware({
         protectedRoutes: [
           {
             routes: [route],
@@ -375,8 +375,8 @@ describe('MonoCloud Middleware', () => {
     });
   });
 
-  it('can pass onError to monoCloudMiddleware() to handle errors', async () => {
-    const middleware = monoCloud.monoCloudMiddleware({
+  it('can pass onError to authMiddleware() to handle errors', async () => {
+    const middleware = monoCloud.authMiddleware({
       onError: () => Promise.resolve(NextResponse.json({ custom: true })),
     });
 
@@ -397,7 +397,7 @@ describe('MonoCloud Middleware', () => {
 
     monoCloud = new MonoCloudNextClient({ refetchUserInfo: true });
 
-    const middleware = monoCloud.monoCloudMiddleware();
+    const middleware = monoCloud.authMiddleware();
 
     const req = new NextRequest('http://localhost:3000/api/auth/userinfo');
 
@@ -413,7 +413,7 @@ describe('MonoCloud Middleware', () => {
   it('should return 500 for unexpected errors', async () => {
     await setupOp(defaultDiscovery, noTokenAndUserInfo);
 
-    const middleware = monoCloud.monoCloudMiddleware();
+    const middleware = monoCloud.authMiddleware();
 
     const req = new NextRequest(
       new URL(
@@ -437,7 +437,7 @@ describe('MonoCloud Middleware', () => {
 
     await setStateCookie(req);
 
-    const middleware = monoCloud.monoCloudMiddleware();
+    const middleware = monoCloud.authMiddleware();
 
     const response = await middleware(req, defaultEvent());
 
@@ -447,7 +447,7 @@ describe('MonoCloud Middleware', () => {
   });
 
   it('should return 401 for unknown routes', async () => {
-    const middleware = monoCloud.monoCloudMiddleware();
+    const middleware = monoCloud.authMiddleware();
 
     const response = await middleware(
       new NextRequest(new URL('http://localhost:3000/api/auth/unknown')),
@@ -475,7 +475,7 @@ describe('MonoCloud Middleware', () => {
       it(`should return 405 on ${endpoint} for request type ${method}`, async () => {
         await setupOp(defaultDiscovery, noTokenAndUserInfo);
 
-        const middleware = monoCloud.monoCloudMiddleware();
+        const middleware = monoCloud.authMiddleware();
 
         const response = await middleware(
           new NextRequest(new URL(`http://localhost:3000${endpoint}`), {
@@ -494,7 +494,7 @@ describe('MonoCloud Middleware', () => {
   it('should redirect to app url after callback', async () => {
     await setupOp();
 
-    const middleware = monoCloud.monoCloudMiddleware();
+    const middleware = monoCloud.authMiddleware();
 
     const req = new NextRequest(
       'http://localhost:3000/api/auth/callback?state=state&nonce=nonce&code=code'
@@ -526,7 +526,7 @@ describe('MonoCloud Middleware', () => {
   it('should process a post request', async () => {
     await setupOp();
 
-    const middleware = monoCloud.monoCloudMiddleware();
+    const middleware = monoCloud.authMiddleware();
 
     const headers = new Headers();
     headers.set('content-type', 'application/x-www-form-urlencoded');
@@ -566,7 +566,7 @@ describe('MonoCloud Middleware', () => {
   it('should redirect to return url set through query from signin after callback', async () => {
     await setupOp();
 
-    const middleware = monoCloud.monoCloudMiddleware();
+    const middleware = monoCloud.authMiddleware();
 
     const req = new NextRequest(
       `http://localhost:3000/api/auth/callback?state=state&nonce=state&code=code`
@@ -593,7 +593,7 @@ describe('MonoCloud Middleware', () => {
       },
     });
 
-    const middleware = monoCloud.monoCloudMiddleware();
+    const middleware = monoCloud.authMiddleware();
 
     const req = new NextRequest(
       new URL('http://localhost:3000/api/auth/custom_login')
@@ -612,7 +612,7 @@ describe('MonoCloud Middleware', () => {
   it('should redirect to authorize endpoint', async () => {
     await setupOp(defaultDiscovery, noTokenAndUserInfo);
 
-    const middleware = monoCloud.monoCloudMiddleware();
+    const middleware = monoCloud.authMiddleware();
 
     const serverResponse = await middleware(
       new NextRequest(new URL('http://localhost:3000/api/auth/signin')),
@@ -640,7 +640,7 @@ describe('MonoCloud Middleware', () => {
   it('prompt=create in query should redirect to authorize endpoint with prompt=create', async () => {
     await setupOp(defaultDiscovery, noTokenAndUserInfo);
 
-    const middleware = monoCloud.monoCloudMiddleware();
+    const middleware = monoCloud.authMiddleware();
 
     const serverResponse = await middleware(
       new NextRequest(
@@ -661,7 +661,7 @@ describe('MonoCloud Middleware', () => {
   it('custom login_hint in query should redirect to authorize endpoint with login_hint', async () => {
     await setupOp(defaultDiscovery, noTokenAndUserInfo);
 
-    const middleware = monoCloud.monoCloudMiddleware();
+    const middleware = monoCloud.authMiddleware();
 
     const serverResponse = await middleware(
       new NextRequest(
@@ -682,7 +682,7 @@ describe('MonoCloud Middleware', () => {
   it('custom authenticator in query should redirect to authorize endpoint with authenticator in the authenticator_hint', async () => {
     await setupOp(defaultDiscovery, noTokenAndUserInfo);
 
-    const middleware = monoCloud.monoCloudMiddleware();
+    const middleware = monoCloud.authMiddleware();
 
     const serverResponse = await middleware(
       new NextRequest(
@@ -705,7 +705,7 @@ describe('MonoCloud Middleware', () => {
   it('should set the state cookie', async () => {
     await setupOp(defaultDiscovery, noTokenAndUserInfo);
 
-    const middleware = monoCloud.monoCloudMiddleware();
+    const middleware = monoCloud.authMiddleware();
 
     const serverResponse = await middleware(
       new NextRequest(new URL('http://localhost:3000/api/auth/signin')),
@@ -730,7 +730,7 @@ describe('MonoCloud Middleware', () => {
   it('should set the custom return url in the state', async () => {
     await setupOp(defaultDiscovery, noTokenAndUserInfo);
 
-    const middleware = monoCloud.monoCloudMiddleware();
+    const middleware = monoCloud.authMiddleware();
 
     const serverResponse = await middleware(
       new NextRequest(
@@ -755,7 +755,7 @@ describe('MonoCloud Middleware', () => {
 
     await setSessionCookie(req);
 
-    const middleware = monoCloud.monoCloudMiddleware();
+    const middleware = monoCloud.authMiddleware();
 
     const response = await middleware(req, defaultEvent());
 
@@ -783,7 +783,7 @@ describe('MonoCloud Middleware', () => {
 
       await setSessionCookie(req);
 
-      const middleware = monoCloud.monoCloudMiddleware();
+      const middleware = monoCloud.authMiddleware();
 
       const response = await middleware(req, defaultEvent());
 
@@ -811,7 +811,7 @@ describe('MonoCloud Middleware', () => {
 
     await setSessionCookie(req);
 
-    const middleware = monoCloud.monoCloudMiddleware();
+    const middleware = monoCloud.authMiddleware();
 
     const response = await middleware(req, defaultEvent());
 
@@ -834,7 +834,7 @@ describe('MonoCloud Middleware', () => {
 
     const req = new NextRequest('http://localhost:3000/api/auth/signout');
 
-    const middleware = monoCloud.monoCloudMiddleware();
+    const middleware = monoCloud.authMiddleware();
 
     const response = await middleware(req, defaultEvent());
 
@@ -845,7 +845,7 @@ describe('MonoCloud Middleware', () => {
   });
 
   it('should return the current user claims', async () => {
-    const middleware = monoCloud.monoCloudMiddleware();
+    const middleware = monoCloud.authMiddleware();
 
     const req = new NextRequest('http://localhost:3000/api/auth/userinfo');
 
@@ -862,7 +862,7 @@ describe('MonoCloud Middleware', () => {
   });
 
   it('should return no content if there is no session', async () => {
-    const middleware = monoCloud.monoCloudMiddleware();
+    const middleware = monoCloud.authMiddleware();
 
     const req = new NextRequest('http://localhost:3000/api/auth/userinfo');
 

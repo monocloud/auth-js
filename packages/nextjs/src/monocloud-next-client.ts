@@ -86,7 +86,7 @@ export class MonoCloudNextClient {
    *
    * @param {MonoCloudAuthOptions} [options] Optional configuration authentication routes.
    *
-   * **Note:** If you are already using `monoCloudMiddleware()`, you typically do **not**
+   * **Note:** If you are already using `authMiddleware()`, you typically do **not**
    * need this API route handler. This function is intended for applications where
    * middleware cannot be used—such as statically generated (SSG) deployments that still
    * require server-side authentication flows.
@@ -492,7 +492,7 @@ export class MonoCloudNextClient {
   /**
    * Middleware factory that protects routes and handles authentication globally.
    */
-  public monoCloudMiddleware: MonoCloudMiddleware = (...args: unknown[]) => {
+  public authMiddleware: MonoCloudMiddleware = (...args: unknown[]) => {
     let req: NextRequest | undefined;
     let evt: NextFetchEvent | undefined;
     let options: MonoCloudMiddlewareOptions | undefined;

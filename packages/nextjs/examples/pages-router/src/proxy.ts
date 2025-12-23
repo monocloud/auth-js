@@ -1,6 +1,6 @@
 import { monoCloud } from './monocloud';
 
-export default monoCloud.monoCloudMiddleware({
+export default monoCloud.authMiddleware({
   protectedRoutes: ['/middleware-profile'],
 });
 
