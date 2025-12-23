@@ -51,6 +51,7 @@
     "dist"
   ],
   "scripts": {
+    "prepare": "husky",
     "build": "tsdown",
     "lint:es": "eslint src tests",
     "lint:ts": "tsc",
