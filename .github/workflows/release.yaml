@@ -40,6 +40,12 @@ jobs:
       - name: Release build
         run: pnpm build
 
+      - name: Add Credentials to .npmrc
+        run: |
+          echo "@monocloud:registry=https://registry.npmjs.org/" >> .npmrc
+          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" >> .npmrc
+        shell: bash
+
       - name: Create Release PR
         id: changesets
         uses: changesets/action@v1
