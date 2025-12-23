@@ -1,0 +1,27 @@
+{
+  "name": "app-router",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint"
+  },
+  "dependencies": {
+    "@monocloud/auth-nextjs": "file:../../",
+    "next": "file:../../node_modules/next",
+    "react": "file:../../node_modules/react",
+    "react-dom": "file:../../node_modules/react-dom"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.18",
+    "@types/node": "^25.0.2",
+    "@types/react": "file:../../node_modules/@types/react",
+    "@types/react-dom": "file:../../node_modules/@types/react-dom",
+    "eslint": "^9.39.2",
+    "eslint-config-next": "^16.0.10",
+    "tailwindcss": "^4.1.18",
+    "typescript": "^5"
+  }
+}

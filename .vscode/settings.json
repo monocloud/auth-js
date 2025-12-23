@@ -1,0 +1,29 @@
+{
+  "files.exclude": {
+    "**/.vs": true,
+    "**/.nyc_output": true,
+    "**/coverage": true,
+    "**/.eslintcache": true,
+    "**/.yarn": true,
+    "**/dist": true,
+    "**/temp": true,
+    "**/.next": true,
+    "**/.turbo": true,
+    "**/node_modules": true,
+    "**/yarn.lock": true,
+    "**/pnpm-lock.yaml": true,
+    "**/packages.lock.json": true,
+    "**/openapi.json": true,
+    "**/*.tsbuildinfo": true,
+    "**/npmrc": true,
+    ".gitignore": true,
+    ".npmrc": true,
+    ".dockerignore": true,
+    ".prettierignore": true,
+    "global.json": true,
+    ".globalconfig": true,
+    ".run": true
+  },
+  "editor.bracketPairColorization.enabled": true,
+  "editor.guides.bracketPairs": "active"
+}

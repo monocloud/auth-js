@@ -1,0 +1,26 @@
+storage: /verdaccio/storage
+
+plugins: /verdaccio/plugins
+
+auth:
+  htpasswd:
+    file: /verdaccio/conf/htpasswd
+
+packages:
+  '@*/*':
+    access: $all
+    publish: $all
+    unpublish: $all
+    proxy: npmjs
+  '**':
+    access: $all
+    publish: $all
+    unpublish: $all
+    proxy: npmjs
+
+web:
+  title: Local Monorepo Registry (4874)
+
+uplinks:
+  npmjs:
+    url: https://registry.npmjs.org/
