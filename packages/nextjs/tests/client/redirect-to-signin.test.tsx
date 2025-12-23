@@ -4,10 +4,10 @@ import { describe, it, expect, beforeAll, vi } from 'vitest';
 import React, { JSX } from 'react';
 import { fetchNoContent, wrapper } from '../client-helper';
 import { RedirectToSignIn } from '../../src/components/client/redirect-to-signin';
-import { useMonoCloudAuth } from '../../src/client/use-monocloud-auth';
+import { useAuth } from '../../src/client/use-auth';
 
 export const Component = (): JSX.Element => {
-  const { user } = useMonoCloudAuth();
+  const { user } = useAuth();
   if (!user) {
     return <RedirectToSignIn />;
   }

@@ -15,7 +15,7 @@ export const Header = async () => {
       <div className="flex gap-4">
         <Link href="/">Home</Link>
         <Link href="/client">Protect Page (Client)</Link>
-        <Link href="/client/use-monocloud-auth">useMonoCloudAuth() Hook</Link>
+        <Link href="/client/use-monocloud-auth">useAuth() Hook</Link>
         <Link href="/server">Server</Link>
         <Link href="/api-profile">Api</Link>
         <Link href="/middleware-profile">Middleware</Link>

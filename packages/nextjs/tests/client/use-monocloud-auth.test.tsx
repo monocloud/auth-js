@@ -1,10 +1,10 @@
 /* eslint-disable import/no-extraneous-dependencies */
 import { renderHook, waitFor } from '@testing-library/react';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { useMonoCloudAuth } from '../../src/client';
+import { useAuth } from '../../src/client';
 import { fetch500, fetchNoContent, fetchOk, wrapper } from '../client-helper';
 
-describe('useMonoCloudAuth()', () => {
+describe('useAuth()', () => {
   let ogFetch: any;
   beforeEach(() => {
     ogFetch = global.fetch;
@@ -17,7 +17,7 @@ describe('useMonoCloudAuth()', () => {
   it('should return error if the server responded with an error', async () => {
     fetch500();
 
-    const { result } = renderHook(() => useMonoCloudAuth(), {
+    const { result } = renderHook(() => useAuth(), {
       wrapper,
     });
 
@@ -30,7 +30,7 @@ describe('useMonoCloudAuth()', () => {
   it('should get the user when the server responds with a success', async () => {
     fetchOk();
 
-    const { result } = renderHook(() => useMonoCloudAuth(), {
+    const { result } = renderHook(() => useAuth(), {
       wrapper,
     });
 
@@ -48,7 +48,7 @@ describe('useMonoCloudAuth()', () => {
   it('should return unauthenticated if response from userinfo is 204', async () => {
     fetchNoContent();
 
-    const { result } = renderHook(() => useMonoCloudAuth(), {
+    const { result } = renderHook(() => useAuth(), {
       wrapper,
     });
 
@@ -63,10 +63,10 @@ describe('useMonoCloudAuth()', () => {
     });
   });
 
-  it('should be able to update the user using the refetch function from useMonoCloudAuth hook', async () => {
+  it('should be able to update the user using the refetch function from useAuth hook', async () => {
     fetchOk();
 
-    const { result } = renderHook(() => useMonoCloudAuth(), {
+    const { result } = renderHook(() => useAuth(), {
       wrapper,
     });
 
@@ -102,7 +102,7 @@ describe('useMonoCloudAuth()', () => {
   it('can refetch even if there is an error in the initial fetch', async () => {
     fetch500();
 
-    const { result } = renderHook(() => useMonoCloudAuth(), { wrapper });
+    const { result } = renderHook(() => useAuth(), { wrapper });
 
     await waitFor(() => {
       expect(result.current.error).toBeInstanceOf(Error);
@@ -118,7 +118,7 @@ describe('useMonoCloudAuth()', () => {
     });
   });
 
-  it('should call API only once even if useMonoCloudAuth hook calls multiple times', async () => {
+  it('should call API only once even if useAuth hook calls multiple times', async () => {
     const mockFetch = vi.fn(() => {
       return {
         status: 200,
@@ -132,13 +132,13 @@ describe('useMonoCloudAuth()', () => {
     });
     (global as any).fetch = mockFetch;
 
-    const { result: resultOne } = renderHook(() => useMonoCloudAuth());
+    const { result: resultOne } = renderHook(() => useAuth());
 
     await waitFor(() => {
       expect(resultOne.current.isAuthenticated).toBe(true);
     });
 
-    const { result: resultTwo } = renderHook(() => useMonoCloudAuth());
+    const { result: resultTwo } = renderHook(() => useAuth());
 
     await waitFor(() => {
       expect(resultTwo.current.isAuthenticated).toBe(true);

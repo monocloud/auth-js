@@ -111,10 +111,10 @@ Access user data in **Client Components** using the provided hook.
 ```tsx
 'use client';
 
-import { useMonoCloudAuth } from '@monocloud/auth-nextjs/client';
+import { useAuth } from '@monocloud/auth-nextjs/client';
 
 export default function Page() {
-  const { user } = useMonoCloudAuth();
+  const { user } = useAuth();
 
   return (
     <div>

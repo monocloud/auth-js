@@ -4,7 +4,7 @@ import { MonoCloudUser } from '@monocloud/auth-node-core';
 import useSWR from 'swr';
 
 /**
- * Authentication State returned by `useMonoCloudAuth` hook.
+ * Authentication State returned by `useAuth` hook.
  */
 export interface AuthState {
   /**
@@ -32,7 +32,7 @@ export interface AuthState {
 /**
  * @returns Authentication State
  */
-export const useMonoCloudAuth = (): AuthState => {
+export const useAuth = (): AuthState => {
   const { data, error, isLoading, mutate } = useSWR<MonoCloudUser | undefined>(
     process.env.NEXT_PUBLIC_MONOCLOUD_AUTH_USER_INFO_URL ??
       // eslint-disable-next-line no-underscore-dangle

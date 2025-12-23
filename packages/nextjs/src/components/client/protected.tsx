@@ -1,6 +1,6 @@
 import { isUserInGroup } from '@monocloud/auth-node-core/utils';
 import React, { JSX } from 'react';
-import { useMonoCloudAuth } from '../../client';
+import { useAuth } from '../../client';
 
 export interface ProtectedComponentProps {
   /**
@@ -45,7 +45,7 @@ export const Protected = ({
   matchAllGroups = false,
   onAccessDenied = null,
 }: ProtectedComponentProps): JSX.Element | null => {
-  const { isLoading, error, isAuthenticated, user } = useMonoCloudAuth();
+  const { isLoading, error, isAuthenticated, user } = useAuth();
 
   if (isLoading) {
     return null;

@@ -1,7 +1,7 @@
-import { useMonoCloudAuth } from '@monocloud/auth-nextjs/client';
+import { useAuth } from '@monocloud/auth-nextjs/client';
 
 export default function MiddlewareProfile() {
-  const user = useMonoCloudAuth();
+  const user = useAuth();
 
   return (
     <div className="mt-5 ml-5">

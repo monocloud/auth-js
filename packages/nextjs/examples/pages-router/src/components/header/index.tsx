@@ -1,4 +1,4 @@
-import { useMonoCloudAuth } from '@monocloud/auth-nextjs/client';
+import { useAuth } from '@monocloud/auth-nextjs/client';
 import {
   SignIn,
   SignOut,
@@ -7,7 +7,7 @@ import {
 import Link from 'next/link';
 
 export const Header = () => {
-  const { user, isAuthenticated } = useMonoCloudAuth();
+  const { user, isAuthenticated } = useAuth();
 
   return (
     <nav className="flex bg-blue-900 text-white justify-between p-6">
@@ -15,7 +15,7 @@ export const Header = () => {
       <div className="flex gap-4">
         <Link href="/">Home</Link>
         <Link href="/client">Client</Link>
-        <Link href="/use-monocloud-auth">useMonoCloudAuth() Hook</Link>
+        <Link href="/use-monocloud-auth">useAuth() Hook</Link>
         <Link href="/server">Server</Link>
         <Link href="/api-profile">Api</Link>
         <Link href="/middleware-profile">Middleware</Link>

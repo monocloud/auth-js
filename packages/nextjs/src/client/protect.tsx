@@ -4,7 +4,7 @@
 import React, { ComponentType, JSX, useEffect } from 'react';
 import type { MonoCloudUser } from '@monocloud/auth-node-core';
 import { isUserInGroup } from '@monocloud/auth-node-core/utils';
-import { useMonoCloudAuth } from './use-monocloud-auth';
+import { useAuth } from './use-auth';
 import { ExtraAuthParams, GroupOptions } from '../types';
 
 /**
@@ -113,7 +113,7 @@ export const protectPage = <P extends object>(
   options?: ProtectPageOptions
 ): React.FC<P> => {
   return props => {
-    const { user, error, isLoading } = useMonoCloudAuth();
+    const { user, error, isLoading } = useAuth();
 
     useEffect(() => {
       if (!user && !isLoading && !error) {
