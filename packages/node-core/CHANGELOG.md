@@ -1,5 +1,13 @@
 # @monocloud/auth-node-core
 
+## 0.0.8
+
+### Patch Changes
+
+- be434d6: a
+- Updated dependencies [be434d6]
+  - @monocloud/auth-core@0.0.8
+
 ## 0.0.7
 
 ### Patch Changes
