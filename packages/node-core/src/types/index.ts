@@ -531,7 +531,7 @@ export interface MonoCloudTokens extends AccessToken {
  *
  * @param error - Error occured during execution of the endpoint.
  */
-export type OnError = (error: Error) => Promise<any>;
+export type OnError = (error: Error) => Promise<any> | any;
 
 /**
  * Represents options for the sign-in handler.

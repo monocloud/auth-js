@@ -237,7 +237,7 @@ type AppOnError<T = any> = (
   req: NextRequest,
   ctx: T,
   error: Error
-) => Promise<NextResponse | void>;
+) => Promise<NextResponse | void> | NextResponse | void;
 
 /**
  * @param req - The Next.js API request object.
@@ -249,7 +249,7 @@ type PageOnError = (
   req: NextApiRequest,
   res: NextApiResponse,
   error: Error
-) => Promise<void>;
+) => Promise<void> | void;
 
 /**
  * A route handler function used to handle errors that occur during the signin, callback, signout and userinfo endpoint execution.
@@ -289,7 +289,7 @@ export interface MonoCloudMiddlewareOptions {
     req: NextRequest,
     evt: NextFetchEvent,
     error: Error
-  ) => Promise<NextResponse | void>;
+  ) => Promise<NextResponse | void> | NextResponse | void;
 
   /**
    * Specifies the routes that require authentication. @see ProtectedRoutes
@@ -500,7 +500,7 @@ export type NextPageRouterApiOnAccessDeniedHandler = (
   req: NextApiRequest,
   res: NextApiResponse<any>,
   user?: MonoCloudUser
-) => unknown | Promise<unknown>;
+) => Promise<unknown> | unknown;
 
 type ProtectApiPageOptions = {
   /**

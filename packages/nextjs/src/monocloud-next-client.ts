@@ -105,7 +105,9 @@ export class MonoCloudNextClient {
 
       let onError;
       if (typeof options?.onError === 'function') {
-        onError = (error: Error): Promise<void | NextResponse<unknown>> =>
+        onError = (
+          error: Error
+        ): void | NextResponse | Promise<void | NextResponse<unknown>> =>
           options.onError!(req as any, resOrCtx as any, error);
       }
 
@@ -539,8 +541,12 @@ export class MonoCloudNextClient {
     ) {
       let onError;
       if (typeof options?.onError === 'function') {
-        onError = (error: Error): Promise<void | NextResponse<unknown>> =>
-          options.onError!(req, evt, error);
+        onError = (
+          error: Error
+        ):
+          | Promise<void | NextResponse<unknown>>
+          | void
+          | NextResponse<unknown> => options.onError!(req, evt, error);
       }
 
       const request = new MonoCloudAppRouterRequest(req, { params: {} });
