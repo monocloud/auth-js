@@ -1,0 +1,133 @@
+name: Snapshot Release on Comment
+
+on:
+  issue_comment:
+    types: [created]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.issue.number }}
+  cancel-in-progress: true
+
+jobs:
+  snapshot:
+    if: github.event.issue.pull_request && startsWith(github.event.comment.body, '!snapshot')
+    name: Create Snapshot Release
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+      issues: write
+      pull-requests: write
+
+    steps:
+      - name: Get PR Info
+        uses: xt0rted/pull-request-comment-branch@v3
+        id: pr_info
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Checkout Repo
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ steps.pr_info.outputs.head_ref }}
+          fetch-depth: 0
+
+      - name: Install PNPM
+        uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install Dependencies
+        run: pnpm install
+
+      - name: Build Packages
+        run: pnpm build
+
+      - name: Force Patch Snapshot Changeset
+        run: |
+          echo "Clearing existing changesets to force patch snapshot..."
+          find .changeset -name "*.md" ! -name "README.md" -delete
+
+          echo "Creating temporary patch changeset."
+
+          cat <<EOF > .changeset/temp-snapshot.md
+          ---
+          '@monocloud/auth-core': patch
+          '@monocloud/auth-node-core': patch
+          '@monocloud/auth-nextjs': patch
+          ---
+
+          Snapshot release.
+          EOF
+
+      - name: Create Snapshot Version
+        run: pnpm changeset version --snapshot canary
+
+      - name: Add Credentials to .npmrc
+        run: |
+          echo "@monocloud:registry=https://registry.npmjs.org/" >> .npmrc
+          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" >> .npmrc
+        shell: bash
+
+      - name: Publish NPM Packages as Canary
+        run: |
+          pnpm changeset publish --tag canary --no-git-tag
+
+      - name: Comment on PR with version
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+
+            const packagesDir = path.join(path.resolve(path.dirname('')), 'packages');
+
+            const IGNORED_DIRS = new Set(['test-utils']);
+
+            const packageDirs = fs.readdirSync(packagesDir).filter(item => {
+              if (IGNORED_DIRS.has(item)) {
+                return false;
+              }
+
+              const fullPath = path.join(packagesDir, item);
+              return fs.statSync(fullPath).isDirectory();
+            });
+
+            const packages = packageDirs
+              .map(dir => {
+                const packageJsonPath = path.join(packagesDir, dir, 'package.json');
+                try {
+                  const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
+                  if (packageJson.private) {
+                    return null;
+                  }
+                  return {
+                    name: packageJson.name || dir,
+                    version: packageJson.version || 'unknown',
+                  };
+                } catch (err) {
+                  return null;
+                }
+              })
+              .filter(pkg => pkg !== null);
+
+            let markdown = '# SDK Information\n\n';
+
+            markdown += '## Snapshot Versions\n\n';
+            markdown += '| SDK | Version |\n';
+            markdown += '|-----|--------|\n';
+            packages.forEach(pkg => {
+              markdown += `| ${pkg.name} | ${pkg.version} |\n`;
+            });
+
+            markdown += '\n## NPM Installation \n\n';
+            packages.forEach(pkg => {
+              markdown += `### ${pkg.name}\n\n`;
+              markdown += `\`\`\`\nnpm i ${pkg.name}@${pkg.version}\n\`\`\`\n\n`;
+            });
+
+            core.setOutput('snapshotDetails', markdown);

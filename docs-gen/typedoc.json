@@ -1,0 +1,37 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "packageOptions": {
+    "entryPoints": [
+      "src/index.ts",
+      "src/utils/index.ts",
+      "src/utils/internal.ts",
+      "src/components/index.tsx",
+      "src/components/client/index.tsx",
+      "src/client/index.tsx",
+    ],
+  },
+  "entryPoints": [
+    "../packages/*"
+  ],
+  "entryPointStrategy": "packages",
+  "out": "../docs",
+  "includeVersion": false,
+  "name": "MonoCloud Authentication SDK",
+  "readme": "../README.md",
+  "hideGenerator": true,
+  "disableSources": false,
+  "excludeExternals": true,
+  "exclude": [
+    "**/node_modules/**",
+    "**/tests/**",
+    "**/examples/**",
+    "**/packages/test-utils"
+  ],
+  "categorizeByGroup": false,
+  "theme": "default",
+  "validation": {
+    "notExported": false,
+    "invalidLink": false,
+    "notDocumented": false
+  }
+}

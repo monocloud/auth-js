@@ -1,0 +1,16 @@
+services:
+  verdaccio:
+    image: verdaccio/verdaccio
+    container_name: verdaccio
+    ports:
+      - "4874:4873"
+    volumes:
+      - ./verdaccio-storage:/verdaccio/storage
+      - ./verdaccio.yml:/verdaccio/conf/config.yaml
+    restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4873/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
