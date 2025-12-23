@@ -104,7 +104,7 @@ jobs:
         if: success() || failure()
         uses: actions/upload-artifact@v4
         with:
-          name: "@monocloud/auth-core"
+          name: "auth-core-tests"
           path: "**/junit.*.xml"
           overwrite: true
 
@@ -112,7 +112,7 @@ jobs:
         if: success() || failure()
         uses: dorny/test-reporter@v1
         with:
-          artifact: "@monocloud/auth-core"
+          artifact: "auth-core-tests"
           name: "Core SDK Tests"
           path: "**/junit.*.xml"
           reporter: java-junit
@@ -149,7 +149,7 @@ jobs:
         if: success() || failure()
         uses: actions/upload-artifact@v4
         with:
-          name: "@monocloud/auth-node-core"
+          name: "auth-node-core-tests"
           path: "**/junit.*.xml"
           overwrite: true
 
@@ -157,7 +157,7 @@ jobs:
         if: success() || failure()
         uses: dorny/test-reporter@v1
         with:
-          artifact: "@monocloud/auth-node-core"
+          artifact: "auth-node-core-tests"
           name: "Node Core SDK Tests"
           path: "**/junit.*.xml"
           reporter: java-junit
@@ -194,7 +194,7 @@ jobs:
         if: success() || failure()
         uses: actions/upload-artifact@v4
         with:
-          name: "@monocloud/auth-nextjs"
+          name: "auth-nextjs-tests"
           path: "**/junit.*.xml"
           overwrite: true
 
@@ -202,7 +202,7 @@ jobs:
         if: success() || failure()
         uses: dorny/test-reporter@v1
         with:
-          artifact: "@monocloud/auth-nextjs"
+          artifact: "auth-nextjs-tests"
           name: "Next.js SDK Tests"
           path: "**/junit.*.xml"
           reporter: java-junit
