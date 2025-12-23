@@ -9,7 +9,7 @@
     "lint": "turbo run lint:ts && turbo run lint:es -- --fix",
     "test": "turbo run test",
     "changeset:version": "changeset version && pnpm install --lockfile-only --engine-strict=false",
-    "changeset:publish": "changeset release --access restricted && git push --follow-tags",
+    "changeset:publish": "changeset publish --access restricted && git push --follow-tags",
     "prepare": "husky",
     "local:registry": "./scripts/publish-local.sh",
     "local:clean": "./scripts/clean-local.sh",
