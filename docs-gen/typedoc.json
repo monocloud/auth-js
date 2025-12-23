@@ -30,8 +30,8 @@
   "categorizeByGroup": false,
   "theme": "default",
   "validation": {
-    "notExported": false,
-    "invalidLink": false,
+    "notExported": true,
+    "invalidLink": true,
     "notDocumented": false
   }
 }

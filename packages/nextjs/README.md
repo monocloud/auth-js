@@ -63,7 +63,7 @@ Create a shared MonoCloud client instance (for example, `lib/monocloud.ts`) and 
 import { MonoCloudNextClient } from '@monocloud/auth-nextjs';
 
 // Environment variables are picked up automatically
-const monoCloud = new MonoCloudNextClient();
+export const monoCloud = new MonoCloudNextClient();
 ```
 
 ⚠️ Security Note: Never commit your credentials to version control. Load them from environment variables.
