@@ -1,5 +1,5 @@
 <div align="center">
-  <a href="https://www.monocloud.com?utm_source=github&utm_medium=monocloud_js" target="_blank" rel="noopener noreferrer">
+  <a href="https://www.monocloud.com?utm_source=github&utm_medium=auth_js" target="_blank" rel="noopener noreferrer">
     <picture>
       <img src="https://raw.githubusercontent.com/monocloud/auth-js/refs/heads/main/MonoCloud.png" height="100" alt="MonoCloud Logo">
     </picture>
