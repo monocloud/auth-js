@@ -115,7 +115,7 @@ jobs:
           artifact: "@monocloud/auth-core"
           name: "Core SDK Tests"
           path: "**/junit.*.xml"
-          reporter: jest-junit
+          reporter: java-junit
           fail-on-error: false
 
   node_core_test:
@@ -160,7 +160,7 @@ jobs:
           artifact: "@monocloud/auth-node-core"
           name: "Node Core SDK Tests"
           path: "**/junit.*.xml"
-          reporter: jest-junit
+          reporter: java-junit
           fail-on-error: false
 
   nextjs_test:
@@ -205,7 +205,7 @@ jobs:
           artifact: "@monocloud/auth-nextjs"
           name: "Next.js SDK Tests"
           path: "**/junit.*.xml"
-          reporter: jest-junit
+          reporter: java-junit
           fail-on-error: false
 
 
