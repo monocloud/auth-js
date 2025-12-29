@@ -10,7 +10,10 @@ import type {
   MonoCloudSession,
   MonoCloudUser,
 } from '@monocloud/auth-core';
-import { MonoCloudValidationError } from '@monocloud/auth-core';
+import {
+  MonoCloudOPError,
+  MonoCloudValidationError,
+} from '@monocloud/auth-core';
 import { decrypt, encrypt } from '@monocloud/auth-core/utils';
 import { now } from '@monocloud/auth-core/internal';
 import { getOptions } from '../src/options/get-options';
@@ -1125,6 +1128,43 @@ describe('MonoCloud Base Instance', () => {
         await instance.callback(req, res);
 
         expect(res.res.redirectedUrl).toBe('https://example.org/basepath/');
+      });
+
+      it('should throw an OP Error if callback has error', async () => {
+        nock('https://example.com')
+          .get('/.well-known/openid-configuration')
+          .reply(200, defaultMetadata);
+
+        const cookies = {} as any;
+
+        await setStateCookieValue(cookies);
+
+        const instance = getConfiguredInstance({
+          idTokenSigningAlg: 'ES256',
+        });
+
+        const req = new TestReq({
+          cookies,
+          url: `https://example.com/auth/api/callback?state=peace&error=something_went_wrong&error_description=huge%20mistake`,
+          method: 'GET',
+        });
+        const res = new TestRes(cookies);
+
+        const onError = vi.fn();
+
+        await instance.callback(req, res, { onError });
+
+        expect(onError).toBeCalledTimes(1);
+
+        const error = onError.mock.calls[0][0];
+
+        expect(error).toBeInstanceOf(MonoCloudOPError);
+        expect(error).toEqual(
+          expect.objectContaining({
+            error: 'something_went_wrong',
+            errorDescription: 'huge mistake',
+          })
+        );
       });
 
       it('should execute custom onError function if provided', async () => {
