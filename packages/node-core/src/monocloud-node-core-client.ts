@@ -2,6 +2,7 @@ import { createRemoteJWKSet, JWTPayload, jwtVerify } from 'jose';
 import {
   ensureLeadingSlash,
   findToken,
+  getBoolean,
   isAbsoluteUrl,
   isPresent,
   isSameHost,
@@ -106,7 +107,7 @@ export class MonoCloudCoreClient {
    *
    * @param request - MonoCloud request object.
    * @param response - MonoCloud response object.
-   * @param signInOptions - Optional configuration to customize the sign-in behavior.
+   * @param signInOptions - Configuration to customize the sign-in behavior.
    * @returns A promise that resolves when the callback processing and redirection are complete.
    *
    * @throws {@link MonoCloudValidationError} When validation of parameters or state fails.
@@ -182,8 +183,25 @@ export class MonoCloudCoreClient {
         }
       }
 
+      const query = this.options.allowQueryParamOverrides
+        ? {
+            returnUrl: request.getQuery('return_url') as string,
+            authenticatorHint: request.getQuery(
+              'authenticator_hint'
+            ) as Authenticators,
+            scope: request.getQuery('scope') as string,
+            resource: request.getQuery('resource') as string,
+            display: request.getQuery('display') as DisplayOptions,
+            uiLocales: request.getQuery('ui_locales') as string,
+            acrValues: request.getQuery('acr_values') as string,
+            loginHint: request.getQuery('login_hint') as string,
+            prompt: request.getQuery('prompt') as Prompt,
+            maxAge: parseInt(request.getQuery('max_age') as string, 10),
+          }
+        : {};
+
       // Set the return url if passed down
-      const retUrl = request.getQuery('return_url') ?? opt.returnUrl;
+      const retUrl = query.returnUrl ?? opt.returnUrl;
       if (
         typeof retUrl === 'string' &&
         retUrl &&
@@ -204,12 +222,9 @@ export class MonoCloudCoreClient {
       const nonce = generateNonce();
       const { codeChallenge, codeVerifier } = await generatePKCE();
 
-      const maxAgeQuery = request.getQuery('max_age');
-      if (typeof maxAgeQuery === 'string' && maxAgeQuery) {
-        const parsedMaxAge = parseInt(maxAgeQuery, 10);
-        if (!isNaN(parsedMaxAge)) {
-          opt.authParams.maxAge = parsedMaxAge;
-        }
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      if (!isNaN(query.maxAge!)) {
+        opt.authParams.maxAge = query.maxAge;
       }
 
       // Ensure that return to is present, if not then use the base url as the return to
@@ -230,16 +245,13 @@ export class MonoCloudCoreClient {
 
       // Set the Authenticator if passed down
       const authenticatorHint =
-        request.getQuery('authenticator_hint') ??
-        opt.authParams.authenticatorHint;
+        query.authenticatorHint ?? opt.authParams.authenticatorHint;
       if (typeof authenticatorHint === 'string' && authenticatorHint) {
-        params.authenticatorHint = authenticatorHint as Authenticators;
+        params.authenticatorHint = authenticatorHint;
       }
 
-      const reqScope = request.getQuery('scope');
-
       const scopes =
-        (typeof reqScope === 'string' ? reqScope : undefined) ??
+        (typeof query.scope === 'string' ? query.scope : undefined) ??
         opt.authParams.scopes;
 
       if (scopes) {
@@ -252,10 +264,8 @@ export class MonoCloudCoreClient {
         }
       }
 
-      const reqResource = request.getQuery('resource');
-
       const resource =
-        (typeof reqResource === 'string' ? reqResource : undefined) ??
+        (typeof query.resource === 'string' ? query.resource : undefined) ??
         opt.authParams.resource;
 
       // Set the resources mode if passed down
@@ -270,21 +280,19 @@ export class MonoCloudCoreClient {
       }
 
       // Set the display if passed down
-      const display = request.getQuery('display') ?? opt.authParams.display;
+      const display = query.display ?? opt.authParams.display;
       if (typeof display === 'string' && display) {
         params.display = display as unknown as DisplayOptions;
       }
 
       // Set the ui locales if passed down
-      const uiLocales =
-        request.getQuery('ui_locales') ?? opt.authParams.uiLocales;
+      const uiLocales = query.uiLocales ?? opt.authParams.uiLocales;
       if (typeof uiLocales === 'string' && uiLocales) {
         params.uiLocales = uiLocales;
       }
 
       // Set the acr values if passed down
-      const acrValues =
-        request.getQuery('acr_values') ?? opt.authParams.acrValues;
+      const acrValues = query.acrValues ?? opt.authParams.acrValues;
       if (typeof acrValues === 'string' && acrValues) {
         params.acrValues = acrValues
           .split(' ')
@@ -293,16 +301,15 @@ export class MonoCloudCoreClient {
       }
 
       // Set the login hint if passed down
-      const loginHint =
-        request.getQuery('login_hint') ?? opt.authParams.loginHint;
+      const loginHint = query.loginHint ?? opt.authParams.loginHint;
       if (typeof loginHint === 'string' && loginHint) {
         params.loginHint = loginHint;
       }
 
       // Set the prompt if passed down
       let prompt: string | undefined;
-      if (typeof request.getQuery('prompt') === 'string') {
-        prompt = request.getQuery('prompt') as string;
+      if (typeof query.prompt === 'string') {
+        prompt = query.prompt;
       } else {
         prompt = opt.register ? 'create' : opt.authParams.prompt;
       }
@@ -555,8 +562,14 @@ export class MonoCloudCoreClient {
         }
       }
 
+      const query = this.options.allowQueryParamOverrides
+        ? { refresh: getBoolean(request.getQuery('refresh') as string) }
+        : {};
+
       const refetchUserInfo =
-        userinfoOptions?.refresh ?? this.options.refetchUserInfo;
+        query.refresh ??
+        userinfoOptions?.refresh ??
+        this.options.refetchUserInfo;
 
       // Get the user session
       const session = await this.sessionService.getSession(
@@ -657,6 +670,13 @@ export class MonoCloudCoreClient {
         }
       }
 
+      const query = this.options.allowQueryParamOverrides
+        ? {
+            postLogoutUrl: request.getQuery('post_logout_url') as string,
+            federated: getBoolean(request.getQuery('federated') as string),
+          }
+        : {};
+
       // Build the return to url
       let returnUrl =
         this.options.postLogoutRedirectUri ??
@@ -664,14 +684,13 @@ export class MonoCloudCoreClient {
         this.options.appUrl;
 
       // Set the return url if passed down
-      const retUrl = request.getQuery('post_logout_url');
-      if (typeof retUrl === 'string' && retUrl) {
+      if (query.postLogoutUrl) {
         const { error } = signOutOptionsSchema.validate({
-          postLogoutRedirectUri: retUrl,
+          postLogoutRedirectUri: query.postLogoutUrl,
         });
 
         if (!error) {
-          returnUrl = retUrl;
+          returnUrl = query.postLogoutUrl;
         }
       }
 
@@ -697,7 +716,9 @@ export class MonoCloudCoreClient {
 
       // Handle Federated Sign Out
       const isFederatedSignOut =
-        signOutOptions?.federatedSignOut ?? this.options.federatedSignOut;
+        query.federated ??
+        signOutOptions?.federatedSignOut ??
+        this.options.federatedSignOut;
 
       if (!isFederatedSignOut) {
         response.redirect(returnUrl);

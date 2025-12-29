@@ -190,6 +190,7 @@ export const defaultConfig: Partial<MonoCloudOptions> = {
   tenantDomain: 'https://example.com',
   appUrl: 'https://example.org',
   userInfo: false,
+  allowQueryParamOverrides: true,
   defaultAuthParams: {
     responseType: 'code',
     scopes: 'openid profile read:customer',

@@ -99,6 +99,42 @@ describe('useAuth()', () => {
     });
   });
 
+  it('should set refresh=true', async () => {
+    fetchOk();
+
+    const { result } = renderHook(() => useAuth(), {
+      wrapper,
+    });
+
+    await waitFor(() => {
+      expect(result.current).toEqual({
+        error: undefined,
+        user: { sub: 'sub', email: 'a@b.com' },
+        isAuthenticated: true,
+        isLoading: false,
+        refetch: expect.any(Function),
+      });
+    });
+
+    fetchOk('/api/auth/userinfo?refresh=true', {
+      sub: 'sub',
+      email: 'a@b.com',
+      address: 'userAddress',
+    });
+
+    result.current.refetch?.(true);
+
+    await waitFor(() => {
+      expect(result.current).toEqual({
+        error: undefined,
+        user: { sub: 'sub', email: 'a@b.com', address: 'userAddress' },
+        isAuthenticated: true,
+        isLoading: false,
+        refetch: expect.any(Function),
+      });
+    });
+  });
+
   it('can refetch even if there is an error in the initial fetch', async () => {
     fetch500();
 

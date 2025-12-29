@@ -408,7 +408,7 @@ describe('MonoCloud Base Instance', () => {
         );
       });
 
-      it('should redirect  with prompt=create', async () => {
+      it('should redirect with prompt=create', async () => {
         setupDiscovery({
           authorization_endpoint: 'https://example.com/connect/authorize',
         });
@@ -549,6 +549,78 @@ describe('MonoCloud Base Instance', () => {
         expect(search.client_id).toBe('__test_client_id__');
         expect(search.response_type).toBe('code');
         expect(search.scope).toBe('openid profile write:customer');
+        expect(search.redirect_uri).toBe(
+          'https://example.org/api/auth/callback'
+        );
+      });
+
+      it('should not pick up the auth params from the request if allowQueryParamOverrides', async () => {
+        setupDiscovery({
+          authorization_endpoint: 'https://example.com/connect/authorize',
+        });
+        const instance = getConfiguredInstance({
+          allowQueryParamOverrides: false,
+        });
+
+        const cookies = {};
+        const req = new TestReq({
+          cookies,
+          query: {
+            authenticator_hint: 'nope',
+            max_age: '555',
+            acr_values: 'sup hello',
+            scope: 'openid profile write:customer',
+            resource: 'https://api.example.com https://test.example.com',
+            display: 'page',
+            ui_locales: 'en-IN',
+            login_hint: 'email',
+            prompt: 'create',
+          },
+          method: 'GET',
+        });
+        const res = new TestRes(cookies);
+
+        await instance.signIn(req, res, {
+          authParams: {
+            authenticatorHint: 'google',
+            maxAge: 123,
+            acrValues: ['hello'],
+            scopes: 'new',
+            resource: 'https://api.example.com',
+            display: 'popup',
+            uiLocales: 'en-US',
+            loginHint: 'username',
+            prompt: 'consent',
+          },
+        });
+
+        expect(res.res.statusCode).toBe(302);
+
+        const url = new URL(res.res.redirectedUrl!);
+
+        expect(`${url.protocol}//${url.host}${url.pathname}`).toBe(
+          'https://example.com/connect/authorize'
+        );
+
+        const search = Object.fromEntries(url.searchParams.entries());
+        expect(Object.keys(search).length).toBe(16);
+        expect(search.state.length).toBeGreaterThan(0);
+        expect(search.code_challenge.length).toBeGreaterThan(0);
+        expect(search.nonce.length).toBeGreaterThan(0);
+        expect(search.code_challenge_method).toBe('S256');
+        expect(search.max_age).toBe('123');
+        expect(search.acr_values).toBe('hello');
+        expect(url.searchParams.getAll('resource').join(' ')).toBe(
+          'https://api.example.com'
+        );
+        expect(search.display).toBe('popup');
+        expect(search.ui_locales).toBe('en-US');
+        expect(search.login_hint).toBe('username');
+        expect(search.prompt).toBe('consent');
+        expect(search.authenticator_hint).toBe('google');
+        expect(search.client_id).toBe('__test_client_id__');
+        expect(search.response_type).toBe('code');
+        expect(search.scope).toBe('new openid profile read:customer');
         expect(search.redirect_uri).toBe(
           'https://example.org/api/auth/callback'
         );
@@ -2043,6 +2115,76 @@ describe('MonoCloud Base Instance', () => {
         });
       });
 
+      it('should perform a userinfo request when passed through query', async () => {
+        setupDiscovery({
+          userinfo_endpoint: 'https://example.com/connect/userinfo',
+        });
+
+        const cookies = {} as any;
+
+        const oldTime = now();
+
+        await setSessionCookieValue(cookies, {
+          session: {
+            user: {
+              sub: 'id',
+              username: 'username',
+              test: '123',
+            },
+            authorizedScopes: 'openid profile read:customer',
+            accessTokens: [
+              {
+                accessToken: 'at',
+                accessTokenExpiration: oldTime + 5,
+                scopes: 'openid profile read:customer',
+                requestedScopes: 'openid profile read:customer',
+              },
+            ],
+            idToken: 'a.b.c',
+            refreshToken: 'rt',
+          },
+          lifetime: { c: oldTime, u: oldTime, e: oldTime + 86400 },
+        });
+
+        const newFrozenTime = frozenTimeMs + 2000;
+
+        travel(newFrozenTime);
+
+        const instance = getConfiguredInstance({ refetchUserInfo: false });
+
+        const req = new TestReq({
+          cookies,
+          query: { refresh: 'true' },
+          method: 'GET',
+        });
+        const res = new TestRes(cookies);
+
+        await instance.userInfo(req, res, { refresh: false });
+
+        await assertSessionCookieValue(cookies, {
+          session: {
+            user: {
+              sub: 'id',
+              username: 'username',
+              test: 'updated',
+              new: 'field',
+            },
+            idToken: 'a.b.c',
+            refreshToken: 'rt',
+            authorizedScopes: 'openid profile read:customer',
+            accessTokens: [
+              {
+                accessToken: 'at',
+                accessTokenExpiration: oldTime + 5,
+                scopes: 'openid profile read:customer',
+                requestedScopes: 'openid profile read:customer',
+              },
+            ],
+          },
+          lifetime: { c: oldTime, u: now(), e: oldTime + 86400 },
+        });
+      });
+
       it('should execute custom onError function if provided', async () => {
         const instance = getConfiguredInstance();
 
@@ -2161,6 +2303,76 @@ describe('MonoCloud Base Instance', () => {
         const instance = getConfiguredInstance({ refetchUserInfo: true });
 
         const req = new TestReq({ cookies, method: 'GET' });
+        const res = new TestRes(cookies);
+
+        await instance.userInfo(req, res, { refresh: false });
+
+        await assertSessionCookieValue(cookies, {
+          session: {
+            user: {
+              sub: 'id',
+              username: 'username',
+              test: '123',
+            },
+            accessTokens: [
+              {
+                accessToken: 'at',
+                accessTokenExpiration: oldTime + 5,
+                scopes: 'something',
+                requestedScopes: 'something',
+              },
+            ],
+            idToken: 'a.b.c',
+            refreshToken: 'rt',
+          },
+          lifetime: { c: oldTime, u: oldTime, e: oldTime + 86400 },
+        });
+      });
+
+      it('should not perform a userinfo request through query if allowQueryParamOverrides is false', async () => {
+        setupDiscovery({
+          userinfo_endpoint: 'https://example.com/userinfo',
+        });
+
+        const cookies = {} as any;
+
+        const oldTime = now();
+
+        await setSessionCookieValue(cookies, {
+          session: {
+            user: {
+              sub: 'id',
+              username: 'username',
+              test: '123',
+            },
+            accessTokens: [
+              {
+                accessToken: 'at',
+                accessTokenExpiration: oldTime + 5,
+                scopes: 'something',
+                requestedScopes: 'something',
+              },
+            ],
+            idToken: 'a.b.c',
+            refreshToken: 'rt',
+          },
+          lifetime: { c: oldTime, u: oldTime, e: oldTime + 86400 },
+        });
+
+        const newFrozenTime = frozenTimeMs + 2000;
+
+        travel(newFrozenTime);
+
+        const instance = getConfiguredInstance({
+          refetchUserInfo: false,
+          allowQueryParamOverrides: false,
+        });
+
+        const req = new TestReq({
+          cookies,
+          query: { refresh: 'true' },
+          method: 'GET',
+        });
         const res = new TestRes(cookies);
 
         await instance.userInfo(req, res, { refresh: false });
@@ -2852,6 +3064,52 @@ describe('MonoCloud Base Instance', () => {
         }
       );
 
+      it('should not override post_logout_url from query param if allowQueryParamOverrides is false', async () => {
+        setupDiscovery({
+          end_session_endpoint: 'https://example.com/connect/endsession',
+        });
+
+        const cookies = {} as any;
+
+        await setSessionCookieValue(cookies, {
+          session: {},
+          lifetime: { c: now(), e: now() + 86400, u: now() },
+        });
+
+        const instance = getConfiguredInstance({
+          allowQueryParamOverrides: false,
+        });
+
+        const req = new TestReq({
+          cookies,
+          query: {
+            post_logout_url: 'https://example.org/from/query/malicious',
+          },
+          method: 'GET',
+        });
+        const res = new TestRes(cookies);
+
+        await instance.signOut(req, res, {
+          postLogoutRedirectUri: 'https://example.com',
+        });
+
+        expect(res.res.redirectedUrl).toBe(
+          `https://example.com/connect/endsession?client_id=__test_client_id__&post_logout_redirect_uri=${encodeURIComponent('https://example.com')}`
+        );
+
+        expect(cookies.session).toEqual({
+          value: '',
+          options: {
+            domain: undefined,
+            expires: new Date(0),
+            httpOnly: true,
+            path: '/',
+            sameSite: 'lax',
+            secure: true,
+          },
+        });
+      });
+
       it('invalid post_logout_url from query param does not override', async () => {
         setupDiscovery({
           end_session_endpoint: 'https://example.com/connect/endsession',
@@ -2896,7 +3154,6 @@ describe('MonoCloud Base Instance', () => {
 
       [
         { federatedSignOut: 23 },
-
         { post_logout_url: Symbol('test') },
         { signOutParams: [] },
       ].forEach((opt, i) => {
@@ -3060,6 +3317,48 @@ describe('MonoCloud Base Instance', () => {
               secure: true,
             },
           });
+        });
+      });
+
+      it('should pickup federated signout from query', async () => {
+        setupDiscovery({
+          end_session_endpoint: 'https://example.com/connect/endsession',
+        });
+
+        const cookies = {} as any;
+
+        await setSessionCookieValue(cookies, {
+          session: {},
+          lifetime: { c: now(), e: now() + 86400, u: now() },
+        });
+
+        const instance = getConfiguredInstance({ federatedSignOut: false });
+
+        const req = new TestReq({
+          cookies,
+          query: {
+            federated: 'true',
+          },
+          method: 'GET',
+        });
+        const res = new TestRes(cookies);
+
+        await instance.signOut(req, res, { federatedSignOut: false });
+
+        expect(res.res.redirectedUrl).toBe(
+          `https://example.com/connect/endsession?client_id=__test_client_id__&post_logout_redirect_uri=${encodeURIComponent('https://example.org')}`
+        );
+
+        expect(cookies.session).toEqual({
+          value: '',
+          options: {
+            domain: undefined,
+            expires: new Date(0),
+            httpOnly: true,
+            path: '/',
+            sameSite: 'lax',
+            secure: true,
+          },
         });
       });
 

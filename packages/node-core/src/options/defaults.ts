@@ -16,6 +16,7 @@ export const DEFAULT_OPTIONS = {
     scopes: 'openid profile email',
     responseType: 'code',
   },
+  allowQueryParamOverrides: false,
   session: {
     cookie: {
       httpOnly: true,
