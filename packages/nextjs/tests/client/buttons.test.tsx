@@ -153,6 +153,18 @@ describe('<SignOut/>', () => {
     expect(anchor.text).toBe('Sign Out');
   });
 
+  it('can set federated through props', () => {
+    const { container } = render(<SignOut federated={true}>Sign Out</SignOut>);
+    const anchorElements = container.querySelectorAll('a');
+    const anchor = anchorElements.item(0);
+    const href = anchor.getAttribute('href');
+
+    expect(anchorElements.length).toBe(1);
+    expect(anchor.attributes.length).toBe(1);
+    expect(href).toBe('/api/auth/signout?federated=true');
+    expect(anchor.text).toBe('Sign Out');
+  });
+
   it('can set arbitrary props', () => {
     const { container } = render(
       <SignOut {...{ test: 1, custom: 'prop' }}>Sign Out</SignOut>

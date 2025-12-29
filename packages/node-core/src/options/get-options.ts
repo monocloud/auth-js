@@ -43,6 +43,8 @@ export const getOptions = (
   const MONOCLOUD_AUTH_USER_INFO = process.env.MONOCLOUD_AUTH_USER_INFO;
   const MONOCLOUD_AUTH_REFETCH_USER_INFO =
     process.env.MONOCLOUD_AUTH_REFETCH_USER_INFO;
+  const MONOCLOUD_AUTH_ALLOW_QUERY_PARAM_OVERRIDES =
+    process.env.MONOCLOUD_AUTH_ALLOW_QUERY_PARAM_OVERRIDES;
   const MONOCLOUD_AUTH_SESSION_COOKIE_NAME =
     process.env.MONOCLOUD_AUTH_SESSION_COOKIE_NAME;
   const MONOCLOUD_AUTH_SESSION_COOKIE_PATH =
@@ -157,6 +159,10 @@ export const getOptions = (
       options?.refetchUserInfo ??
       getBoolean(MONOCLOUD_AUTH_REFETCH_USER_INFO) ??
       DEFAULT_OPTIONS.refetchUserInfo,
+    allowQueryParamOverrides:
+      options?.allowQueryParamOverrides ??
+      getBoolean(MONOCLOUD_AUTH_ALLOW_QUERY_PARAM_OVERRIDES) ??
+      DEFAULT_OPTIONS.allowQueryParamOverrides,
     session: {
       cookie: {
         name:

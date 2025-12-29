@@ -181,6 +181,7 @@ export const optionsSchema: Joi.ObjectSchema<MonoCloudOptionsBase> = Joi.object(
     federatedSignOut: boolRequired,
     userInfo: boolRequired,
     refetchUserInfo: boolRequired,
+    allowQueryParamOverrides: boolRequired,
     defaultAuthParams: authParamSchema,
     resources: Joi.array<Indicator>().items(indicatorOptionsSchema).optional(),
     session: sessionSchema,
