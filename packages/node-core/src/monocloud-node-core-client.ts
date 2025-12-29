@@ -28,6 +28,7 @@ import type {
 } from '@monocloud/auth-core';
 import {
   MonoCloudOidcClient,
+  MonoCloudOPError,
   MonoCloudValidationError,
 } from '@monocloud/auth-core';
 import { MonoCloudSessionService } from './monocloud-session-service';
@@ -430,6 +431,14 @@ export class MonoCloudCoreClient {
 
       if (callbackParams.state !== monoCloudState.state) {
         throw new MonoCloudValidationError('Invalid state');
+      }
+
+      if (isPresent(callbackParams.error)) {
+        throw new MonoCloudOPError(
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          callbackParams.error!,
+          callbackParams.errorDescription
+        );
       }
 
       // Get the redirect Url to be validated
