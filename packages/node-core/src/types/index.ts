@@ -369,7 +369,7 @@ export interface MonoCloudOptionsBase {
    *
    * Time in seconds to cache the JWKS document after it is fetched
    *
-   * @default 300
+   * @default 60 (seconds)
    *
    * */
   jwksCacheDuration?: number;
@@ -379,7 +379,7 @@ export interface MonoCloudOptionsBase {
    *
    * Time in seconds to cache the metadata document after it is fetched.
    *
-   * @default 300
+   * @default 60 (seconds)
    * */
   metadataCacheDuration?: number;
 
