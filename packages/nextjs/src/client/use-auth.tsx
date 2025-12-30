@@ -1,6 +1,6 @@
 'use client';
 
-import { MonoCloudUser } from '@monocloud/auth-node-core';
+import type { MonoCloudUser } from '@monocloud/auth-node-core';
 import useSWR from 'swr';
 
 /**
