@@ -369,7 +369,7 @@ export interface MonoCloudOptionsBase {
    *
    * Time in seconds to cache the JWKS document after it is fetched
    *
-   * @default 300
+   * @default 60 (seconds)
    *
    * */
   jwksCacheDuration?: number;
@@ -379,9 +379,25 @@ export interface MonoCloudOptionsBase {
    *
    * Time in seconds to cache the metadata document after it is fetched.
    *
-   * @default 300
+   * @default 60 (seconds)
    * */
   metadataCacheDuration?: number;
+
+  /**
+   * Determines whether authorization parameters should be dynamically extracted
+   * from query.
+   *
+   * When set to `true`, parameters such as `scope`, `resource`, `prompt` etc
+   * from the query parameters will be merged into the authentication request.
+   *
+   * @example
+   *
+   * // The SDK will automatically use prompt='login' and the login_hint.
+   * https://example.com/api/auth/signin?prompt=login&login_hint=user@example.com
+   *
+   * @default false
+   */
+  allowQueryParamOverrides?: boolean;
 
   /**
    * Optional: A callback function invoked when a back-channel logout event is received.

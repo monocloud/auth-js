@@ -13,6 +13,7 @@ export const setupDefaultConfig = (): void => {
   process.env.MONOCLOUD_AUTH_APP_URL = 'https://example.org';
   process.env.MONOCLOUD_AUTH_COOKIE_SECRET = 'cookie_secret';
   process.env.MONOCLOUD_AUTH_SCOPES = 'openid profile email read:customer';
+  process.env.MONOCLOUD_AUTH_ALLOW_QUERY_PARAM_OVERRIDES = 'true';
 };
 
 export const deleteDefaultConfig = (): void => {
@@ -22,6 +23,7 @@ export const deleteDefaultConfig = (): void => {
   process.env.MONOCLOUD_AUTH_APP_URL = undefined;
   process.env.MONOCLOUD_AUTH_COOKIE_SECRET = undefined;
   process.env.MONOCLOUD_AUTH_SCOPES = undefined;
+  process.env.MONOCLOUD_AUTH_ALLOW_QUERY_PARAM_OVERRIDES = undefined;
 };
 
 export interface ParsedCookie {

@@ -1,6 +1,6 @@
 'use client';
 
-import { MonoCloudUser } from '@monocloud/auth-node-core';
+import type { MonoCloudUser } from '@monocloud/auth-node-core';
 import useSWR from 'swr';
 
 /**
@@ -25,32 +25,49 @@ export interface AuthState {
   user?: MonoCloudUser;
   /**
    * Function to refetch the authentication state.
+   *
    */
-  refetch?: () => void;
+  refetch: (refresh?: boolean) => void;
 }
+
+const fetchUser = async (url: string): Promise<MonoCloudUser | undefined> => {
+  const res = await fetch(url, { credentials: 'include' });
+
+  if (res.status === 204) {
+    return undefined;
+  }
+
+  if (res.ok) {
+    return res.json();
+  }
+
+  throw new Error('Failed to fetch user');
+};
 
 /**
  * @returns Authentication State
  */
 export const useAuth = (): AuthState => {
-  const { data, error, isLoading, mutate } = useSWR<MonoCloudUser | undefined>(
+  const key =
     process.env.NEXT_PUBLIC_MONOCLOUD_AUTH_USER_INFO_URL ??
-      // eslint-disable-next-line no-underscore-dangle
-      `${process.env.__NEXT_ROUTER_BASEPATH ?? ''}/api/auth/userinfo`,
-    async (url: string) => {
-      const res = await fetch(url, { credentials: 'include' });
+    // eslint-disable-next-line no-underscore-dangle
+    `${process.env.__NEXT_ROUTER_BASEPATH ?? ''}/api/auth/userinfo`;
 
-      if (res.status === 204) {
-        return undefined;
-      }
-
-      if (res.ok) {
-        return res.json();
-      }
-
-      throw new Error('Failed to fetch user');
-    }
+  const { data, error, isLoading, mutate } = useSWR<MonoCloudUser | undefined>(
+    key,
+    fetchUser
   );
+
+  const refetch = (refresh?: boolean): void => {
+    const url = new URL(key, 'https://dummy');
+    if (refresh) {
+      url.searchParams.set('refresh', 'true');
+    }
+
+    void mutate(async () => await fetchUser(url.pathname + url.search), {
+      revalidate: false,
+    });
+  };
 
   if (error) {
     return {
@@ -58,7 +75,7 @@ export const useAuth = (): AuthState => {
       isLoading: false,
       isAuthenticated: false,
       error: error as Error,
-      refetch: () => mutate(),
+      refetch,
     };
   }
 
@@ -68,7 +85,7 @@ export const useAuth = (): AuthState => {
       isLoading,
       isAuthenticated: !!data && Object.keys(data).length > 0,
       error: undefined,
-      refetch: () => mutate(),
+      refetch,
     };
   }
 

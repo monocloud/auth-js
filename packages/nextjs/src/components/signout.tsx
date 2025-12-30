@@ -3,6 +3,9 @@ import React, { JSX } from 'react';
 export interface SignOutProps {
   /** URL to redirect the user to after they have been signed out. */
   postLogoutUrl?: string;
+
+  /** Whether to also sign out the user from MonoCloud */
+  federated?: boolean;
 }
 
 /**
@@ -15,6 +18,7 @@ export interface SignOutProps {
 export const SignOut = ({
   children,
   postLogoutUrl,
+  federated,
   ...props
 }: SignOutProps &
   React.AnchorHTMLAttributes<HTMLAnchorElement>): JSX.Element => {
@@ -27,6 +31,10 @@ export const SignOut = ({
 
   if (postLogoutUrl) {
     query.set('post_logout_url', postLogoutUrl);
+  }
+
+  if (typeof federated === 'boolean') {
+    query.set('federated', federated.toString());
   }
 
   return (
