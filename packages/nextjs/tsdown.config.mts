@@ -20,5 +20,5 @@ const common = {
 
 export default defineConfig([
   { ...common, format: 'cjs', dts: false },
-  { ...common, format: 'es', dts: true },
+  { ...common, format: 'es', dts: { resolve: true, enabled: true } },
 ]);
