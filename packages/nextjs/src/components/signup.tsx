@@ -18,6 +18,32 @@ export interface SignUpProps extends Omit<
  * @param props - Properties for the SignUp component.
  *
  * @returns An anchor element that links to the sign-in endpoint with the prompt set to 'create'.
+ *
+ * @example App Router and Pages Router
+ *
+ * **Sign-up component works on both the server and the client in pages router and app router.**
+ *
+ * ```tsx
+ * import { SignUp } from "@monocloud/auth-nextjs/components";
+ *
+ * export default function Home() {
+ *   return <SignUp>Sign Up</SignUp>;
+ * }
+ * ```
+ *
+ * @example Customize the authorization request
+ *
+ * You can customize the authorization request by passing in props. See {@link SignUpProps}.
+ *
+ * **Note⚠️: You need to set the env `MONOCLOUD_AUTH_ALLOW_QUERY_PARAM_OVERRIDES=true` or `allowQueryParamOverrides` should be `true` in the client initialization for props to work**
+ *
+ * ```tsx
+ * import { SignUp } from "@monocloud/auth-nextjs/components";
+ *
+ * export default function Home() {
+ *   return <SignUp returnUrl="/dashboard">Sign Up</SignUp>;
+ * }
+ * ```
  */
 export const SignUp = ({
   children,
