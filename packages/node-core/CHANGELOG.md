@@ -1,5 +1,11 @@
 # @monocloud/auth-node-core
 
+## 0.1.2
+
+### Patch Changes
+
+- e8912d0: Removed getRoute() method from MonoCloudRequest interface
+
 ## 0.1.1
 
 ### Patch Changes
