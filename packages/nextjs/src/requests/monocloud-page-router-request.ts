@@ -6,11 +6,6 @@ export default class MonoCloudPageRouterRequest implements MonoCloudRequest {
   constructor(public readonly req: NextApiRequest) {}
 
   /* v8 ignore next */
-  getRoute(parameter: string): string | string[] | undefined {
-    return this.req.query[parameter];
-  }
-
-  /* v8 ignore next */
   getQuery(parameter: string): string | string[] | undefined {
     return this.req.query[parameter];
   }

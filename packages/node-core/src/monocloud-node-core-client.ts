@@ -505,11 +505,9 @@ export class MonoCloudCoreClient {
           response.redirect(decodedUrl);
           return response.done();
         }
-        /* c8 ignore start */
       } catch {
         // do nothing
       }
-      /* c8 ignore stop */
 
       response.redirect(this.options.appUrl);
     } catch (error) {

@@ -119,10 +119,6 @@ export class TestReq implements MonoCloudRequest {
     };
   }
 
-  getRoute(_parameter: string): string | string[] | undefined {
-    throw new Error('Method not implemented.');
-  }
-
   getQuery(parameter: string): string | string[] | undefined {
     if (this.req.url) {
       const url = new URL(this.req.url);

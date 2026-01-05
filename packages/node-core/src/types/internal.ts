@@ -10,7 +10,6 @@ export interface IMonoCloudCookieRequest {
 }
 
 export interface MonoCloudRequest extends IMonoCloudCookieRequest {
-  getRoute(parameter: string): string | string[] | undefined;
   getQuery(parameter: string): string | string[] | undefined;
   getRawRequest(): Promise<{
     method: string;
