@@ -1,5 +1,6 @@
 import type { MonoCloudRequest } from '@monocloud/auth-node-core';
-import type { NextRequest } from 'next/server';
+// eslint-disable-next-line import/extensions
+import type { NextRequest } from 'next/server.js';
 
 export default class MonoCloudAppRouterRequest implements MonoCloudRequest {
   constructor(public readonly req: NextRequest) {}
