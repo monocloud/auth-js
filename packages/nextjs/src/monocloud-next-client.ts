@@ -1,6 +1,12 @@
+/* eslint-disable import/extensions */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { NextFetchEvent, NextRequest, NextResponse } from 'next/server';
-import { redirect } from 'next/navigation';
+import {
+  NextFetchEvent,
+  NextRequest,
+  NextResponse,
+  NextMiddleware,
+  NextProxy,
+} from 'next/server.js';
 import type {
   NextApiHandler,
   NextApiRequest,
@@ -27,7 +33,6 @@ import {
   MonoCloudValidationError,
   MonoCloudOidcClient,
 } from '@monocloud/auth-node-core';
-import type { NextMiddlewareResult } from 'next/dist/server/web/types';
 import {
   AppRouterApiHandlerFn,
   AppRouterContext,
@@ -215,6 +220,9 @@ export class MonoCloudNextClient {
             options.authParams.loginHint
           );
         }
+
+        // @ts-expect-error Cannot find module 'next/navigation'
+        const { redirect } = await import('next/navigation');
 
         return redirect(signInRoute.toString());
       }
@@ -827,6 +835,9 @@ export class MonoCloudNextClient {
       signInRoute.searchParams.set('prompt', options.authParams.prompt);
     }
 
+    // @ts-expect-error Cannot find module 'next/navigation'
+    const { redirect } = await import('next/navigation');
+
     redirect(signInRoute.toString());
   }
 
@@ -1017,6 +1028,9 @@ export class MonoCloudNextClient {
       signInRoute.searchParams.set('prompt', options.prompt);
     }
 
+    // @ts-expect-error Cannot find module 'next/navigation'
+    const { redirect } = await import('next/navigation');
+
     redirect(signInRoute.toString());
   }
 
@@ -1052,6 +1066,9 @@ export class MonoCloudNextClient {
         options.postLogoutRedirectUri
       );
     }
+
+    // @ts-expect-error Cannot find module 'next/navigation'
+    const { redirect } = await import('next/navigation');
 
     redirect(signOutRoute.toString());
   }

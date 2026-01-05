@@ -1,4 +1,5 @@
-import { NextResponse, type NextRequest } from 'next/server';
+// eslint-disable-next-line import/extensions
+import { NextRequest, NextResponse } from 'next/server.js';
 import type { NextApiRequest, NextApiResponse } from 'next/types';
 import type {
   MonoCloudRequest,

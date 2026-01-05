@@ -2,7 +2,8 @@ import type {
   CookieOptions,
   MonoCloudResponse,
 } from '@monocloud/auth-node-core';
-import { NextResponse } from 'next/server';
+// eslint-disable-next-line import/extensions
+import { NextResponse } from 'next/server.js';
 
 export default class MonoCloudAppRouterResponse implements MonoCloudResponse {
   constructor(public res: NextResponse) {}
