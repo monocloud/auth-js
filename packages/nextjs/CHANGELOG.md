@@ -1,5 +1,16 @@
 # @monocloud/auth-nextjs
 
+## 0.1.2
+
+### Patch Changes
+
+- e8912d0: Removed getRoute() method from MonoCloudRequest interface
+- e8912d0: Added docs
+- e8912d0: Added support for raw Request and Response
+- e8912d0: Fixed import errors (could not find 'next/server') errors for page router applications
+- Updated dependencies [e8912d0]
+  - @monocloud/auth-node-core@0.1.2
+
 ## 0.1.1
 
 ### Patch Changes
