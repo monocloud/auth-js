@@ -1,17 +1,8 @@
 import type { MonoCloudRequest } from '@monocloud/auth-node-core';
 import type { NextRequest } from 'next/server';
-import { AppRouterContext } from '../types';
 
 export default class MonoCloudAppRouterRequest implements MonoCloudRequest {
-  constructor(
-    public readonly req: NextRequest,
-    public readonly ctx: AppRouterContext
-  ) {}
-
-  /* v8 ignore next */
-  getRoute(parameter: string): string | string[] | undefined {
-    return this.ctx.params?.[parameter];
-  }
+  constructor(public readonly req: NextRequest) {}
 
   getQuery(parameter: string): string | string[] | undefined {
     const url = new URL(this.req.url);
