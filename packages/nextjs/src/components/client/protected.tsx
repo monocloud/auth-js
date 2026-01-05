@@ -33,10 +33,83 @@ export interface ProtectedComponentProps {
  * A wrapper component that conditionally renders its children based on the user's authentication
  * status and group membership.
  *
- * @param props - The properties for the Protected component.
+ * **Note⚠️: The component is hidden from view. The data is present in the browser. Use server side `protectPage()` for protecting components before that data is sent to the client.**
+ *
+ * @param props - Props for customizing the Protected component.
  *
  * @returns The children if authorized, the `onAccessDenied` content if unauthorized,
  * or `null` while loading.
+ *
+ * @example App Router
+ *
+ * ```tsx
+ * "use client";
+ *
+ * import { Protected } from "@monocloud/auth-nextjs/components/client";
+ *
+ * export default function Home() {
+ *   return (
+ *     <Protected onAccessDenied={<>Sign in to view the message.</>}>
+ *       <>You are breathtaking</>
+ *     </Protected>
+ *   );
+ * }
+ * ```
+ *
+ * @example App Router with group options
+ *
+ * See {@link ProtectedComponentProps}.
+ *
+ * ```tsx
+ * "use client";
+ *
+ * import { Protected } from "@monocloud/auth-nextjs/components/client";
+ *
+ * export default function Home() {
+ *   return (
+ *     <Protected
+ *       onAccessDenied={<>Only admins are allowed.</>}
+ *       groups={["admin"]}
+ *     >
+ *       <>Signed in as admin</>
+ *     </Protected>
+ *   );
+ * }
+ * ```
+ *
+ * @example Pages Router
+ *
+ * ```tsx
+ * import { Protected } from "@monocloud/auth-nextjs/components/client";
+ *
+ * export default function Home() {
+ *   return (
+ *     <Protected onAccessDenied={<>Sign in to view the message.</>}>
+ *       <>You are breathtaking</>
+ *     </Protected>
+ *   );
+ * }
+ * ```
+ *
+ * @example Pages Router with group options
+ *
+ * See {@link ProtectedComponentProps}.
+ *
+ * ```tsx
+ * import { Protected } from "@monocloud/auth-nextjs/components/client";
+ *
+ * export default function Home() {
+ *   return (
+ *     <Protected
+ *       onAccessDenied={<>Only admins are allowed.</>}
+ *       groups={["admin"]}
+ *     >
+ *       <>Signed in as admin</>
+ *     </Protected>
+ *   );
+ * }
+ * ```
+ *
  */
 export const Protected = ({
   children,

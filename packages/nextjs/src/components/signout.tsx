@@ -14,6 +14,32 @@ export interface SignOutProps {
  * @param props - Properties for the SignOut component.
  *
  * @returns An anchor element that links to the sign-out endpoint.
+ *
+ * @example App Router and Pages Router
+ *
+ * **Sign-out component works on both the server and the client in pages router and app router.**
+ *
+ * ```tsx
+ * import { SignOut } from "@monocloud/auth-nextjs/components";
+ *
+ * export default function Home() {
+ *   return <SignOut>Sign Out</SignOut>;
+ * }
+ * ```
+ *
+ * @example Customize the request
+ *
+ * You can customize the request by passing in props. See {@link SignOutProps}.
+ *
+ * **Note⚠️: You need to set the env `MONOCLOUD_AUTH_ALLOW_QUERY_PARAM_OVERRIDES=true` or `allowQueryParamOverrides` should be `true` in the client initialization for props to work**
+ *
+ * ```tsx
+ * import { SignOut } from "@monocloud/auth-nextjs/components";
+ *
+ * export default function Home() {
+ *   return <SignOut federated={true}>Sign Out</SignOut>;
+ * }
+ * ```
  */
 export const SignOut = ({
   children,

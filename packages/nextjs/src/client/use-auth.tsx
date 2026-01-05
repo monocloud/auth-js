@@ -45,7 +45,83 @@ const fetchUser = async (url: string): Promise<MonoCloudUser | undefined> => {
 };
 
 /**
+ *
+ * Hook for getting the user's profile on client components
+ *
  * @returns Authentication State
+ *
+ * @example App Router
+ *
+ * ```tsx
+ * "use client";
+ *
+ * import { useAuth } from "@monocloud/auth-nextjs/client";
+ *
+ * export default function Home() {
+ *   const { user } = useAuth();
+ *
+ *   return <>User Id: {user?.sub}</>;
+ * }
+ * ```
+ *
+ * @example App Router - Refetch user from Userinfo endpoint
+ *
+ * Calling `refetch(true)` will force refresh the user's profile from the userinfo endpoint.
+ * If you do not intent to refersh from your tenants userinfo endpoint, use just `refetch()`
+ *
+ * **Note⚠️: You need to set the env `MONOCLOUD_AUTH_ALLOW_QUERY_PARAM_OVERRIDES=true` or `allowQueryParamOverrides` should be `true` in the client initialization for force refresh to work**
+ *
+ * ```tsx
+ * "use client";
+ *
+ * import { useAuth } from "@monocloud/auth-nextjs/client";
+ *
+ * export default function Home() {
+ *   const { user, refetch } = useAuth();
+ *
+ *   return (
+ *     <>
+ *       <pre>{JSON.stringify(user)}</pre>
+ *       <button onClick={() => refetch(true)}>Refresh</button>
+ *     </>
+ *   );
+ * }
+ * ```
+ *
+ * @example Pages Router
+ *
+ * ```tsx
+ * import { useAuth } from "@monocloud/auth-nextjs/client";
+ *
+ * export default function Home() {
+ *   const { user } = useAuth();
+ *
+ *   return <>User Id: {user?.sub}</>;
+ * }
+ * ```
+ *
+ * @example Pages Router - Refetch user from Userinfo endpoint
+ *
+ *  Calling `refetch(true)` will force refresh the user's profile from the userinfo endpoint.
+ * If you do not intent to refersh from your tenants userinfo endpoint, use just `refetch()`
+ *
+ * **Note⚠️: You need to set the env `MONOCLOUD_AUTH_ALLOW_QUERY_PARAM_OVERRIDES=true` or `allowQueryParamOverrides` should be `true` in the client initialization for force refresh to work**
+ *
+ * ```tsx
+ * import { useAuth } from "@monocloud/auth-nextjs/client";
+ *
+ * export default function Home() {
+ *   const { user, refetch } = useAuth();
+ *
+ *   return (
+ *     <>
+ *       <pre>{JSON.stringify(user)}</pre>
+ *       <button onClick={() => refetch(true)}>Refresh</button>
+ *     </>
+ *   );
+ * }
+ * ```
+ *
  */
 export const useAuth = (): AuthState => {
   const key =

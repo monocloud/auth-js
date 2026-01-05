@@ -102,11 +102,67 @@ const handlePageError = (
 /**
  * Function to protect a client rendered page component.
  * Ensures that only authenticated users can access the component.
+ * 
+ * **Note⚠️: Since `window.location` is set as `returnUrl` query param by default, you need to set the env `MONOCLOUD_AUTH_ALLOW_QUERY_PARAM_OVERRIDES=true` or `allowQueryParamOverrides` should be `true` in the client initialization for returning to the same page.**
  *
  * @param Component - The component to protect.
  * @param options - The options.
  *
- * @returns Protected clinet rendered page component.
+ * @returns Protected client rendered page component.
+ *
+ * @example App Router
+ *
+ * ```tsx
+ * "use client";
+ *
+ * import { protectPage } from "@monocloud/auth-nextjs/client";
+ *
+ * export default protectPage(function Home() {
+ *   return <>You are signed in</>;
+ * });
+ * ```
+ *
+ * @example App Router with options
+ * 
+ * See {@link ProtectPageOptions} for more options.
+ *
+ * ```tsx
+ * "use client";
+ *
+ * import { protectPage } from "@monocloud/auth-nextjs/client";
+ *
+ * export default protectPage(
+ *   function Home() {
+ *     return <>You are signed in</>;
+ *   },
+ *   { returnUrl: "/dashboard", authParams: { loginHint: "username" } }
+ * );
+ * ```
+
+* @example Pages Router
+ *
+ * ```tsx
+ * import { protectPage } from "@monocloud/auth-nextjs/client";
+ *
+ * export default protectPage(function Home() {
+ *   return <>You are signed in</>;
+ * });
+ * ```
+ *
+ * @example Pages Router with options
+ * 
+ * See {@link ProtectPageOptions} for more options.
+ *
+ * ```tsx
+ * import { protectPage } from "@monocloud/auth-nextjs/client";
+ *
+ * export default protectPage(
+ *   function Home() {
+ *     return <>You are signed in</>;
+ *   },
+ *   { returnUrl: "/dashboard", authParams: { loginHint: "username" } }
+ * );
+ * ```
  */
 export const protectPage = <P extends object>(
   Component: ComponentType<P & { user: MonoCloudUser }>,
