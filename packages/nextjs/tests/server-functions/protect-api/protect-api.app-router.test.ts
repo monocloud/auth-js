@@ -32,6 +32,22 @@ describe('MonoCloud.protectApi() - App Router', () => {
     });
   });
 
+  it('should return unauthorized for requests with no session (web request and response)', async () => {
+    const api = monoCloud.protectApi(
+      () => new Response(JSON.stringify({ success: true }))
+    );
+
+    const req = new Request('http://localhost:3000/api/someroute');
+    const response = await api(req, { params: {} });
+
+    const res = new TestAppRes(response);
+
+    expect(res.status).toBe(401);
+    expect(await res.getBody()).toEqual({
+      message: 'unauthorized',
+    });
+  });
+
   it('can set custom onAccessDenied handler (NextResponse)', async () => {
     const api = monoCloud.protectApi(
       () => NextResponse.json({ success: true }),

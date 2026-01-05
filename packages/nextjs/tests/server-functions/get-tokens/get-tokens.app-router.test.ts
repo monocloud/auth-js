@@ -1,7 +1,11 @@
 /* eslint-disable import/no-extraneous-dependencies */
 import { NextRequest, NextResponse } from 'next/server';
 import { beforeEach, it, describe, expect, afterEach, vi } from 'vitest';
-import { MonoCloudNextClient, MonoCloudValidationError } from '../../../src';
+import {
+  GetTokensOptions,
+  MonoCloudNextClient,
+  MonoCloudValidationError,
+} from '../../../src';
 import {
   defaultSessionCookieValue,
   setSessionCookie,
@@ -51,6 +55,20 @@ describe('MonoCloud.getTokens() - App Router', () => {
         refreshToken: defaultSessionCookieValue.refreshToken,
         isExpired: false,
       });
+    });
+
+    it('should throw an error if one of the argument is incorrect', async () => {
+      await setSessionCookie(req);
+
+      try {
+        await monoCloud.getTokens(1 as unknown as GetTokensOptions);
+        throw new Error();
+      } catch (error) {
+        expect(error).toBeInstanceOf(MonoCloudValidationError);
+        expect((error as any).message).toBe(
+          'Invalid parameters passed to getTokens()'
+        );
+      }
     });
 
     it('should throw if the request is not authenticated', async () => {
@@ -108,6 +126,18 @@ describe('MonoCloud.getTokens() - App Router', () => {
       }
     });
 
+    it('should throw if the request is not authenticated (web request and response)', async () => {
+      try {
+        await monoCloud.getTokens(
+          new Request('http://localhost:3000/'),
+          new Response()
+        );
+      } catch (error) {
+        expect(error).toBeInstanceOf(MonoCloudValidationError);
+        expect((error as any).message).toBe('Session does not exist');
+      }
+    });
+
     it('should refresh the tokens when forceRefresh is true', async () => {
       await setupOp(defaultDiscovery);
 
@@ -128,11 +158,11 @@ describe('MonoCloud.getTokens() - App Router', () => {
     });
   });
 
-  describe('With Request and Context (req, ctx)', () => {
+  describe('With Request (req)', () => {
     it('should return the tokens if the request is authenticated', async () => {
       await setSessionCookie(req);
 
-      const result = await monoCloud.getTokens(req, { params: {} });
+      const result = await monoCloud.getTokens(req);
 
       expect(result).toEqual({
         accessToken: defaultSessionCookieValue.accessTokens[0].accessToken,
@@ -147,7 +177,7 @@ describe('MonoCloud.getTokens() - App Router', () => {
 
     it('should throw if the request is not authenticated', async () => {
       try {
-        await monoCloud.getTokens(req, { params: {} });
+        await monoCloud.getTokens(req);
       } catch (error) {
         expect(error).toBeInstanceOf(MonoCloudValidationError);
         expect((error as any).message).toBe('Session does not exist');
@@ -159,11 +189,7 @@ describe('MonoCloud.getTokens() - App Router', () => {
 
       await setSessionCookie(req);
 
-      const result = await monoCloud.getTokens(
-        req,
-        { params: {} },
-        { forceRefresh: true }
-      );
+      const result = await monoCloud.getTokens(req, { forceRefresh: true });
 
       expect(result).toEqual({
         ...refreshedTokens,

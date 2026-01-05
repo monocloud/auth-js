@@ -1,12 +1,16 @@
 /* eslint-disable import/no-extraneous-dependencies */
 import { NextRequest, NextResponse } from 'next/server';
 import { describe, it, expect } from 'vitest';
-import { isAppRouter, getMonoCloudReqRes, mergeResponse } from '../src/utils';
+import {
+  isAppRouter,
+  getMonoCloudCookieReqRes,
+  mergeResponse,
+} from '../src/utils';
 import MonoCloudAppRouterResponse from '../src/responses/monocloud-app-router-response';
 import MonoCloudAppRouterRequest from '../src/requests/monocloud-app-router-request';
-import { NextAnyRequest, NextAnyResponse } from '../src/types';
 import MonoCloudPageRouterRequest from '../src/requests/monocloud-page-router-request';
 import MonoCloudPageRouterResponse from '../src/responses/monocloud-page-router-response';
+import { IncomingMessage, ServerResponse } from 'node:http';
 
 describe('isAppRouter', () => {
   it('should return true for app router request', () => {
@@ -24,18 +28,16 @@ describe('getMonoCloudReqRes', () => {
   it('should return MonoCloudRequest and MonoCloudResponse for app router request', () => {
     const req = new NextRequest('http://example.com');
     const resOrCtx = new NextResponse();
-    const { request, response } = getMonoCloudReqRes(req, resOrCtx);
+    const { request, response } = getMonoCloudCookieReqRes(req, resOrCtx);
     expect(request).toBeInstanceOf(MonoCloudAppRouterRequest);
     expect(response).toBeInstanceOf(MonoCloudAppRouterResponse);
   });
 
   it('should return MonoCloudRequest and MonoCloudResponse for page router request', () => {
-    const req = {};
-    const resOrCtx = {};
-    const { request, response } = getMonoCloudReqRes(
-      req as unknown as NextAnyRequest,
-      resOrCtx as unknown as NextAnyResponse
-    );
+    const req = Object.create(IncomingMessage.prototype);
+    const resOrCtx = Object.create(ServerResponse.prototype);
+
+    const { request, response } = getMonoCloudCookieReqRes(req, resOrCtx);
     expect(request).toBeInstanceOf(MonoCloudPageRouterRequest);
     expect(response).toBeInstanceOf(MonoCloudPageRouterResponse);
   });

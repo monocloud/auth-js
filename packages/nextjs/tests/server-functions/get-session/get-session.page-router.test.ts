@@ -2,7 +2,7 @@
 import { CookieJar } from 'tough-cookie';
 import { beforeEach, it, describe, expect, afterEach } from 'vitest';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { MonoCloudNextClient } from '../../../src';
+import { MonoCloudNextClient, MonoCloudValidationError } from '../../../src';
 import {
   defaultDiscovery,
   noTokenAndUserInfo,
@@ -28,6 +28,32 @@ describe('MonoCloud.getSession() - Page Router', () => {
 
   afterEach(async () => {
     await stopNodeServer();
+  });
+
+  it('should throw an error if request and response is invalid', async () => {
+    const handler = async (
+      _req: NextApiRequest,
+      res: NextApiResponse
+    ): Promise<void> => {
+      try {
+        await monoCloud.getSession(
+          {} as unknown as NextApiRequest,
+          {} as unknown as NextApiResponse
+        );
+        throw new Error();
+      } catch (error) {
+        expect(error).toBeInstanceOf(MonoCloudValidationError);
+        expect((error as any).message).toBe(
+          'Invalid pages router request and response'
+        );
+      }
+
+      res.end();
+    };
+
+    const baseUrl = await startNodeServer(handler);
+
+    await get(baseUrl, '/');
   });
 
   it('should return undefined if there is no session (NextApiRequest, NextApiResponse)', async () => {

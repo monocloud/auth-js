@@ -95,17 +95,13 @@ describe('MonoCloud.isUserInGroup() - App Router', () => {
 
   describe('With Request and Context (req, ctx)', () => {
     it('should return true if the user is in any of the specified groups', async () => {
-      const result = await monoCloud.isUserInGroup(req, { params: {} }, [
-        'test',
-      ]);
+      const result = await monoCloud.isUserInGroup(req, ['test']);
 
       expect(result).toBe(true);
     });
 
     it('should return false if the user is not in any of the specified groups', async () => {
-      const result = await monoCloud.isUserInGroup(req, { params: {} }, [
-        'NOPE',
-      ]);
+      const result = await monoCloud.isUserInGroup(req, ['NOPE']);
 
       expect(result).toBe(false);
     });
@@ -113,7 +109,7 @@ describe('MonoCloud.isUserInGroup() - App Router', () => {
     it('can customize the groups claim', async () => {
       const result = await monoCloud.isUserInGroup(
         req,
-        { params: {} },
+
         ['test'],
         {
           groupsClaim: 'CUSTOM_GROUPS',
@@ -168,6 +164,16 @@ describe('MonoCloud.isUserInGroup() - App Router (No session + No groups)', () =
       expect(result).toBe(false);
     });
 
+    it('should return false if there is no session (web request and response)', async () => {
+      const result = await monoCloud.isUserInGroup(
+        new Request('http://localhost:3000/'),
+        new Response(),
+        ['test']
+      );
+
+      expect(result).toBe(false);
+    });
+
     it('should throw if no groups are passed', async () => {
       try {
         await monoCloud.isUserInGroup(
@@ -185,22 +191,16 @@ describe('MonoCloud.isUserInGroup() - App Router (No session + No groups)', () =
     });
   });
 
-  describe('With Request and Context (req, ctx)', () => {
+  describe('With Request (req)', () => {
     it('should return false if there is no session', async () => {
-      const result = await monoCloud.isUserInGroup(req, { params: {} }, [
-        'test',
-      ]);
+      const result = await monoCloud.isUserInGroup(req, ['test']);
 
       expect(result).toBe(false);
     });
 
     it('should throw if no groups are passed', async () => {
       try {
-        await monoCloud.isUserInGroup(
-          req,
-          { params: {} },
-          null as unknown as string[]
-        );
+        await monoCloud.isUserInGroup(req, null as unknown as string[]);
         throw new Error();
       } catch (error) {
         expect(error).toBeInstanceOf(MonoCloudValidationError);

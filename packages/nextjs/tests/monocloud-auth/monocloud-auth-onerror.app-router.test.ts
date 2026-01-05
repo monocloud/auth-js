@@ -13,7 +13,7 @@ describe('MonoCloud Auth - App Router: onError', () => {
       'http://localhost:3000/api/auth/callback?code=123&state=321'
     );
 
-    const response = await authHandler(req, {});
+    const response = await authHandler(req, { params: {} });
 
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual({ custom: true });

@@ -9,7 +9,7 @@ import {
 } from '../../page-router-helpers';
 
 describe('redirectToSignIn() - Page Router', () => {
-  it('should throw "redirectToSignIn() can only be used in App Router project"', async () => {
+  it('should throw', async () => {
     const monoCloud = new MonoCloudNextClient();
 
     // Simulate a typical Page Router usage
@@ -33,7 +33,7 @@ describe('redirectToSignIn() - Page Router', () => {
         throw new Error('Expected redirectToSignIn() to throw');
       } catch (error: any) {
         expect(error.message).toBe(
-          'redirectToSignIn() can only be used in App Router project'
+          'redirectToSignIn() can only be used in App Router server environments (RSC, route handlers, or server actions)'
         );
       }
 

@@ -57,6 +57,15 @@ describe('MonoCloud.isAuthenticated() - App Router', () => {
       expect(result).toBe(true);
     });
 
+    it('should return false if the request is not authenticated (web request and response)', async () => {
+      const result = await monoCloud.isAuthenticated(
+        new Request('http://localhost:3000/'),
+        new Response()
+      );
+
+      expect(result).toBe(false);
+    });
+
     it('should return false if the request is not authenticated', async () => {
       const res = new NextResponse();
 
@@ -66,17 +75,17 @@ describe('MonoCloud.isAuthenticated() - App Router', () => {
     });
   });
 
-  describe('With Request and Context (req, ctx)', () => {
+  describe('With Request (req)', () => {
     it('should return true if the request is authenticated', async () => {
       await setSessionCookie(req);
 
-      const result = await monoCloud.isAuthenticated(req, { params: {} });
+      const result = await monoCloud.isAuthenticated(req);
 
       expect(result).toBe(true);
     });
 
     it('should return false if the request is not authenticated', async () => {
-      const result = await monoCloud.isAuthenticated(req, { params: {} });
+      const result = await monoCloud.isAuthenticated(req);
 
       expect(result).toBe(false);
     });
