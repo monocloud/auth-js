@@ -27,7 +27,7 @@ describe('MonoCloud Auth - App Router: userinfo op error', () => {
 
     await setSessionCookie(req);
 
-    const response = await authHandler(req, {});
+    const response = await authHandler(req, { params: {} });
 
     expect(response.status).toBe(500);
   });

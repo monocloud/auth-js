@@ -46,6 +46,14 @@ describe('redirectToSignOut() - App Router', () => {
     expect(redirectCalled).toBe('https://example.org/api/auth/signout');
   });
 
+  it('should append federated when provided in options', async () => {
+    await monoCloud.redirectToSignOut({ federated: false });
+
+    expect(redirectCalled).toBe(
+      'https://example.org/api/auth/signout?federated=false'
+    );
+  });
+
   it('should append post_logout_redirect_uri when provided in options', async () => {
     await monoCloud.redirectToSignOut({
       postLogoutRedirectUri: 'https://example.org/goodbye',

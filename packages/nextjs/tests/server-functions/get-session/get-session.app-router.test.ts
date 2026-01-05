@@ -33,6 +33,17 @@ describe('MonoCloud.getSession() - App Router', () => {
     monoCloud = new MonoCloudNextClient();
   });
 
+  it('should return undefined if there is no session (Request, Response)', async () => {
+    const nextRes = new Response();
+
+    const session = await monoCloud.getSession(
+      new Request('http://localhost:3000/'),
+      nextRes
+    );
+
+    expect(session).toBeUndefined();
+  });
+
   it('should return undefined if there is no session (NextRequest, NextResponse)', async () => {
     const nextRes = new NextResponse();
 
@@ -51,16 +62,16 @@ describe('MonoCloud.getSession() - App Router', () => {
     expect(session).toEqual(defaultSessionCookieValue);
   });
 
-  it('should return undefined if there is no session (NextRequest, AppRouterContext)', async () => {
-    const session = await monoCloud.getSession(req, { params: {} });
+  it('should return undefined if there is no session (NextRequest)', async () => {
+    const session = await monoCloud.getSession(req);
 
     expect(session).toBeUndefined();
   });
 
-  it('should return the session of the current user (NextRequest, AppRouterContext)', async () => {
+  it('should return the session of the current user (NextRequest)', async () => {
     await setSessionCookie(req);
 
-    const session = await monoCloud.getSession(req, { params: {} });
+    const session = await monoCloud.getSession(req);
 
     expect(session).toEqual(defaultSessionCookieValue);
   });

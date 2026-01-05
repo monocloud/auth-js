@@ -9,7 +9,7 @@ import {
 } from '../../page-router-helpers';
 
 describe('protect() - Page Router', () => {
-  it('should throw "protect() can only be used in App Router project"', async () => {
+  it('should throw', async () => {
     const monoCloud = new MonoCloudNextClient();
 
     const getServerSideProps = async (
@@ -33,7 +33,7 @@ describe('protect() - Page Router', () => {
         throw new Error();
       } catch (error: any) {
         expect(error.message).toBe(
-          'protect() can only be used in App Router project'
+          'protect() can only be used in App Router server environments (RSC, route handlers, or server actions)'
         );
       }
 

@@ -9,6 +9,7 @@ import {
   setSessionCookie,
   setStateCookie,
 } from './common-helper';
+import { MonoCloudOidcClient } from '@monocloud/auth-node-core';
 
 describe('Base Path', () => {
   let monoCloud: MonoCloudNextClient;
@@ -22,6 +23,10 @@ describe('Base Path', () => {
 
   afterEach(() => {
     process.env.MONOCLOUD_AUTH_APP_URL = undefined;
+  });
+
+  test('should have the base path in redirect uri', () => {
+    expect(monoCloud.oidcClient).toBeInstanceOf(MonoCloudOidcClient);
   });
 
   test('should have the base path in redirect uri', async () => {

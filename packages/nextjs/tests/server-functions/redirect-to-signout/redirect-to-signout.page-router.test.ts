@@ -9,7 +9,7 @@ import {
 } from '../../page-router-helpers';
 
 describe('redirectToSignOut() - Page Router', () => {
-  it('should throw "redirectToSignOut() can only be used in App Router project"', async () => {
+  it('should throw', async () => {
     const monoCloud = new MonoCloudNextClient();
 
     // Simulate Page Router usage
@@ -33,7 +33,7 @@ describe('redirectToSignOut() - Page Router', () => {
         throw new Error('Expected redirectToSignOut() to throw');
       } catch (error: any) {
         expect(error.message).toBe(
-          'redirectToSignOut() can only be used in App Router project'
+          'redirectToSignOut() can only be used in App Router server environments (RSC, route handlers, or server actions)'
         );
       }
 
