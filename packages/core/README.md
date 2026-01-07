@@ -14,6 +14,7 @@ This package provides a **framework-agnostic OpenID Connect (OIDC) client** for 
 ## 📘 Documentation
 
 - **Documentation:** [https://www.monocloud.com/docs](https://www.monocloud.com/docs?utm_source=github&utm_medium=auth_js)
+- **API Reference:** [https://monocloud.github.io/auth-js](https://monocloud.github.io/auth-js?utm_source=github&utm_medium=auth_js)
 
 ## Supported Platforms
 
