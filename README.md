@@ -34,6 +34,7 @@ This SDK provides a typed JavaScript client for implementing **OAuth 2.0** and *
 ## 📘 Documentation
 
 - **Documentation:** [https://www.monocloud.com/docs](https://www.monocloud.com/docs?utm_source=github&utm_medium=auth_js)
+- **API Reference:** [https://monocloud.github.io/auth-js](https://monocloud.github.io/auth-js?utm_source=github&utm_medium=auth_js)
 
 ## 📦 Packages
 

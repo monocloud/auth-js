@@ -10,8 +10,10 @@ This SDK is designed specifically for **Next.js**, providing first-class integra
 
 ## 📘 Documentation
 
+- **Documentation:** [https://www.monocloud.com/docs](https://www.monocloud.com/docs?utm_source=github&utm_medium=auth_js)
 - **Quickstart:**  [https://www.monocloud.com/docs/quickstarts/nextjs-app-router](https://www.monocloud.com/docs/quickstarts/nextjs-app-router?utm_source=github&utm_medium=auth_js)
 - **SDK Reference:**  [https://www.monocloud.com/docs/sdk-reference/nextjs](https://www.monocloud.com/docs/sdk-reference/nextjs/index?utm_source=github&utm_medium=auth_js)
+- **API Reference:** [https://monocloud.github.io/auth-js](https://monocloud.github.io/auth-js?utm_source=github&utm_medium=auth_js)
 
 ## Supported Platforms
 
@@ -124,6 +126,7 @@ export default function Page() {
   );
 }
 ```
+
 ## When should I use `auth-nextjs`?
 
 Use **`@monocloud/auth-nextjs`** if you are building a **Next.js application** and want a secure authentication solution with minimal configuration.
