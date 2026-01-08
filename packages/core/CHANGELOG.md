@@ -1,5 +1,11 @@
 # @monocloud/auth-core
 
+## 0.1.2
+
+### Patch Changes
+
+- 21a411c: Added documentation links to README.md
+
 ## 0.1.1
 
 ### Patch Changes
