@@ -1,5 +1,13 @@
 # @monocloud/auth-nextjs
 
+## 0.1.3
+
+### Patch Changes
+
+- 21a411c: Added documentation links to README.md
+- Updated dependencies [21a411c]
+  - @monocloud/auth-node-core@0.1.3
+
 ## 0.1.2
 
 ### Patch Changes
