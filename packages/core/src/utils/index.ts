@@ -80,6 +80,7 @@ export const parseCallbackParams = (
     sessionState: params.get('session_state') ?? undefined,
     expiresIn: expiresIn ? parseInt(expiresIn, 10) : undefined,
     code: params.get('code') ?? undefined,
+    scope: params.get('scope') ?? undefined,
     error: params.get('error') ?? undefined,
     errorDescription: params.get('error_description') ?? undefined,
   };

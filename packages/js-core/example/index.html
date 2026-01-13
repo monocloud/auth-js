@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="/favicon.ico" />
+  <title>MonoCloud Vanilla JavaScript SDK</title>
+</head>
+
+<body class="bg-gray-100 min-h-screen flex flex-col items-center py-12 px-4">
+  <h1 class="text-3xl font-bold text-center mb-8">
+    MonoCloud Vanilla JavaScript SDK
+  </h1>
+
+  <div class="w-full max-w-2xl mb-8">
+    <div id="user-info-container" class="bg-white rounded-lg shadow-lg p-4 h-125 overflow-auto border border-gray-200">
+      <p id="no-user-message" class="text-gray-500 text-center py-4 hidden">
+        Click on the sign in button to get started
+      </p>
+      <p id="loading" class="text-gray-500 text-center py-4">Loading...</p>
+      <div id="user-data" class="hidden">
+        <div class="mb-2">
+          <span class="font-semibold">idToken:</span>
+          <span id="id-token-value" class="break-all text-sm ml-2 p-1 rounded">null</span>
+        </div>
+        <div class="mb-2">
+          <span class="font-semibold">refreshToken:</span>
+          <span id="refresh-token-value" class="break-all text-sm ml-2 p-1 rounded">null</span>
+        </div>
+        <div class="mb-2">
+          <span class="font-semibold">accessTokens:</span>
+          <pre id="access-tokens-value" class="bg-gray-100 p-2 rounded text-sm overflow-auto">
+null</pre>
+        </div>
+        <div class="mb-2">
+          <span class="font-semibold">user:</span>
+          <pre id="user-value" class="bg-gray-100 p-2 rounded text-sm overflow-auto">
+null</pre>
+        </div>
+        <div class="mb-2">
+          <span class="font-semibold">session:</span>
+          <pre id="session-value" class="bg-gray-100 p-2 rounded text-sm overflow-auto">
+null</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-4 gap-4 mb-8 w-full max-w-2xl">
+    <div class="flex flex-col justify-between bg-white rounded-lg shadow p-4 h-full">
+      <div>
+        <div class="mb-2">
+          <label for="sign-in-mode" class="block text-sm text-gray-600">Mode:</label>
+          <select id="sign-in-mode"
+            class="mt-1 block w-full border-gray-300 shadow-sm rounded-md bg-white border px-3 py-1 text-sm">
+            <option value="redirect">Redirect</option>
+            <option value="popup">Popup</option>
+          </select>
+        </div>
+      </div>
+      <button id="sign-in-btn"
+        class="bg-[#0231FF] hover:bg-blue-600 text-white font-medium py-2 px-4 rounded transition w-full mt-auto">
+        Sign In
+      </button>
+    </div>
+
+    <div class="flex flex-col justify-between bg-white rounded-lg shadow p-4 h-full">
+      <div>
+        <div class="mb-2">
+          <label for="sign-out-mode" class="block text-sm text-gray-600">Mode:</label>
+          <select id="sign-out-mode"
+            class="mt-1 block w-full border-gray-300 shadow-sm rounded-md bg-white border px-3 py-1 text-sm">
+            <option value="redirect">Redirect</option>
+            <option value="popup">Popup</option>
+          </select>
+        </div>
+        <div class="mt-2 flex items-center">
+          <input type="checkbox" id="federated-signout" class="mr-2 h-4 w-4" />
+          <label for="federated-signout" class="text-sm text-gray-600">Federated</label>
+        </div>
+      </div>
+      <button id="sign-out-btn"
+        class="bg-[#0231FF] hover:bg-blue-600 text-white font-medium py-2 px-4 rounded transition w-full mt-auto">
+        Sign Out
+      </button>
+    </div>
+
+    <div class="flex flex-col justify-between bg-white rounded-lg shadow p-4 h-full">
+      <div>
+        <div class="mb-2">
+          <label for="refresh-mode" class="block text-sm text-gray-600">Mode:</label>
+          <select id="refresh-mode"
+            class="mt-1 block w-full border-gray-300 shadow-sm rounded-md bg-white border px-3 py-1 text-sm">
+            <option value="refresh_token">Refresh Token</option>
+            <option value="popup">Popup</option>
+            <option value="silent">Silent</option>
+          </select>
+        </div>
+      </div>
+      <button id="refresh-session-btn"
+        class="bg-[#0231FF] hover:bg-blue-600 text-white font-medium py-2 px-4 rounded transition w-full h-10 mt-auto">
+        Refresh
+      </button>
+    </div>
+
+    <div class="flex flex-col justify-between bg-white rounded-lg shadow p-4 h-full">
+      <div>
+        <div class="mb-2 text-center">Refetch Userinfo</div>
+      </div>
+      <button id="refetch-user-btn"
+        class="bg-[#0231FF] hover:bg-blue-600 text-white font-medium py-2 px-4 rounded transition w-full h-10 mt-auto">
+        Refetch
+      </button>
+    </div>
+  </div>
+
+  <div class="w-full max-w-2xl mb-8">
+    <div class="bg-white rounded-lg shadow p-4">
+      <h2 class="text-lg font-semibold">Get Tokens</h2>
+      <p class="text-xs text-black/60 mb-4">
+        IMPORTANT: Ensure all scopes and resources requested here were included in the initial /authorize request.
+        Update defaultAuthParams or resources in the client configuration accordingly. Example: For 'https://my-api'
+        with
+        scope 'read:data', include these in defaultAuthParams or resources.
+      </p>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        <div>
+          <label for="token-resource" class="block text-sm text-gray-600 mb-1">Resource:</label>
+          <input type="text" id="token-resource"
+            class="w-full border-gray-300 shadow-sm rounded-md bg-white border px-3 py-2 text-sm"
+            placeholder="Space separated resources" />
+        </div>
+        <div>
+          <label for="token-scopes" class="block text-sm text-gray-600 mb-1">Scopes:</label>
+          <input type="text" id="token-scopes"
+            class="w-full border-gray-300 shadow-sm rounded-md bg-white border px-3 py-2 text-sm"
+            placeholder="Space separated scopes" />
+        </div>
+      </div>
+      <div class="flex items-center justify-between">
+        <div class="flex items-center">
+          <input type="checkbox" id="force-refresh" class="mr-2 h-4 w-4" />
+          <label for="force-refresh" class="text-sm text-gray-600">Force Refresh</label>
+        </div>
+        <button id="get-tokens-btn"
+          class="bg-[#0231FF] hover:bg-blue-600 text-white font-medium py-2 px-6 rounded transition">
+          Get Tokens
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="/src/main.ts"></script>
+</body>
+
+</html>

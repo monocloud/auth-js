@@ -91,6 +91,8 @@ export interface CallbackParams {
   error?: string;
   /** Explanation of the reason for authentication failure */
   errorDescription?: string;
+  /** Access token scopes (Implicit Flow) */
+  scope?: string;
   /** Authorization code received from the callback */
   code?: string;
   /** Access token received from the callback */
