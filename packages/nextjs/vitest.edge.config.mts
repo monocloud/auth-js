@@ -3,6 +3,10 @@ import { defineConfig } from 'vitest/config';
 export default defineConfig({
   test: {
     name: 'nextjs-auth-edge',
+    reporters: [
+      'default',
+      ['junit', { outputFile: 'coverage/junit.edge.xml' }],
+    ],
     include: [
       'tests/middleware.test.ts',
       'tests/server-functions/**/*.app-router.test.ts',

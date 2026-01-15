@@ -3,6 +3,10 @@ import { defineConfig } from 'vitest/config';
 export default defineConfig({
   test: {
     name: 'node-auth-core-edge',
+    reporters: [
+      'default',
+      ['junit', { outputFile: 'coverage/junit.edge.xml' }],
+    ],
     include: ['tests/**/**.test.ts'],
     coverage: {
       reportsDirectory: 'coverage/edge',
