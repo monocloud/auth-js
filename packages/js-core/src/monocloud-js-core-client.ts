@@ -24,7 +24,6 @@ import {
 } from '@monocloud/auth-core/internal';
 import type {
   CallbackState,
-  IMonoCloudJSCoreClient,
   IStorage,
   MonoCloudJSCoreClientOptions,
   PostCallback,
@@ -65,7 +64,7 @@ import { withLock } from './lock';
  * await monoCloudClient.signIn();
  * await monoCloudClient.processCallback();
  */
-export class MonoCloudJSCoreClient implements IMonoCloudJSCoreClient {
+export class MonoCloudJSCoreClient {
   private storage: IStorage;
 
   /**
@@ -463,6 +462,7 @@ export class MonoCloudJSCoreClient implements IMonoCloudJSCoreClient {
       this.redirectCallbackState = undefined;
 
       if (!this.federatedSignOut) {
+        await this.setSession();
         return;
       }
 

@@ -47,7 +47,6 @@ export { localStorage, memoryStorage, sessionStorage } from './storage';
 
 export type {
   MonoCloudJSCoreClientOptions,
-  IMonoCloudJSCoreClient,
   IStorage,
   InteractionMode,
   ApplicationState,

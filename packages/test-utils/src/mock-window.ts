@@ -11,6 +11,8 @@ export class MockWindow {
 
   private href = 'http://localhost:3000/';
 
+  private hrefSetCalled = false;
+
   private hrefSet = vi.fn();
 
   private expectedHrefValue?: string;
@@ -119,9 +121,39 @@ export class MockWindow {
         search: this.search,
         pathname: this.pathname,
         get href() {
-          return mockWindowInstance.href;
+          const href =
+            (mockWindowInstance.href.endsWith('/')
+              ? mockWindowInstance.href.substring(
+                  0,
+                  mockWindowInstance.href.length - 1
+                )
+              : mockWindowInstance.href) ?? '';
+
+          const path =
+            (mockWindowInstance.pathname.startsWith('/')
+              ? mockWindowInstance.pathname
+              : `/${mockWindowInstance.pathname}`) ?? '/';
+
+          let query = '';
+          if (mockWindowInstance.search !== '') {
+            query = mockWindowInstance.search.startsWith('?')
+              ? mockWindowInstance.search
+              : `?${mockWindowInstance.search}`;
+          }
+
+          let fragment = '';
+          if (mockWindowInstance.hash !== '') {
+            fragment = mockWindowInstance.hash.startsWith('#')
+              ? mockWindowInstance.hash
+              : `#${mockWindowInstance.hash}`;
+          }
+
+          return mockWindowInstance.hrefSetCalled
+            ? mockWindowInstance.href
+            : `${href}${path}${query}${fragment}`;
         },
         set href(href) {
+          mockWindowInstance.hrefSetCalled = true;
           mockWindowInstance.hrefSet(href);
           mockWindowInstance.href = href;
         },

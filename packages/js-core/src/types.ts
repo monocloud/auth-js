@@ -403,41 +403,6 @@ export interface RefreshOptions {
   appState?: ApplicationState;
 }
 
-export interface IMonoCloudJSCoreClient {
-  /**
-   * Process the authentication callback
-   */
-  processCallback(): Promise<void>;
-
-  /**
-   * Initiate the sign-in process
-   * @param {SignInOptions} signInOptions Sign-in configuration
-   */
-  signIn(signInOptions?: SignInOptions): Promise<void>;
-
-  /**
-   * Sign out the current user
-   * @param {SignOutOptions} signOutOptions Sign-out configuration
-   */
-  signOut(signOutOptions?: SignOutOptions): Promise<void>;
-
-  /**
-   * Refresh the current session
-   * @param {RefreshOptions} refreshOptions - Refresh session configuration
-   */
-  refreshSession(refreshOptions?: RefreshOptions): Promise<void>;
-
-  /**
-   * Refetch the user information
-   */
-  refetchUserInfo(): Promise<void>;
-
-  /**
-   * Returns the session of the currently signed in user.
-   */
-  getSession(): Promise<MonoCloudSession | undefined>;
-}
-
 /**
  * Internal interface used for storing the authentication request state.
  */
