@@ -102,7 +102,7 @@ importers:
         specifier: workspace:*
         version: link:../core
       browser-tabs-lock:
-        specifier: ^1.3.0
+        specifier: 1.3.0
         version: 1.3.0
     devDependencies:
       '@monocloud/auth-test-utils':
