@@ -1,5 +1,20 @@
 # @monocloud/auth-nextjs
 
+## 0.1.4
+
+### Patch Changes
+
+- 05568e9: - Fixed an error where Next.js Request was created incorrectly that throws an error on Node.js 24
+  - Added duplex property to Next.js Request creation in utils to support Node.js streaming response
+  - Refactored Next.js response creation from raw response
+  - Added tests for the utils method `getNextRequest()` and `getNextResponse()`
+- 05568e9: - Added matrix testing for all packages on Node.js version 20, 22, and 24.
+- 05568e9: - Moved vitest reporter to the respective configs.
+  - Added default reporter back to see the test results.
+- Updated dependencies [05568e9]
+- Updated dependencies [05568e9]
+  - @monocloud/auth-node-core@0.1.4
+
 ## 0.1.3
 
 ### Patch Changes
