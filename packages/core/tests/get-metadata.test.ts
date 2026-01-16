@@ -27,11 +27,14 @@ describe('MonoCloudOidcClient.getMetadata()', () => {
 
     const promise = client.getMetadata();
 
-    await assertError(
-      promise,
-      MonoCloudHttpError,
-      "Failed to parse response body as JSON : Expected property name or '}' in JSON at position 1 (line 1 column 2)"
-    );
+    const nodeMajor = parseInt(process?.versions?.node?.split('.')[0]);
+
+    const errorMessage =
+      nodeMajor > 20
+        ? "Failed to parse response body as JSON : Expected property name or '}' in JSON at position 1 (line 1 column 2)"
+        : "Failed to parse response body as JSON : Expected property name or '}' in JSON at position 1";
+
+    await assertError(promise, MonoCloudHttpError, errorMessage);
 
     fetchSpy.mockClear();
   });

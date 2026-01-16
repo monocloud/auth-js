@@ -14,6 +14,7 @@ import MonoCloudPageRouterResponse from './responses/monocloud-page-router-respo
 import MonoCloudCookieResponse from './responses/monocloud-cookie-response';
 import MonoCloudCookieRequest from './requests/monocloud-cookie-request';
 import { IncomingMessage, ServerResponse } from 'node:http';
+import { isPresent } from '@monocloud/auth-node-core/internal';
 
 export const isMonoCloudRequest = (
   req: unknown
@@ -39,7 +40,13 @@ export const getNextRequest = (req: Request | NextRequest): NextRequest => {
     return req;
   }
 
-  return new NextRequest(req);
+  return new NextRequest(req.url, {
+    method: req.method,
+    headers: req.headers,
+    body: req.body,
+    /* v8 ignore next -- @preserve */
+    duplex: (req as any).duplex ?? 'half',
+  });
 };
 
 export const getNextResponse = (
@@ -50,7 +57,23 @@ export const getNextResponse = (
   }
 
   if (res instanceof Response) {
-    return new NextResponse(res.body, res);
+    const nextResponse = new NextResponse(res.body, {
+      status: res.status,
+      statusText: res.statusText,
+      headers: res.headers,
+      url: res.url,
+    });
+
+    try {
+      /* v8 ignore else -- @preserve */
+      if (!isPresent(nextResponse.url)) {
+        (nextResponse as any).url = res.url;
+      }
+    } catch {
+      // ignore
+    }
+
+    return nextResponse;
   }
 
   return new NextResponse();

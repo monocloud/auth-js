@@ -3,6 +3,10 @@ import { defineConfig } from 'vitest/config';
 export default defineConfig({
   test: {
     name: 'node-auth-core-node',
+    reporters: [
+      'default',
+      ['junit', { outputFile: 'coverage/junit.node.xml' }],
+    ],
     include: ['tests/**/**.test.ts'],
     coverage: {
       reportsDirectory: 'coverage/node',

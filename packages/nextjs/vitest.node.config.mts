@@ -3,6 +3,10 @@ import { defineConfig } from 'vitest/config';
 export default defineConfig({
   test: {
     name: 'nextjs-auth-node',
+    reporters: [
+      'default',
+      ['junit', { outputFile: 'coverage/junit.node.xml' }],
+    ],
     include: [
       'tests/config.test.ts',
       'tests/middleware.test.ts',

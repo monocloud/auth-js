@@ -4,6 +4,10 @@ export default defineConfig({
   test: {
     name: 'core-js-auth-browser',
     include: ['tests/**.test.ts'],
+    reporters: [
+      'default',
+      ['junit', { outputFile: 'coverage/junit.browser.xml' }],
+    ],
     coverage: {
       reportsDirectory: 'coverage/browser',
       reporter: 'json',

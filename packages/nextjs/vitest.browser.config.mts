@@ -3,6 +3,10 @@ import { defineConfig } from 'vitest/config';
 export default defineConfig({
   test: {
     name: 'nextjs-auth-browser',
+    reporters: [
+      'default',
+      ['junit', { outputFile: 'coverage/junit.browser.xml' }],
+    ],
     include: ['tests/client/**.test.{ts,tsx}'],
     coverage: {
       reportsDirectory: 'coverage/browser',

@@ -4,6 +4,10 @@ export default defineConfig({
   test: {
     name: 'core-js-auth-edge',
     include: ['tests/**.test.ts'],
+    reporters: [
+      'default',
+      ['junit', { outputFile: 'coverage/junit.edge.xml' }],
+    ],
     coverage: {
       reportsDirectory: 'coverage/edge',
       reporter: 'json',

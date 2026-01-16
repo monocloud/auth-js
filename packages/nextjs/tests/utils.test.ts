@@ -5,6 +5,8 @@ import {
   isAppRouter,
   getMonoCloudCookieReqRes,
   mergeResponse,
+  getNextRequest,
+  getNextResponse,
 } from '../src/utils';
 import MonoCloudAppRouterResponse from '../src/responses/monocloud-app-router-response';
 import MonoCloudAppRouterRequest from '../src/requests/monocloud-app-router-request';
@@ -21,6 +23,76 @@ describe('isAppRouter', () => {
   it('should return false for other types of requests', () => {
     const req = {};
     expect(isAppRouter(req as unknown as NextRequest)).toBe(false);
+  });
+});
+
+describe('getNextRequest', () => {
+  const baseUrl = 'http://localhost:3000/api/auth';
+
+  it('should return the exact same instance if input is already NextRequest', () => {
+    const req = new NextRequest(baseUrl);
+    const result = getNextRequest(req);
+    expect(result).toBe(req);
+  });
+
+  it('should create a new NextRequest from a standard Request', () => {
+    const req = new Request(baseUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user: 'test' }),
+    });
+
+    const result = getNextRequest(req);
+
+    expect(result).toBeInstanceOf(NextRequest);
+    expect(result.url).toBe(baseUrl);
+    expect(result.method).toBe('POST');
+    expect(result.headers.get('content-type')).toBe('application/json');
+  });
+});
+
+describe('getNextResponse', () => {
+  it('should return the exact same instance if input is already NextResponse', () => {
+    const res = new NextResponse('body');
+    const result = getNextResponse(res);
+    expect(result).toBe(res);
+  });
+
+  it('should convert a standard Response to NextResponse', async () => {
+    const res = new Response('test payload', {
+      status: 201,
+      statusText: 'Created',
+      headers: { 'X-Auth-Token': 'abc-123' },
+    });
+
+    const result = getNextResponse(res);
+
+    expect(result).toBeInstanceOf(NextResponse);
+    expect(result.status).toBe(201);
+    expect(result.statusText).toBe('Created');
+    expect(result.headers.get('X-Auth-Token')).toBe('abc-123');
+
+    const text = await result.text();
+    expect(text).toBe('test payload');
+  });
+
+  it('should return an empty NextResponse if input is not a Response object (fallback)', () => {
+    const context = { params: { id: '1' } };
+
+    const result = getNextResponse(context);
+
+    expect(result).toBeInstanceOf(NextResponse);
+    expect(result.status).toBe(200);
+    expect(result.body).toBe(null);
+  });
+
+  it('should not crash if setting the URL fails (try/catch coverage)', () => {
+    const res = new Response(null);
+    Object.defineProperty(res, 'url', { value: 'http://foo.com' });
+
+    const result = getNextResponse(res);
+
+    expect(result).toBeInstanceOf(NextResponse);
   });
 });
 
