@@ -1,5 +1,17 @@
 # @monocloud/auth-node-core
 
+## 0.1.4
+
+### Patch Changes
+
+- 05568e9: - Added matrix testing for all packages on Node.js version 20, 22, and 24.
+- 05568e9: - Moved vitest reporter to the respective configs.
+  - Added default reporter back to see the test results.
+- Updated dependencies [05568e9]
+- Updated dependencies [05568e9]
+- Updated dependencies [05568e9]
+  - @monocloud/auth-core@0.1.3
+
 ## 0.1.3
 
 ### Patch Changes
