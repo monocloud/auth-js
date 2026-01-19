@@ -835,15 +835,15 @@ export class MonoCloudJSCoreClient {
       throw new MonoCloudValidationError('No parameters found in callback');
     }
 
+    if (callbackState.state && callbackParams.state !== callbackState.state) {
+      throw new MonoCloudValidationError('Sign in callback states mismatch');
+    }
+
     if (callbackParams.error) {
       throw new MonoCloudOPError(
         callbackParams.error,
         callbackParams.errorDescription
       );
-    }
-
-    if (callbackState.state && callbackParams.state !== callbackState.state) {
-      throw new MonoCloudValidationError('Sign in callback states mismatch');
     }
 
     // Implicit/Hybrid
@@ -971,6 +971,13 @@ export class MonoCloudJSCoreClient {
 
     if (callbackParams.state !== callbackState.state) {
       throw new MonoCloudValidationError('Sign out states mismatch');
+    }
+
+    if (callbackParams.error) {
+      throw new MonoCloudOPError(
+        callbackParams.error,
+        callbackParams.errorDescription
+      );
     }
 
     await this.setSession();
