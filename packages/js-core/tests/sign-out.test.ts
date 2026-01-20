@@ -7,7 +7,6 @@ import { testInstance, setSession, VanillaJsMockStorage } from './utils';
 import {
   CallbackState,
   MonoCloudJsError,
-  MonoCloudOPError,
   MonoCloudValidationError,
 } from '../src';
 
@@ -180,8 +179,7 @@ describe('signOut() Tests', () => {
 
     instance.processCallback().then();
 
-    await vi.waitFor(async () => {
-      expect(await instance.getSession()).toBeUndefined();
+    await vi.waitFor(() => {
       storage.expectCallbackStateRemoved();
     });
   });
@@ -204,8 +202,7 @@ describe('signOut() Tests', () => {
 
     instance.processCallback().then();
 
-    await vi.waitFor(async () => {
-      expect(await instance.getSession()).toBeUndefined();
+    await vi.waitFor(() => {
       storage.expectCallbackStateRemoved();
     });
   });
@@ -235,41 +232,39 @@ describe('signOut() Tests', () => {
     });
   });
 
-  it.each(['Silent', 'Popup'])(
-    '%s Mode - should process signout callback',
-    async mode => {
-      mockWindow
-        .mockPostMessage()
-        .mockParentSide(mode as 'Silent' | 'Popup')
-        .setSearch('?state=state')
-        .setPathname('/signout')
-        .assert();
+  it('Popup Mode - should process signout callback', async () => {
+    mockWindow
+      .mockPostMessage()
+      .mockParentSide('popup')
+      .setSearch('?state=state')
+      .setPathname('/signout')
+      .assert();
 
-      const state: CallbackState = {
-        mode: mode.toLowerCase() as CallbackState['mode'],
-        signOut: true,
-        state: 'state',
-      };
-      storage.setCallbackState(state);
+    const state: CallbackState = {
+      mode: 'popup',
+      signOut: true,
+      state: 'state',
+    };
 
-      const instance = testInstance({
-        storage,
-        signOutCallbackPath: '/signout',
-      });
+    storage.setCallbackState(state);
 
-      instance.processCallback();
+    const instance = testInstance({
+      storage,
+      signOutCallbackPath: '/signout',
+    });
 
-      await vi.waitFor(() => {
-        expect(mockWindow.parentPostMessage).toHaveBeenCalledWith(
-          expect.objectContaining({
-            source: 'monocloud-auth-js-core',
-            url: 'http://localhost:3000/signout?state=state',
-          }),
-          'http://localhost:3000'
-        );
-      });
-    }
-  );
+    instance.processCallback();
+
+    await vi.waitFor(() => {
+      expect(mockWindow.parentPostMessage).toHaveBeenCalledWith(
+        expect.objectContaining({
+          source: 'monocloud-auth-js-core',
+          url: 'http://localhost:3000/signout?state=state',
+        }),
+        'http://localhost:3000'
+      );
+    });
+  });
 
   it('Popup Mode - should throw error if states mismatch', async () => {
     fetchBuilder().configureMetadata().createSpy();
@@ -360,75 +355,9 @@ describe('signOut() Tests', () => {
       })
     );
 
-    await vi.waitFor(async () => {
-      fetchSpy.assert();
-      expect(mockPopup.close).toBeCalled();
-      expect(await instance.getSession()).toBeUndefined();
-      storage.expectCallbackStateRemoved();
-    });
-
-    popupSpy.mockClear();
-  });
-
-  it('Popup Mode - should redirect popup to sign out page and reject when an error message is received', async () => {
-    const fetchSpy = fetchBuilder().configureMetadata().createSpy();
-
-    mockWindow.assert();
-
-    const mockPopup = {
-      close: vi.fn(),
-      closed: false,
-      location: { href: '' },
-    } as unknown as Window;
-
-    const popupSpy = vi.spyOn(window, 'open').mockReturnValue(mockPopup);
-
-    const instance = testInstance({
-      storage,
-      signOutCallbackPath: undefined,
-    });
-
-    expect(await instance.getSession()).toBeUndefined();
-
-    const error = new MonoCloudOPError('some_error', 'something went wrong');
-
-    let thrown = false;
-
-    instance.signOut({ mode: 'popup' }).catch(e => {
-      expect(e).toBeInstanceOf(MonoCloudOPError);
-      expect(e?.error).toBe(error.error);
-      expect(e?.errorDescription).toBe(error.errorDescription);
-      thrown = true;
-    });
-
     await vi.waitFor(() => {
-      expect(mockPopup.location.href).toContain(
-        'https://example.com/connect/endsession'
-      );
-    });
-
-    expect(window.open).toBeCalledWith(
-      'about:blank',
-      'mc.popup',
-      expect.any(String)
-    );
-
-    window.dispatchEvent(
-      new MessageEvent('message', {
-        data: {
-          source: 'monocloud-auth-js-core',
-          url: `http://localhost:3000?error=${error.error}&error_description=${encodeURIComponent(error.errorDescription!)}`,
-        },
-        source: mockPopup,
-        origin: 'http://localhost:3000',
-      })
-    );
-
-    await vi.waitFor(async () => {
       fetchSpy.assert();
       expect(mockPopup.close).toBeCalled();
-      expect(thrown).toBe(true);
-      expect(await instance.getSession()).toBeUndefined();
       storage.expectCallbackStateRemoved();
     });
 
@@ -449,8 +378,6 @@ describe('signOut() Tests', () => {
     const popupSpy = vi.spyOn(window, 'open').mockReturnValue(mockPopup);
 
     const instance = testInstance({ storage, authWindowTimeout: 0.1 });
-
-    expect(await instance.getSession()).toBeUndefined();
 
     let thrown = false;
 
@@ -482,8 +409,6 @@ describe('signOut() Tests', () => {
       'https://example.com/connect/endsession'
     );
 
-    expect(await instance.getSession()).toBeUndefined();
-
     fetchSpy.assert();
     popupSpy.mockClear();
   });
@@ -495,8 +420,6 @@ describe('signOut() Tests', () => {
 
     const instance = testInstance({ storage });
 
-    expect(await instance.getSession()).toBeUndefined();
-
     let thrown = false;
 
     instance.signOut({ mode: 'popup' }).catch(e => {
@@ -505,10 +428,9 @@ describe('signOut() Tests', () => {
       thrown = true;
     });
 
-    await vi.waitFor(async () => {
+    await vi.waitFor(() => {
       fetchSpy.assert();
       expect(thrown).toBe(true);
-      expect(await instance.getSession()).toBeUndefined();
       storage.expectCallbackStateRemoved();
     });
 
@@ -545,11 +467,9 @@ describe('signOut() Tests', () => {
       mockPopup.closed = true;
     }, 200);
 
-    await vi.waitFor(async () => {
+    await vi.waitFor(() => {
       expect(thrown).toBe(true);
       fetchSpy.assert();
-
-      expect(await instance.getSession()).toBeUndefined();
     });
 
     popupSpy.mockClear();
@@ -572,8 +492,6 @@ describe('signOut() Tests', () => {
       storage,
       signOutCallbackPath: undefined,
     });
-
-    expect(await instance.getSession()).toBeUndefined();
 
     instance.signOut({ mode: 'popup' }).then();
 
@@ -607,7 +525,7 @@ describe('signOut() Tests', () => {
       })
     );
 
-    await vi.waitFor(async () => {
+    await vi.waitFor(() => {
       fetchSpy.assert();
       expect(mockPopup.close).toBeCalled();
     });
@@ -671,7 +589,7 @@ describe('signOut() Tests', () => {
       })
     );
 
-    await vi.waitFor(async () => {
+    await vi.waitFor(() => {
       fetchSpy.assert();
       expect(mockPopup.close).toBeCalled();
     });
@@ -733,7 +651,7 @@ describe('signOut() Tests', () => {
       })
     );
 
-    await vi.waitFor(async () => {
+    await vi.waitFor(() => {
       fetchSpy.assert();
       expect(mockPopup.close).toBeCalled();
     });

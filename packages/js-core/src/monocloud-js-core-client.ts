@@ -487,11 +487,9 @@ export class MonoCloudJSCoreClient {
         state,
       });
 
-      const parsedUrl = new URL(url);
-
       const callbackState = {
         mode,
-        state: parsedUrl.searchParams.get('state') ?? undefined,
+        state: new URL(url).searchParams.get('state') ?? undefined,
         signOut: true,
         returnUrl: signOutOptions?.returnUrl,
       };
@@ -974,13 +972,6 @@ export class MonoCloudJSCoreClient {
 
     if (callbackParams.state !== callbackState.state) {
       throw new MonoCloudValidationError('Sign out states mismatch');
-    }
-
-    if (callbackParams.error) {
-      throw new MonoCloudOPError(
-        callbackParams.error,
-        callbackParams.errorDescription
-      );
     }
 
     await this.postCallbackFn({

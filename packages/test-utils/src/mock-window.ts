@@ -45,18 +45,21 @@ export class MockWindow {
     return this;
   }
 
-  mockParentSide(mode: 'Silent' | 'Popup'): MockWindow {
-    if (mode === 'Popup') {
+  mockParentSide(mode: string): MockWindow {
+    if (mode === 'popup') {
       vi.spyOn(window, 'opener', 'get').mockReturnValue({
         postMessage: this.parentPostMessage,
       });
-    } else {
+    }
+
+    if (mode === 'silent') {
       vi.spyOn(window, 'parent', 'get').mockReturnValue({
         postMessage: this.parentPostMessage,
       } as unknown as Window);
 
       vi.spyOn(window, 'top', 'get').mockReturnValue({} as unknown as Window);
     }
+
     return this;
   }
 
