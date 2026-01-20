@@ -501,6 +501,7 @@ export class MonoCloudJSCoreClient {
         return;
       }
 
+      /* v8 ignore if -- @preserve */
       if (!ref?.getRef()) {
         throw new MonoCloudJsError('Popup or Iframe creation failed');
       }

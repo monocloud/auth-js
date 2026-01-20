@@ -71,7 +71,7 @@ export class VanillaJsMockStorage extends MockStorage implements IStorage {
   }
 
   expectNoSession(): VanillaJsMockStorage {
-    expect(this.store[sessionKey()]).toBe(null);
+    expect(this.store[sessionKey()]).toBeUndefined();
     return this;
   }
 
