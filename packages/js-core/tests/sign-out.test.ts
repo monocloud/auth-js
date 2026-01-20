@@ -273,7 +273,7 @@ describe('signOut() Tests', () => {
   );
 
   it('Popup Mode - should throw error if states mismatch', async () => {
-    const fetchSpy = fetchBuilder().configureMetadata().createSpy();
+    fetchBuilder().configureMetadata().createSpy();
 
     const mockPopup = {
       close: vi.fn(),
