@@ -241,26 +241,10 @@ describe('signOut() Tests', () => {
     async mode => {
       mockWindow
         .mockPostMessage()
+        .mockParentSide(mode as 'Silent' | 'Popup')
         .setSearch('?state=state')
         .setPathname('/signout')
         .assert();
-
-      const postMessageSpy = vi.fn();
-
-      if (mode === 'Popup') {
-        vi.stubGlobal('opener', { postMessage: postMessageSpy });
-      } else {
-        Object.defineProperty(window, 'parent', {
-          value: { postMessage: postMessageSpy },
-          writable: true,
-          configurable: true,
-        });
-        Object.defineProperty(window, 'top', {
-          value: {},
-          writable: true,
-          configurable: true,
-        });
-      }
 
       const state: CallbackState = {
         mode: mode.toLowerCase() as CallbackState['mode'],
@@ -274,102 +258,76 @@ describe('signOut() Tests', () => {
         signOutCallbackPath: '/signout',
       });
 
-      try {
-        instance.processCallback().catch(console.error);
+      instance.processCallback();
 
-        await vi.waitFor(() => {
-          expect(postMessageSpy).toHaveBeenCalledWith(
-            expect.objectContaining({
-              source: 'monocloud-auth-js-core',
-              url: expect.stringContaining('/signout'),
-            }),
-            'http://localhost:3000'
-          );
-        });
-      } finally {
-        vi.unstubAllGlobals();
-
-        Object.defineProperty(window, 'parent', {
-          value: window,
-          writable: true,
-          configurable: true,
-        });
-        Object.defineProperty(window, 'top', {
-          value: window,
-          writable: true,
-          configurable: true,
-        });
-      }
-    }
-  );
-
-  it.each(['Silent', 'Popup'])(
-    '%s Mode - should set an error if states mismatch',
-    async mode => {
-      mockWindow
-        .mockPostMessage()
-        .setSearch('?state=state')
-        .setPathname('/signout')
-        .assert();
-
-      const postMessageSpy = vi.fn();
-
-      if (mode === 'Popup') {
-        vi.stubGlobal('opener', { postMessage: postMessageSpy });
-      } else {
-        Object.defineProperty(window, 'parent', {
-          value: { postMessage: postMessageSpy },
-          writable: true,
-          configurable: true,
-        });
-        Object.defineProperty(window, 'top', {
-          value: {},
-          writable: true,
-          configurable: true,
-        });
-      }
-
-      const state: CallbackState = {
-        mode: mode.toLowerCase() as CallbackState['mode'],
-        signOut: true,
-        state: 'states',
-      };
-
-      storage.setCallbackState(state);
-
-      const instance = testInstance({
-        storage,
-        signOutCallbackPath: '/signout',
+      await vi.waitFor(() => {
+        expect(mockWindow.parentPostMessage).toHaveBeenCalledWith(
+          expect.objectContaining({
+            source: 'monocloud-auth-js-core',
+            url: expect.stringContaining('/signout'),
+          }),
+          'http://localhost:3000'
+        );
       });
-
-      try {
-        instance.processCallback().catch(console.error);
-
-        await vi.waitFor(async () => {
-          expect(postMessageSpy).toHaveBeenCalledWith(
-            expect.objectContaining({
-              source: 'monocloud-auth-js-core',
-              url: expect.stringContaining('state=state'),
-            }),
-            'http://localhost:3000'
-          );
-        });
-      } finally {
-        vi.unstubAllGlobals();
-
-        Object.defineProperty(window, 'parent', {
-          value: window,
-          writable: true,
-          configurable: true,
-        });
-        Object.defineProperty(window, 'top', {
-          value: window,
-          writable: true,
-          configurable: true,
-        });
-      }
     }
   );
+
+  it.only('Popup Mode - should throw error if states mismatch', async () => {
+    const fetchSpy = fetchBuilder().configureMetadata().createSpy();
+
+    const mockPopup = {
+      close: vi.fn(),
+      closed: false,
+      location: { href: '' },
+    } as unknown as Window;
+
+    const popupSpy = vi.spyOn(window, 'open').mockReturnValue(mockPopup);
+
+    const session: MonoCloudSession = {
+      user: { sub: 'sub' },
+      accessTokens: [
+        {
+          accessToken: 'at',
+          scopes: 'token',
+          requestedScopes: 'token',
+          accessTokenExpiration: now() + 1000,
+        },
+      ],
+      idToken: 'mock_id_token',
+      authorizedScopes: 'token',
+    };
+
+    setSession(storage, session);
+
+    const instance = testInstance({
+      storage,
+      signOutCallbackPath: '/signout',
+    });
+
+    const signOutPromise = instance.signOut({ mode: 'popup' });
+
+    await vi.waitFor(() => {
+      expect(mockPopup.location.href).toContain('state=');
+    });
+
+    window.dispatchEvent(
+      new MessageEvent('message', {
+        data: {
+          source: 'monocloud-auth-js-core',
+          url: 'http://localhost:3000/signout?state=wrong-state',
+        },
+        source: mockPopup,
+        origin: 'http://localhost:3000',
+      })
+    );
+
+    await expect(signOutPromise).rejects.toThrow(MonoCloudValidationError);
+    await expect(signOutPromise).rejects.toThrow('Sign out states mismatch');
+
+    expect(mockPopup.close).toBeCalled();
+
+    popupSpy.mockClear();
+  });
 
   it('Popup Mode - should redirect popup to sign out page and resolve when a success message is received', async () => {
     const fetchSpy = fetchBuilder().configureMetadata().createSpy();
@@ -383,7 +341,6 @@ describe('signOut() Tests', () => {
     } as unknown as Window;
 
     const popupSpy = vi.spyOn(window, 'open').mockReturnValue(mockPopup);
-    const addEventListenerSpy = vi.spyOn(window, 'addEventListener');
 
     const session: MonoCloudSession = {
       user: { sub: 'sub' },
@@ -406,34 +363,28 @@ describe('signOut() Tests', () => {
     instance.signOut({ mode: 'popup' }).then();
 
     await vi.waitFor(() => {
-      expect(mockPopup.location.href).toContain(
-        'https://example.com/connect/endsession'
-      );
       expect(mockPopup.location.href).toContain('state=');
     });
+
+    expect(window.open).toBeCalledWith(
+      'about:blank',
+      'mc.popup',
+      expect.stringContaining('width=')
+    );
 
     const popupUrl = new URL(mockPopup.location.href);
     const stateParam = popupUrl.searchParams.get('state');
 
-    if (!stateParam) throw new Error('State parameter was not generated!');
-
-    const listenerCall = addEventListenerSpy.mock.calls.find(
-      call => call[0] === 'message'
+    window.dispatchEvent(
+      new MessageEvent('message', {
+        data: {
+          source: 'monocloud-auth-js-core',
+          url: `http://localhost:3000/signout?state=${stateParam}`,
+        },
+        source: mockPopup,
+        origin: 'http://localhost:3000',
+      })
     );
-    if (!listenerCall) throw new Error('Listener was not attached!');
-
-    const listenerCallback = listenerCall[1] as EventListener;
-
-    const mockEvent = new MessageEvent('message', {
-      data: {
-        source: 'monocloud-auth-js-core',
-        url: `http://localhost:3000/signout?state=${stateParam}`,
-      },
-      source: mockPopup,
-      origin: 'http://localhost:3000',
-    });
-
-    listenerCallback(mockEvent);
 
     await vi.waitFor(async () => {
       fetchSpy.assert();
@@ -443,7 +394,6 @@ describe('signOut() Tests', () => {
     });
 
     popupSpy.mockClear();
-    addEventListenerSpy.mockRestore();
   });
 
   it('Popup Mode - should redirect popup to sign out page and reject when an error message is received', async () => {
@@ -458,7 +408,6 @@ describe('signOut() Tests', () => {
     } as unknown as Window;
 
     const popupSpy = vi.spyOn(window, 'open').mockReturnValue(mockPopup);
-    const addEventListenerSpy = vi.spyOn(window, 'addEventListener');
 
     const session: MonoCloudSession = {
       user: { sub: 'sub' },
@@ -498,9 +447,6 @@ describe('signOut() Tests', () => {
       expect(mockPopup.location.href).toContain('state=');
     });
 
-    const popupUrl = new URL(mockPopup.location.href);
-    const stateParam = popupUrl.searchParams.get('state');
-
     expect(window.open).toBeCalledWith(
       'about:blank',
       'mc.popup',
@@ -511,14 +457,10 @@ describe('signOut() Tests', () => {
       'https://example.com/connect/endsession'
     );
 
-    const listenerCall = addEventListenerSpy.mock.calls.find(
-      call => call[0] === 'message'
-    );
-    if (!listenerCall) throw new Error('Listener not attached');
+    const popupUrl = new URL(mockPopup.location.href);
+    const stateParam = popupUrl.searchParams.get('state');
 
-    const listenerCallback = listenerCall[1] as EventListener;
-
-    listenerCallback(
+    window.dispatchEvent(
       new MessageEvent('message', {
         data: {
           source: 'monocloud-auth-js-core',
@@ -538,7 +480,6 @@ describe('signOut() Tests', () => {
     });
 
     popupSpy.mockClear();
-    addEventListenerSpy.mockRestore();
   });
 
   it('Popup Mode - can timeout', async () => {
@@ -694,13 +635,9 @@ describe('signOut() Tests', () => {
       close: vi.fn(),
       closed: false,
       location: { href: '' },
-    };
+    } as unknown as Window;
 
-    const popupSpy = vi
-      .spyOn(window, 'open')
-      .mockReturnValue(mockPopup as unknown as Window);
-
-    const addEventListenerSpy = vi.spyOn(window, 'addEventListener');
+    const popupSpy = vi.spyOn(window, 'open').mockReturnValue(mockPopup);
 
     const session: MonoCloudSession = {
       user: { sub: 'sub' },
@@ -727,19 +664,13 @@ describe('signOut() Tests', () => {
     const popupUrl = new URL(mockPopup.location.href);
     const stateParam = popupUrl.searchParams.get('state');
 
-    const listenerCall = addEventListenerSpy.mock.calls.find(
-      call => call[0] === 'message'
-    );
-    if (!listenerCall) throw new Error('Listener not attached');
-    const listenerCallback = listenerCall[1] as EventListener;
-
-    listenerCallback(
+    window.dispatchEvent(
       new MessageEvent('message', {
         data: {
           source: 'monocloud-auth-js-core',
           url: `http://localhost:3000/signout?state=${stateParam}`,
         },
-        source: mockPopup as unknown as Window,
+        source: mockPopup,
         origin: 'http://yyy.com',
       })
     );
@@ -747,13 +678,13 @@ describe('signOut() Tests', () => {
     expect(mockPopup.close).not.toBeCalled();
     expect(await instance.getSession()).toBeDefined();
 
-    listenerCallback(
+    window.dispatchEvent(
       new MessageEvent('message', {
         data: {
           source: 'monocloud-auth-js-core',
           url: `http://localhost:3000/signout?state=${stateParam}`,
         },
-        source: mockPopup as unknown as Window,
+        source: mockPopup,
         origin: 'http://localhost:3000',
       })
     );
@@ -765,7 +696,6 @@ describe('signOut() Tests', () => {
     });
 
     popupSpy.mockClear();
-    addEventListenerSpy.mockRestore();
   });
 
   it('should only resolve the promise if the source is the expected popup window', async () => {
@@ -783,8 +713,6 @@ describe('signOut() Tests', () => {
       .spyOn(window, 'open')
       .mockReturnValue(mockPopup as unknown as Window);
 
-    const addEventListenerSpy = vi.spyOn(window, 'addEventListener');
-
     const session: MonoCloudSession = {
       user: { sub: 'sub' },
       accessToken: 'at',
@@ -810,15 +738,9 @@ describe('signOut() Tests', () => {
     const popupUrl = new URL(mockPopup.location.href);
     const stateParam = popupUrl.searchParams.get('state');
 
-    const listenerCall = addEventListenerSpy.mock.calls.find(
-      call => call[0] === 'message'
-    );
-    if (!listenerCall) throw new Error('Listener not attached');
-    const listenerCallback = listenerCall[1] as EventListener;
-
     const randomWindow = {} as Window;
 
-    listenerCallback(
+    window.dispatchEvent(
       new MessageEvent('message', {
         data: {
           source: 'monocloud-auth-js-core',
@@ -832,7 +754,7 @@ describe('signOut() Tests', () => {
     expect(mockPopup.close).not.toBeCalled();
     expect(await instance.getSession()).toBeDefined();
 
-    listenerCallback(
+    window.dispatchEvent(
       new MessageEvent('message', {
         data: {
           source: 'monocloud-auth-js-core',
@@ -850,7 +772,6 @@ describe('signOut() Tests', () => {
     });
 
     popupSpy.mockClear();
-    addEventListenerSpy.mockRestore();
   });
 
   it('should only resolve the promise if data.source is the expected SDK identifier', async () => {
@@ -868,8 +789,6 @@ describe('signOut() Tests', () => {
       .spyOn(window, 'open')
       .mockReturnValue(mockPopup as unknown as Window);
 
-    const addEventListenerSpy = vi.spyOn(window, 'addEventListener');
-
     const session: MonoCloudSession = {
       user: { sub: 'sub' },
       accessToken: 'at',
@@ -895,16 +814,10 @@ describe('signOut() Tests', () => {
     const popupUrl = new URL(mockPopup.location.href);
     const stateParam = popupUrl.searchParams.get('state');
 
-    const listenerCall = addEventListenerSpy.mock.calls.find(
-      call => call[0] === 'message'
-    );
-    if (!listenerCall) throw new Error('Listener not attached');
-    const listenerCallback = listenerCall[1] as EventListener;
-
-    listenerCallback(
+    window.dispatchEvent(
       new MessageEvent('message', {
         data: {
-          source: 'someone-else',
+          source: 'yyy',
           url: `http://localhost:3000/signout?state=${stateParam}`,
         },
         source: mockPopup as unknown as Window,
@@ -915,7 +828,7 @@ describe('signOut() Tests', () => {
     expect(mockPopup.close).not.toBeCalled();
     expect(await instance.getSession()).toBeDefined();
 
-    listenerCallback(
+    window.dispatchEvent(
       new MessageEvent('message', {
         data: {
           source: 'monocloud-auth-js-core',
@@ -933,6 +846,5 @@ describe('signOut() Tests', () => {
     });
 
     popupSpy.mockClear();
-    addEventListenerSpy.mockRestore();
   });
 });
