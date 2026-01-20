@@ -272,7 +272,7 @@ describe('signOut() Tests', () => {
     }
   );
 
-  it.only('Popup Mode - should throw error if states mismatch', async () => {
+  it('Popup Mode - should throw error if states mismatch', async () => {
     const fetchSpy = fetchBuilder().configureMetadata().createSpy();
 
     const mockPopup = {
