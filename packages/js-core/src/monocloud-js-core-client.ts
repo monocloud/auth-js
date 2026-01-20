@@ -487,9 +487,11 @@ export class MonoCloudJSCoreClient {
         state,
       });
 
+      const parsedUrl = new URL(url);
+
       const callbackState = {
         mode,
-        state,
+        state: parsedUrl.searchParams.get('state') ?? undefined,
         signOut: true,
         returnUrl: signOutOptions?.returnUrl,
       };
@@ -957,6 +959,7 @@ export class MonoCloudJSCoreClient {
     callbackUrl: string,
     callbackState: CallbackState
   ): Promise<void> {
+    await this.setSession();
     const url = new URL(callbackUrl);
 
     if ((this.options.signOutCallbackPath ?? '/') !== url.pathname) {
@@ -979,8 +982,6 @@ export class MonoCloudJSCoreClient {
         callbackParams.errorDescription
       );
     }
-
-    await this.setSession();
 
     await this.postCallbackFn({
       type: 'signOut',

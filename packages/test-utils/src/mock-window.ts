@@ -1,4 +1,4 @@
-import { expect, vi, type Mock } from 'vitest';
+import { expect, vi } from 'vitest';
 
 export class MockWindow {
   private origin?: string;
@@ -31,7 +31,7 @@ export class MockWindow {
 
   public mockedPostMessage: typeof window.postMessage = vi.fn();
 
-  public parentPostMessage: Mock = vi.fn();
+  public parentPostMessage: typeof window.postMessage = vi.fn();
 
   constructor() {
     this.location = window.location;
@@ -40,26 +40,22 @@ export class MockWindow {
 
   mockPostMessage(): MockWindow {
     this.ogPostMessage = postMessage;
+
     window.postMessage = this.mockedPostMessage;
     return this;
   }
 
   mockParentSide(mode: 'Silent' | 'Popup'): MockWindow {
-    this.parentPostMessage.mockClear();
-
     if (mode === 'Popup') {
-      vi.stubGlobal('opener', { postMessage: this.parentPostMessage });
+      vi.spyOn(window, 'opener', 'get').mockReturnValue({
+        postMessage: this.parentPostMessage,
+      });
     } else {
-      Object.defineProperty(window, 'parent', {
-        value: { postMessage: this.parentPostMessage },
-        writable: true,
-        configurable: true,
-      });
-      Object.defineProperty(window, 'top', {
-        value: {},
-        writable: true,
-        configurable: true,
-      });
+      vi.spyOn(window, 'parent', 'get').mockReturnValue({
+        postMessage: this.parentPostMessage,
+      } as unknown as Window);
+
+      vi.spyOn(window, 'top', 'get').mockReturnValue({} as unknown as Window);
     }
     return this;
   }
@@ -195,18 +191,5 @@ export class MockWindow {
     if (this.ogPostMessage) {
       window.postMessage = this.ogPostMessage;
     }
-
-    vi.unstubAllGlobals();
-
-    Object.defineProperty(window, 'parent', {
-      value: window,
-      writable: true,
-      configurable: true,
-    });
-    Object.defineProperty(window, 'top', {
-      value: window,
-      writable: true,
-      configurable: true,
-    });
   }
 }
