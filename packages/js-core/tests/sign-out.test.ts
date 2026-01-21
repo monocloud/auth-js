@@ -68,9 +68,9 @@ describe('signOut() Tests', () => {
       );
     }
 
-    openerSpy1.mockClear();
-    openerSpy2.mockClear();
-    openerSpy3.mockClear();
+    openerSpy1.mockRestore();
+    openerSpy2.mockRestore();
+    openerSpy3.mockRestore();
   });
 
   it('should redirect to signout without state, logout uri and idToken', async () => {
@@ -670,7 +670,8 @@ describe('signOut() Tests', () => {
       accessTokenExpiration: now() + 1000,
       idToken: 'mock_id_token',
     };
-    setSession(storage, session);
+
+    await setSession(storage, session);
 
     const instance = testInstance({
       storage,
@@ -694,7 +695,7 @@ describe('signOut() Tests', () => {
     openSpy.mockRestore();
   });
 
-  it('Popup Mode - should clear session immediately even if staet validation fails', async () => {
+  it('Popup Mode - should clear session immediately even if state validation fails', async () => {
     fetchBuilder().configureMetadata().createSpy();
 
     const mockPopup = {
@@ -711,7 +712,8 @@ describe('signOut() Tests', () => {
       accessTokenExpiration: now() + 1000,
       idToken: 'mock_id_token',
     };
-    setSession(storage, session);
+
+    await setSession(storage, session);
 
     const instance = testInstance({ storage });
 
@@ -741,41 +743,59 @@ describe('signOut() Tests', () => {
     popupSpy.mockClear();
   });
 
-  it('Redirect Mode - should clear session immediately even if staet validation fails', async () => {
-    mockWindow.setSearch('?state=wrong-state').setPathname('/signout').assert();
+  it('Popup Mode - should clear session even if state validation fails', async () => {
+    fetchBuilder().configureMetadata().createSpy();
 
-    const state: CallbackState = {
-      mode: 'redirect',
-      signOut: true,
-      state: 'correct-state',
-    };
-    storage.setCallbackState(state);
+    const mockPopup = {
+      close: vi.fn(),
+      closed: false,
+      location: { href: '' },
+    } as unknown as Window;
+
+    const popupSpy = vi.spyOn(window, 'open').mockReturnValue(mockPopup);
 
     const session: MonoCloudSession = {
       user: { sub: 'sub' },
-      accessToken: 'at',
-      accessTokenExpiration: now() + 1000,
+      accessTokens: [
+        {
+          accessToken: 'at',
+          accessTokenExpiration: now() + 1000,
+          scopes: 'token',
+        },
+      ],
     };
-    setSession(storage, session);
 
-    const instance = testInstance({
-      storage,
-      signOutCallbackPath: '/signout',
-    });
+    await setSession(storage, session);
+
+    const instance = testInstance({ storage });
 
     expect(await instance.getSession()).toBeDefined();
 
-    try {
-      await instance.processCallback();
-    } catch (e) {
-      expect(e).toBeInstanceOf(MonoCloudValidationError);
-      expect((e as any).message).toBe('Sign out states mismatch');
-    }
+    const signOutPromise = instance.signOut({ mode: 'popup' });
 
-    await vi.waitFor(async () => {
-      expect(await instance.getSession()).toBeUndefined();
-      storage.expectNoSession();
-      storage.expectCallbackStateRemoved();
+    await vi.waitFor(() => {
+      expect(mockPopup.location.href).toContain(
+        'https://example.com/connect/endsession'
+      );
     });
+
+    window.dispatchEvent(
+      new MessageEvent('message', {
+        data: {
+          source: 'monocloud-auth-js-core',
+          url: 'http://localhost:3000/signout?state=wrong-state',
+        },
+        source: mockPopup,
+        origin: 'http://localhost:3000',
+      })
+    );
+
+    await expect(signOutPromise).rejects.toThrow('Sign out states mismatch');
+
+    expect(await instance.getSession()).toBeUndefined();
+    storage.expectNoSession();
+
+    expect(mockPopup.close).toBeCalled();
+    popupSpy.mockClear();
   });
 });
