@@ -4,6 +4,10 @@ export default defineConfig({
   test: {
     name: 'auth-js-core',
     include: ['tests/**.test.ts'],
+    reporters: [
+      'default',
+      ['junit', { outputFile: 'coverage/junit.xml' }],
+    ],
     coverage: {
       provider: 'v8',
       include: ['src'],
