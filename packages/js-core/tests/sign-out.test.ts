@@ -666,9 +666,15 @@ describe('signOut() Tests', () => {
 
     const session: MonoCloudSession = {
       user: { sub: 'sub' },
-      accessToken: 'at',
-      accessTokenExpiration: now() + 1000,
-      idToken: 'mock_id_token',
+      accessTokens: [
+        {
+          accessToken: 'at',
+          scopes: 'token',
+          requestedScopes: 'token',
+          accessTokenExpiration: now() + 1000,
+        },
+      ],
+      authorizedScopes: 'token',
     };
 
     await setSession(storage, session);
@@ -708,9 +714,15 @@ describe('signOut() Tests', () => {
 
     const session: MonoCloudSession = {
       user: { sub: 'sub' },
-      accessToken: 'at',
-      accessTokenExpiration: now() + 1000,
-      idToken: 'mock_id_token',
+      accessTokens: [
+        {
+          accessToken: 'at',
+          scopes: 'token',
+          requestedScopes: 'token',
+          accessTokenExpiration: now() + 1000,
+        },
+      ],
+      authorizedScopes: 'token',
     };
 
     await setSession(storage, session);
@@ -743,59 +755,50 @@ describe('signOut() Tests', () => {
     popupSpy.mockClear();
   });
 
-  it('Popup Mode - should clear session even if state validation fails', async () => {
-    fetchBuilder().configureMetadata().createSpy();
+  it('Redirect Mode - should clear session immediately even if state validation fails', async () => {
+    mockWindow.setSearch('?state=wrong-state').setPathname('/signout').assert();
 
-    const mockPopup = {
-      close: vi.fn(),
-      closed: false,
-      location: { href: '' },
-    } as unknown as Window;
+    const state: CallbackState = {
+      mode: 'redirect',
+      signOut: true,
+      state: 'correct-state',
+    };
 
-    const popupSpy = vi.spyOn(window, 'open').mockReturnValue(mockPopup);
+    storage.setCallbackState(state);
 
     const session: MonoCloudSession = {
       user: { sub: 'sub' },
       accessTokens: [
         {
           accessToken: 'at',
-          accessTokenExpiration: now() + 1000,
           scopes: 'token',
+          requestedScopes: 'token',
+          accessTokenExpiration: now() + 1000,
         },
       ],
+      authorizedScopes: 'token',
     };
 
-    await setSession(storage, session);
+    setSession(storage, session);
 
-    const instance = testInstance({ storage });
+    const instance = testInstance({
+      storage,
+      signOutCallbackPath: '/signout',
+    });
 
     expect(await instance.getSession()).toBeDefined();
 
-    const signOutPromise = instance.signOut({ mode: 'popup' });
+    try {
+      await instance.processCallback();
+    } catch (e) {
+      expect(e).toBeInstanceOf(MonoCloudValidationError);
+      expect((e as any).message).toBe('Sign out states mismatch');
+    }
 
-    await vi.waitFor(() => {
-      expect(mockPopup.location.href).toContain(
-        'https://example.com/connect/endsession'
-      );
+    await vi.waitFor(async () => {
+      expect(await instance.getSession()).toBeUndefined();
+      storage.expectNoSession();
+      storage.expectCallbackStateRemoved();
     });
-
-    window.dispatchEvent(
-      new MessageEvent('message', {
-        data: {
-          source: 'monocloud-auth-js-core',
-          url: 'http://localhost:3000/signout?state=wrong-state',
-        },
-        source: mockPopup,
-        origin: 'http://localhost:3000',
-      })
-    );
-
-    await expect(signOutPromise).rejects.toThrow('Sign out states mismatch');
-
-    expect(await instance.getSession()).toBeUndefined();
-    storage.expectNoSession();
-
-    expect(mockPopup.close).toBeCalled();
-    popupSpy.mockClear();
   });
 });
