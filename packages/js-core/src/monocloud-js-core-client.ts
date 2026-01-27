@@ -142,7 +142,13 @@ export class MonoCloudJSCoreClient {
   }
 
   private get redirectUri(): string {
-    return `${this.options.appUrl}${this.options.callbackPath ? ensureLeadingSlash(this.options.callbackPath) : ''}`;
+    return `${this.options.appUrl}${this.options.callbackPath ? ensureLeadingSlash(this.options.callbackPath) : '/'}`;
+  }
+
+  private get logoutRedirectUri(): string {
+    return `${this.options.appUrl}${ensureLeadingSlash(
+      this.options.signOutCallbackPath ?? '/'
+    )}`;
   }
 
   private get callbackStateKey(): string {
@@ -290,9 +296,15 @@ export class MonoCloudJSCoreClient {
    *
    */
   async processCallback(): Promise<void> {
-    const isSignInPath = window.location.pathname === this.options.callbackPath;
-    const isSignOutPath =
-      window.location.pathname === (this.options.signOutCallbackPath ?? '/');
+    const currentUrl = new URL(window.location.href);
+
+    const signInUrl = new URL(this.redirectUri);
+
+    const signOutUrl = new URL(this.logoutRedirectUri);
+
+    const isSignInPath = currentUrl.origin === signInUrl.origin;
+
+    const isSignOutPath = currentUrl.origin === signOutUrl.origin;
 
     if (this.mainWindow) {
       const callbackState = this.redirectCallbackState;
@@ -417,6 +429,7 @@ export class MonoCloudJSCoreClient {
         return;
       }
 
+      /* v8 ignore if -- @preserve */
       if (!ref) {
         throw new MonoCloudJsError('Popup or Iframe creation failed');
       }

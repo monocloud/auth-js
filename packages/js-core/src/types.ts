@@ -83,7 +83,7 @@ export interface MonoCloudJSCoreClientOptions {
   /**
    * The relative path where MonoCloud redirects the user after sign in.
    * This url should be registered in the client's callback urls settings. If callback path is not set
-   * the callback url is set to `appUrl`.
+   * the callback url is set to `appUrl` with path `/`.
    *
    * @example /callback
    */
@@ -168,7 +168,7 @@ export interface MonoCloudJSCoreClientOptions {
    *
    * @example /signout
    */
-  signOutCallbackPath?: string;
+  signOutCallbackPath?: string | null;
 
   /**
    * Client secret or JSON Web Key for client authentication.
