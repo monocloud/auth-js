@@ -275,7 +275,7 @@ describe('signOut() Tests', () => {
       );
     });
 
-    expect(window.open).toBeCalledWith(
+    expect(window.open).toHaveBeenCalledWith(
       'about:blank',
       'mc.popup',
       expect.any(String)
@@ -295,7 +295,7 @@ describe('signOut() Tests', () => {
     await expect(signOutPromise).rejects.toThrow(MonoCloudValidationError);
     await expect(signOutPromise).rejects.toThrow('Sign out states mismatch');
     fetchSpy.assert();
-    expect(mockPopup.close).toBeCalled();
+    expect(mockPopup.close).toHaveBeenCalled();
   });
 
   it('Popup Mode - should redirect popup to sign out page and resolve when a success message is received', async () => {
@@ -321,7 +321,7 @@ describe('signOut() Tests', () => {
       );
     });
 
-    expect(window.open).toBeCalledWith(
+    expect(window.open).toHaveBeenCalledWith(
       'about:blank',
       'mc.popup',
       expect.any(String)
@@ -340,7 +340,7 @@ describe('signOut() Tests', () => {
 
     await vi.waitFor(() => {
       fetchSpy.assert();
-      expect(mockPopup.close).toBeCalled();
+      expect(mockPopup.close).toHaveBeenCalled();
       storage.expectCallbackStateRemoved();
     });
   });
@@ -365,9 +365,9 @@ describe('signOut() Tests', () => {
     await expect(signOutPromise).rejects.toThrow(MonoCloudJsError);
     await expect(signOutPromise).rejects.toThrow('Window timed out');
 
-    expect(mockPopup.close).toBeCalled();
+    expect(mockPopup.close).toHaveBeenCalled();
 
-    expect(window.open).toBeCalledWith(
+    expect(window.open).toHaveBeenCalledWith(
       'about:blank',
       'mc.popup',
       expect.any(String)
@@ -458,7 +458,7 @@ describe('signOut() Tests', () => {
       })
     );
 
-    expect(mockPopup.close).not.toBeCalled();
+    expect(mockPopup.close).not.toHaveBeenCalled();
 
     window.dispatchEvent(
       new MessageEvent('message', {
@@ -473,7 +473,7 @@ describe('signOut() Tests', () => {
 
     await vi.waitFor(() => {
       fetchSpy.assert();
-      expect(mockPopup.close).toBeCalled();
+      expect(mockPopup.close).toHaveBeenCalled();
     });
   });
 
@@ -518,7 +518,7 @@ describe('signOut() Tests', () => {
       })
     );
 
-    expect(mockPopup.close).not.toBeCalled();
+    expect(mockPopup.close).not.toHaveBeenCalled();
 
     window.dispatchEvent(
       new MessageEvent('message', {
@@ -533,7 +533,7 @@ describe('signOut() Tests', () => {
 
     await vi.waitFor(() => {
       fetchSpy.assert();
-      expect(mockPopup.close).toBeCalled();
+      expect(mockPopup.close).toHaveBeenCalled();
     });
   });
 
@@ -576,7 +576,7 @@ describe('signOut() Tests', () => {
       })
     );
 
-    expect(mockPopup.close).not.toBeCalled();
+    expect(mockPopup.close).not.toHaveBeenCalled();
 
     window.dispatchEvent(
       new MessageEvent('message', {
@@ -591,7 +591,7 @@ describe('signOut() Tests', () => {
 
     await vi.waitFor(() => {
       fetchSpy.assert();
-      expect(mockPopup.close).toBeCalled();
+      expect(mockPopup.close).toHaveBeenCalled();
     });
   });
 
@@ -685,7 +685,7 @@ describe('signOut() Tests', () => {
     storage.expectNoSession();
 
     fetchSpy.assert();
-    expect(mockPopup.close).toBeCalled();
+    expect(mockPopup.close).toHaveBeenCalled();
   });
 
   it('Redirect Mode - should clear session immediately even if state validation fails', async () => {
