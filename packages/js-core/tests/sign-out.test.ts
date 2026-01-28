@@ -24,7 +24,7 @@ describe('signOut() Tests', () => {
     window.localStorage.clear();
   });
 
-  it('should set custom redirect uri from options', async () => {
+  it('Redirect Mode - should set custom redirect uri from options', async () => {
     const fetchSpy = fetchBuilder().configureMetadata().createSpy();
 
     mockWindow
@@ -36,11 +36,9 @@ describe('signOut() Tests', () => {
 
     const instance = testInstance({ storage });
 
-    instance
-      .signOut({
-        postLogoutRedirectUri: 'http://localhost:3000/signout/custom',
-      })
-      .then();
+    instance.signOut({
+      postLogoutRedirectUri: 'http://localhost:3000/signout/custom',
+    });
 
     await vi.waitFor(() => {
       expect(window.location.assign).toHaveBeenCalledOnce();
@@ -49,28 +47,17 @@ describe('signOut() Tests', () => {
   });
 
   it('should throw error if the code is not running in the main window', async () => {
-    const openerSpy1 = vi.spyOn(window, 'opener', 'get').mockReturnValue(null);
-    const openerSpy2 = vi
-      .spyOn(window, 'parent', 'get')
-      .mockReturnValue({} as unknown as Window);
-    const openerSpy3 = vi
-      .spyOn(window, 'top', 'get')
-      .mockReturnValue({} as unknown as Window);
+    vi.spyOn(window, 'opener', 'get').mockReturnValue(null);
+    vi.spyOn(window, 'parent', 'get').mockReturnValue({} as unknown as Window);
+    vi.spyOn(window, 'top', 'get').mockReturnValue({} as unknown as Window);
     const instance = testInstance({ storage });
 
-    try {
-      await instance.signOut();
-      throw new Error();
-    } catch (e) {
-      expect(e).toBeInstanceOf(MonoCloudJsError);
-      expect((e as any).message).toBe(
-        'Initiating an authentication flow in a popup or iframe is not supported'
-      );
-    }
+    const signOutPromise = instance.signOut();
 
-    openerSpy1.mockRestore();
-    openerSpy2.mockRestore();
-    openerSpy3.mockRestore();
+    await expect(signOutPromise).rejects.toThrow(MonoCloudJsError);
+    await expect(signOutPromise).rejects.toThrow(
+      'Initiating an authentication flow in a popup or iframe is not supported'
+    );
   });
 
   it('should redirect to signout without state, logout uri and idToken', async () => {
@@ -88,7 +75,7 @@ describe('signOut() Tests', () => {
       signOutCallbackPath: undefined,
     });
 
-    instance.signOut().then();
+    instance.signOut();
 
     await vi.waitFor(() => {
       expect(window.location.assign).toHaveBeenCalledOnce();
@@ -128,7 +115,7 @@ describe('signOut() Tests', () => {
 
     expect(await instance.getSession()).toBeDefined();
 
-    instance.signOut().then();
+    instance.signOut();
 
     await vi.waitFor(async () => {
       expect(window.location.assign).toHaveBeenCalledOnce();
@@ -149,7 +136,7 @@ describe('signOut() Tests', () => {
 
     const instance = testInstance({ storage });
 
-    instance.signOut().then();
+    instance.signOut();
 
     await vi.waitFor(() => {
       expect(window.location.assign).toHaveBeenCalledWith(
@@ -177,7 +164,7 @@ describe('signOut() Tests', () => {
 
     const instance = testInstance({ storage, signOutCallbackPath: '/signout' });
 
-    instance.processCallback().then();
+    instance.processCallback();
 
     await vi.waitFor(() => {
       storage.expectCallbackStateRemoved();
@@ -200,7 +187,7 @@ describe('signOut() Tests', () => {
       signOutCallbackPath: undefined,
     });
 
-    instance.processCallback().then();
+    instance.processCallback();
 
     await vi.waitFor(() => {
       storage.expectCallbackStateRemoved();
@@ -220,12 +207,10 @@ describe('signOut() Tests', () => {
 
     const instance = testInstance({ storage });
 
-    try {
-      await instance.processCallback();
-    } catch (e) {
-      expect(e).toBeInstanceOf(MonoCloudValidationError);
-      expect((e as any).message).toBe('Sign out states mismatch');
-    }
+    const callbackPromise = instance.processCallback();
+
+    await expect(callbackPromise).rejects.toThrow(MonoCloudValidationError);
+    await expect(callbackPromise).rejects.toThrow('Sign out states mismatch');
 
     await vi.waitFor(() => {
       storage.expectCallbackStateRemoved();
@@ -267,7 +252,7 @@ describe('signOut() Tests', () => {
   });
 
   it('Popup Mode - should throw error if states mismatch', async () => {
-    fetchBuilder().configureMetadata().createSpy();
+    const fetchSpy = fetchBuilder().configureMetadata().createSpy();
 
     const mockPopup = {
       close: vi.fn(),
@@ -275,7 +260,7 @@ describe('signOut() Tests', () => {
       location: { href: '' },
     } as unknown as Window;
 
-    const popupSpy = vi.spyOn(window, 'open').mockReturnValue(mockPopup);
+    vi.spyOn(window, 'open').mockReturnValue(mockPopup);
 
     const instance = testInstance({
       storage,
@@ -309,10 +294,8 @@ describe('signOut() Tests', () => {
 
     await expect(signOutPromise).rejects.toThrow(MonoCloudValidationError);
     await expect(signOutPromise).rejects.toThrow('Sign out states mismatch');
-
+    fetchSpy.assert();
     expect(mockPopup.close).toBeCalled();
-
-    popupSpy.mockClear();
   });
 
   it('Popup Mode - should redirect popup to sign out page and resolve when a success message is received', async () => {
@@ -326,11 +309,11 @@ describe('signOut() Tests', () => {
       location: { href: '' },
     } as unknown as Window;
 
-    const popupSpy = vi.spyOn(window, 'open').mockReturnValue(mockPopup);
+    vi.spyOn(window, 'open').mockReturnValue(mockPopup);
 
     const instance = testInstance({ storage, signOutCallbackPath: undefined });
 
-    instance.signOut({ mode: 'popup' }).then();
+    instance.signOut({ mode: 'popup' });
 
     await vi.waitFor(() => {
       expect(mockPopup.location.href).toContain(
@@ -360,8 +343,6 @@ describe('signOut() Tests', () => {
       expect(mockPopup.close).toBeCalled();
       storage.expectCallbackStateRemoved();
     });
-
-    popupSpy.mockClear();
   });
 
   it('Popup Mode - can timeout', async () => {
@@ -375,27 +356,14 @@ describe('signOut() Tests', () => {
       location: { href: '' },
     } as unknown as Window;
 
-    const popupSpy = vi.spyOn(window, 'open').mockReturnValue(mockPopup);
+    vi.spyOn(window, 'open').mockReturnValue(mockPopup);
 
     const instance = testInstance({ storage, authWindowTimeout: 0.1 });
 
-    let thrown = false;
+    const signOutPromise = instance.signOut({ mode: 'popup' });
 
-    instance
-      .signOut({ mode: 'popup' })
-      .then()
-      .catch(e => {
-        expect(e).toBeInstanceOf(MonoCloudJsError);
-        expect(e?.message).toBe('Window timed out');
-        thrown = true;
-      });
-
-    await vi.waitFor(
-      () => {
-        expect(thrown).toBe(true);
-      },
-      { timeout: 1000 }
-    );
+    await expect(signOutPromise).rejects.toThrow(MonoCloudJsError);
+    await expect(signOutPromise).rejects.toThrow('Window timed out');
 
     expect(mockPopup.close).toBeCalled();
 
@@ -410,31 +378,22 @@ describe('signOut() Tests', () => {
     );
 
     fetchSpy.assert();
-    popupSpy.mockClear();
   });
 
   it('Popup Mode - should throw error if popup fails to open', async () => {
     const fetchSpy = fetchBuilder().createSpy();
 
-    const popupSpy = vi.spyOn(window, 'open').mockReturnValue(null);
+    vi.spyOn(window, 'open').mockReturnValue(null);
 
     const instance = testInstance({ storage });
 
-    let thrown = false;
+    const signOutPromise = instance.signOut({ mode: 'popup' });
 
-    instance.signOut({ mode: 'popup' }).catch(e => {
-      expect(e).toBeInstanceOf(MonoCloudJsError);
-      expect(e?.message).toBe('Could not open popup');
-      thrown = true;
-    });
+    await expect(signOutPromise).rejects.toThrow(MonoCloudJsError);
+    await expect(signOutPromise).rejects.toThrow('Could not open popup');
 
-    await vi.waitFor(() => {
-      fetchSpy.assert();
-      expect(thrown).toBe(true);
-      storage.expectCallbackStateRemoved();
-    });
-
-    popupSpy.mockClear();
+    fetchSpy.assert();
+    storage.expectCallbackStateRemoved();
   });
 
   it('Popup Mode - throws when user closes the window', async () => {
@@ -446,36 +405,23 @@ describe('signOut() Tests', () => {
       location: { href: '' },
     };
 
-    const popupSpy = vi
-      .spyOn(window, 'open')
-      .mockReturnValue(mockPopup as unknown as Window);
+    vi.spyOn(window, 'open').mockReturnValue(mockPopup as unknown as Window);
 
     const instance = testInstance({ storage });
 
-    let thrown = false;
-
-    instance
-      .signOut({ mode: 'popup' })
-      .then()
-      .catch(e => {
-        expect(e).toBeInstanceOf(MonoCloudJsError);
-        expect(e?.message).toBe('Window closed by user');
-        thrown = true;
-      });
+    const signOutPromise = instance.signOut({ mode: 'popup' });
 
     setTimeout(() => {
       mockPopup.closed = true;
     }, 200);
 
-    await vi.waitFor(() => {
-      expect(thrown).toBe(true);
-      fetchSpy.assert();
-    });
+    await expect(signOutPromise).rejects.toThrow(MonoCloudJsError);
+    await expect(signOutPromise).rejects.toThrow('Window closed by user');
 
-    popupSpy.mockClear();
+    fetchSpy.assert();
   });
 
-  it('should only resolve the promise if the origin is appUrl', async () => {
+  it('Popup Mode - should only resolve the promise if the origin is appUrl', async () => {
     const fetchSpy = fetchBuilder().configureMetadata().createSpy();
 
     mockWindow.assert();
@@ -486,14 +432,14 @@ describe('signOut() Tests', () => {
       location: { href: '' },
     } as unknown as Window;
 
-    const popupSpy = vi.spyOn(window, 'open').mockReturnValue(mockPopup);
+    vi.spyOn(window, 'open').mockReturnValue(mockPopup);
 
     const instance = testInstance({
       storage,
       signOutCallbackPath: undefined,
     });
 
-    instance.signOut({ mode: 'popup' }).then();
+    instance.signOut({ mode: 'popup' });
 
     await vi.waitFor(() => {
       expect(mockPopup.location.href).toContain(
@@ -529,11 +475,9 @@ describe('signOut() Tests', () => {
       fetchSpy.assert();
       expect(mockPopup.close).toBeCalled();
     });
-
-    popupSpy.mockClear();
   });
 
-  it('should only resolve the promise if the source is the expected popup window', async () => {
+  it('Popup Mode - should only resolve the promise if the source is the expected popup window', async () => {
     const fetchSpy = fetchBuilder().configureMetadata().createSpy();
 
     mockWindow.assert();
@@ -544,9 +488,7 @@ describe('signOut() Tests', () => {
       location: { href: '' },
     };
 
-    const popupSpy = vi
-      .spyOn(window, 'open')
-      .mockReturnValue(mockPopup as unknown as Window);
+    vi.spyOn(window, 'open').mockReturnValue(mockPopup as unknown as Window);
 
     const instance = testInstance({
       storage,
@@ -555,7 +497,7 @@ describe('signOut() Tests', () => {
 
     expect(await instance.getSession()).toBeUndefined();
 
-    instance.signOut({ mode: 'popup' }).then();
+    instance.signOut({ mode: 'popup' });
 
     await vi.waitFor(() => {
       expect(mockPopup.location.href).toContain(
@@ -593,11 +535,9 @@ describe('signOut() Tests', () => {
       fetchSpy.assert();
       expect(mockPopup.close).toBeCalled();
     });
-
-    popupSpy.mockClear();
   });
 
-  it('should only resolve the promise if data.source is the expected SDK identifier', async () => {
+  it('Popup Mode - should only resolve the promise if data.source is the expected SDK identifier', async () => {
     const fetchSpy = fetchBuilder().configureMetadata().createSpy();
 
     mockWindow.assert();
@@ -608,9 +548,7 @@ describe('signOut() Tests', () => {
       location: { href: '' },
     };
 
-    const popupSpy = vi
-      .spyOn(window, 'open')
-      .mockReturnValue(mockPopup as unknown as Window);
+    vi.spyOn(window, 'open').mockReturnValue(mockPopup as unknown as Window);
 
     const instance = testInstance({
       storage,
@@ -619,7 +557,7 @@ describe('signOut() Tests', () => {
 
     expect(await instance.getSession()).toBeUndefined();
 
-    instance.signOut({ mode: 'popup' }).then();
+    instance.signOut({ mode: 'popup' });
 
     await vi.waitFor(() => {
       expect(mockPopup.location.href).toContain(
@@ -655,8 +593,6 @@ describe('signOut() Tests', () => {
       fetchSpy.assert();
       expect(mockPopup.close).toBeCalled();
     });
-
-    popupSpy.mockClear();
   });
 
   it('should only clear local session and return if federatedSignOut is false', async () => {
@@ -696,13 +632,10 @@ describe('signOut() Tests', () => {
     expect(openSpy).not.toHaveBeenCalled();
 
     expect(window.fetch).not.toHaveBeenCalled();
-
-    assignSpy.mockRestore();
-    openSpy.mockRestore();
   });
 
   it('Popup Mode - should clear session immediately even if state validation fails', async () => {
-    fetchBuilder().configureMetadata().createSpy();
+    const fetchSpy = fetchBuilder().configureMetadata().createSpy();
 
     const mockPopup = {
       close: vi.fn(),
@@ -710,7 +643,7 @@ describe('signOut() Tests', () => {
       location: { href: '' },
     } as unknown as Window;
 
-    const popupSpy = vi.spyOn(window, 'open').mockReturnValue(mockPopup);
+    vi.spyOn(window, 'open').mockReturnValue(mockPopup);
 
     const session: MonoCloudSession = {
       user: { sub: 'sub' },
@@ -751,8 +684,8 @@ describe('signOut() Tests', () => {
     expect(await instance.getSession()).toBeUndefined();
     storage.expectNoSession();
 
+    fetchSpy.assert();
     expect(mockPopup.close).toBeCalled();
-    popupSpy.mockClear();
   });
 
   it('Redirect Mode - should clear session immediately even if state validation fails', async () => {
@@ -779,7 +712,7 @@ describe('signOut() Tests', () => {
       authorizedScopes: 'token',
     };
 
-    setSession(storage, session);
+    await setSession(storage, session);
 
     const instance = testInstance({
       storage,
@@ -788,12 +721,10 @@ describe('signOut() Tests', () => {
 
     expect(await instance.getSession()).toBeDefined();
 
-    try {
-      await instance.processCallback();
-    } catch (e) {
-      expect(e).toBeInstanceOf(MonoCloudValidationError);
-      expect((e as any).message).toBe('Sign out states mismatch');
-    }
+    const callbackPromise = instance.processCallback();
+
+    await expect(callbackPromise).rejects.toThrow(MonoCloudValidationError);
+    await expect(callbackPromise).rejects.toThrow('Sign out states mismatch');
 
     await vi.waitFor(async () => {
       expect(await instance.getSession()).toBeUndefined();
