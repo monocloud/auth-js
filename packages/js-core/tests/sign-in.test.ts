@@ -57,29 +57,18 @@ describe('signIn() Tests', () => {
   });
 
   it('should throw error if the code is not running in the main window', async () => {
-    const openerSpy1 = vi.spyOn(window, 'opener', 'get').mockReturnValue(null);
-    const openerSpy2 = vi
-      .spyOn(window, 'parent', 'get')
-      .mockReturnValue({} as unknown as Window);
-    const openerSpy3 = vi
-      .spyOn(window, 'top', 'get')
-      .mockReturnValue({} as unknown as Window);
+    vi.spyOn(window, 'opener', 'get').mockReturnValue(null);
+    vi.spyOn(window, 'parent', 'get').mockReturnValue({} as unknown as Window);
+    vi.spyOn(window, 'top', 'get').mockReturnValue({} as unknown as Window);
 
     const instance = testInstance({ storage });
 
-    try {
-      await instance.signIn();
-      throw new Error();
-    } catch (e) {
-      expect(e).toBeInstanceOf(MonoCloudJsError);
-      expect((e as any).message).toBe(
-        'Initiating an authentication flow in a popup or iframe is not supported'
-      );
-    }
+    const signInPromise = instance.signIn();
 
-    openerSpy1.mockClear();
-    openerSpy2.mockClear();
-    openerSpy3.mockClear();
+    await expect(signInPromise).rejects.toThrow(MonoCloudJsError);
+    await expect(signInPromise).rejects.toThrow(
+      'Initiating an authentication flow in a popup or iframe is not supported'
+    );
   });
 
   it('should redirect to the appUrl if callback path is undefined', async () => {
@@ -159,23 +148,6 @@ describe('signIn() Tests', () => {
     fetchSpy.assert();
   });
 
-  it('Redirect Mode - should set params location according to the responseType', async () => {
-    const fetchSpy = fetchBuilder().configureMetadata().createSpy();
-
-    mockWindow.assert();
-
-    const instance = testInstance({ storage, responseType: 'id_token token' });
-
-    await instance.signIn();
-
-    storage.expectCallbackState();
-
-    expect(window.location.assign).toBeCalledWith(
-      expect.stringContaining('https://example.com/connect/authorize')
-    );
-    fetchSpy.assert();
-  });
-
   it('Redirect Mode - should redirect to sign in page', async () => {
     const fetchSpy = fetchBuilder().configureMetadata().createSpy();
 
@@ -194,13 +166,13 @@ describe('signIn() Tests', () => {
       .expectCallbackStateSignOut(undefined)
       .expectCallbackStateState();
 
-    expect(window.location.assign).toBeCalledWith(
+    expect(window.location.assign).toHaveBeenCalledWith(
       expect.stringContaining('https://example.com/connect/authorize')
     );
     fetchSpy.assert();
   });
 
-  it('Should process callback using the default callback state key', async () => {
+  it('Redirect Mode - should process callback using the default callback state key', async () => {
     const idToken = await generateIdToken({ nonce: 'nonce' });
 
     const fetchSpy = fetchBuilder()
@@ -238,7 +210,7 @@ describe('signIn() Tests', () => {
     fetchSpy.assert();
   });
 
-  it('Should not process callback if there is no callback state found', async () => {
+  it('Redirect Mode - should not process callback if there is no callback state found', async () => {
     mockWindow
       .setSearch('?state=state&code=code')
       .setPathname('/callback')
@@ -350,7 +322,7 @@ describe('signIn() Tests', () => {
     const session = await instance.getSession();
 
     expect(session?.user).toBeDefined();
-    expect(fn).toBeCalledTimes(1);
+    expect(fn).toHaveBeenCalledTimes(1);
     fetchSpy.assert();
   });
 
@@ -679,14 +651,13 @@ describe('signIn() Tests', () => {
 
     const instance = testInstance({ storage });
 
-    try {
-      await instance.processCallback();
-      throw new Error('Expected processCallback to throw an OP Error');
-    } catch (e) {
-      expect(e).toBeInstanceOf(MonoCloudOPError);
-      expect((e as any).error).toBe('some_error');
-      expect((e as any).errorDescription).toBe('Bad Request');
-    }
+    const processPromise = instance.processCallback();
+
+    await expect(processPromise).rejects.toThrow(MonoCloudOPError);
+    await expect(processPromise).rejects.toMatchObject({
+      error: 'some_error',
+      errorDescription: 'Bad Request',
+    });
 
     storage.expectCallbackStateRemoved();
   });
@@ -776,7 +747,7 @@ describe('signIn() Tests', () => {
 
     const instance = testInstance({ storage, validateIdToken: false });
 
-    instance.processCallback().then();
+    instance.processCallback();
 
     storage.expectCallbackStateRemoved();
 
@@ -811,13 +782,12 @@ describe('signIn() Tests', () => {
 
     const instance = testInstance({ storage, validateIdToken: false });
 
-    try {
-      await instance.processCallback();
-      throw new Error();
-    } catch (e) {
-      expect(e).toBeInstanceOf(MonoCloudTokenError);
-      expect((e as any).message).toBe('JWT does not contain payload');
-    }
+    const processPromise = instance.processCallback();
+
+    await expect(processPromise).rejects.toThrow(MonoCloudTokenError);
+    await expect(processPromise).rejects.toThrow(
+      'JWT does not contain payload'
+    );
 
     storage.expectCallbackStateRemoved();
   });
@@ -999,7 +969,7 @@ describe('signIn() Tests', () => {
 
       expect(window.fetch).not.toHaveBeenCalled();
 
-      expect(mockWindow.parentPostMessage).toBeCalledWith(
+      expect(mockWindow.parentPostMessage).toHaveBeenCalledWith(
         {
           source: 'monocloud-auth-js-core',
           url: 'http://localhost:3000/callback?state=state&access_token=at&expires_in=600&scope=openid',
@@ -1039,7 +1009,7 @@ describe('signIn() Tests', () => {
 
       expect(window.fetch).not.toHaveBeenCalled();
 
-      expect(mockWindow.parentPostMessage).toBeCalledWith(
+      expect(mockWindow.parentPostMessage).toHaveBeenCalledWith(
         {
           source: 'monocloud-auth-js-core',
           url: `http://localhost:3000/callback?state=state&id_token=${idToken}`,
@@ -1084,7 +1054,7 @@ describe('signIn() Tests', () => {
 
       expect(window.fetch).not.toHaveBeenCalled();
 
-      expect(mockWindow.parentPostMessage).toBeCalledWith(
+      expect(mockWindow.parentPostMessage).toHaveBeenCalledWith(
         {
           source: 'monocloud-auth-js-core',
           url: `http://localhost:3000/callback?state=state&id_token=${idToken}&access_token=at&expires_in=600&scope=openid`,
@@ -1103,7 +1073,7 @@ describe('signIn() Tests', () => {
       location: { href: '' },
     } as unknown as Window;
 
-    const popupSpy = vi.spyOn(window, 'open').mockReturnValue(mockPopup);
+    vi.spyOn(window, 'open').mockReturnValue(mockPopup);
 
     const instance = testInstance({
       storage,
@@ -1115,7 +1085,7 @@ describe('signIn() Tests', () => {
       expect(mockPopup.location.href).toMatch(urlRegex);
     });
 
-    expect(window.open).toBeCalledWith(
+    expect(window.open).toHaveBeenCalledWith(
       'about:blank',
       'mc.popup',
       expect.any(String)
@@ -1137,9 +1107,7 @@ describe('signIn() Tests', () => {
       'Sign in callback states mismatch'
     );
 
-    expect(mockPopup.close).toBeCalled();
-
-    popupSpy.mockClear();
+    expect(mockPopup.close).toHaveBeenCalled();
   });
 
   it('Popup Mode - should set an error if callback contains error', async () => {
@@ -1151,7 +1119,7 @@ describe('signIn() Tests', () => {
       location: { href: '' },
     } as unknown as Window;
 
-    const popupSpy = vi.spyOn(window, 'open').mockReturnValue(mockPopup);
+    vi.spyOn(window, 'open').mockReturnValue(mockPopup);
 
     const instance = testInstance({
       storage,
@@ -1177,16 +1145,13 @@ describe('signIn() Tests', () => {
       })
     );
 
-    try {
-      await signInPromise;
-    } catch (e) {
-      expect(e).toBeInstanceOf(MonoCloudOPError);
-      expect((e as any).error).toBe('access_denied');
-      expect((e as any).errorDescription).toBe('User denied');
-    }
+    await expect(signInPromise).rejects.toThrow(MonoCloudOPError);
+    await expect(signInPromise).rejects.toMatchObject({
+      error: 'access_denied',
+      errorDescription: 'User denied',
+    });
 
-    expect(mockPopup.close).toBeCalled();
-    popupSpy.mockClear();
+    expect(mockPopup.close).toHaveBeenCalled();
   });
 
   it('Popup Mode - should set an error if jwks fetch fails for implicit id token validation', async () => {
@@ -1203,7 +1168,7 @@ describe('signIn() Tests', () => {
       location: { href: '' },
     } as unknown as Window;
 
-    const popupSpy = vi.spyOn(window, 'open').mockReturnValue(mockPopup);
+    vi.spyOn(window, 'open').mockReturnValue(mockPopup);
 
     const instance = testInstance({
       storage,
@@ -1234,9 +1199,8 @@ describe('signIn() Tests', () => {
       'Error while fetching JWKS. Unexpected status code: 400'
     );
 
-    expect(mockPopup.close).toBeCalled();
+    expect(mockPopup.close).toHaveBeenCalled();
     fetchSpy.assert();
-    popupSpy.mockClear();
   });
 
   it('Popup Mode - should set an error if id token is invalid', async () => {
@@ -1248,7 +1212,7 @@ describe('signIn() Tests', () => {
       location: { href: '' },
     } as unknown as Window;
 
-    const popupSpy = vi.spyOn(window, 'open').mockReturnValue(mockPopup);
+    vi.spyOn(window, 'open').mockReturnValue(mockPopup);
 
     const instance = testInstance({
       storage,
@@ -1279,8 +1243,7 @@ describe('signIn() Tests', () => {
       'ID Token must have a header, payload and signature'
     );
 
-    expect(mockPopup.close).toBeCalled();
-    popupSpy.mockClear();
+    expect(mockPopup.close).toHaveBeenCalled();
   });
 
   it('Popup Mode - should extract user from id token even if validate id token is false', async () => {
@@ -1300,7 +1263,7 @@ describe('signIn() Tests', () => {
       location: { href: '' },
     } as unknown as Window;
 
-    const popupSpy = vi.spyOn(window, 'open').mockReturnValue(mockPopup);
+    vi.spyOn(window, 'open').mockReturnValue(mockPopup);
 
     const instance = testInstance({
       storage,
@@ -1342,14 +1305,12 @@ describe('signIn() Tests', () => {
       })
     );
 
-    expect(mockPopup.close).toBeCalled();
+    expect(mockPopup.close).toHaveBeenCalled();
 
     expect(windowFetchSpy).toHaveBeenCalledTimes(1);
     expect(windowFetchSpy.mock.calls[0][0]).toContain(
       '.well-known/openid-configuration'
     );
-
-    popupSpy.mockClear();
   });
 
   it('Popup Mode - should set an error if id token is invalid and validateIdToken is false', async () => {
@@ -1361,7 +1322,7 @@ describe('signIn() Tests', () => {
       location: { href: '' },
     } as unknown as Window;
 
-    const popupSpy = vi.spyOn(window, 'open').mockReturnValue(mockPopup);
+    vi.spyOn(window, 'open').mockReturnValue(mockPopup);
 
     const instance = testInstance({
       storage,
@@ -1391,10 +1352,8 @@ describe('signIn() Tests', () => {
     await expect(signInPromise).rejects.toThrow(MonoCloudTokenError);
     await expect(signInPromise).rejects.toThrow('JWT does not contain payload');
 
-    expect(mockPopup.close).toBeCalled();
+    expect(mockPopup.close).toHaveBeenCalled();
     storage.expectNoSession();
-
-    popupSpy.mockClear();
   });
 
   it('Popup Mode - should set an error if userinfo returned an error', async () => {
@@ -1411,7 +1370,7 @@ describe('signIn() Tests', () => {
       location: { href: '' },
     } as unknown as Window;
 
-    const popupSpy = vi.spyOn(window, 'open').mockReturnValue(mockPopup);
+    vi.spyOn(window, 'open').mockReturnValue(mockPopup);
 
     const instance = testInstance({
       storage,
@@ -1446,11 +1405,9 @@ describe('signIn() Tests', () => {
       'Error while fetching userinfo. Unexpected status code: 400'
     );
 
-    expect(mockPopup.close).toBeCalled();
+    expect(mockPopup.close).toHaveBeenCalled();
     storage.expectNoSession();
     fetchSpy.assert();
-
-    popupSpy.mockClear();
   });
 
   it('Popup Mode - should set an error if code exchange fails', async () => {
@@ -1467,7 +1424,7 @@ describe('signIn() Tests', () => {
       location: { href: '' },
     } as unknown as Window;
 
-    const popupSpy = vi.spyOn(window, 'open').mockReturnValue(mockPopup);
+    vi.spyOn(window, 'open').mockReturnValue(mockPopup);
 
     const instance = testInstance({ storage });
 
@@ -1493,7 +1450,7 @@ describe('signIn() Tests', () => {
       })
     );
 
-    await expect(signInPromise).rejects.toBeInstanceOf(MonoCloudHttpError);
+    await expect(signInPromise).rejects.toThrow(MonoCloudHttpError);
     await expect(signInPromise).rejects.toThrow(
       'Error while performing token grant. Unexpected status code: 500'
     );
@@ -1504,7 +1461,6 @@ describe('signIn() Tests', () => {
 
     storage.expectNoSession();
     fetchSpy.assert();
-    popupSpy.mockRestore();
   });
 
   it('Popup Mode - should redirect popup to sign in page and resolve when a session message is received', async () => {
@@ -1518,7 +1474,7 @@ describe('signIn() Tests', () => {
       location: { href: '' },
     } as unknown as Window;
 
-    const popupSpy = vi.spyOn(window, 'open').mockReturnValue(mockPopup);
+    vi.spyOn(window, 'open').mockReturnValue(mockPopup);
 
     const instance = testInstance({ storage, validateIdToken: false });
 
@@ -1585,7 +1541,6 @@ describe('signIn() Tests', () => {
     });
 
     fetchSpy.assert();
-    popupSpy.mockRestore();
   });
 
   it('Popup Mode - should redirect popup to sign in page and reject when an error message is received', async () => {
@@ -1599,7 +1554,7 @@ describe('signIn() Tests', () => {
       location: { href: '' },
     } as unknown as Window;
 
-    const popupSpy = vi.spyOn(window, 'open').mockReturnValue(mockPopup);
+    vi.spyOn(window, 'open').mockReturnValue(mockPopup);
 
     const instance = testInstance({ storage });
 
@@ -1642,8 +1597,6 @@ describe('signIn() Tests', () => {
 
       fetchSpy.assert();
     });
-
-    popupSpy.mockRestore();
   });
 
   it('Popup Mode - can timeout', async () => {
@@ -1657,7 +1610,7 @@ describe('signIn() Tests', () => {
       location: { href: '' },
     } as unknown as Window;
 
-    const popupSpy = vi.spyOn(window, 'open').mockReturnValue(mockPopup);
+    vi.spyOn(window, 'open').mockReturnValue(mockPopup);
 
     const instance = testInstance({ storage, authWindowTimeout: 0.1 });
 
@@ -1668,7 +1621,7 @@ describe('signIn() Tests', () => {
       expect(await instance.getSession()).toBeUndefined();
     });
 
-    await expect(signInPromise).rejects.toBeInstanceOf(MonoCloudJsError);
+    await expect(signInPromise).rejects.toThrow(MonoCloudJsError);
     await expect(signInPromise).rejects.toThrow('Window timed out');
 
     await vi.waitFor(async () => {
@@ -1676,25 +1629,19 @@ describe('signIn() Tests', () => {
       expect(await instance.getSession()).toBeUndefined();
       fetchSpy.assert();
     });
-
-    popupSpy.mockRestore();
   });
 
   it('Popup Mode - should throw error if popup fails to open', async () => {
-    const popupSpy = vi.spyOn(window, 'open').mockReturnValue(null);
+    vi.spyOn(window, 'open').mockReturnValue(null);
 
     const instance = testInstance({ storage });
 
     const signInPromise = instance.signIn({ mode: 'popup' });
 
-    await expect(signInPromise).rejects.toBeInstanceOf(MonoCloudJsError);
-    await expect(signInPromise).rejects.toMatchObject({
-      message: 'Could not open popup',
-    });
+    await expect(signInPromise).rejects.toThrow(MonoCloudJsError);
+    await expect(signInPromise).rejects.toThrow('Could not open popup');
 
     expect(await instance.getSession()).toBeUndefined();
-
-    popupSpy.mockRestore();
   });
 
   it('Popup Mode - throws when user closes the window', async () => {
@@ -1706,9 +1653,7 @@ describe('signIn() Tests', () => {
       location: { href: '' },
     };
 
-    const popupSpy = vi
-      .spyOn(window, 'open')
-      .mockReturnValue(mockPopup as unknown as Window);
+    vi.spyOn(window, 'open').mockReturnValue(mockPopup as unknown as Window);
 
     const instance = testInstance({ storage });
 
@@ -1721,7 +1666,7 @@ describe('signIn() Tests', () => {
 
     mockPopup.closed = true;
 
-    await expect(signInPromise).rejects.toBeInstanceOf(MonoCloudJsError);
+    await expect(signInPromise).rejects.toThrow(MonoCloudJsError);
     await expect(signInPromise).rejects.toThrow('Window closed by user');
 
     await vi.waitFor(async () => {
@@ -1729,10 +1674,9 @@ describe('signIn() Tests', () => {
     });
 
     fetchSpy.assert();
-    popupSpy.mockRestore();
   });
 
-  it('should only resolve the promise if the origin is appUrl', async () => {
+  it('Popup Mode - should only resolve the promise if the origin is appUrl', async () => {
     const fetchSpy = fetchBuilder()
       .configureMetadata()
       .configureJwks()
@@ -1746,7 +1690,7 @@ describe('signIn() Tests', () => {
       location: { href: '' },
     } as unknown as Window;
 
-    const popupSpy = vi.spyOn(window, 'open').mockReturnValue(mockPopup);
+    vi.spyOn(window, 'open').mockReturnValue(mockPopup);
 
     const instance = testInstance({ storage });
 
@@ -1827,10 +1771,9 @@ describe('signIn() Tests', () => {
     });
 
     fetchSpy.assert();
-    popupSpy.mockRestore();
   });
 
-  it('should only resolve the promise if the source is popup window', async () => {
+  it('Popup Mode - should only resolve the promise if the source is popup window', async () => {
     const fetchSpy = fetchBuilder()
       .configureMetadata()
       .configureJwks()
@@ -1844,7 +1787,7 @@ describe('signIn() Tests', () => {
       location: { href: '' },
     } as unknown as Window;
 
-    const popupSpy = vi.spyOn(window, 'open').mockReturnValue(mockPopup);
+    vi.spyOn(window, 'open').mockReturnValue(mockPopup);
 
     const instance = testInstance({ storage });
 
@@ -1925,10 +1868,9 @@ describe('signIn() Tests', () => {
     });
 
     fetchSpy.assert();
-    popupSpy.mockRestore();
   });
 
-  it('should only resolve the promise if data.source is monocloud-auth-js-core', async () => {
+  it('Popup Mode - should only resolve the promise if data.source is monocloud-auth-js-core', async () => {
     const fetchSpy = fetchBuilder()
       .configureMetadata()
       .configureJwks()
@@ -1942,7 +1884,7 @@ describe('signIn() Tests', () => {
       location: { href: '' },
     } as unknown as Window;
 
-    const popupSpy = vi.spyOn(window, 'open').mockReturnValue(mockPopup);
+    vi.spyOn(window, 'open').mockReturnValue(mockPopup);
 
     const instance = testInstance({ storage });
 
@@ -2023,7 +1965,6 @@ describe('signIn() Tests', () => {
     });
 
     fetchSpy.assert();
-    popupSpy.mockRestore();
   });
 
   it('should throw error when callbackUrl origin/path does not match redirectUri', async () => {

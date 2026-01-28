@@ -145,7 +145,7 @@ export class MonoCloudJSCoreClient {
     return `${this.options.appUrl}${this.options.callbackPath ? ensureLeadingSlash(this.options.callbackPath) : '/'}`;
   }
 
-  private get logoutRedirectUri(): string {
+  private get signOutRedirectUri(): string {
     return `${this.options.appUrl}${ensureLeadingSlash(
       this.options.signOutCallbackPath ?? '/'
     )}`;
@@ -296,15 +296,9 @@ export class MonoCloudJSCoreClient {
    *
    */
   async processCallback(): Promise<void> {
-    const currentUrl = new URL(window.location.href);
-
-    const signInUrl = new URL(this.redirectUri);
-
-    const signOutUrl = new URL(this.logoutRedirectUri);
-
-    const isSignInPath = currentUrl.origin === signInUrl.origin;
-
-    const isSignOutPath = currentUrl.origin === signOutUrl.origin;
+    const currentUrl = window.location.href;
+    const isSignInPath = currentUrl === this.redirectUri;
+    const isSignOutPath = currentUrl === this.signOutRedirectUri;
 
     if (this.mainWindow) {
       const callbackState = this.redirectCallbackState;
