@@ -38,7 +38,7 @@ export class Ref {
     switch (this.mode) {
       case 'silent': {
         const iframe = this.getRef<HTMLIFrameElement>();
-        if (!iframe.isConnected) {
+        if (iframe.isConnected) {
           iframe.remove();
         }
         break;

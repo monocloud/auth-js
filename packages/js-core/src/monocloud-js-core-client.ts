@@ -296,9 +296,12 @@ export class MonoCloudJSCoreClient {
    *
    */
   async processCallback(): Promise<void> {
-    const currentUrl = window.location.href;
-    const isSignInPath = currentUrl === this.redirectUri;
-    const isSignOutPath = currentUrl === this.signOutRedirectUri;
+    const currentUrl = new URL(window.location.href);
+
+    const isSignInPath =
+      `${currentUrl.origin}${currentUrl.pathname}` === this.redirectUri;
+    const isSignOutPath =
+      `${currentUrl.origin}${currentUrl.pathname}` === this.signOutRedirectUri;
 
     if (this.mainWindow) {
       const callbackState = this.redirectCallbackState;
@@ -617,6 +620,7 @@ export class MonoCloudJSCoreClient {
             nonce,
           });
 
+          /* v8 ignore if -- @preserve */
           if (!ref) {
             throw new MonoCloudJsError('Popup or Iframe creation failed');
           }
