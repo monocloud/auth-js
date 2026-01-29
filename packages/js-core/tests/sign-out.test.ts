@@ -732,4 +732,46 @@ describe('signOut() Tests', () => {
       storage.expectCallbackStateRemoved();
     });
   });
+
+  it('should throw error when callbackUrl origin/path does not match redirectUri', async () => {
+    const instance = testInstance({ storage });
+
+    const callbackState: CallbackState = {
+      mode: 'popup',
+      state: 'state',
+      scopes: 'openid',
+    };
+
+    const badCallbackUrl =
+      'http://localhost:3000/wrong-callback?code=code&state=state';
+
+    const p = (instance as any).processSignOutCallback(
+      badCallbackUrl,
+      callbackState
+    );
+
+    await expect(p).rejects.toThrow(MonoCloudValidationError);
+    await expect(p).rejects.toThrow('Incorrect callback url');
+  });
+
+  it('should throw error when callbackState.signOut is false', async () => {
+    const instance = testInstance({ storage });
+
+    const callbackState: CallbackState = {
+      mode: 'popup',
+      state: 'state',
+      scopes: 'openid',
+      signOut: false,
+    };
+
+    const callbackUrl = 'http://localhost:3000/signout?code=code&state=state';
+
+    const p = (instance as any).processSignOutCallback(
+      callbackUrl,
+      callbackState
+    );
+
+    await expect(p).rejects.toThrow(MonoCloudValidationError);
+    await expect(p).rejects.toThrow('Incorrect callback state');
+  });
 });

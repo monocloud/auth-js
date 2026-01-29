@@ -133,4 +133,30 @@ describe('refetchUserinfo() Tests', () => {
     storage.expectSession(sessionNew);
     expect(await instance.getSession()).toEqual(sessionNew);
   });
+
+  it('should throw an error if default token is not present', async () => {
+    const session: MonoCloudSession = {
+      user: { sub: 'sub' },
+      authorizedScopes: 'openid',
+      refreshToken: 'rt',
+      accessTokens: [
+        {
+          accessToken: 'at',
+          scopes: 'profile',
+          requestedScopes: 'profile',
+          accessTokenExpiration: now() + 1000,
+          resource: 'some-api',
+        },
+      ],
+    };
+
+    await setSession(storage, session);
+
+    const instance = testInstance({ storage });
+
+    const p = instance.refetchUserInfo();
+
+    await expect(p).rejects.toBeInstanceOf(MonoCloudValidationError);
+    await expect(p).rejects.toThrow('Default token not found');
+  });
 });
