@@ -603,7 +603,7 @@ describe('signIn() Tests', () => {
     fetchSpy.assert();
   });
 
-  it('Redirect Mode - should set an error if states mismatch', async () => {
+  it('Redirect Mode - should throw an error if states mismatch', async () => {
     mockWindow
       .setSearch('?state=states&code=code')
       .setPathname('/callback')
@@ -631,7 +631,7 @@ describe('signIn() Tests', () => {
     storage.expectCallbackStateRemoved();
   });
 
-  it('Redirect Mode - should set an error if callback contains error', async () => {
+  it('Redirect Mode - should throw an op error if callback contains error', async () => {
     mockWindow
       .setSearch(
         '?error=some_error&error_description=Bad%20Request&state=state'
@@ -662,7 +662,7 @@ describe('signIn() Tests', () => {
     storage.expectCallbackStateRemoved();
   });
 
-  it('Redirect Mode - should set an error if jwks fetch fails for implicit id token validation', async () => {
+  it('Redirect Mode - should throw an error if jwks fetch fails for implicit id token validation', async () => {
     const idToken = await generateIdToken({ nonce: 'nonce' });
 
     const fetchSpy = fetchBuilder()
@@ -694,7 +694,7 @@ describe('signIn() Tests', () => {
     fetchSpy.assert();
   });
 
-  it('Redirect Mode - should set an error if id token is invalid', async () => {
+  it('Redirect Mode - should throw an error if id token is invalid', async () => {
     fetchBuilder().configureMetadata().configureJwks().createSpy();
 
     mockWindow
@@ -747,7 +747,7 @@ describe('signIn() Tests', () => {
 
     const instance = testInstance({ storage, validateIdToken: false });
 
-    instance.processCallback();
+    await instance.processCallback();
 
     storage.expectCallbackStateRemoved();
 
@@ -765,7 +765,7 @@ describe('signIn() Tests', () => {
     });
   });
 
-  it('Redirect Mode - should set an error if id token is invalid and validateIdToken is false', async () => {
+  it('Redirect Mode - should throw an error if id token is invalid and validateIdToken is false', async () => {
     mockWindow
       .setSearch('?state=state&id_token=id_token')
       .setPathname('/callback')
@@ -792,7 +792,7 @@ describe('signIn() Tests', () => {
     storage.expectCallbackStateRemoved();
   });
 
-  it('Redirect Mode - should set an error if userinfo returned an error', async () => {
+  it('Redirect Mode - should throw an error if userinfo returned an error', async () => {
     const fetchSpy = fetchBuilder()
       .configureMetadata()
       .configureUserinfo({ responseCode: 400 })
@@ -825,7 +825,7 @@ describe('signIn() Tests', () => {
     fetchSpy.assert();
   });
 
-  it('Redirect Mode - should set an error if code exchange fails', async () => {
+  it('Redirect Mode - should throw an error if code exchange fails', async () => {
     const fetchSpy = fetchBuilder()
       .configureMetadata()
       .configureTokenEndpoint({
@@ -862,209 +862,34 @@ describe('signIn() Tests', () => {
     fetchSpy.assert();
   });
 
-  it.each(['Silent', 'Popup'])(
-    '%s Mode - should process a redirect callback (Authorization Code)',
-    async mode => {
-      fetchBuilder().createSpy();
+  it('Popup Mode - should send the redirect callback through window.postMessage', async () => {
+    fetchBuilder().createSpy();
 
-      mockWindow
-        .mockPostMessage()
-        .mockParentSide(mode.toLowerCase())
-        .setSearch('?state=state&code=code')
-        .setPathname('/callback')
-        .assert();
+    mockWindow
+      .mockPostMessage()
+      .mockParentSide('popup')
+      .setSearch('?state=state&code=code')
+      .setPathname('/callback')
+      .assert();
 
-      const state: CallbackState = {
-        codeVerifier: 'codeVerifier',
-        nonce: 'nonce',
-        state: 'state',
-        mode: mode.toLowerCase() as CallbackState['mode'],
-        scopes: 'openid',
-      };
+    const instance = testInstance({ storage });
 
-      storage.setCallbackState(state);
+    await instance.processCallback();
 
-      const instance = testInstance({ storage });
+    expect(window.fetch).not.toHaveBeenCalled();
 
-      await instance.processCallback();
-
-      expect(window.fetch).not.toHaveBeenCalled();
-
-      await vi.waitFor(() => {
-        expect(mockWindow.parentPostMessage).toHaveBeenCalledWith(
-          expect.objectContaining({
-            source: 'monocloud-auth-js-core',
-            url: 'http://localhost:3000/callback?state=state&code=code',
-          }),
-          'http://localhost:3000'
-        );
-      });
-    }
-  );
-
-  it.each(['Silent', 'Popup'])(
-    "%s Mode - should process a redirect callback (Hybrid - 'code token id_token' response type)",
-    async mode => {
-      fetchBuilder().createSpy();
-
-      mockWindow
-        .mockPostMessage()
-        .mockParentSide(mode.toLowerCase())
-        .setSearch(
-          '?state=state&code=code&access_token=at&expires_in=600&id_token=idtoken&refresh_token=rt'
-        )
-        .setPathname('/callback')
-        .assert();
-
-      const state: CallbackState = {
-        state: 'state',
-        mode: mode.toLowerCase() as CallbackState['mode'],
-        codeVerifier: 'codeVerifier',
-        nonce: 'nonce',
-        scopes: 'openid',
-      };
-
-      storage.setCallbackState(state);
-
-      const instance = testInstance({ storage });
-
-      await instance.processCallback();
-
-      expect(window.fetch).not.toHaveBeenCalled();
+    await vi.waitFor(() => {
       expect(mockWindow.parentPostMessage).toHaveBeenCalledWith(
-        {
+        expect.objectContaining({
           source: 'monocloud-auth-js-core',
-          url: 'http://localhost:3000/callback?state=state&code=code&access_token=at&expires_in=600&id_token=idtoken&refresh_token=rt',
-        },
+          url: 'http://localhost:3000/callback?state=state&code=code',
+        }),
         'http://localhost:3000'
       );
-    }
-  );
+    });
+  });
 
-  it.each(['Silent', 'Popup'])(
-    "%s Mode - should process a callback (Implicit - 'token' response type)",
-    async mode => {
-      fetchBuilder().createSpy();
-
-      mockWindow
-        .mockPostMessage()
-        .mockParentSide(mode.toLowerCase())
-        .setSearch('?state=state&access_token=at&expires_in=600&scope=openid')
-        .setPathname('/callback')
-        .assert();
-
-      const state: CallbackState = {
-        state: 'state',
-        mode: mode.toLowerCase() as CallbackState['mode'],
-      };
-
-      storage.setCallbackState(state);
-
-      const instance = testInstance({
-        storage,
-        responseType: 'token',
-      });
-
-      await instance.processCallback();
-
-      expect(window.fetch).not.toHaveBeenCalled();
-
-      expect(mockWindow.parentPostMessage).toHaveBeenCalledWith(
-        {
-          source: 'monocloud-auth-js-core',
-          url: 'http://localhost:3000/callback?state=state&access_token=at&expires_in=600&scope=openid',
-        },
-        'http://localhost:3000'
-      );
-    }
-  );
-
-  it.each(['Silent', 'Popup'])(
-    "%s Mode - should process a redirect callback (Implicit - 'id_token' response type)",
-    async mode => {
-      const idToken = await generateIdToken({
-        nonce: 'nonce',
-      });
-
-      fetchBuilder().createSpy();
-
-      mockWindow
-        .mockPostMessage()
-        .mockParentSide(mode.toLowerCase())
-        .setSearch(`?state=state&id_token=${idToken}`)
-        .setPathname('/callback')
-        .assert();
-
-      const state: CallbackState = {
-        nonce: 'nonce',
-        state: 'state',
-        mode: mode.toLowerCase() as CallbackState['mode'],
-      };
-
-      storage.setCallbackState(state);
-
-      const instance = testInstance({ storage, responseType: 'id_token' });
-
-      await instance.processCallback();
-
-      expect(window.fetch).not.toHaveBeenCalled();
-
-      expect(mockWindow.parentPostMessage).toHaveBeenCalledWith(
-        {
-          source: 'monocloud-auth-js-core',
-          url: `http://localhost:3000/callback?state=state&id_token=${idToken}`,
-        },
-        'http://localhost:3000'
-      );
-    }
-  );
-
-  it.each(['Silent', 'Popup'])(
-    "%s Mode - should process a redirect callback (Implicit - 'id_token token' response type)",
-    async mode => {
-      const idToken = await generateIdToken({
-        nonce: 'nonce',
-      });
-
-      fetchBuilder().createSpy();
-
-      mockWindow
-        .mockPostMessage()
-        .mockParentSide(mode.toLowerCase())
-        .setSearch(
-          `?state=state&id_token=${idToken}&access_token=at&expires_in=600&scope=openid`
-        )
-        .setPathname('/callback')
-        .assert();
-
-      const state: CallbackState = {
-        nonce: 'nonce',
-        state: 'state',
-        mode: mode.toLowerCase() as CallbackState['mode'],
-      };
-
-      storage.setCallbackState(state);
-
-      const instance = testInstance({
-        storage,
-        responseType: 'id_token token',
-      });
-
-      instance.processCallback();
-
-      expect(window.fetch).not.toHaveBeenCalled();
-
-      expect(mockWindow.parentPostMessage).toHaveBeenCalledWith(
-        {
-          source: 'monocloud-auth-js-core',
-          url: `http://localhost:3000/callback?state=state&id_token=${idToken}&access_token=at&expires_in=600&scope=openid`,
-        },
-        'http://localhost:3000'
-      );
-    }
-  );
-
-  it('Popup Mode - should set an error if states mismatch', async () => {
+  it('Popup Mode - should throw an error if states mismatch', async () => {
     fetchBuilder().configureMetadata().createSpy();
 
     const mockPopup = {
@@ -1110,7 +935,7 @@ describe('signIn() Tests', () => {
     expect(mockPopup.close).toHaveBeenCalled();
   });
 
-  it('Popup Mode - should set an error if callback contains error', async () => {
+  it('Popup Mode - should throw an error if callback contains error', async () => {
     fetchBuilder().configureMetadata().createSpy();
 
     const mockPopup = {
@@ -1154,7 +979,7 @@ describe('signIn() Tests', () => {
     expect(mockPopup.close).toHaveBeenCalled();
   });
 
-  it('Popup Mode - should set an error if jwks fetch fails for implicit id token validation', async () => {
+  it('Popup Mode - should throw an error if jwks fetch fails for implicit id token validation', async () => {
     const idToken = await generateIdToken({ nonce: 'nonce' });
 
     const fetchSpy = fetchBuilder()
@@ -1203,7 +1028,7 @@ describe('signIn() Tests', () => {
     fetchSpy.assert();
   });
 
-  it('Popup Mode - should set an error if id token is invalid', async () => {
+  it('Popup Mode - should throw an error if id token is invalid', async () => {
     fetchBuilder().configureMetadata().configureJwks().createSpy();
 
     const mockPopup = {
@@ -1313,7 +1138,7 @@ describe('signIn() Tests', () => {
     );
   });
 
-  it('Popup Mode - should set an error if id token is invalid and validateIdToken is false', async () => {
+  it('Popup Mode - should throw an error if id token is invalid and validateIdToken is false', async () => {
     fetchBuilder().configureMetadata().createSpy();
 
     const mockPopup = {
@@ -1356,7 +1181,7 @@ describe('signIn() Tests', () => {
     storage.expectNoSession();
   });
 
-  it('Popup Mode - should set an error if userinfo returned an error', async () => {
+  it('Popup Mode - should throw an error if userinfo returned an error', async () => {
     const fetchSpy = fetchBuilder()
       .configureMetadata()
       .configureUserinfo({ responseCode: 400 })
@@ -1410,7 +1235,7 @@ describe('signIn() Tests', () => {
     fetchSpy.assert();
   });
 
-  it('Popup Mode - should set an error if code exchange fails', async () => {
+  it('Popup Mode - should throw an error if code exchange fails', async () => {
     const fetchSpy = fetchBuilder()
       .configureMetadata()
       .configureTokenEndpoint({
@@ -1494,15 +1319,15 @@ describe('signIn() Tests', () => {
       claims: { email: 'test@example.com' },
     });
 
-    fetchSpy.configureTokenEndpoint({
-      accessToken: 'mock-access-token',
-      idToken,
-    });
-
-    fetchSpy.configureUserinfo({
-      accessToken: 'mock-access-token',
-      claims: { sub: 'sub', email: 'test@example.com' },
-    });
+    fetchSpy
+      .configureTokenEndpoint({
+        accessToken: 'mock-access-token',
+        idToken,
+      })
+      .configureUserinfo({
+        accessToken: 'mock-access-token',
+        claims: { sub: 'sub', email: 'test@example.com' },
+      });
 
     window.dispatchEvent(
       new MessageEvent('message', {

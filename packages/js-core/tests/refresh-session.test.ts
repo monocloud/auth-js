@@ -91,13 +91,9 @@ describe('instance.refreshSession() Tests', () => {
   });
 
   it('should throw error if the code is not running in the main window', async () => {
-    const openerSpy1 = vi.spyOn(window, 'opener', 'get').mockReturnValue(null);
-    const openerSpy2 = vi
-      .spyOn(window, 'parent', 'get')
-      .mockReturnValue({} as unknown as Window);
-    const openerSpy3 = vi
-      .spyOn(window, 'top', 'get')
-      .mockReturnValue({} as unknown as Window);
+    vi.spyOn(window, 'opener', 'get').mockReturnValue(null);
+    vi.spyOn(window, 'parent', 'get').mockReturnValue({} as unknown as Window);
+    vi.spyOn(window, 'top', 'get').mockReturnValue({} as unknown as Window);
 
     const instance = testInstance({ storage });
 
@@ -107,10 +103,6 @@ describe('instance.refreshSession() Tests', () => {
     await expect(p).rejects.toThrow(
       'Initiating an authentication flow in a popup or iframe is not supported'
     );
-
-    openerSpy1.mockClear();
-    openerSpy2.mockClear();
-    openerSpy3.mockClear();
   });
 
   it('Refresh Token Mode - should refresh successfully', async () => {
@@ -146,11 +138,9 @@ describe('instance.refreshSession() Tests', () => {
 
     const instance = testInstance({ storage });
 
-    instance
-      .refreshSession({
-        mode: 'refresh_token',
-      })
-      .then();
+    await instance.refreshSession({
+      mode: 'refresh_token',
+    });
 
     const sessionNew = {
       user: {
@@ -244,7 +234,7 @@ describe('instance.refreshSession() Tests', () => {
         location: { href: '' },
       } as unknown as Window;
 
-      const popupSpy = vi.spyOn(window, 'open').mockReturnValue(mockPopup);
+      vi.spyOn(window, 'open').mockReturnValue(mockPopup);
 
       const existingSession: MonoCloudSession = {
         user: { sub: 'sub' },
@@ -353,11 +343,10 @@ describe('instance.refreshSession() Tests', () => {
       });
 
       fetchSpy.assert();
-      popupSpy.mockRestore();
     }
   );
 
-  it('Popup Mode - should reject when an error message is received', async () => {
+  it('Popup Mode - should reject when redirect has error', async () => {
     const fetchSpy = fetchBuilder().configureMetadata().createSpy();
 
     mockWindow.assert();
@@ -368,7 +357,7 @@ describe('instance.refreshSession() Tests', () => {
       location: { href: '' },
     } as unknown as Window;
 
-    const popupSpy = vi.spyOn(window, 'open').mockReturnValue(mockPopup);
+    vi.spyOn(window, 'open').mockReturnValue(mockPopup);
 
     const existingSession: MonoCloudSession = {
       user: { sub: 'sub' },
@@ -453,8 +442,6 @@ describe('instance.refreshSession() Tests', () => {
 
       fetchSpy.assert();
     });
-
-    popupSpy.mockRestore();
   });
 
   it('Popup Mode - can timeout', async () => {
@@ -468,7 +455,7 @@ describe('instance.refreshSession() Tests', () => {
       location: { href: '' },
     } as unknown as Window;
 
-    const popupSpy = vi.spyOn(window, 'open').mockReturnValue(mockPopup);
+    vi.spyOn(window, 'open').mockReturnValue(mockPopup);
 
     const existingSession: MonoCloudSession = {
       user: { sub: 'sub' },
@@ -534,16 +521,12 @@ describe('instance.refreshSession() Tests', () => {
 
       fetchSpy.assert();
     });
-
-    popupSpy.mockRestore();
   });
 
   it('Popup Mode - should throw an error if popup fails to open', async () => {
-    fetchBuilder().createSpy();
-
     mockWindow.assert();
 
-    const popupSpy = vi.spyOn(window, 'open').mockReturnValue(null);
+    vi.spyOn(window, 'open').mockReturnValue(null);
 
     const existingSession: MonoCloudSession = {
       user: { sub: 'sub' },
@@ -583,20 +566,7 @@ describe('instance.refreshSession() Tests', () => {
 
     storage.expectCallbackStateRemoved();
 
-    expect(await instance.getSession()).toEqual(
-      expect.objectContaining({
-        user: { sub: 'sub' },
-        refreshToken: 'rt',
-        accessTokens: [
-          expect.objectContaining({
-            accessToken: 'at',
-            accessTokenExpiration: expect.any(Number),
-          }),
-        ],
-      })
-    );
-
-    popupSpy.mockRestore();
+    expect(await instance.getSession()).toEqual(existingSession);
   });
 
   it('Silent Mode - should refresh session through iframe and resolve when a session message is received', async () => {
@@ -609,23 +579,21 @@ describe('instance.refreshSession() Tests', () => {
 
     const iframe = window.document.createElement('iframe');
 
-    const createElementSpy = vi
-      .spyOn(window.document, 'createElement')
-      .mockReturnValue(iframe);
+    vi.spyOn(window.document, 'createElement').mockReturnValue(iframe);
 
-    const contentWindowSpy = vi
-      .spyOn(iframe, 'contentWindow', 'get')
-      .mockReturnValue(window as unknown as Window);
+    vi.spyOn(iframe, 'contentWindow', 'get').mockReturnValue(
+      window as unknown as Window
+    );
 
     const appendChildSpy = vi.spyOn(window.document.body, 'appendChild');
 
     let iframeSrc = '';
 
-    const setAttributeSpy = vi
-      .spyOn(iframe, 'setAttribute')
-      .mockImplementation((name: string, value: string) => {
+    vi.spyOn(iframe, 'setAttribute').mockImplementation(
+      (name: string, value: string) => {
         if (name === 'src') iframeSrc = value;
-      });
+      }
+    );
 
     const existingSession: MonoCloudSession = {
       user: { sub: 'sub' },
@@ -725,11 +693,6 @@ describe('instance.refreshSession() Tests', () => {
 
       fetchSpy.assert();
     });
-
-    createElementSpy.mockRestore();
-    contentWindowSpy.mockRestore();
-    appendChildSpy.mockRestore();
-    setAttributeSpy.mockRestore();
   });
 
   it('Silent Mode - should reject when an error callback url is received', async () => {
@@ -739,23 +702,21 @@ describe('instance.refreshSession() Tests', () => {
 
     const iframe = window.document.createElement('iframe');
 
-    const createElementSpy = vi
-      .spyOn(window.document, 'createElement')
-      .mockReturnValue(iframe);
+    vi.spyOn(window.document, 'createElement').mockReturnValue(iframe);
 
-    const contentWindowSpy = vi
-      .spyOn(iframe, 'contentWindow', 'get')
-      .mockReturnValue(window as unknown as Window);
+    vi.spyOn(iframe, 'contentWindow', 'get').mockReturnValue(
+      window as unknown as Window
+    );
 
     const appendChildSpy = vi.spyOn(window.document.body, 'appendChild');
 
     let iframeSrc = '';
 
-    const setAttributeSpy = vi
-      .spyOn(iframe, 'setAttribute')
-      .mockImplementation((name: string, value: string) => {
+    vi.spyOn(iframe, 'setAttribute').mockImplementation(
+      (name: string, value: string) => {
         if (name === 'src') iframeSrc = value;
-      });
+      }
+    );
 
     const existingSession: MonoCloudSession = {
       user: { sub: 'sub' },
@@ -827,11 +788,6 @@ describe('instance.refreshSession() Tests', () => {
 
       fetchSpy.assert();
     });
-
-    createElementSpy.mockRestore();
-    contentWindowSpy.mockRestore();
-    appendChildSpy.mockRestore();
-    setAttributeSpy.mockRestore();
   });
 
   it('Silent Mode - can timeout', async () => {
@@ -841,18 +797,16 @@ describe('instance.refreshSession() Tests', () => {
 
     const iframe = window.document.createElement('iframe');
 
-    const createElementSpy = vi
-      .spyOn(window.document, 'createElement')
-      .mockReturnValue(iframe);
+    vi.spyOn(window.document, 'createElement').mockReturnValue(iframe);
 
     const appendChildSpy = vi.spyOn(window.document.body, 'appendChild');
 
     let iframeSrc = '';
-    const setAttributeSpy = vi
-      .spyOn(iframe, 'setAttribute')
-      .mockImplementation((name: string, value: string) => {
+    vi.spyOn(iframe, 'setAttribute').mockImplementation(
+      (name: string, value: string) => {
         if (name === 'src') iframeSrc = value;
-      });
+      }
+    );
 
     const existingSession: MonoCloudSession = {
       user: { sub: 'sub' },
@@ -917,10 +871,6 @@ describe('instance.refreshSession() Tests', () => {
 
       fetchSpy.assert();
     });
-
-    createElementSpy.mockRestore();
-    appendChildSpy.mockRestore();
-    setAttributeSpy.mockRestore();
   });
 
   it('Popup Mode - throws when user closes the window', async () => {
@@ -932,9 +882,7 @@ describe('instance.refreshSession() Tests', () => {
       location: { href: '' },
     };
 
-    const popupSpy = vi
-      .spyOn(window, 'open')
-      .mockReturnValue(mockPopup as unknown as Window);
+    vi.spyOn(window, 'open').mockReturnValue(mockPopup as unknown as Window);
 
     const existingSession: MonoCloudSession = {
       user: { sub: 'sub' },
@@ -983,8 +931,6 @@ describe('instance.refreshSession() Tests', () => {
 
       fetchSpy.assert();
     });
-
-    popupSpy.mockRestore();
   });
 
   it('should only resolve the promise if the origin is appUrl', async () => {
@@ -1001,7 +947,7 @@ describe('instance.refreshSession() Tests', () => {
       location: { href: '' },
     } as unknown as Window;
 
-    const popupSpy = vi.spyOn(window, 'open').mockReturnValue(mockPopup);
+    vi.spyOn(window, 'open').mockReturnValue(mockPopup);
 
     const existingSession: MonoCloudSession = {
       user: { sub: 'sub' },
@@ -1117,11 +1063,9 @@ describe('instance.refreshSession() Tests', () => {
 
       fetchSpy.assert();
     });
-
-    popupSpy.mockRestore();
   });
 
-  it('should only resolve the promise if the source is parent window', async () => {
+  it('should only resolve the promise if the source is popup window', async () => {
     const fetchSpy = fetchBuilder()
       .configureMetadata()
       .configureJwks()
@@ -1135,7 +1079,7 @@ describe('instance.refreshSession() Tests', () => {
       location: { href: '' },
     } as unknown as Window;
 
-    const popupSpy = vi.spyOn(window, 'open').mockReturnValue(mockPopup);
+    vi.spyOn(window, 'open').mockReturnValue(mockPopup);
 
     const existingSession: MonoCloudSession = {
       user: { sub: 'sub' },
@@ -1251,8 +1195,6 @@ describe('instance.refreshSession() Tests', () => {
 
       fetchSpy.assert();
     });
-
-    popupSpy.mockRestore();
   });
 
   it('should only resolve the promise if data.source is monocloud-auth-js-core', async () => {
@@ -1269,7 +1211,7 @@ describe('instance.refreshSession() Tests', () => {
       location: { href: '' },
     } as unknown as Window;
 
-    const popupSpy = vi.spyOn(window, 'open').mockReturnValue(mockPopup);
+    vi.spyOn(window, 'open').mockReturnValue(mockPopup);
 
     const existingSession: MonoCloudSession = {
       user: { sub: 'sub' },
@@ -1386,7 +1328,5 @@ describe('instance.refreshSession() Tests', () => {
 
       fetchSpy.assert();
     });
-
-    popupSpy.mockRestore();
   });
 });

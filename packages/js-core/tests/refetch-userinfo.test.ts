@@ -1,5 +1,5 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 import type { MonoCloudSession } from '@monocloud/auth-core';
 import { now } from '@monocloud/auth-core/internal';
 import { fetchBuilder } from '@monocloud/auth-test-utils';
@@ -17,15 +17,12 @@ describe('refetchUserinfo() Tests', () => {
   it('should throw an error if there is no session', async () => {
     const instance = testInstance({ storage });
 
-    try {
-      await instance.refetchUserInfo();
-      throw new Error();
-    } catch (e) {
-      expect(e).toBeInstanceOf(MonoCloudValidationError);
-      expect((e as any).message).toBe(
-        'Ensure the user is authenticated before refetching userinfo'
-      );
-    }
+    const p = instance.refetchUserInfo();
+
+    await expect(p).rejects.toBeInstanceOf(MonoCloudValidationError);
+    await expect(p).rejects.toThrow(
+      'Ensure the user is authenticated before refetching userinfo'
+    );
   });
 
   it('should throw an error if there userinfo fetch fails', async () => {
@@ -49,28 +46,26 @@ describe('refetchUserinfo() Tests', () => {
 
     expect(await instance.getSession()).toBeDefined();
 
-    try {
-      await instance.refetchUserInfo();
-      throw new Error();
-    } catch (e) {
-      expect(e).toBeInstanceOf(MonoCloudValidationError);
-      expect((e as any).message).toBe(
-        'Fetching userinfo requires the openid scope'
-      );
-      expect(await instance.getSession()).toEqual({
-        user: { sub: 'sub' },
-        refreshToken: 'rt',
-        authorizedScopes: 'token',
-        accessTokens: [
-          {
-            accessToken: 'at',
-            scopes: 'token',
-            requestedScopes: 'token',
-            accessTokenExpiration: expect.any(Number),
-          },
-        ],
-      });
-    }
+    const p = instance.refetchUserInfo();
+
+    await expect(p).rejects.toBeInstanceOf(MonoCloudValidationError);
+    await expect(p).rejects.toThrow(
+      'Fetching userinfo requires the openid scope'
+    );
+
+    expect(await instance.getSession()).toEqual({
+      user: { sub: 'sub' },
+      refreshToken: 'rt',
+      authorizedScopes: 'token',
+      accessTokens: [
+        {
+          accessToken: 'at',
+          scopes: 'token',
+          requestedScopes: 'token',
+          accessTokenExpiration: expect.any(Number),
+        },
+      ],
+    });
   });
 
   it('should refetch userinfo successfully', async () => {
@@ -113,7 +108,7 @@ describe('refetchUserinfo() Tests', () => {
       refreshToken: 'rt',
     });
 
-    instance.refetchUserInfo().then();
+    await instance.refetchUserInfo();
 
     const sessionNew: MonoCloudSession = {
       user: {
@@ -134,10 +129,8 @@ describe('refetchUserinfo() Tests', () => {
       authorizedScopes: 'openid',
     };
 
-    await vi.waitFor(async () => {
-      fetchSpy.assert();
-      storage.expectSession(sessionNew);
-      expect(await instance.getSession()).toEqual(sessionNew);
-    });
+    fetchSpy.assert();
+    storage.expectSession(sessionNew);
+    expect(await instance.getSession()).toEqual(sessionNew);
   });
 });
