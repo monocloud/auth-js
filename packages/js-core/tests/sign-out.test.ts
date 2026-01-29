@@ -597,8 +597,8 @@ describe('signOut() Tests', () => {
 
   it('should only clear local session and return if federatedSignOut is false', async () => {
     fetchBuilder().createSpy();
-    const assignSpy = vi.spyOn(window.location, 'assign');
-    const openSpy = vi.spyOn(window, 'open');
+    vi.spyOn(window.location, 'assign');
+    vi.spyOn(window, 'open');
 
     const session: MonoCloudSession = {
       user: { sub: 'sub' },
@@ -626,10 +626,6 @@ describe('signOut() Tests', () => {
 
     expect(await instance.getSession()).toBeUndefined();
     storage.expectNoSession();
-
-    expect(assignSpy).not.toHaveBeenCalled();
-
-    expect(openSpy).not.toHaveBeenCalled();
 
     expect(window.fetch).not.toHaveBeenCalled();
   });

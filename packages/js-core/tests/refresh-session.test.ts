@@ -285,16 +285,16 @@ describe('instance.refreshSession() Tests', () => {
         claims: { email: 'test@example.com' },
       });
 
-      fetchSpy.configureTokenEndpoint({
-        accessToken: 'newAt',
-        refreshToken: 'newRt',
-        idToken,
-      });
-
-      fetchSpy.configureUserinfo({
-        accessToken: 'newAt',
-        claims: { sub: 'sub', email: 'test@example.com' },
-      });
+      fetchSpy
+        .configureTokenEndpoint({
+          accessToken: 'newAt',
+          refreshToken: 'newRt',
+          idToken,
+        })
+        .configureUserinfo({
+          accessToken: 'newAt',
+          claims: { sub: 'sub', email: 'test@example.com' },
+        });
 
       const callbackUrl =
         responseType === 'code'
@@ -642,16 +642,16 @@ describe('instance.refreshSession() Tests', () => {
       claims: { email: 'test@example.com' },
     });
 
-    fetchSpy.configureTokenEndpoint({
-      accessToken: 'newAt',
-      refreshToken: 'newRt',
-      idToken,
-    });
-
-    fetchSpy.configureUserinfo({
-      accessToken: 'newAt',
-      claims: { sub: 'sub', email: 'test@example.com' },
-    });
+    fetchSpy
+      .configureTokenEndpoint({
+        accessToken: 'newAt',
+        refreshToken: 'newRt',
+        idToken,
+      })
+      .configureUserinfo({
+        accessToken: 'newAt',
+        claims: { sub: 'sub', email: 'test@example.com' },
+      });
 
     const callbackUrl = `http://localhost:3000/callback?code=auth-code&state=${encodeURIComponent(
       generatedState ?? ''
@@ -997,16 +997,16 @@ describe('instance.refreshSession() Tests', () => {
       claims: { email: 'test@example.com' },
     });
 
-    fetchSpy.configureTokenEndpoint({
-      accessToken: 'newAt',
-      refreshToken: 'newRt',
-      idToken,
-    });
-
-    fetchSpy.configureUserinfo({
-      accessToken: 'newAt',
-      claims: { sub: 'sub', email: 'test@example.com' },
-    });
+    fetchSpy
+      .configureTokenEndpoint({
+        accessToken: 'newAt',
+        refreshToken: 'newRt',
+        idToken,
+      })
+      .configureUserinfo({
+        accessToken: 'newAt',
+        claims: { sub: 'sub', email: 'test@example.com' },
+      });
 
     const callbackUrl = `http://localhost:3000/callback?code=auth-code&state=${encodeURIComponent(
       generatedState ?? ''
@@ -1129,16 +1129,16 @@ describe('instance.refreshSession() Tests', () => {
       claims: { email: 'test@example.com' },
     });
 
-    fetchSpy.configureTokenEndpoint({
-      accessToken: 'newAt',
-      refreshToken: 'newRt',
-      idToken,
-    });
-
-    fetchSpy.configureUserinfo({
-      accessToken: 'newAt',
-      claims: { sub: 'sub', email: 'test@example.com' },
-    });
+    fetchSpy
+      .configureTokenEndpoint({
+        accessToken: 'newAt',
+        refreshToken: 'newRt',
+        idToken,
+      })
+      .configureUserinfo({
+        accessToken: 'newAt',
+        claims: { sub: 'sub', email: 'test@example.com' },
+      });
 
     const callbackUrl = `http://localhost:3000/callback?code=auth-code&state=${encodeURIComponent(
       generatedState ?? ''
@@ -1262,16 +1262,16 @@ describe('instance.refreshSession() Tests', () => {
       claims: { email: 'test@example.com' },
     });
 
-    fetchSpy.configureTokenEndpoint({
-      accessToken: 'newAt',
-      refreshToken: 'newRt',
-      idToken,
-    });
-
-    fetchSpy.configureUserinfo({
-      accessToken: 'newAt',
-      claims: { sub: 'sub', email: 'test@example.com' },
-    });
+    fetchSpy
+      .configureTokenEndpoint({
+        accessToken: 'newAt',
+        refreshToken: 'newRt',
+        idToken,
+      })
+      .configureUserinfo({
+        accessToken: 'newAt',
+        claims: { sub: 'sub', email: 'test@example.com' },
+      });
 
     const callbackUrl = `http://localhost:3000/callback?code=auth-code&state=${encodeURIComponent(
       generatedState ?? ''

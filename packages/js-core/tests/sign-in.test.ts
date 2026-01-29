@@ -1534,15 +1534,15 @@ describe('signIn() Tests', () => {
       claims: { email: 'test@example.com' },
     });
 
-    fetchSpy.configureTokenEndpoint({
-      accessToken: 'mock-access-token',
-      idToken,
-    });
-
-    fetchSpy.configureUserinfo({
-      accessToken: 'mock-access-token',
-      claims: { sub: 'sub', email: 'test@example.com' },
-    });
+    fetchSpy
+      .configureTokenEndpoint({
+        accessToken: 'mock-access-token',
+        idToken,
+      })
+      .configureUserinfo({
+        accessToken: 'mock-access-token',
+        claims: { sub: 'sub', email: 'test@example.com' },
+      });
 
     const goodCallbackUrl = `http://localhost:3000/callback?code=auth-code&state=${encodeURIComponent(
       state ?? ''
@@ -1631,15 +1631,15 @@ describe('signIn() Tests', () => {
       claims: { email: 'test@example.com' },
     });
 
-    fetchSpy.configureTokenEndpoint({
-      accessToken: 'mock-access-token',
-      idToken,
-    });
-
-    fetchSpy.configureUserinfo({
-      accessToken: 'mock-access-token',
-      claims: { sub: 'sub', email: 'test@example.com' },
-    });
+    fetchSpy
+      .configureTokenEndpoint({
+        accessToken: 'mock-access-token',
+        idToken,
+      })
+      .configureUserinfo({
+        accessToken: 'mock-access-token',
+        claims: { sub: 'sub', email: 'test@example.com' },
+      });
 
     const callbackUrl = `http://localhost:3000/callback?code=auth-code&state=${encodeURIComponent(
       state ?? ''
@@ -1728,15 +1728,15 @@ describe('signIn() Tests', () => {
       claims: { email: 'test@example.com' },
     });
 
-    fetchSpy.configureTokenEndpoint({
-      accessToken: 'mock-access-token',
-      idToken,
-    });
-
-    fetchSpy.configureUserinfo({
-      accessToken: 'mock-access-token',
-      claims: { sub: 'sub', email: 'test@example.com' },
-    });
+    fetchSpy
+      .configureTokenEndpoint({
+        accessToken: 'mock-access-token',
+        idToken,
+      })
+      .configureUserinfo({
+        accessToken: 'mock-access-token',
+        claims: { sub: 'sub', email: 'test@example.com' },
+      });
 
     const callbackUrl = `http://localhost:3000/callback?code=auth-code&state=${encodeURIComponent(
       state ?? ''
