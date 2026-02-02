@@ -48,36 +48,48 @@ import { MonoCloudJsError } from './monocloud-js-error';
 import { withLock } from './lock';
 
 /**
- * MonoCloudJSCoreClient manages authentication and session for JavaScript apps that run in the browser.
+ * Browser client for MonoCloud authentication.
  *
- * @example Initialize MonoCloudJSCoreClient
+ * Use this class to:
+ * - Start sign-in and sign-out flows (redirect, popup, silent iframe)
+ * - Process authentication callbacks (`processCallback`)
+ * - Persist the authenticated session in storage
+ * - Refresh the session and retrieve tokens on demand
  *
- * const monoCloudClient = new MonoCloudJSCoreClient({
- *   domain: 'your-domain.monocloud.com',
+ * Typical setup:
+ * 1) Create the client.
+ * 2) Call `processCallback()` once on app startup (before rendering protected routes).
+ * 3) Call `signIn()` / `signOut()` in response to user actions.
+ *
+ * @example
+ * const client = new MonoCloudJSCoreClient({
+ *   tenantDomain: 'your-tenant.monocloud.com',
  *   clientId: 'your-client-id',
  *   appUrl: 'https://your-app.com',
  *   callbackPath: '/callback',
- *   signOutCallbackPath: '/signout-callback'
+ *   signOutCallbackPath: '/signout-callback',
  * });
  *
- * // Basic usage
- * await monoCloudClient.signIn();
- * await monoCloudClient.processCallback();
+ * // On app startup:
+ * await client.processCallback();
+ *
+ * // Later (e.g., button click):
+ * await client.signIn();
  */
 export class MonoCloudJSCoreClient {
   private storage: IStorage;
 
-  /**
-   * The underlying OIDC client instance used for low-level OpenID Connect operations.
-   *
-   * @example
-   * // Manually revoke an access token
-   * await client.oidcClient.revokeToken(accessToken, 'access_token');
-   */
   oidcClient: MonoCloudOidcClient;
 
   private options: MonoCloudJSCoreClientOptions;
 
+  /**
+   * Default post-callback behavior:
+   * - If `returnUrl` is not set: remove query params from the current URL (no navigation).
+   * - If `returnUrl` is set: navigate to `returnUrl` (full page reload).
+   *
+   * If you use a client-side router, provide a custom `postCallbackFn` to avoid full reload.
+   */
   private postCallbackFn: PostCallback = state => {
     if (!state.returnUrl) {
       const url = new URL(window.location.href);
@@ -94,6 +106,10 @@ export class MonoCloudJSCoreClient {
     return;
   };
 
+  /**
+   * Optional hook invoked while constructing a new session (e.g., after authenticate/refresh).
+   * This is useful for mapping app-specific state into your session or running side effects.
+   */
   private onSessionCreating?: OnSessionCreating;
 
   private get filteredIdTokenClaims(): string[] {
@@ -159,6 +175,10 @@ export class MonoCloudJSCoreClient {
     return `${AUTH_CONSTANTS.LOCK_KEY}.${this.options.clientId}`;
   }
 
+  /**
+   * Persist the callback state in `sessionStorage` for redirect-based flows.
+   * This state is consumed by `processCallback()` and then cleared.
+   */
   private set redirectCallbackState(state: CallbackState | undefined) {
     if (!state) {
       window.sessionStorage.removeItem(this.callbackStateKey);
@@ -195,6 +215,10 @@ export class MonoCloudJSCoreClient {
     return this.options.popupWindowHeight ?? AUTH_CONSTANTS.POPUP_WINDOW_HEIGHT;
   }
 
+  /**
+   * Storage key used for persisting the current session.
+   * Includes `clientId` and optional `sessionKey` suffix to avoid collisions.
+   */
   private get sessionKey(): string {
     return `${AUTH_CONSTANTS.SESSION_KEY}.${this.options.clientId}${this.options.sessionKey ? `.${this.options.sessionKey}` : ''}`;
   }
@@ -228,26 +252,38 @@ export class MonoCloudJSCoreClient {
   }
 
   /**
-   * Creates a new instance of MonoCloudJSCoreClient.
+   * Create a new `MonoCloudJSCoreClient`.
    *
-   * @param {MonoCloudJSCoreClientOptions} options - Configuration options for the client
-   * @param {IStorage} [storage=window.localStorage] - Storage for storing session
-   * @param {PostCallback} [postCallbackFn] - A function that is executed after a sign in or sign out callback.
-   * default `PostCallback` to redirect to the `returnUrl` after a sign in or sign out.
-   * **If you have configured a custom `PostCallback` function, this parameter can be ignored.**
+   * Notes:
+   * - `options.appUrl` is normalized to remove trailing slashes.
+   * - Session data is stored via the provided `storage` implementation.
+   * - If `postCallbackFn` is not provided, the default implementation either:
+   *   - removes query params (no navigation), or
+   *   - navigates to `returnUrl` (full page reload).
+   *
+   * @param options Client configuration (tenant, clientId, appUrl, callback paths, etc.).
+   * @param storage Storage provider for the session. Defaults to browser `localStorage`.
+   * @param postCallbackFn Handler called after a successful sign-in or sign-out callback.
+   * @param onSessionCreating Optional hook invoked when a new session is created or updated.
+   *
    * @example
-   * const client = new MonoCloudJSCoreClient({
-   *   domain: 'your-domain.monocloud.com',
-   *   clientId: 'your-client-id',
-   *   appUrl: 'https://your-app.com',
-   *   callbackPath: '/callback',
-   *   signOutCallbackPath: '/signout-callback'
-   *   scopes: ['openid', 'profile', 'email'],
-   *   responseType: 'code',
-   *   validateIdToken: true,
-   *   fetchUserinfo: true,
-   *   federatedSignOut: true
-   * });
+   * const client = new MonoCloudJSCoreClient(
+   *   {
+   *     tenantDomain: 'your-tenant.monocloud.com',
+   *     clientId: 'your-client-id',
+   *     appUrl: 'https://your-app.com',
+   *     callbackPath: '/callback',
+   *     signOutCallbackPath: '/signout-callback',
+   *     responseType: 'code',
+   *     fetchUserinfo: true,
+   *     validateIdToken: true,
+   *   },
+   *   localStorage(),
+   *   ({ type, returnUrl }) => {
+   *     // Integrate with a SPA router instead of full page reloads
+   *     if (returnUrl) router.navigate(returnUrl);
+   *   }
+   * );
    */
   constructor(
     options: MonoCloudJSCoreClientOptions,
@@ -280,20 +316,20 @@ export class MonoCloudJSCoreClient {
   }
 
   /**
-   * Processes authentication callbacks after a redirect, popup, or silent sign-in/sign-out flow.
+   * Process an authentication callback (sign-in or sign-out).
    *
-   * This method must be called exactly once when the application initializes.
+   * Call this **once** during application startup.
    *
-   * - In the main window, it validates and completes sign-in or sign-out callbacks
-   *   using the stored callback state.
+   * Behavior depends on the execution context:
+   * - **Main window:** validates the callback using stored state and completes the flow.
+   * - **Popup / iframe:** forwards the callback URL to the opener/parent via `postMessage`.
    *
-   * - In popup or iframe contexts, it forwards the callback URL to the parent window
-   *   using `postMessage` and performs no validation itself.
+   * This method is safe to call on any route; it only acts when the current URL matches
+   * the configured callback paths and matching callback state is available.
    *
    * @example
-   *
-   * await monoCloudClient.processCallback();
-   *
+   * // On app startup (before rendering protected routes)
+   * await client.processCallback();
    */
   async processCallback(): Promise<void> {
     const currentUrl = new URL(window.location.href);
@@ -333,19 +369,30 @@ export class MonoCloudJSCoreClient {
   }
 
   /**
-   * Starts the sign in flow
+   * Start the sign-in flow.
    *
-   * @param {SignInOptions} [signInOptions] -  Options to customize sign in.
+   * Supported modes:
+   * - `redirect` (default): navigates the browser to the authorization endpoint.
+   * - `popup`: opens a centered popup and completes sign-in without leaving the main window.
+   *
+   * This method must be called from the **main window** (not from a popup or iframe).
+   *
+   * @param signInOptions Optional parameters such as mode, scopes, prompt, returnUrl, etc.
+   *
+   * @throws {MonoCloudJsError} If called from a popup/iframe or if popup/iframe creation fails.
+   * @throws {MonoCloudValidationError | MonoCloudOPError} If the callback validation fails.
    *
    * @example
-   * // Sign in with redirect
-   * await monoCloudClient.signIn();
+   * // Redirect sign-in
+   * await client.signIn();
    *
-   * // Sign in with popup
-   * await monoCloudClient.signIn({ mode: 'popup' });
+   * @example
+   * // Popup sign-in
+   * await client.signIn({ mode: 'popup' });
    *
-   * // Show sign up ui
-   * await monoCloudClient.signIn({ signUp: true });
+   * @example
+   * // Show sign-up UI (if supported by the OP)
+   * await client.signIn({ signUp: true });
    */
   async signIn(signInOptions?: SignInOptions): Promise<void> {
     if (!this.mainWindow) {
@@ -440,21 +487,31 @@ export class MonoCloudJSCoreClient {
   }
 
   /**
-   * Signs out the current user and optionally performs a federated sign out.
+   * Sign out the current user.
    *
-   * @param {SignOutOptions} [signOutOptions] - Sign out options
+   * If federated sign-out is enabled (`federatedSignOut: true`), this initiates an
+   * end-session request against the OP and processes the callback.
+   *
+   * If federated sign-out is disabled, this only clears the local session.
+   *
+   * This method must be called from the **main window** (not from a popup or iframe).
+   *
+   * @param signOutOptions Optional options such as mode, returnUrl, and postLogoutRedirectUri.
+   *
+   * @throws {MonoCloudJsError} If called from a popup/iframe or if popup/iframe creation fails.
+   * @throws {MonoCloudValidationError} If callback validation fails.
    *
    * @example
-   * // Basic sign out
-   * await monoCloudClient.signOut();
+   * // Basic sign out (uses configured federatedSignOut behavior)
+   * await client.signOut();
    *
-   * // Sign out with popup
-   * await monoCloudClient.signOut({ mode: 'popup' });
+   * @example
+   * // Popup sign out
+   * await client.signOut({ mode: 'popup' });
    *
-   * // Sign out with custom redirect URI
-   * await monoCloudClient.signOut({
-   *   postLogoutRedirectUri: 'https://example.com/logout-complete'
-   * });
+   * @example
+   * // Override the post-logout redirect target (OP must allow it)
+   * await client.signOut({ postLogoutRedirectUri: 'https://example.com/logout' });
    */
   async signOut(signOutOptions?: SignOutOptions): Promise<void> {
     if (!this.mainWindow) {
@@ -525,20 +582,27 @@ export class MonoCloudJSCoreClient {
   }
 
   /**
-   * Refreshes the current session either using a refresh token, silent authentication or popup.
+   * Refresh the current session.
    *
-   * @param {RefreshOptions} [refreshOptions] - Refresh session options.
+   * Supported modes:
+   * - `silent` (default): uses `prompt=none` in a hidden iframe.
+   * - `popup`: performs `prompt=none` in a popup window.
+   * - `refresh_token`: uses the refresh token grant (requires `offline_access`).
+   *
+   * This method must be called from the **main window** (not from a popup or iframe).
+   *
+   * @param refreshOptions Refresh behavior and optional grant options.
+   *
+   * @throws {MonoCloudValidationError} If there is no session, or refresh token is required but missing.
+   * @throws {MonoCloudJsError} If called from a popup/iframe or if popup/iframe creation fails.
    *
    * @example
    * // Refresh using refresh token grant
-   * await monoCloudClient.refreshSession({
-   *   mode: 'refresh_token'
-   * });
+   * await client.refreshSession({ mode: 'refresh_token' });
    *
-   * // Silent refresh using prompt=none
-   * await monoCloudClient.refreshSession({
-   *   mode: 'silent'
-   * });
+   * @example
+   * // Silent refresh (prompt=none) using hidden iframe
+   * await client.refreshSession({ mode: 'silent' });
    */
   // eslint-disable-next-line consistent-return
   async refreshSession(refreshOptions?: RefreshOptions): Promise<void> {
@@ -646,11 +710,16 @@ export class MonoCloudJSCoreClient {
   }
 
   /**
-   * Fetches user details using the access token from the userinfo endpoint and updates the current session.
+   * Re-fetch user details from the OIDC `userinfo` endpoint and update the stored session.
+   *
+   * This requires:
+   * - An active session
+   * - A default access token that can call `userinfo` (typically includes `openid`)
+   *
+   * @throws {MonoCloudValidationError} If there is no session or no default access token.
    *
    * @example
-   * // Refetch user information
-   * await monoCloudClient.refetchUserInfo();
+   * await client.refetchUserInfo();
    */
   async refetchUserInfo(): Promise<void> {
     let session = await this.getSession();
@@ -679,15 +748,32 @@ export class MonoCloudJSCoreClient {
   }
 
   /**
-   * Retrieves active tokens (Access, ID, Refresh), performing a refresh if they are expired or missing.
+   * Get tokens for the current session.
    *
-   * @param options - Configuration for token retrieval (force refresh, specific scopes/resources).
+   * Returns:
+   * - Access token (for the requested resource/scopes)
+   * - ID token (from the current/updated session)
+   * - Refresh token (if available)
    *
-   * @returns Fetched tokens
+   * If the access token is missing or near expiry, this method refreshes the session first.
+   * It also supports forcing a refresh regardless of current expiry.
+   *
+   * @param options Token selection and refresh behavior.
+   * @returns Token bundle including `isExpired` (based on a small safety buffer).
+   *
+   * @throws {MonoCloudValidationError} If no session exists or an access token cannot be obtained.
    *
    * @example
+   * // Get default tokens (may refresh if needed)
+   * const tokens = await client.getTokens();
    *
-   * await monoCloudClient.getTokens();
+   * @example
+   * // Force refresh and refetch user info
+   * const tokens = await client.getTokens({ forceRefresh: true, refetchUserInfo: true });
+   *
+   * @example
+   * // Request an access token for a specific resource/scopes
+   * const tokens = await client.getTokens({ resource: 'https://api.example.com', scopes: 'read write' });
    */
   async getTokens(options?: GetTokensOptions): Promise<MonoCloudTokens> {
     return await withLock(this.lockKey, async () => {
@@ -763,7 +849,6 @@ export class MonoCloudJSCoreClient {
         refreshToken = updatedSession.refreshToken;
       }
 
-      // Just in case. At this point, the access token should be present
       /* v8 ignore next -- @preserve */
       if (!token) {
         throw new MonoCloudValidationError('Access token not found');
@@ -779,10 +864,15 @@ export class MonoCloudJSCoreClient {
   }
 
   /**
-   * Returns the session of the currently signed in user.
+   * Get the currently stored session (if any).
+   *
+   * If the stored value is invalid JSON, it will be cleared and `undefined` is returned.
+   *
+   * @returns The session, or `undefined` if no session exists.
    *
    * @example
-   * await monoCloudClient.getSession();
+   * const session = await client.getSession();
+   * if (session) console.log(session.user);
    */
   async getSession(): Promise<MonoCloudSession | undefined> {
     try {
@@ -793,6 +883,11 @@ export class MonoCloudJSCoreClient {
     }
   }
 
+  /**
+   * Persist or clear the session in storage.
+   *
+   * @param session When provided, the session is serialized to storage. When omitted, the session is removed.
+   */
   private async setSession(session?: MonoCloudSession): Promise<void> {
     if (!session) {
       await this.storage.removeItem(this.sessionKey);
@@ -803,18 +898,21 @@ export class MonoCloudJSCoreClient {
   }
 
   /**
-   * Processes a completed sign-in callback URL.
+   * Complete a sign-in flow using a callback URL and the saved callback state.
    *
-   * This method validates:
-   * - Callback URL and path
-   * - Callback state
-   * - Authorization response parameters
+   * Validates:
+   * - Callback URL matches configured `redirectUri`
+   * - Callback state is present and matches the response (`state`)
+   * - Authorization response parameters (success or error)
+   * - ID token (optional, depending on configuration and flow)
    *
-   * It creates and stores a new session on success and invokes the configured
-   * post-callback handler.
+   * On success, creates/updates the session and invokes the configured post-callback handler.
    *
-   * @throws {MonoCloudValidationError} if validation fails
-   * @throws {MonoCloudOPError} if the authorization server returns an error
+   * @param callbackUrl Full callback URL received from the OP.
+   * @param callbackState State captured when initiating the flow.
+   *
+   * @throws {MonoCloudValidationError} If validation fails.
+   * @throws {MonoCloudOPError} If the OP returned an error response.
    */
   private async processSignInCallback(
     callbackUrl: string,
@@ -960,11 +1058,15 @@ export class MonoCloudJSCoreClient {
   }
 
   /**
-   * Opens a popup window or silent iframe to perform an authentication request
-   * and waits for the callback URL to be returned via postMessage.
+   * Complete a sign-out callback.
    *
-   * This method does not parse or validate authentication responses.
-   * It only returns the callback URL to the caller.
+   * Clears the local session and validates that the callback `state` matches the
+   * stored callback state for the initiated sign-out flow.
+   *
+   * @param callbackUrl Full callback URL received from the OP.
+   * @param callbackState State captured when initiating the sign-out flow.
+   *
+   * @throws {MonoCloudValidationError} If callback validation fails.
    */
   private async processSignOutCallback(
     callbackUrl: string,
@@ -994,6 +1096,22 @@ export class MonoCloudJSCoreClient {
     });
   }
 
+  /**
+   * Run an auth request inside a popup window or hidden iframe and wait for the callback URL.
+   *
+   * This method:
+   * - navigates the popup/iframe to the provided authorization URL
+   * - waits for a `postMessage` from the popup/iframe containing the callback URL
+   * - rejects on timeout or if the user closes the popup
+   *
+   * It does not parse or validate the callback parameters; the caller does that.
+   *
+   * @param url Authorization/end-session URL to load in the auth window.
+   * @param ref Wrapper around the popup/iframe reference.
+   * @returns The callback URL received via `postMessage`.
+   *
+   * @throws {MonoCloudJsError} On timeout or if the user closes the popup.
+   */
   private async authWindow(url: string, ref: Ref): Promise<string> {
     ref.setUrl(url);
     return await new Promise<string>((resolve, reject) => {
@@ -1053,6 +1171,13 @@ export class MonoCloudJSCoreClient {
     });
   }
 
+  /**
+   * Create a window reference appropriate for the interaction mode.
+   *
+   * - `popup`  -> opens a popup window
+   * - `silent` -> creates a hidden iframe
+   * - other modes do not require a window reference
+   */
   private createRef(
     mode: 'popup' | 'silent' | 'redirect' | 'refresh_token'
   ): Ref | undefined {
@@ -1068,6 +1193,12 @@ export class MonoCloudJSCoreClient {
     }
   }
 
+  /**
+   * Open a centered popup window for interactive authentication.
+   *
+   * @returns A `Ref` bound to the popup window.
+   * @throws {MonoCloudJsError} If the browser blocks the popup.
+   */
   private createPopup(): Ref {
     const { screenLeft, screenTop } = window;
 
@@ -1103,6 +1234,12 @@ export class MonoCloudJSCoreClient {
     return ref;
   }
 
+  /**
+   * Create a hidden iframe for silent authentication (`prompt=none`).
+   *
+   * @returns A `Ref` bound to the iframe element.
+   * @throws {MonoCloudJsError} If the environment is cross-origin isolated.
+   */
   private createIframe(): Ref {
     if (window.crossOriginIsolated) {
       throw new MonoCloudJsError('Isolated Cross-Origin. Cannot create iframe');
