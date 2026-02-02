@@ -1,5 +1,6 @@
 import TabLock from 'browser-tabs-lock';
 import { MonoCloudJsError } from './monocloud-js-error';
+import { MonoCloudAuthBaseError } from '@monocloud/auth-core';
 
 const tabLock = new TabLock();
 
@@ -7,11 +8,6 @@ export async function withLock<T = any>(
   key: string,
   cb: () => Promise<T>
 ): Promise<T> {
-  const releaseLocks = async (): Promise<void> => {
-    await tabLock.releaseLock(key);
-    window.removeEventListener('pagehide', releaseLocks);
-  };
-
   if (navigator.locks instanceof LockManager && window.isSecureContext) {
     const abortController = new AbortController();
     const timeout = setTimeout(() => abortController.abort(), 5000);
@@ -24,10 +20,18 @@ export async function withLock<T = any>(
           return await cb();
         }
       );
-    } catch (error) {
-      throw new MonoCloudJsError(
-        `Failed to acquire lock : ${(error as Error).message}`
-      );
+    } catch (error: any) {
+      if (error instanceof MonoCloudAuthBaseError) {
+        throw error;
+      }
+
+      if (error.name === 'AbortError') {
+        throw new MonoCloudJsError(
+          `Failed to acquire lock: Timed out after 5000ms`
+        );
+      }
+
+      throw new MonoCloudJsError(`Failed to acquire lock : ${error.message}`);
     }
   } else {
     const acquired = await tabLock.acquireLock(key, 5000);
@@ -35,10 +39,15 @@ export async function withLock<T = any>(
       throw new MonoCloudJsError('Failed to acquire lock.');
     }
 
+    const onPageHide = async () => {
+      await tabLock.releaseLock(key);
+    };
+
     try {
-      window.addEventListener('pagehide', releaseLocks);
+      window.addEventListener('pagehide', onPageHide);
       return await cb();
     } finally {
+      window.removeEventListener('pagehide', onPageHide);
       await tabLock.releaseLock(key);
     }
   }

@@ -1329,4 +1329,146 @@ describe('instance.refreshSession() Tests', () => {
       fetchSpy.assert();
     });
   });
+
+  it('Silent Mode - should combine multiple resources and scopes from options.resources', async () => {
+    fetchBuilder()
+      .configureMetadata()
+      .configureTokenEndpoint()
+      .configureUserinfo()
+      .createSpy();
+
+    mockWindow.assert();
+
+    const iframe = window.document.createElement('iframe');
+    vi.spyOn(window.document, 'createElement').mockReturnValue(iframe);
+    vi.spyOn(iframe, 'contentWindow', 'get').mockReturnValue(
+      window as unknown as Window
+    );
+
+    let iframeSrc = '';
+    vi.spyOn(iframe, 'setAttribute').mockImplementation((name, value) => {
+      if (name === 'src') iframeSrc = value;
+    });
+
+    const existingSession: MonoCloudSession = {
+      user: { sub: 'sub' },
+      refreshToken: 'rt',
+      accessTokens: [
+        {
+          accessToken: 'at',
+          accessTokenExpiration: now() + 1000,
+          scopes: 'openid',
+          requestedScopes: 'openid',
+        },
+      ],
+      authorizedScopes: 'openid',
+    };
+    setSession(storage, existingSession);
+
+    const instance = testInstance({
+      storage,
+      resources: [
+        { resource: 'api://inventory', scopes: 'inv:read' },
+        { resource: 'api://orders', scopes: 'orders:write' },
+      ],
+    });
+
+    instance.refreshSession({ mode: 'silent' });
+
+    await vi.waitFor(() => {
+      expect(iframeSrc).toContain('https://example.com/connect/authorize');
+    });
+
+    const url = new URL(iframeSrc);
+
+    const resources = url.searchParams.getAll('resource');
+    expect(resources).toHaveLength(2);
+    expect(resources).toContain('api://inventory');
+    expect(resources).toContain('api://orders');
+
+    const scopes = url.searchParams.get('scope')?.split(' ') ?? [];
+    expect(scopes).toContain('inv:read');
+    expect(scopes).toContain('orders:write');
+  });
+
+  it('Silent Mode - should filter out invalid resources and scopes from options.resources', async () => {
+    fetchBuilder().configureMetadata().createSpy();
+    mockWindow.assert();
+
+    const iframe = window.document.createElement('iframe');
+    vi.spyOn(window.document, 'createElement').mockReturnValue(iframe);
+    vi.spyOn(iframe, 'contentWindow', 'get').mockReturnValue(
+      window as unknown as Window
+    );
+
+    let iframeSrc = '';
+    vi.spyOn(iframe, 'setAttribute').mockImplementation((name, value) => {
+      if (name === 'src') iframeSrc = value;
+    });
+
+    const existingSession: MonoCloudSession = {
+      user: { sub: 'sub' },
+      refreshToken: 'rt',
+      accessTokens: [
+        {
+          accessToken: 'at',
+          accessTokenExpiration: now() + 1000,
+          scopes: 'openid',
+          requestedScopes: 'openid',
+        },
+      ],
+      authorizedScopes: 'openid',
+    };
+    setSession(storage, existingSession);
+
+    const instance = testInstance({
+      storage,
+      resources: [
+        { resource: 'api://valid', scopes: 'scope:valid' },
+        { resource: '', scopes: '' },
+        { resource: undefined, scopes: undefined },
+        {} as any,
+      ],
+    });
+
+    instance.refreshSession({ mode: 'silent' });
+
+    await vi.waitFor(() => {
+      expect(iframeSrc).toContain('https://example.com/connect/authorize');
+    });
+
+    const url = new URL(iframeSrc);
+
+    const resources = url.searchParams.getAll('resource');
+    expect(resources).toHaveLength(1);
+    expect(resources).toContain('api://valid');
+    expect(resources).not.toContain('');
+    expect(resources).not.toContain('undefined');
+
+    const scopes = url.searchParams.get('scope')?.split(' ') ?? [];
+    expect(scopes).toContain('scope:valid');
+    expect(scopes).not.toContain('');
+    expect(scopes).not.toContain('undefined');
+  });
+
+  it('Silent Mode - should throw error if window is crossOriginIsolated', async () => {
+    const instance = testInstance({ storage });
+
+    Object.defineProperty(window, 'crossOriginIsolated', {
+      value: true,
+      configurable: true,
+    });
+
+    const refreshPromise = instance.refreshSession({ mode: 'silent' });
+
+    await expect(refreshPromise).rejects.toThrow(MonoCloudJsError);
+    await expect(refreshPromise).rejects.toThrow(
+      'Isolated Cross-Origin. Cannot create iframe'
+    );
+
+    Object.defineProperty(window, 'crossOriginIsolated', {
+      value: false,
+      configurable: true,
+    });
+  });
 });

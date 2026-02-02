@@ -1872,4 +1872,203 @@ describe('signIn() Tests', () => {
     await expect(p).rejects.toThrow(MonoCloudValidationError);
     await expect(p).rejects.toThrow('No parameters found in callback');
   });
+
+  it('should combine multiple resources and scopes from options.resources', async () => {
+    const fetchSpy = fetchBuilder().configureMetadata().createSpy();
+    mockWindow.assert();
+
+    const instance = testInstance({
+      storage,
+      resources: [
+        { resource: 'api://inventory', scopes: 'inv:read' },
+        { resource: 'api://orders', scopes: 'orders:write' },
+      ],
+    });
+
+    await instance.signIn();
+
+    expect(window.location.assign).toHaveBeenCalledOnce();
+
+    const [calledUrl] = (window.location.assign as any).mock.calls[0];
+    const url = new URL(calledUrl);
+
+    const resources = url.searchParams.getAll('resource');
+
+    expect(resources).toHaveLength(2);
+    expect(resources).toContain('api://inventory');
+    expect(resources).toContain('api://orders');
+
+    const scopes = url.searchParams.get('scope')?.split(' ') ?? [];
+    expect(scopes).toContain('inv:read');
+    expect(scopes).toContain('orders:write');
+
+    fetchSpy.assert();
+  });
+
+  it('should filter out invalid resources and scopes from options.resources', async () => {
+    const fetchSpy = fetchBuilder().configureMetadata().createSpy();
+    mockWindow.assert();
+
+    const instance = testInstance({
+      storage,
+      resources: [
+        { resource: 'valid-resource', scopes: 'valid-scope' },
+        { resource: '', scopes: '' },
+        { resource: undefined, scopes: undefined },
+        {} as any,
+        { resource: null as any, scopes: null as any },
+      ],
+    });
+
+    await instance.signIn();
+
+    expect(window.location.assign).toHaveBeenCalledOnce();
+
+    const [calledUrl] = (window.location.assign as any).mock.calls[0];
+    const url = new URL(calledUrl);
+
+    const resources = url.searchParams.get('resource')?.split(' ') ?? [];
+    expect(resources).toContain('valid-resource');
+    expect(resources).not.toContain('');
+    expect(resources).not.toContain('undefined');
+    expect(resources).not.toContain('null');
+    expect(resources.length).toBe(1);
+
+    const scopes = url.searchParams.get('scope')?.split(' ') ?? [];
+    expect(scopes).toContain('valid-scope');
+    expect(scopes).not.toContain('');
+    expect(scopes).not.toContain('undefined');
+    expect(scopes).not.toContain('null');
+
+    fetchSpy.assert();
+  });
+
+  it('should handle corrupted/invalid JSON in session storage for callback state', async () => {
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    vi.spyOn(window.sessionStorage, 'getItem').mockReturnValue(
+      '{ malformed_json_string'
+    );
+
+    const removeItemSpy = vi.spyOn(window.sessionStorage, 'removeItem');
+
+    const instance = testInstance({ storage });
+
+    const processPromise = instance.processCallback();
+
+    await expect(processPromise).rejects.toThrow(SyntaxError);
+
+    expect(removeItemSpy).toHaveBeenCalled();
+    expect(consoleSpy).toHaveBeenCalledWith(
+      'Unexpected error reading callback state:'
+    );
+
+    consoleSpy.mockRestore();
+  });
+
+  it('Popup Mode - should ignore messages with invalid data types or missing URLs', async () => {
+    const fetchSpy = fetchBuilder()
+      .configureMetadata()
+      .configureJwks()
+      .createSpy();
+
+    mockWindow.assert();
+
+    const mockPopup = {
+      close: vi.fn(),
+      closed: false,
+      location: { href: '' },
+    } as unknown as Window;
+
+    vi.spyOn(window, 'open').mockReturnValue(mockPopup);
+
+    const instance = testInstance({ storage });
+
+    const signInPromise = instance.signIn({ mode: 'popup' });
+
+    await vi.waitFor(() => {
+      expect(mockPopup.location.href).toMatch(urlRegex);
+    });
+
+    const authorizeUrl = new URL(mockPopup.location.href);
+    const generatedState = authorizeUrl.searchParams.get('state');
+    const generatedNonce = authorizeUrl.searchParams.get('nonce');
+    const idToken = await generateIdToken({
+      nonce: generatedNonce ?? undefined,
+      claims: { email: 'test@example.com' },
+    });
+
+    fetchSpy
+      .configureTokenEndpoint({ accessToken: 'at', idToken })
+      .configureUserinfo({ claims: { sub: 'sub' } });
+
+    window.dispatchEvent(
+      new MessageEvent('message', {
+        data: 'invalid-string-data',
+        origin: 'http://localhost:3000',
+        source: mockPopup,
+      })
+    );
+
+    window.dispatchEvent(
+      new MessageEvent('message', {
+        data: {
+          source: 'monocloud-auth-js-core',
+          otherProp: 123,
+        },
+        origin: 'http://localhost:3000',
+        source: mockPopup,
+      })
+    );
+
+    const validCallbackUrl = `http://localhost:3000/callback?code=auth-code&state=${encodeURIComponent(
+      generatedState ?? ''
+    )}`;
+
+    window.dispatchEvent(
+      new MessageEvent('message', {
+        data: {
+          source: 'monocloud-auth-js-core',
+          url: validCallbackUrl,
+        },
+        source: mockPopup,
+        origin: 'http://localhost:3000',
+      })
+    );
+
+    await expect(signInPromise).resolves.not.toThrow();
+
+    await vi.waitFor(async () => {
+      expect(mockPopup.close).toHaveBeenCalled();
+      fetchSpy.assert();
+    });
+  });
+
+  it('should fall back to window.parent when window.opener is null', async () => {
+    const mockParent = {
+      postMessage: vi.fn(),
+    };
+
+    vi.spyOn(window, 'opener', 'get').mockReturnValue(null);
+    vi.spyOn(window, 'parent', 'get').mockReturnValue(
+      mockParent as unknown as Window
+    );
+    vi.spyOn(window, 'top', 'get').mockReturnValue(
+      mockParent as unknown as Window
+    );
+
+    mockWindow.setPathname('/callback').assert();
+
+    const instance = testInstance({ storage });
+
+    await instance.processCallback();
+
+    expect(mockParent.postMessage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        source: 'monocloud-auth-js-core',
+        url: expect.stringContaining('/callback'),
+      }),
+      'http://localhost:3000'
+    );
+  });
 });

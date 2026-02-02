@@ -955,6 +955,7 @@ export class MonoCloudJSCoreClient {
       return;
     }
 
+    /* v8 ignore next -- @preserve */
     throw new MonoCloudValidationError('Invalid sign in callback');
   }
 
