@@ -12,11 +12,11 @@ import {
 
 describe('signOut() Tests', () => {
   let mockWindow: MockWindow;
-  let storage: VanillaJsMockStorage;
+  let mockStorage: VanillaJsMockStorage;
 
   beforeEach(() => {
     mockWindow = new MockWindow();
-    storage = new VanillaJsMockStorage();
+    mockStorage = new VanillaJsMockStorage();
   });
 
   afterEach(() => {
@@ -34,7 +34,7 @@ describe('signOut() Tests', () => {
       )
       .assert();
 
-    const instance = testInstance({ storage });
+    const instance = testInstance({ storage: mockStorage });
 
     instance.signOut({
       postLogoutRedirectUri: 'http://localhost:3000/signout/custom',
@@ -50,12 +50,12 @@ describe('signOut() Tests', () => {
     vi.spyOn(window, 'opener', 'get').mockReturnValue(null);
     vi.spyOn(window, 'parent', 'get').mockReturnValue({} as unknown as Window);
     vi.spyOn(window, 'top', 'get').mockReturnValue({} as unknown as Window);
-    const instance = testInstance({ storage });
+    const instance = testInstance({ storage: mockStorage });
 
-    const signOutPromise = instance.signOut();
+    const error = await instance.signOut().catch(e => e);
 
-    await expect(signOutPromise).rejects.toThrow(MonoCloudJsError);
-    await expect(signOutPromise).rejects.toThrow(
+    expect(error).toBeInstanceOf(MonoCloudJsError);
+    expect(error.message).toBe(
       'Initiating an authentication flow in a popup or iframe is not supported'
     );
   });
@@ -71,7 +71,7 @@ describe('signOut() Tests', () => {
       .assert();
 
     const instance = testInstance({
-      storage,
+      storage: mockStorage,
       signOutCallbackPath: undefined,
     });
 
@@ -106,10 +106,10 @@ describe('signOut() Tests', () => {
       authorizedScopes: 'token',
     };
 
-    await setSession(storage, session);
+    await setSession(mockStorage, session);
 
     const instance = testInstance({
-      storage,
+      storage: mockStorage,
       signOutCallbackPath: undefined,
     });
 
@@ -134,7 +134,7 @@ describe('signOut() Tests', () => {
       .expectQuery('post_logout_redirect_uri', 'http://localhost:3000/signout')
       .assert();
 
-    const instance = testInstance({ storage });
+    const instance = testInstance({ storage: mockStorage });
 
     instance.signOut();
 
@@ -142,7 +142,7 @@ describe('signOut() Tests', () => {
       expect(window.location.assign).toHaveBeenCalledWith(
         expect.stringContaining('https://example.com/connect/endsession')
       );
-      storage
+      mockStorage
         .expectCallbackState()
         .expectCallbackStateState()
         .expectCallbackStateMode('redirect')
@@ -160,14 +160,17 @@ describe('signOut() Tests', () => {
       state: 'state',
     };
 
-    storage.setCallbackState(state);
+    mockStorage.setCallbackState(state);
 
-    const instance = testInstance({ storage, signOutCallbackPath: '/signout' });
+    const instance = testInstance({
+      storage: mockStorage,
+      signOutCallbackPath: '/signout',
+    });
 
     instance.processCallback();
 
     await vi.waitFor(() => {
-      storage.expectCallbackStateRemoved();
+      mockStorage.expectCallbackStateRemoved();
     });
   });
 
@@ -180,17 +183,17 @@ describe('signOut() Tests', () => {
       state: 'state',
     };
 
-    storage.setCallbackState(state);
+    mockStorage.setCallbackState(state);
 
     const instance = testInstance({
-      storage,
+      storage: mockStorage,
       signOutCallbackPath: undefined,
     });
 
     instance.processCallback();
 
     await vi.waitFor(() => {
-      storage.expectCallbackStateRemoved();
+      mockStorage.expectCallbackStateRemoved();
     });
   });
 
@@ -203,17 +206,17 @@ describe('signOut() Tests', () => {
       state: 'states',
     };
 
-    storage.setCallbackState(state);
+    mockStorage.setCallbackState(state);
 
-    const instance = testInstance({ storage });
+    const instance = testInstance({ storage: mockStorage });
 
-    const callbackPromise = instance.processCallback();
+    const error = await instance.processCallback().catch(e => e);
 
-    await expect(callbackPromise).rejects.toThrow(MonoCloudValidationError);
-    await expect(callbackPromise).rejects.toThrow('Sign out states mismatch');
+    expect(error).toBeInstanceOf(MonoCloudValidationError);
+    expect(error.message).toBe('Sign out states mismatch');
 
     await vi.waitFor(() => {
-      storage.expectCallbackStateRemoved();
+      mockStorage.expectCallbackStateRemoved();
     });
   });
 
@@ -231,10 +234,10 @@ describe('signOut() Tests', () => {
       state: 'state',
     };
 
-    storage.setCallbackState(state);
+    mockStorage.setCallbackState(state);
 
     const instance = testInstance({
-      storage,
+      storage: mockStorage,
       signOutCallbackPath: '/signout',
     });
 
@@ -263,7 +266,7 @@ describe('signOut() Tests', () => {
     vi.spyOn(window, 'open').mockReturnValue(mockPopup);
 
     const instance = testInstance({
-      storage,
+      storage: mockStorage,
       signOutCallbackPath: '/signout',
     });
 
@@ -292,8 +295,10 @@ describe('signOut() Tests', () => {
       })
     );
 
-    await expect(signOutPromise).rejects.toThrow(MonoCloudValidationError);
-    await expect(signOutPromise).rejects.toThrow('Sign out states mismatch');
+    const error = await signOutPromise.catch(e => e);
+
+    expect(error).toBeInstanceOf(MonoCloudValidationError);
+    expect(error.message).toBe('Sign out states mismatch');
     fetchSpy.assert();
     expect(mockPopup.close).toHaveBeenCalled();
   });
@@ -311,7 +316,10 @@ describe('signOut() Tests', () => {
 
     vi.spyOn(window, 'open').mockReturnValue(mockPopup);
 
-    const instance = testInstance({ storage, signOutCallbackPath: undefined });
+    const instance = testInstance({
+      storage: mockStorage,
+      signOutCallbackPath: undefined,
+    });
 
     instance.signOut({ mode: 'popup' });
 
@@ -341,7 +349,7 @@ describe('signOut() Tests', () => {
     await vi.waitFor(() => {
       fetchSpy.assert();
       expect(mockPopup.close).toHaveBeenCalled();
-      storage.expectCallbackStateRemoved();
+      mockStorage.expectCallbackStateRemoved();
     });
   });
 
@@ -358,12 +366,15 @@ describe('signOut() Tests', () => {
 
     vi.spyOn(window, 'open').mockReturnValue(mockPopup);
 
-    const instance = testInstance({ storage, authWindowTimeout: 0.1 });
+    const instance = testInstance({
+      storage: mockStorage,
+      authWindowTimeout: 0.1,
+    });
 
-    const signOutPromise = instance.signOut({ mode: 'popup' });
+    const error = await instance.signOut({ mode: 'popup' }).catch(e => e);
 
-    await expect(signOutPromise).rejects.toThrow(MonoCloudJsError);
-    await expect(signOutPromise).rejects.toThrow('Window timed out');
+    expect(error).toBeInstanceOf(MonoCloudJsError);
+    expect(error.message).toBe('Window timed out');
 
     expect(mockPopup.close).toHaveBeenCalled();
 
@@ -385,15 +396,15 @@ describe('signOut() Tests', () => {
 
     vi.spyOn(window, 'open').mockReturnValue(null);
 
-    const instance = testInstance({ storage });
+    const instance = testInstance({ storage: mockStorage });
 
-    const signOutPromise = instance.signOut({ mode: 'popup' });
+    const error = await instance.signOut({ mode: 'popup' }).catch(e => e);
 
-    await expect(signOutPromise).rejects.toThrow(MonoCloudJsError);
-    await expect(signOutPromise).rejects.toThrow('Could not open popup');
+    expect(error).toBeInstanceOf(MonoCloudJsError);
+    expect(error.message).toBe('Could not open popup');
 
     fetchSpy.assert();
-    storage.expectCallbackStateRemoved();
+    mockStorage.expectCallbackStateRemoved();
   });
 
   it('Popup Mode - throws when user closes the window', async () => {
@@ -407,7 +418,7 @@ describe('signOut() Tests', () => {
 
     vi.spyOn(window, 'open').mockReturnValue(mockPopup as unknown as Window);
 
-    const instance = testInstance({ storage });
+    const instance = testInstance({ storage: mockStorage });
 
     const signOutPromise = instance.signOut({ mode: 'popup' });
 
@@ -415,8 +426,10 @@ describe('signOut() Tests', () => {
       mockPopup.closed = true;
     }, 200);
 
-    await expect(signOutPromise).rejects.toThrow(MonoCloudJsError);
-    await expect(signOutPromise).rejects.toThrow('Window closed by user');
+    const error = await signOutPromise.catch(e => e);
+
+    expect(error).toBeInstanceOf(MonoCloudJsError);
+    expect(error.message).toBe('Window closed by user');
 
     fetchSpy.assert();
   });
@@ -435,7 +448,7 @@ describe('signOut() Tests', () => {
     vi.spyOn(window, 'open').mockReturnValue(mockPopup);
 
     const instance = testInstance({
-      storage,
+      storage: mockStorage,
       signOutCallbackPath: undefined,
     });
 
@@ -491,7 +504,7 @@ describe('signOut() Tests', () => {
     vi.spyOn(window, 'open').mockReturnValue(mockPopup as unknown as Window);
 
     const instance = testInstance({
-      storage,
+      storage: mockStorage,
       signOutCallbackPath: undefined,
     });
 
@@ -551,7 +564,7 @@ describe('signOut() Tests', () => {
     vi.spyOn(window, 'open').mockReturnValue(mockPopup as unknown as Window);
 
     const instance = testInstance({
-      storage,
+      storage: mockStorage,
       signOutCallbackPath: undefined,
     });
 
@@ -613,10 +626,10 @@ describe('signOut() Tests', () => {
       authorizedScopes: 'token',
     };
 
-    await setSession(storage, session);
+    await setSession(mockStorage, session);
 
     const instance = testInstance({
-      storage,
+      storage: mockStorage,
       federatedSignOut: false,
     });
 
@@ -625,7 +638,7 @@ describe('signOut() Tests', () => {
     await instance.signOut();
 
     expect(await instance.getSession()).toBeUndefined();
-    storage.expectNoSession();
+    mockStorage.expectNoSession();
 
     expect(window.fetch).not.toHaveBeenCalled();
   });
@@ -654,9 +667,9 @@ describe('signOut() Tests', () => {
       authorizedScopes: 'token',
     };
 
-    await setSession(storage, session);
+    await setSession(mockStorage, session);
 
-    const instance = testInstance({ storage });
+    const instance = testInstance({ storage: mockStorage });
 
     const signOutPromise = instance.signOut({ mode: 'popup' });
 
@@ -678,7 +691,7 @@ describe('signOut() Tests', () => {
 
     await expect(signOutPromise).rejects.toThrow('Sign out states mismatch');
     expect(await instance.getSession()).toBeUndefined();
-    storage.expectNoSession();
+    mockStorage.expectNoSession();
 
     fetchSpy.assert();
     expect(mockPopup.close).toHaveBeenCalled();
@@ -693,7 +706,7 @@ describe('signOut() Tests', () => {
       state: 'correct-state',
     };
 
-    storage.setCallbackState(state);
+    mockStorage.setCallbackState(state);
 
     const session: MonoCloudSession = {
       user: { sub: 'sub' },
@@ -708,29 +721,29 @@ describe('signOut() Tests', () => {
       authorizedScopes: 'token',
     };
 
-    await setSession(storage, session);
+    await setSession(mockStorage, session);
 
     const instance = testInstance({
-      storage,
+      storage: mockStorage,
       signOutCallbackPath: '/signout',
     });
 
     expect(await instance.getSession()).toBeDefined();
 
-    const callbackPromise = instance.processCallback();
+    const error = await instance.processCallback().catch(e => e);
 
-    await expect(callbackPromise).rejects.toThrow(MonoCloudValidationError);
-    await expect(callbackPromise).rejects.toThrow('Sign out states mismatch');
+    expect(error).toBeInstanceOf(MonoCloudValidationError);
+    expect(error.message).toBe('Sign out states mismatch');
 
     await vi.waitFor(async () => {
       expect(await instance.getSession()).toBeUndefined();
-      storage.expectNoSession();
-      storage.expectCallbackStateRemoved();
+      mockStorage.expectNoSession();
+      mockStorage.expectCallbackStateRemoved();
     });
   });
 
   it('should throw error when callbackUrl origin/path does not match redirectUri', async () => {
-    const instance = testInstance({ storage });
+    const instance = testInstance({ storage: mockStorage });
 
     const callbackState: CallbackState = {
       mode: 'popup',
@@ -741,17 +754,16 @@ describe('signOut() Tests', () => {
     const badCallbackUrl =
       'http://localhost:3000/wrong-callback?code=code&state=state';
 
-    const p = (instance as any).processSignOutCallback(
-      badCallbackUrl,
-      callbackState
-    );
+    const error = await (instance as any)
+      .processSignOutCallback(badCallbackUrl, callbackState)
+      .catch((e: any) => e);
 
-    await expect(p).rejects.toThrow(MonoCloudValidationError);
-    await expect(p).rejects.toThrow('Incorrect callback url');
+    expect(error).toBeInstanceOf(MonoCloudValidationError);
+    expect(error.message).toBe('Incorrect callback url');
   });
 
   it('should throw error when callbackState.signOut is false', async () => {
-    const instance = testInstance({ storage });
+    const instance = testInstance({ storage: mockStorage });
 
     const callbackState: CallbackState = {
       mode: 'popup',
@@ -762,12 +774,11 @@ describe('signOut() Tests', () => {
 
     const callbackUrl = 'http://localhost:3000/signout?code=code&state=state';
 
-    const p = (instance as any).processSignOutCallback(
-      callbackUrl,
-      callbackState
-    );
+    const error = await (instance as any)
+      .processSignOutCallback(callbackUrl, callbackState)
+      .catch((e: any) => e);
 
-    await expect(p).rejects.toThrow(MonoCloudValidationError);
-    await expect(p).rejects.toThrow('Incorrect callback state');
+    expect(error).toBeInstanceOf(MonoCloudValidationError);
+    expect(error.message).toBe('Incorrect callback state');
   });
 });

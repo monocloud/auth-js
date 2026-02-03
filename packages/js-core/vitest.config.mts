@@ -16,6 +16,7 @@ export default defineConfig({
         'src/storage.ts',
         'src/index.ts',
         'src/monocloud-js-error.ts',
+        'src/utils'
       ],
       enabled: true,
       reportOnFailure: true,

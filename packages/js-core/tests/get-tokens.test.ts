@@ -7,10 +7,10 @@ import { MonoCloudValidationError } from '@monocloud/auth-core';
 import { setSession, testInstance, VanillaJsMockStorage } from './utils';
 
 describe('getTokens() Tests', () => {
-  let storage: VanillaJsMockStorage;
+  let mockStorage: VanillaJsMockStorage;
 
   beforeEach(() => {
-    storage = new VanillaJsMockStorage();
+    mockStorage = new VanillaJsMockStorage();
 
     if (!(globalThis as any).LockManager) {
       (globalThis as any).LockManager = class LockManager {};
@@ -25,12 +25,12 @@ describe('getTokens() Tests', () => {
   });
 
   it('should throw if session does not exist', async () => {
-    const instance = testInstance({ storage });
+    const instance = testInstance({ storage: mockStorage });
 
-    const p = instance.getTokens();
+    const error = await instance.getTokens().catch(e => e);
 
-    await expect(p).rejects.toBeInstanceOf(MonoCloudValidationError);
-    await expect(p).rejects.toThrow('Session does not exist');
+    expect(error).toBeInstanceOf(MonoCloudValidationError);
+    expect(error.message).toBe('Session does not exist');
   });
 
   it('should return existing token without refresh when it is not expired', async () => {
@@ -49,9 +49,9 @@ describe('getTokens() Tests', () => {
       ],
     };
 
-    setSession(storage, session);
+    setSession(mockStorage, session);
 
-    const instance = testInstance({ storage });
+    const instance = testInstance({ storage: mockStorage });
 
     const tokens = await instance.getTokens();
 
@@ -95,9 +95,9 @@ describe('getTokens() Tests', () => {
       ],
     };
 
-    setSession(storage, session);
+    setSession(mockStorage, session);
 
-    const instance = testInstance({ storage });
+    const instance = testInstance({ storage: mockStorage });
 
     const tokens = await instance.getTokens();
 
@@ -140,9 +140,9 @@ describe('getTokens() Tests', () => {
       ],
     };
 
-    setSession(storage, session);
+    setSession(mockStorage, session);
 
-    const instance = testInstance({ storage });
+    const instance = testInstance({ storage: mockStorage });
 
     const tokens = await instance.getTokens({ forceRefresh: true });
 
@@ -179,10 +179,10 @@ describe('getTokens() Tests', () => {
       ],
     };
 
-    setSession(storage, session);
+    setSession(mockStorage, session);
 
     const instance = testInstance({
-      storage,
+      storage: mockStorage,
       resources: [{ resource: 'api', scopes: 'api.read' }],
     });
 
@@ -227,10 +227,10 @@ describe('getTokens() Tests', () => {
       ],
     };
 
-    setSession(storage, session);
+    setSession(mockStorage, session);
 
     const instance = testInstance({
-      storage,
+      storage: mockStorage,
       resources: [{ resource: 'api' }, { resource: 'api', scopes: 'api.read' }],
     });
 

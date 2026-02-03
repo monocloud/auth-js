@@ -16,26 +16,31 @@ import {
 import { now } from '@monocloud/auth-core/internal';
 import { MonoCloudJsError } from '../src';
 
+const tabLockMocks = vi.hoisted(() => ({
+  acquireLock: vi.fn(() => true),
+  releaseLock: vi.fn(() => void 0),
+}));
+
 vi.mock('browser-tabs-lock', () => {
   return {
     default: class TabLockMock {
-      acquireLock = vi.fn(() => true);
+      acquireLock = tabLockMocks.acquireLock;
 
-      releaseLock = vi.fn(() => void 0);
+      releaseLock = tabLockMocks.releaseLock;
     },
   };
 });
 
 describe('instance.refreshSession() Tests', () => {
   let mockWindow: MockWindow;
-  let storage: VanillaJsMockStorage;
+  let mockStorage: VanillaJsMockStorage;
 
   const urlRegex =
     /^https:\/\/example\.com\/connect\/authorize\?client_id=clientId&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fcallback&scope=[a-zA-Z0-9+_% -]+&response_type=[a-zA-Z0-9_+]+&nonce=[a-zA-Z0-9_-]+&prompt=[a-zA-Z0-9_-]+&code_challenge=[a-zA-Z0-9_-]+&code_challenge_method=S256&state=[a-zA-Z0-9_-]+$/;
 
   beforeEach(() => {
     mockWindow = new MockWindow();
-    storage = new VanillaJsMockStorage();
+    mockStorage = new VanillaJsMockStorage();
 
     if (!(globalThis as any).LockManager) {
       (globalThis as any).LockManager = class LockManager {};
@@ -50,12 +55,14 @@ describe('instance.refreshSession() Tests', () => {
   });
 
   it('should throw if no session exists', async () => {
-    const instance = testInstance({ storage });
+    const instance = testInstance({ storage: mockStorage });
 
-    const p = instance.refreshSession({ mode: 'refresh_token' });
+    const error = await instance
+      .refreshSession({ mode: 'refresh_token' })
+      .catch(e => e);
 
-    await expect(p).rejects.toBeInstanceOf(MonoCloudValidationError);
-    await expect(p).rejects.toThrow(
+    expect(error).toBeInstanceOf(MonoCloudValidationError);
+    expect(error.message).toBe(
       'Ensure the user is authenticated before refreshing the session'
     );
   });
@@ -74,18 +81,20 @@ describe('instance.refreshSession() Tests', () => {
       authorizedScopes: 'token',
     };
 
-    setSession(storage, session);
+    setSession(mockStorage, session);
 
-    const instance = testInstance({ storage });
+    const instance = testInstance({ storage: mockStorage });
 
     expect(await instance.getSession()).toBeDefined();
 
-    const p = instance.refreshSession({
-      mode: 'refresh_token',
-    });
+    const error = await instance
+      .refreshSession({
+        mode: 'refresh_token',
+      })
+      .catch(e => e);
 
-    await expect(p).rejects.toBeInstanceOf(MonoCloudValidationError);
-    await expect(p).rejects.toThrow(
+    expect(error).toBeInstanceOf(MonoCloudValidationError);
+    expect(error.message).toBe(
       'Refresh token not found. Sign in with offline_access scope to get the refresh token.'
     );
   });
@@ -95,12 +104,12 @@ describe('instance.refreshSession() Tests', () => {
     vi.spyOn(window, 'parent', 'get').mockReturnValue({} as unknown as Window);
     vi.spyOn(window, 'top', 'get').mockReturnValue({} as unknown as Window);
 
-    const instance = testInstance({ storage });
+    const instance = testInstance({ storage: mockStorage });
 
-    const p = instance.refreshSession();
+    const error = await instance.refreshSession().catch(e => e);
 
-    await expect(p).rejects.toBeInstanceOf(MonoCloudJsError);
-    await expect(p).rejects.toThrow(
+    expect(error).toBeInstanceOf(MonoCloudJsError);
+    expect(error.message).toBe(
       'Initiating an authentication flow in a popup or iframe is not supported'
     );
   });
@@ -134,9 +143,9 @@ describe('instance.refreshSession() Tests', () => {
       authorizedScopes: 'token',
     };
 
-    setSession(storage, session);
+    setSession(mockStorage, session);
 
-    const instance = testInstance({ storage });
+    const instance = testInstance({ storage: mockStorage });
 
     await instance.refreshSession({
       mode: 'refresh_token',
@@ -163,7 +172,7 @@ describe('instance.refreshSession() Tests', () => {
 
     await vi.waitFor(async () => {
       fetchSpy.assert();
-      storage.expectSession(sessionNew).expectCallbackStateRemoved();
+      mockStorage.expectSession(sessionNew).expectCallbackStateRemoved();
       expect(await instance.getSession()).toEqual(sessionNew);
     });
   });
@@ -191,14 +200,16 @@ describe('instance.refreshSession() Tests', () => {
       authorizedScopes: 'openid',
     };
 
-    setSession(storage, storedSession);
+    setSession(mockStorage, storedSession);
 
-    const instance = testInstance({ storage });
+    const instance = testInstance({ storage: mockStorage });
 
-    const p = instance.refreshSession({ mode: 'refresh_token' });
+    const error = await instance
+      .refreshSession({ mode: 'refresh_token' })
+      .catch(e => e);
 
-    await expect(p).rejects.toBeInstanceOf(MonoCloudHttpError);
-    await expect(p).rejects.toThrow(
+    expect(error).toBeInstanceOf(MonoCloudHttpError);
+    expect(error.message).toBe(
       'Error while performing refresh token grant. Unexpected status code: 500'
     );
 
@@ -250,10 +261,10 @@ describe('instance.refreshSession() Tests', () => {
         authorizedScopes: 'openid',
       };
 
-      setSession(storage, existingSession);
+      setSession(mockStorage, existingSession);
 
       const instance = testInstance({
-        storage,
+        storage: mockStorage,
         responseType: responseType as ResponseTypes,
       });
 
@@ -339,7 +350,7 @@ describe('instance.refreshSession() Tests', () => {
           })
         );
 
-        storage.expectCallbackStateRemoved();
+        mockStorage.expectCallbackStateRemoved();
       });
 
       fetchSpy.assert();
@@ -373,9 +384,9 @@ describe('instance.refreshSession() Tests', () => {
       authorizedScopes: 'openid',
     };
 
-    setSession(storage, existingSession);
+    setSession(mockStorage, existingSession);
 
-    const instance = testInstance({ storage });
+    const instance = testInstance({ storage: mockStorage });
 
     expect(await instance.getSession()).toEqual(
       expect.objectContaining({
@@ -416,15 +427,17 @@ describe('instance.refreshSession() Tests', () => {
       })
     );
 
-    await expect(refreshPromise).rejects.toBeInstanceOf(MonoCloudOPError);
-    await expect(refreshPromise).rejects.toMatchObject({
+    const error = await refreshPromise.catch(e => e);
+
+    expect(error).toBeInstanceOf(MonoCloudOPError);
+    expect(error).toMatchObject({
       error: 'some_error',
       errorDescription: 'something went wrong',
     });
 
     await vi.waitFor(async () => {
       expect(mockPopup.close).toHaveBeenCalled();
-      storage.expectCallbackStateRemoved();
+      mockStorage.expectCallbackStateRemoved();
 
       const saved = await instance.getSession();
       expect(saved).toEqual(
@@ -471,10 +484,10 @@ describe('instance.refreshSession() Tests', () => {
       authorizedScopes: 'openid',
     };
 
-    setSession(storage, existingSession);
+    setSession(mockStorage, existingSession);
 
     const instance = testInstance({
-      storage,
+      storage: mockStorage,
       authWindowTimeout: 0.1,
     });
 
@@ -497,13 +510,15 @@ describe('instance.refreshSession() Tests', () => {
       expect(mockPopup.location.href).toMatch(urlRegex);
     });
 
-    await expect(refreshPromise).rejects.toBeInstanceOf(MonoCloudJsError);
-    await expect(refreshPromise).rejects.toThrow('Window timed out');
+    const error = await refreshPromise.catch(e => e);
+
+    expect(error).toBeInstanceOf(MonoCloudJsError);
+    expect(error.message).toBe('Window timed out');
 
     await vi.waitFor(async () => {
       expect(mockPopup.close).toHaveBeenCalled();
 
-      storage.expectCallbackStateRemoved();
+      mockStorage.expectCallbackStateRemoved();
 
       const saved = await instance.getSession();
       expect(saved).toEqual(
@@ -542,9 +557,9 @@ describe('instance.refreshSession() Tests', () => {
       authorizedScopes: 'openid',
     };
 
-    setSession(storage, existingSession);
+    setSession(mockStorage, existingSession);
 
-    const instance = testInstance({ storage });
+    const instance = testInstance({ storage: mockStorage });
 
     expect(await instance.getSession()).toEqual(
       expect.objectContaining({
@@ -559,12 +574,14 @@ describe('instance.refreshSession() Tests', () => {
       })
     );
 
-    const p = instance.refreshSession({ mode: 'popup' });
+    const error = await instance
+      .refreshSession({ mode: 'popup' })
+      .catch(e => e);
 
-    await expect(p).rejects.toBeInstanceOf(MonoCloudJsError);
-    await expect(p).rejects.toMatchObject({ message: 'Could not open popup' });
+    expect(error).toBeInstanceOf(MonoCloudJsError);
+    expect(error).toMatchObject({ message: 'Could not open popup' });
 
-    storage.expectCallbackStateRemoved();
+    mockStorage.expectCallbackStateRemoved();
 
     expect(await instance.getSession()).toEqual(existingSession);
   });
@@ -609,9 +626,9 @@ describe('instance.refreshSession() Tests', () => {
       authorizedScopes: 'openid',
     };
 
-    setSession(storage, existingSession);
+    setSession(mockStorage, existingSession);
 
-    const instance = testInstance({ storage });
+    const instance = testInstance({ storage: mockStorage });
 
     expect(await instance.getSession()).toEqual(
       expect.objectContaining({
@@ -732,9 +749,9 @@ describe('instance.refreshSession() Tests', () => {
       authorizedScopes: 'openid',
     };
 
-    setSession(storage, existingSession);
+    setSession(mockStorage, existingSession);
 
-    const instance = testInstance({ storage });
+    const instance = testInstance({ storage: mockStorage });
 
     const refreshPromise = instance.refreshSession({ mode: 'silent' });
 
@@ -763,8 +780,10 @@ describe('instance.refreshSession() Tests', () => {
       })
     );
 
-    await expect(refreshPromise).rejects.toBeInstanceOf(MonoCloudOPError);
-    await expect(refreshPromise).rejects.toMatchObject({
+    const error = await refreshPromise.catch(e => e);
+
+    expect(error).toBeInstanceOf(MonoCloudOPError);
+    expect(error).toMatchObject({
       error: 'some_error',
       errorDescription: 'something went wrong',
     });
@@ -822,10 +841,10 @@ describe('instance.refreshSession() Tests', () => {
       authorizedScopes: 'openid',
     };
 
-    setSession(storage, existingSession);
+    setSession(mockStorage, existingSession);
 
     const instance = testInstance({
-      storage,
+      storage: mockStorage,
       authWindowTimeout: 0.1,
     });
 
@@ -897,9 +916,9 @@ describe('instance.refreshSession() Tests', () => {
       ],
       authorizedScopes: 'openid',
     };
-    setSession(storage, existingSession);
+    setSession(mockStorage, existingSession);
 
-    const instance = testInstance({ storage });
+    const instance = testInstance({ storage: mockStorage });
 
     const refreshPromise = instance.refreshSession({ mode: 'popup' });
 
@@ -913,7 +932,7 @@ describe('instance.refreshSession() Tests', () => {
     await expect(refreshPromise).rejects.toThrow('Window closed by user');
 
     await vi.waitFor(async () => {
-      storage.expectCallbackStateRemoved();
+      mockStorage.expectCallbackStateRemoved();
 
       const saved = await instance.getSession();
       expect(saved).toEqual(
@@ -962,10 +981,10 @@ describe('instance.refreshSession() Tests', () => {
       ],
       authorizedScopes: 'openid',
     };
-    setSession(storage, existingSession);
+    setSession(mockStorage, existingSession);
 
     const instance = testInstance({
-      storage,
+      storage: mockStorage,
       responseType: 'code',
     });
 
@@ -1094,10 +1113,10 @@ describe('instance.refreshSession() Tests', () => {
       ],
       authorizedScopes: 'openid',
     };
-    setSession(storage, existingSession);
+    setSession(mockStorage, existingSession);
 
     const instance = testInstance({
-      storage,
+      storage: mockStorage,
       responseType: 'code',
     });
 
@@ -1227,10 +1246,10 @@ describe('instance.refreshSession() Tests', () => {
       authorizedScopes: 'openid',
     };
 
-    setSession(storage, existingSession);
+    setSession(mockStorage, existingSession);
 
     const instance = testInstance({
-      storage,
+      storage: mockStorage,
       responseType: 'code',
     });
 
@@ -1363,10 +1382,10 @@ describe('instance.refreshSession() Tests', () => {
       ],
       authorizedScopes: 'openid',
     };
-    setSession(storage, existingSession);
+    setSession(mockStorage, existingSession);
 
     const instance = testInstance({
-      storage,
+      storage: mockStorage,
       resources: [
         { resource: 'api://inventory', scopes: 'inv:read' },
         { resource: 'api://orders', scopes: 'orders:write' },
@@ -1419,10 +1438,10 @@ describe('instance.refreshSession() Tests', () => {
       ],
       authorizedScopes: 'openid',
     };
-    setSession(storage, existingSession);
+    setSession(mockStorage, existingSession);
 
     const instance = testInstance({
-      storage,
+      storage: mockStorage,
       resources: [
         { resource: 'api://valid', scopes: 'scope:valid' },
         { resource: '', scopes: '' },
@@ -1452,19 +1471,19 @@ describe('instance.refreshSession() Tests', () => {
   });
 
   it('Silent Mode - should throw error if window is crossOriginIsolated', async () => {
-    const instance = testInstance({ storage });
+    const instance = testInstance({ storage: mockStorage });
 
     Object.defineProperty(window, 'crossOriginIsolated', {
       value: true,
       configurable: true,
     });
 
-    const refreshPromise = instance.refreshSession({ mode: 'silent' });
+    const error = await instance
+      .refreshSession({ mode: 'silent' })
+      .catch(e => e);
 
-    await expect(refreshPromise).rejects.toThrow(MonoCloudJsError);
-    await expect(refreshPromise).rejects.toThrow(
-      'Isolated Cross-Origin. Cannot create iframe'
-    );
+    expect(error).toBeInstanceOf(MonoCloudJsError);
+    expect(error.message).toBe('Isolated Cross-Origin. Cannot create iframe');
 
     Object.defineProperty(window, 'crossOriginIsolated', {
       value: false,

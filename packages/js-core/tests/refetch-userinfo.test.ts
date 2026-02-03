@@ -7,25 +7,25 @@ import { setSession, testInstance, VanillaJsMockStorage } from './utils';
 import { MonoCloudValidationError } from '@monocloud/auth-core';
 
 describe('refetchUserinfo() Tests', () => {
-  let storage: VanillaJsMockStorage;
+  let mockStorage: VanillaJsMockStorage;
 
   beforeEach(() => {
-    storage = new VanillaJsMockStorage();
+    mockStorage = new VanillaJsMockStorage();
     window.localStorage.clear();
   });
 
   it('should throw an error if there is no session', async () => {
-    const instance = testInstance({ storage });
+    const instance = testInstance({ storage: mockStorage });
 
-    const p = instance.refetchUserInfo();
+    const error = await instance.refetchUserInfo().catch(e => e);
 
-    await expect(p).rejects.toBeInstanceOf(MonoCloudValidationError);
-    await expect(p).rejects.toThrow(
+    expect(error).toBeInstanceOf(MonoCloudValidationError);
+    expect(error.message).toBe(
       'Ensure the user is authenticated before refetching userinfo'
     );
   });
 
-  it('should throw an error if there userinfo fetch fails', async () => {
+  it('should throw an error if the openid scope is not present', async () => {
     const session: MonoCloudSession = {
       user: { sub: 'sub' },
       accessTokens: [
@@ -40,18 +40,16 @@ describe('refetchUserinfo() Tests', () => {
       refreshToken: 'rt',
     };
 
-    await setSession(storage, session);
+    await setSession(mockStorage, session);
 
-    const instance = testInstance({ storage });
+    const instance = testInstance({ storage: mockStorage });
 
     expect(await instance.getSession()).toBeDefined();
 
-    const p = instance.refetchUserInfo();
+    const error = await instance.refetchUserInfo().catch(e => e);
 
-    await expect(p).rejects.toBeInstanceOf(MonoCloudValidationError);
-    await expect(p).rejects.toThrow(
-      'Fetching userinfo requires the openid scope'
-    );
+    expect(error).toBeInstanceOf(MonoCloudValidationError);
+    expect(error.message).toBe('Fetching userinfo requires the openid scope');
 
     expect(await instance.getSession()).toEqual({
       user: { sub: 'sub' },
@@ -90,9 +88,9 @@ describe('refetchUserinfo() Tests', () => {
       refreshToken: 'rt',
     };
 
-    await setSession(storage, session);
+    await setSession(mockStorage, session);
 
-    const instance = testInstance({ storage });
+    const instance = testInstance({ storage: mockStorage });
 
     expect(await instance.getSession()).toEqual({
       user: { sub: 'sub' },
@@ -130,7 +128,7 @@ describe('refetchUserinfo() Tests', () => {
     };
 
     fetchSpy.assert();
-    storage.expectSession(sessionNew);
+    mockStorage.expectSession(sessionNew);
     expect(await instance.getSession()).toEqual(sessionNew);
   });
 
@@ -150,13 +148,13 @@ describe('refetchUserinfo() Tests', () => {
       ],
     };
 
-    await setSession(storage, session);
+    await setSession(mockStorage, session);
 
-    const instance = testInstance({ storage });
+    const instance = testInstance({ storage: mockStorage });
 
-    const p = instance.refetchUserInfo();
+    const error = await instance.refetchUserInfo().catch(e => e);
 
-    await expect(p).rejects.toBeInstanceOf(MonoCloudValidationError);
-    await expect(p).rejects.toThrow('Default token not found');
+    expect(error).toBeInstanceOf(MonoCloudValidationError);
+    expect(error.message).toBe('Default token not found');
   });
 });

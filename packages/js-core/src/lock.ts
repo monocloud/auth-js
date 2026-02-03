@@ -25,12 +25,6 @@ export async function withLock<T = any>(
         throw error;
       }
 
-      if (error.name === 'AbortError') {
-        throw new MonoCloudJsError(
-          `Failed to acquire lock: Timed out after 5000ms`
-        );
-      }
-
       throw new MonoCloudJsError(`Failed to acquire lock : ${error.message}`);
     }
   } else {
@@ -39,15 +33,15 @@ export async function withLock<T = any>(
       throw new MonoCloudJsError('Failed to acquire lock.');
     }
 
-    const onPageHide = async () => {
+    const onPageHide = async (): Promise<void> => {
       await tabLock.releaseLock(key);
+      window.removeEventListener('pagehide', onPageHide);
     };
 
     try {
       window.addEventListener('pagehide', onPageHide);
       return await cb();
     } finally {
-      window.removeEventListener('pagehide', onPageHide);
       await tabLock.releaseLock(key);
     }
   }
