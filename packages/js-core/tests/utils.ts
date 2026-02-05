@@ -7,6 +7,7 @@ import type {
   InteractionMode,
   PostCallback,
   MonoCloudJSCoreClientOptions,
+  OnSessionCreating,
 } from '../src';
 import { AUTH_CONSTANTS } from '../src/constants';
 import { MonoCloudJSCoreClient } from '../src';
@@ -15,6 +16,7 @@ export const testInstance = (
   options?: Partial<MonoCloudJSCoreClientOptions> & {
     storage?: IStorage;
     postCallback?: PostCallback;
+    onSessionCreating?: OnSessionCreating;
   }
 ): MonoCloudJSCoreClient => {
   const deafultOptions = {
@@ -36,7 +38,8 @@ export const testInstance = (
   const instance = new MonoCloudJSCoreClient(
     options as MonoCloudJSCoreClientOptions,
     options.storage,
-    options.postCallback
+    options.postCallback,
+    options.onSessionCreating
   );
 
   return instance;
