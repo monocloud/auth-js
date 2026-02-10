@@ -161,7 +161,7 @@ describe('MonoCloud.protectApi() - Page Router', () => {
       });
     });
 
-    it('can set custom onAccessDenied handler', async () => {
+    it('does not fall back to onAccessDenied handler when group check fails', async () => {
       const api = monoCloud.protectApi(
         (_req: NextApiRequest, res: NextApiResponse<object>) =>
           res.json({ success: true }),
@@ -185,9 +185,72 @@ describe('MonoCloud.protectApi() - Page Router', () => {
 
       await stopNodeServer();
 
+      expect(res.status).toBe(403);
+      expect(await res.getBody()).toEqual({
+        message: 'forbidden',
+      });
+    });
+
+    it('should execute custom onGroupAccessDenied if user is authenticated but does not belong to any of the listed groups', async () => {
+      const api = monoCloud.protectApi(
+        (_req: NextApiRequest, res: NextApiResponse<object>) =>
+          res.json({ success: true }),
+        {
+          groups: ['NOPE'],
+          onGroupAccessDenied: (_req, res, user) =>
+            res.status(403).json({ groupDenied: true, userId: user.sub }),
+        }
+      );
+
+      const baseUrl = await startNodeServer(api);
+
+      const cookieJar = new CookieJar();
+
+      await setSessionCookie(
+        cookieJar,
+        `${baseUrl}/api/someroute`,
+        userWithGroupsSessionCookieValue
+      );
+
+      const res = await get(baseUrl, '/api/someroute', cookieJar);
+
+      await stopNodeServer();
+
+      expect(res.status).toBe(403);
+      expect(await res.getBody()).toEqual({
+        groupDenied: true,
+        userId: userWithGroupsSessionCookieValue.user.sub,
+      });
+    });
+
+    it('should prioritize onGroupAccessDenied over onAccessDenied', async () => {
+      const api = monoCloud.protectApi(
+        (_req: NextApiRequest, res: NextApiResponse<object>) =>
+          res.json({ success: true }),
+        {
+          groups: ['NOPE'],
+          onAccessDenied: (_req, res) => res.json({ accessDenied: true }),
+          onGroupAccessDenied: (_req, res) => res.json({ groupDenied: true }),
+        }
+      );
+
+      const baseUrl = await startNodeServer(api);
+
+      const cookieJar = new CookieJar();
+
+      await setSessionCookie(
+        cookieJar,
+        `${baseUrl}/api/someroute`,
+        userWithGroupsSessionCookieValue
+      );
+
+      const res = await get(baseUrl, '/api/someroute', cookieJar);
+
+      await stopNodeServer();
+
       expect(res.status).toBe(200);
       expect(await res.getBody()).toEqual({
-        custom: true,
+        groupDenied: true,
       });
     });
   });

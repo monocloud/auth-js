@@ -205,13 +205,9 @@ describe('MonoCloud.protectApi() - App Router', () => {
       });
     });
 
-    it('can set custom onAccessDenied handler (NextResponse)', async () => {
+    it('does not fall back to onAccessDenied handler (NextResponse) when group check fails', async () => {
       const api = monoCloud.protectApi(
-        () =>
-          ({
-            body: '{"success": true }',
-            headers: { 'content-type': 'application/json' },
-          }) as unknown as NextResponse,
+        () => NextResponse.json({ success: true }),
         {
           groups: ['NOPE'],
           onAccessDenied: () => NextResponse.json({ custom: true }),
@@ -226,19 +222,15 @@ describe('MonoCloud.protectApi() - App Router', () => {
 
       const res = new TestAppRes(response);
 
-      expect(res.status).toBe(200);
+      expect(res.status).toBe(403);
       expect(await res.getBody()).toEqual({
-        custom: true,
+        message: 'forbidden',
       });
     });
 
-    it('can set custom onAccessDenied handler (Response Object)', async () => {
+    it('does not fall back to onAccessDenied handler (Response Object) when group check fails', async () => {
       const api = monoCloud.protectApi(
-        () =>
-          ({
-            body: '{"success": true }',
-            headers: { 'content-type': 'application/json' },
-          }) as unknown as NextResponse,
+        () => NextResponse.json({ success: true }),
         {
           groups: ['NOPE'],
           onAccessDenied: () =>
@@ -257,9 +249,97 @@ describe('MonoCloud.protectApi() - App Router', () => {
 
       const res = new TestAppRes(response);
 
+      expect(res.status).toBe(403);
+      expect(await res.getBody()).toEqual({
+        message: 'forbidden',
+      });
+    });
+
+    it('can set custom onGroupAccessDenied handler (NextResponse)', async () => {
+      const api = monoCloud.protectApi(
+        () =>
+          ({
+            body: '{"success": true }',
+            headers: { 'content-type': 'application/json' },
+          }) as unknown as NextResponse,
+        {
+          groups: ['NOPE'],
+          onGroupAccessDenied: (_req, _ctx, user) =>
+            NextResponse.json({ groupDenied: true, userId: user.sub }),
+        }
+      );
+
+      const req = new NextRequest('http://localhost:3000/api/someroute');
+
+      await setSessionCookie(req, undefined, userWithGroupsSessionCookieValue);
+
+      const response = await api(req, { params: {} });
+
+      const res = new TestAppRes(response);
+
       expect(res.status).toBe(200);
       expect(await res.getBody()).toEqual({
-        custom: true,
+        groupDenied: true,
+        userId: userWithGroupsSessionCookieValue.user.sub,
+      });
+    });
+
+    it('can set custom onGroupAccessDenied handler (Response Object)', async () => {
+      const api = monoCloud.protectApi(
+        () =>
+          ({
+            body: '{"success": true }',
+            headers: { 'content-type': 'application/json' },
+          }) as unknown as NextResponse,
+        {
+          groups: ['NOPE'],
+          onGroupAccessDenied: () =>
+            ({
+              body: '{"groupDenied":true}',
+              status: 403,
+            }) as unknown as NextResponse,
+        }
+      );
+
+      const req = new NextRequest('http://localhost:3000/api/someroute');
+
+      await setSessionCookie(req, undefined, userWithGroupsSessionCookieValue);
+
+      const response = await api(req, { params: {} });
+
+      const res = new TestAppRes(response);
+
+      expect(res.status).toBe(403);
+      expect(await res.getBody()).toEqual({
+        groupDenied: true,
+      });
+    });
+
+    it('should prioritize onGroupAccessDenied over onAccessDenied', async () => {
+      const api = monoCloud.protectApi(
+        () =>
+          ({
+            body: '{"success": true }',
+            headers: { 'content-type': 'application/json' },
+          }) as unknown as NextResponse,
+        {
+          groups: ['NOPE'],
+          onAccessDenied: () => NextResponse.json({ accessDenied: true }),
+          onGroupAccessDenied: () => NextResponse.json({ groupDenied: true }),
+        }
+      );
+
+      const req = new NextRequest('http://localhost:3000/api/someroute');
+
+      await setSessionCookie(req, undefined, userWithGroupsSessionCookieValue);
+
+      const response = await api(req, { params: {} });
+
+      const res = new TestAppRes(response);
+
+      expect(res.status).toBe(200);
+      expect(await res.getBody()).toEqual({
+        groupDenied: true,
       });
     });
   });

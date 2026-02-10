@@ -55,11 +55,11 @@ describe('protectPage() - CSR', () => {
     });
   });
 
-  it('can set custom onAccessDenied component if user is not authenticated', async () => {
+  it('can set custom fallback component if user is not authenticated', async () => {
     fetchNoContent();
 
     const ProtectedComponent = protectPage(Component(false), {
-      onAccessDenied: () => <p>CUSTOM</p>,
+      fallback: () => <p>CUSTOM</p>,
     });
 
     const { container } = render(<ProtectedComponent />, { wrapper });
@@ -191,12 +191,30 @@ describe('protectPage() - CSR', () => {
     });
   });
 
-  it('can set custom onAccessDenied component', async () => {
+  it('does not fall back to fallback component when group check fails', async () => {
     fetchOkGroups();
 
     const ProtectedComponent = protectPage(Component(false), {
       groups: ['NOPE'],
-      onAccessDenied: () => <p>CUSTOM</p>,
+      fallback: () => <p>CUSTOM FALLBACK</p>,
+    });
+
+    const { container } = render(<ProtectedComponent />, { wrapper });
+
+    await waitFor(() => {
+      const components = container.querySelectorAll('div');
+      const div = components.item(0);
+
+      expect(div.textContent).toBe('Access Denied');
+    });
+  });
+
+  it('should render groupFallback if the user does not belong to any groups', async () => {
+    fetchOkGroups();
+
+    const ProtectedComponent = protectPage(Component(false), {
+      groups: ['NOPE'],
+      groupFallback: () => <p>GROUP FALLBACK</p>,
     });
 
     const { container } = render(<ProtectedComponent />, { wrapper });
@@ -206,7 +224,27 @@ describe('protectPage() - CSR', () => {
       const para = components.item(0);
 
       expect(components.length).toBe(1);
-      expect(para.textContent).toBe('CUSTOM');
+      expect(para.textContent).toBe('GROUP FALLBACK');
+    });
+  });
+
+  it('should prioritize groupFallback over fallback when unauthorized', async () => {
+    fetchOkGroups();
+
+    const ProtectedComponent = protectPage(Component(false), {
+      groups: ['NOPE'],
+      fallback: () => <p>GENERIC FALLBACK</p>,
+      groupFallback: () => <p>SPECIFIC GROUP FALLBACK</p>,
+    });
+
+    const { container } = render(<ProtectedComponent />, { wrapper });
+
+    await waitFor(() => {
+      const components = container.querySelectorAll('p');
+      const para = components.item(0);
+
+      expect(components.length).toBe(1);
+      expect(para.textContent).toBe('SPECIFIC GROUP FALLBACK');
     });
   });
 });

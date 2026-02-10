@@ -330,49 +330,58 @@ describe('MonoCloud Middleware', () => {
     expect(res.status).toBe(200);
   });
 
-  [
-    {
-      ret: { body: '{"custom":true}', status: 200 },
-      expected: { custom: true },
-      route: '/protected',
-    },
-    {
-      ret: NextResponse.json({ custom: true }),
-      expected: { custom: true },
-      route: '/protected',
-    },
-    {
-      ret: null,
-      expected: '',
-      route: '/protected',
-    },
-  ].forEach(({ ret, expected, route }, i) => {
-    it(`can set custom onAccessDenied middleware function ${i + 1}/1`, async () => {
-      const middleware = monoCloud.authMiddleware({
-        protectedRoutes: [
-          {
-            routes: [route],
-            groups: ['NOPE'],
-          },
-        ],
-        onAccessDenied: () => ret as any,
-      });
-
-      const request = new NextRequest(`http://localhost:3000${route}`);
-
-      await setSessionCookie(
-        request,
-        undefined,
-        userWithGroupsSessionCookieValue
-      );
-
-      const response = await middleware(request, defaultEvent());
-
-      const res = new TestAppRes(response);
-
-      expect(res.status).toBe(200);
-      expect(await res.getBody()).toStrictEqual(expected);
+  it('does NOT use onAccessDenied middleware function for group failures (Page)', async () => {
+    const middleware = monoCloud.authMiddleware({
+      protectedRoutes: [
+        {
+          routes: ['/protected'],
+          groups: ['NOPE'],
+        },
+      ],
+      onAccessDenied: () => 'HELLO' as any,
     });
+
+    const request = new NextRequest(`http://localhost:3000/protected`);
+
+    await setSessionCookie(
+      request,
+      undefined,
+      userWithGroupsSessionCookieValue
+    );
+
+    const response = await middleware(request, defaultEvent());
+
+    const res = new TestAppRes(response);
+
+    expect(res.status).toBe(403);
+    expect(await res.getBody()).toBe('forbidden');
+  });
+
+  it('does NOT use onAccessDenied middleware function for group failures (API)', async () => {
+    const middleware = monoCloud.authMiddleware({
+      protectedRoutes: [
+        {
+          routes: ['/api/protected'],
+          groups: ['NOPE'],
+        },
+      ],
+      onAccessDenied: () => NextResponse.json({ hello: 'world' }),
+    });
+
+    const request = new NextRequest(`http://localhost:3000/api/protected`);
+
+    await setSessionCookie(
+      request,
+      undefined,
+      userWithGroupsSessionCookieValue
+    );
+
+    const response = await middleware(request, defaultEvent());
+
+    const res = new TestAppRes(response);
+
+    expect(res.status).toBe(403);
+    expect(await res.getBody()).toStrictEqual({ message: 'forbidden' });
   });
 
   it('can pass onError to authMiddleware() to handle errors', async () => {
@@ -871,5 +880,113 @@ describe('MonoCloud Middleware', () => {
     const res = new TestAppRes(response);
 
     expect(res.status).toBe(204);
+  });
+
+  [
+    {
+      ret: { body: '{"custom":true}', status: 200 },
+      expected: { custom: true },
+      route: '/protected',
+    },
+    {
+      ret: NextResponse.json({ custom: true }),
+      expected: { custom: true },
+      route: '/api/protected',
+    },
+    {
+      ret: null,
+      expected: '',
+      route: '/protected',
+    },
+  ].forEach(({ ret, expected, route }, i) => {
+    it(`executes custom onGroupAccessDenied when user does not belong to group - ${i + 1}/3`, async () => {
+      const middleware = monoCloud.authMiddleware({
+        protectedRoutes: [{ routes: [route], groups: ['NOPE'] }],
+        onGroupAccessDenied: () => ret as any,
+      });
+
+      const request = new NextRequest(`http://localhost:3000${route}`);
+
+      await setSessionCookie(
+        request,
+        undefined,
+        userWithGroupsSessionCookieValue
+      );
+
+      const response = await middleware(request, defaultEvent());
+
+      const res = new TestAppRes(response);
+
+      expect(res.status).toBe(200);
+      expect(await res.getBody()).toEqual(expected);
+    });
+  });
+
+  it('passes the user object to onGroupAccessDenied', async () => {
+    const middleware = monoCloud.authMiddleware({
+      protectedRoutes: [{ routes: ['/protected'], groups: ['NOPE'] }],
+      onGroupAccessDenied: (_req, _evt, user) =>
+        NextResponse.json({ userId: user.sub }),
+    });
+
+    const request = new NextRequest('http://localhost:3000/protected');
+
+    await setSessionCookie(
+      request,
+      undefined,
+      userWithGroupsSessionCookieValue
+    );
+
+    const response = await middleware(request, defaultEvent());
+
+    const res = new TestAppRes(response);
+
+    expect(await res.getBody()).toEqual({
+      userId: userWithGroupsSessionCookieValue.user.sub,
+    });
+  });
+
+  it('prioritizes onGroupAccessDenied over onAccessDenied', async () => {
+    const middleware = monoCloud.authMiddleware({
+      protectedRoutes: [{ routes: ['/protected'], groups: ['NOPE'] }],
+      onAccessDenied: () => NextResponse.json({ accessDenied: true }),
+      onGroupAccessDenied: () => NextResponse.json({ groupDenied: true }),
+    });
+
+    const request = new NextRequest('http://localhost:3000/protected');
+
+    await setSessionCookie(
+      request,
+      undefined,
+      userWithGroupsSessionCookieValue
+    );
+
+    const response = await middleware(request, defaultEvent());
+
+    const res = new TestAppRes(response);
+
+    expect(await res.getBody()).toEqual({ groupDenied: true });
+  });
+
+  it('does not fall back to onAccessDenied if onGroupAccessDenied is not provided', async () => {
+    const middleware = monoCloud.authMiddleware({
+      protectedRoutes: [{ routes: ['/protected'], groups: ['NOPE'] }],
+      onAccessDenied: () => NextResponse.json({ accessDenied: true }),
+    });
+
+    const request = new NextRequest('http://localhost:3000/protected');
+
+    await setSessionCookie(
+      request,
+      undefined,
+      userWithGroupsSessionCookieValue
+    );
+
+    const response = await middleware(request, defaultEvent());
+
+    const res = new TestAppRes(response);
+
+    expect(res.status).toBe(403);
+    expect(await res.getBody()).toBe('forbidden');
   });
 });

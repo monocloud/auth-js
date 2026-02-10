@@ -14,17 +14,20 @@ import { Protected } from '../../src/components/client/protected';
 export const ProtectedComponent = ({
   groups,
   groupsClaim,
-  onAccessDenied,
+  fallback,
+  groupFallback,
 }: {
   groups?: string[];
   groupsClaim?: string;
-  onAccessDenied?: React.ReactNode;
+  fallback?: React.ReactNode;
+  groupFallback?: React.ReactNode;
 }): JSX.Element => {
   return (
     <Protected
       groups={groups}
       groupsClaim={groupsClaim}
-      onAccessDenied={onAccessDenied}
+      fallback={fallback}
+      groupFallback={groupFallback}
     >
       <p>Great Success!!!</p>
     </Protected>
@@ -77,11 +80,11 @@ describe('<Protected/> (Client)', () => {
     });
   });
 
-  it('should render onAccessDenied if the user is not authenticated', async () => {
+  it('should render fallback if the user is not authenticated', async () => {
     fetchNoContent();
 
     const { container } = render(
-      <ProtectedComponent onAccessDenied={<>Great Failure!!!</>} />,
+      <ProtectedComponent fallback={<>Great Failure!!!</>} />,
       {
         wrapper,
       }
@@ -92,11 +95,11 @@ describe('<Protected/> (Client)', () => {
     });
   });
 
-  it('should render onAccessDenied if there was an authentication error', async () => {
+  it('should render fallback if there was an authentication error', async () => {
     fetch500();
 
     const { container } = render(
-      <ProtectedComponent onAccessDenied={<>Great Failure!!!</>} />,
+      <ProtectedComponent fallback={<>Great Failure!!!</>} />,
       {
         wrapper,
       }
@@ -131,13 +134,28 @@ describe('<Protected/> (Client)', () => {
     });
   });
 
-  it('should render onAccessDenied if the the user does not belong to any groups', async () => {
+  it('should NOT render fallback if the user does not belong to any groups', async () => {
+    fetchOkGroups();
+
+    const { container } = render(
+      <ProtectedComponent groups={['NOPE']} fallback={<>Great Failure!!!</>} />,
+      {
+        wrapper,
+      }
+    );
+
+    await waitFor(() => {
+      expect(container.textContent).not.toContain('Great Failure!!!');
+    });
+  });
+
+  it('should render groupFallback if the user does not belong to any groups', async () => {
     fetchOkGroups();
 
     const { container } = render(
       <ProtectedComponent
         groups={['NOPE']}
-        onAccessDenied={<>Great Failure!!!</>}
+        groupFallback={<>Group Specific Failure!!!</>}
       />,
       {
         wrapper,
@@ -145,7 +163,26 @@ describe('<Protected/> (Client)', () => {
     );
 
     await waitFor(() => {
-      expect(container.textContent).toContain('Great Failure!!!');
+      expect(container.textContent).toContain('Group Specific Failure!!!');
+    });
+  });
+
+  it('should prioritize groupFallback over fallback when user is authenticated but unauthorized', async () => {
+    fetchOkGroups();
+
+    const { container } = render(
+      <ProtectedComponent
+        groups={['NOPE']}
+        fallback={<>Generic Failure</>}
+        groupFallback={<>Group Specific Failure!!!</>}
+      />,
+      {
+        wrapper,
+      }
+    );
+
+    await waitFor(() => {
+      expect(container.textContent).toContain('Group Specific Failure!!!');
     });
   });
 
