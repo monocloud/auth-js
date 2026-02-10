@@ -26,7 +26,12 @@ export interface ProtectedComponentProps {
   /**
    * A fallback component that should render if the user is not authenticated.
    */
-  onAccessDenied?: React.ReactNode;
+  fallback?: React.ReactNode;
+
+  /**
+   * A fallback component that should render if the user is authenticated but does not belong to the required groups.
+   */
+  groupFallback?: React.ReactNode;
 }
 
 /**
@@ -37,7 +42,7 @@ export interface ProtectedComponentProps {
  *
  * @param props - Props for customizing the Protected component.
  *
- * @returns The children if authorized, the `onAccessDenied` content if unauthorized,
+ * @returns The children if authorized, the `fallback` or `groupFallback` content if unauthenticated or unauthorized,
  * or `null` while loading.
  *
  * @example App Router
@@ -49,7 +54,7 @@ export interface ProtectedComponentProps {
  *
  * export default function Home() {
  *   return (
- *     <Protected onAccessDenied={<>Sign in to view the message.</>}>
+ *     <Protected fallback={<>Sign in to view the message.</>}>
  *       <>You are breathtaking</>
  *     </Protected>
  *   );
@@ -68,7 +73,7 @@ export interface ProtectedComponentProps {
  * export default function Home() {
  *   return (
  *     <Protected
- *       onAccessDenied={<>Only admins are allowed.</>}
+ *       groupFallback={<>Only admins are allowed.</>}
  *       groups={["admin"]}
  *     >
  *       <>Signed in as admin</>
@@ -84,7 +89,7 @@ export interface ProtectedComponentProps {
  *
  * export default function Home() {
  *   return (
- *     <Protected onAccessDenied={<>Sign in to view the message.</>}>
+ *     <Protected fallback={<>Sign in to view the message.</>}>
  *       <>You are breathtaking</>
  *     </Protected>
  *   );
@@ -101,7 +106,7 @@ export interface ProtectedComponentProps {
  * export default function Home() {
  *   return (
  *     <Protected
- *       onAccessDenied={<>Only admins are allowed.</>}
+ *       groupFallback={<>Only admins are allowed.</>}
  *       groups={["admin"]}
  *     >
  *       <>Signed in as admin</>
@@ -116,7 +121,8 @@ export const Protected = ({
   groups,
   groupsClaim,
   matchAllGroups = false,
-  onAccessDenied = null,
+  fallback = null,
+  groupFallback = null,
 }: ProtectedComponentProps): JSX.Element | null => {
   const { isLoading, error, isAuthenticated, user } = useAuth();
 
@@ -125,8 +131,8 @@ export const Protected = ({
   }
 
   if (error || !isAuthenticated || !user) {
-    if (onAccessDenied) {
-      return <>{onAccessDenied}</>;
+    if (fallback) {
+      return <>{fallback}</>;
     }
 
     return null;
@@ -142,7 +148,7 @@ export const Protected = ({
         matchAllGroups
       )
         ? children
-        : onAccessDenied}
+        : groupFallback}
     </>
   );
 };

@@ -388,8 +388,8 @@ export class MonoCloudNextClient {
    *
    * Restricts access to server-rendered pages in your Next.js App Router application, ensures that only authenticated (and optionally authorized) users can view the page.
    *
-   * **Note⚠️ - When using groups to protect a page, 'Access Denied' is rendered by default when the user does not have
-   * enough permissions. To display a custom component, pass the `onAccessDenied` parameter.**
+   * **Note⚠️ - When using groups to protect a page, 'Access Denied' is rendered by default when the user does not belong to the groups.
+   *  To display a custom component, pass the `onGroupAccessDenied` parameter.**
    *
    * @param component The App Router server component that protectPage wraps and secures
    * @param options App Router `protectPage()` configuration options
@@ -432,9 +432,9 @@ export class MonoCloudNextClient {
    *
    * Restricts access to server-rendered pages in your Next.js Pages Router application, ensures that only authenticated (and optionally authorized) users can view the page.
    *
-   * **Note⚠️ - When using groups to protect a page, the page will be rendered even if the user does not have
-   * enough permissions. You should check the props for `accessDenied` boolean value to determine whether the user is
-   * allowed to accesss the page. Alternatively, you can pass `onAccessDenied` parameter to return custom props.**
+   * **Note⚠️ - When using groups to protect a page, the page will be rendered even if the user does not belong to the groups.
+   * You should check the props for `groupAccessDenied` boolean value to determine whether the user is
+   * allowed to access the page. Alternatively, you can pass `onGroupAccessDenied` parameter to return custom props.**
    *
    * @param options Pages Router `protectPage()` configuration options
    *
@@ -592,8 +592,11 @@ export class MonoCloudNextClient {
           options.matchAll
         )
       ) {
-        if (options.onAccessDenied) {
-          return options.onAccessDenied({ ...params, user: session.user });
+        if (options.onGroupAccessDenied) {
+          return options.onGroupAccessDenied({
+            ...params,
+            user: session.user,
+          });
         }
 
         return 'Access Denied' as unknown as JSX.Element;
@@ -705,10 +708,10 @@ export class MonoCloudNextClient {
           options.matchAll
         )
       ) {
-        const customProps: any = (await options.onAccessDenied?.({
+        const customProps: any = (await options.onGroupAccessDenied?.({
           ...context,
           user: session.user,
-        })) ?? { props: { accessDenied: true } };
+        })) ?? { props: { groupAccessDenied: true } };
 
         const props = {
           ...customProps,
@@ -860,8 +863,12 @@ export class MonoCloudNextClient {
         options.matchAll
       )
     ) {
-      if (options.onAccessDenied) {
-        const result = await options.onAccessDenied(req, ctx);
+      if (options.onGroupAccessDenied) {
+        const result = await options.onGroupAccessDenied(
+          req,
+          ctx,
+          session.user
+        );
 
         if (result instanceof NextResponse) {
           return mergeResponse([res, result]);
@@ -912,8 +919,8 @@ export class MonoCloudNextClient {
         options.matchAll
       )
     ) {
-      if (options.onAccessDenied) {
-        return options.onAccessDenied(req, res, session.user);
+      if (options.onGroupAccessDenied) {
+        return options.onGroupAccessDenied(req, res, session.user);
       }
 
       return res.status(403).json({
@@ -1226,14 +1233,16 @@ export class MonoCloudNextClient {
     const groupsClaim =
       options?.groupsClaim ?? process.env.MONOCLOUD_AUTH_GROUPS_CLAIM;
 
-    const onAccessDenied = options?.onAccessDenied;
-
     if (
       allowedGroups &&
       !isUserInGroup(session.user, allowedGroups, groupsClaim)
     ) {
-      if (onAccessDenied) {
-        const result = await onAccessDenied(req, evt, session.user);
+      if (options?.onGroupAccessDenied) {
+        const result = await options.onGroupAccessDenied(
+          req,
+          evt,
+          session.user
+        );
 
         if (result instanceof NextResponse) {
           return mergeResponse([nxtResp, result]);
@@ -1517,8 +1526,12 @@ export class MonoCloudNextClient {
    * @example SSR Component
    *
    * ```typescript
-   * import { monoCloud } from "@/lib/monocloud";
-   * import type { GetServerSideProps, InferGetServerSidePropsType } from "next";
+   * import { monoCloud } from "@/monocloud";
+   * import type {
+   *   GetServerSideProps,
+   *   GetServerSidePropsContext,
+   *   InferGetServerSidePropsType,
+   * } from "next";
    *
    * type HomeProps = InferGetServerSidePropsType<typeof getServerSideProps>;
    *
@@ -1526,15 +1539,20 @@ export class MonoCloudNextClient {
    *   return <pre>Session: {JSON.stringify(session, null, 2)}</pre>;
    * }
    *
-   * export const getServerSideProps: GetServerSideProps = async (context) => {
-   *   const session = await monoCloud.getSession(context.req, context.res);
+   * export const getServerSideProps = (async (
+   *   context: GetServerSidePropsContext,
+   * ) => {
+   *   const session = await monoCloud.getSession(
+   *     context.req,
+   *     context.res,
+   *   );
    *
    *   return {
    *     props: {
    *       session: session ?? null,
    *     },
    *   };
-   * };
+   * }) satisfies GetServerSideProps;
    * ```
    */
   public getSession(
@@ -1646,7 +1664,7 @@ export class MonoCloudNextClient {
    *
    *  The default token is an access token with scopes set through `MONOCLOUD_AUTH_SCOPES` or
    * `options.defaultAuthParams.scopes`, and resources set through `MONOCLOUD_AUTH_RESOURCE` or
-   * `options.defaultAuthParams.resource`. This token is refreshed when calling getTokens without parameters.
+   * `options.defaultAuthParams.resource`. This token is refreshed when calling getTokens without resource and scopes parameters.
    *
    * ```typescript
    * import { NextResponse } from "next/server";

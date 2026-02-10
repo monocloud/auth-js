@@ -175,7 +175,7 @@ describe('MonoCloud.protectPage() - App Router', () => {
       expect(componentResult).toBe('Access Denied');
     });
 
-    it('can set custom onAccessDenied component', async () => {
+    it('does not fall back to onAccessDenied component when group check fails', async () => {
       await setSessionCookie(req, undefined, userWithGroupsSessionCookieValue);
 
       const protectedComponent = monoCloud.protectPage(Component(false), {
@@ -185,7 +185,56 @@ describe('MonoCloud.protectPage() - App Router', () => {
 
       const componentResult = await protectedComponent({});
 
-      expect(componentResult).toBe('Custom ERROR');
+      expect(componentResult).toBe('Access Denied');
+    });
+
+    it('should render onGroupAccessDenied if user is authenticated but does not belong to any of the listed groups', async () => {
+      await setSessionCookie(req, undefined, userWithGroupsSessionCookieValue);
+
+      const protectedComponent = monoCloud.protectPage(Component(false), {
+        groups: ['NOPE'],
+        onGroupAccessDenied: () =>
+          React.createElement('div', {}, 'Group Access Denied CUSTOM'),
+      });
+
+      const componentResult = await protectedComponent({});
+
+      expect(componentResult.type).toBe('div');
+      expect(componentResult.props.children).toBe('Group Access Denied CUSTOM');
+    });
+
+    it('should pass the user object to onGroupAccessDenied', async () => {
+      await setSessionCookie(req, undefined, userWithGroupsSessionCookieValue);
+
+      let capturedUser: any;
+
+      const protectedComponent = monoCloud.protectPage(Component(false), {
+        groups: ['NOPE'],
+        onGroupAccessDenied: ({ user }) => {
+          capturedUser = user;
+          return React.createElement('div', {}, 'Captured');
+        },
+      });
+
+      await protectedComponent({});
+
+      expect(capturedUser).toEqual(userWithGroupsSessionCookieValue.user);
+    });
+
+    it('should prioritize onGroupAccessDenied over onAccessDenied when authenticated but unauthorized', async () => {
+      await setSessionCookie(req, undefined, userWithGroupsSessionCookieValue);
+
+      const protectedComponent = monoCloud.protectPage(Component(false), {
+        groups: ['NOPE'],
+        onAccessDenied: () =>
+          React.createElement('div', {}, 'Generic Access Denied'),
+        onGroupAccessDenied: () =>
+          React.createElement('div', {}, 'Specific Group Denial'),
+      });
+
+      const componentResult = await protectedComponent({});
+
+      expect(componentResult.props.children).toBe('Specific Group Denial');
     });
   });
 });

@@ -49,13 +49,25 @@ export type NextMiddlewareResult =
  *
  * @param request - The incoming Next.js request.
  * @param event - The Next.js fetch event.
- * @param user - The authenticated user object (if available).
  * @returns A `NextMiddlewareResult` (e.g., a redirect or rewrite) or a Promise resolving to one.
  */
 type NextMiddlewareOnAccessDenied = (
   request: NextRequest,
+  event: NextFetchEvent
+) => NextMiddlewareResult | Promise<NextMiddlewareResult>;
+
+/**
+ * Handler function triggered when a user is denied access in Next.js Middleware due to group restrictions.
+ *
+ * @param request - The incoming Next.js request.
+ * @param event - The Next.js fetch event.
+ * @param user - The authenticated user object.
+ * @returns A `NextMiddlewareResult` (e.g., a redirect or rewrite) or a Promise resolving to one.
+ */
+type NextMiddlewareOnGroupAccessDenied = (
+  request: NextRequest,
   event: NextFetchEvent,
-  user?: MonoCloudUser
+  user: MonoCloudUser
 ) => NextMiddlewareResult | Promise<NextMiddlewareResult>;
 
 /**
@@ -169,9 +181,14 @@ export interface MonoCloudMiddlewareOptions {
   matchAll?: boolean;
 
   /**
-   * A middleware function called when the user is not authenticated or is not a member of the specified groups.
+   * A middleware function called when the user is not authenticated.
    */
   onAccessDenied?: NextMiddlewareOnAccessDenied;
+
+  /**
+   * A middleware function called when the user is authenticated but is not a member of the specified groups.
+   */
+  onGroupAccessDenied?: NextMiddlewareOnGroupAccessDenied;
 }
 
 /**
@@ -218,10 +235,18 @@ export type ProtectAppPageOptions = {
   returnUrl?: string;
 
   /**
-   * Alternate page handler called when the user is not authenticated or is not a member of the specified groups.
+   * Alternate page handler called when the user is not authenticated.
    */
   onAccessDenied?: (props: {
-    user?: MonoCloudUser;
+    params?: Record<string, string | string[]>;
+    searchParams?: Record<string, string | string[] | undefined>;
+  }) => Promise<JSX.Element> | JSX.Element;
+
+  /**
+   * Alternate page handler called when the user is authenticated but is not a member of the specified groups.
+   */
+  onGroupAccessDenied?: (props: {
+    user: MonoCloudUser;
     params?: Record<string, string | string[]>;
     searchParams?: Record<string, string | string[] | undefined>;
   }) => Promise<JSX.Element> | JSX.Element;
@@ -257,9 +282,14 @@ export type ProtectPagePageOptions<
   returnUrl?: string;
 
   /**
-   * Alternate `getServerSideProps` function called when the user is not authenticated or is not a member of the specified groups.
+   * Alternate `getServerSideProps` function called when the user is not authenticated.
    */
   onAccessDenied?: ProtectPagePageOnAccessDeniedType<P, Q>;
+
+  /**
+   * Alternate `getServerSideProps` function called when the user IS authenticated but is not a member of the specified groups.
+   */
+  onGroupAccessDenied?: ProtectPagePageOnGroupAccessDeniedType<P, Q>;
 
   /**
    * Authorization parameters to be used during authentication.
@@ -268,12 +298,12 @@ export type ProtectPagePageOptions<
 } & GroupOptions;
 
 /**
- * Handler function triggered when a user is denied access in a Pages Router `getServerSideProps` flow.
+ * Handler function triggered when a user is not authenticated in a Pages Router `getServerSideProps` flow.
  *
  * @typeParam P - The type of the props.
  * @typeParam Q - The type of the parsed query object.
  *
- * @param context - The server-side props context extended with the optional user object.
+ * @param context - The server-side props context
  *
  * @returns The result for `getServerSideProps`.
  */
@@ -281,7 +311,24 @@ export type ProtectPagePageOnAccessDeniedType<
   P,
   Q extends ParsedUrlQuery = ParsedUrlQuery,
 > = (
-  context: GetServerSidePropsContext<Q> & { user?: MonoCloudUser }
+  context: GetServerSidePropsContext<Q>
+) => Promise<GetServerSidePropsResult<P>> | GetServerSidePropsResult<P>;
+
+/**
+ * Handler function triggered when a user is denied access in a Pages Router `getServerSideProps` flow due to group restrictions.
+ *
+ * @typeParam P - The type of the props.
+ * @typeParam Q - The type of the parsed query object.
+ *
+ * @param context - The server-side props context with the user object.
+ *
+ * @returns The result for `getServerSideProps`.
+ */
+export type ProtectPagePageOnGroupAccessDeniedType<
+  P,
+  Q extends ParsedUrlQuery = ParsedUrlQuery,
+> = (
+  context: GetServerSidePropsContext<Q> & { user: MonoCloudUser }
 ) => Promise<GetServerSidePropsResult<P>> | GetServerSidePropsResult<P>;
 
 /**
@@ -312,50 +359,85 @@ export type ProtectedAppServerComponent = (props: {
 }) => Promise<JSX.Element> | JSX.Element;
 
 /**
- * Handler function triggered when a user is denied access in an App Router API route.
+ * Handler function triggered when a user is not authenticated in an App Router API route.
  *
  * @param req - The incoming Next.js request.
  * @param ctx - The App Router context.
- *
- * @param user - The authenticated user object (if available).
  *
  * @returns A Response/NextResponse or Promise resolving to one.
  */
 export type AppRouterApiOnAccessDeniedHandler = (
   req: NextRequest,
+  ctx: AppRouterContext
+) => Promise<Response> | Response;
+
+/**
+ * Handler function triggered when a user is denied access in an App Router API route due to group restrictions.
+ *
+ * @param req - The incoming Next.js request.
+ * @param ctx - The App Router context.
+ * @param user - The authenticated user object.
+ *
+ * @returns A Response/NextResponse or Promise resolving to one.
+ */
+export type AppRouterApiOnGroupAccessDeniedHandler = (
+  req: NextRequest,
   ctx: AppRouterContext,
-  user?: MonoCloudUser
+  user: MonoCloudUser
 ) => Promise<Response> | Response;
 
 /** Options for App Router `protectApi()` */
 export type ProtectApiAppOptions = {
   /**
-   * Alternate app router api handler called when the user is not authenticated or is not a member of the specified groups.
+   * Alternate app router api handler called when the user is not authenticated.
    */
   onAccessDenied?: AppRouterApiOnAccessDeniedHandler;
+
+  /**
+   * Alternate app router api handler called when the user is authenticated but is not a member of the specified groups.
+   */
+  onGroupAccessDenied?: AppRouterApiOnGroupAccessDeniedHandler;
 } & GroupOptions;
 
 /**
- * Handler function triggered when a user is denied access in a Pages Router API route.
+ * Handler function triggered when a user is not authenticated in a Pages Router API route.
  *
  * @param req - The incoming Next.js API request.
  * @param res - The Next.js API response.
- * @param user - The authenticated user object (if available).
  *
  * @returns
  */
 export type PageRouterApiOnAccessDeniedHandler = (
   req: NextApiRequest,
+  res: NextApiResponse<any>
+) => Promise<unknown> | unknown;
+
+/**
+ * Handler function triggered when a user is denied access in a Pages Router API route due to group restrictions.
+ *
+ * @param req - The incoming Next.js API request.
+ * @param res - The Next.js API response.
+ * @param user - The authenticated user object.
+ *
+ * @returns
+ */
+export type PageRouterApiOnGroupAccessDeniedHandler = (
+  req: NextApiRequest,
   res: NextApiResponse<any>,
-  user?: MonoCloudUser
+  user: MonoCloudUser
 ) => Promise<unknown> | unknown;
 
 /** Options for Page Router `protectApi()` */
 export type ProtectApiPageOptions = {
   /**
-   * Alternate page router api handler called when the user is not authenticated or is not a member of the specified groups.
+   * Alternate page router api handler called when the user is not authenticated.
    */
   onAccessDenied?: PageRouterApiOnAccessDeniedHandler;
+
+  /**
+   * Alternate page router api handler called when the user is authenticated but is not a member of the specified groups.
+   */
+  onGroupAccessDenied?: PageRouterApiOnGroupAccessDeniedHandler;
 } & GroupOptions;
 
 /**
@@ -435,7 +517,7 @@ export interface RedirectToSignInOptions {
    */
   acrValues?: string[];
   /**
-   *  A hint to the authorization server about the user's identifier
+   * A hint to the authorization server about the user's identifier
    */
   loginHint?: string;
   /**

@@ -17,9 +17,14 @@ export type ProtectPageOptions = {
   returnUrl?: string;
 
   /**
-   * A custom react element to render when the user is not authenticated or is not a member of the specified groups.
+   * A custom react element to render when the user is not authenticated.
    */
-  onAccessDenied?: (user?: MonoCloudUser) => JSX.Element;
+  fallback?: (user?: MonoCloudUser) => JSX.Element;
+
+  /**
+   * A custom react element to render when the user is authenticated but does not belong to the required groups.
+   */
+  groupFallback?: (user: MonoCloudUser) => JSX.Element;
 
   /**
    * Authorization parameters to be used during authentication.
@@ -102,7 +107,7 @@ const handlePageError = (
 /**
  * Function to protect a client rendered page component.
  * Ensures that only authenticated users can access the component.
- * 
+ *
  * **Note⚠️: Since `window.location` is set as `returnUrl` query param by default, you need to set the env `MONOCLOUD_AUTH_ALLOW_QUERY_PARAM_OVERRIDES=true` or `allowQueryParamOverrides` should be `true` in the client initialization for returning to the same page.**
  *
  * @param Component - The component to protect.
@@ -123,7 +128,7 @@ const handlePageError = (
  * ```
  *
  * @example App Router with options
- * 
+ *
  * See {@link ProtectPageOptions} for more options.
  *
  * ```tsx
@@ -138,8 +143,42 @@ const handlePageError = (
  *   { returnUrl: "/dashboard", authParams: { loginHint: "username" } }
  * );
  * ```
-
-* @example Pages Router
+ * @example Custom Fallback
+ *
+ * ```tsx
+ * "use client";
+ *
+ * import { protectPage } from "@monocloud/auth-nextjs/client";
+ *
+ * export default protectPage(
+ *   function Home() {
+ *     return <>You are signed in</>;
+ *   },
+ *   {
+ *    fallback: () => <div>Please sign in to continue</div>
+ *   }
+ * );
+ * ```
+ *
+ * @example Group Protection with Group Fallback
+ *
+ * ```tsx
+ * "use client";
+ *
+ * import { protectPage } from "@monocloud/auth-nextjs/client";
+ *
+ * export default protectPage(
+ *   function Home() {
+ *     return <>Welcome Admin</>;
+ *   },
+ *   {
+ *    groups: ["admin"],
+ *    groupFallback: (user) => <div>User {user.email} is not an admin</div>
+ *   }
+ * );
+ * ```
+ *
+ * @example Pages Router
  *
  * ```tsx
  * import { protectPage } from "@monocloud/auth-nextjs/client";
@@ -150,7 +189,7 @@ const handlePageError = (
  * ```
  *
  * @example Pages Router with options
- * 
+ *
  * See {@link ProtectPageOptions} for more options.
  *
  * ```tsx
@@ -173,7 +212,7 @@ export const protectPage = <P extends object>(
 
     useEffect(() => {
       if (!user && !isLoading && !error) {
-        if (options?.onAccessDenied) {
+        if (options?.fallback) {
           return;
         }
 
@@ -189,8 +228,8 @@ export const protectPage = <P extends object>(
       return handlePageError(error, options);
     }
 
-    if (!user && !isLoading && options?.onAccessDenied) {
-      return options.onAccessDenied();
+    if (!user && !isLoading && options?.fallback) {
+      return options.fallback();
     }
 
     if (user) {
@@ -204,9 +243,9 @@ export const protectPage = <P extends object>(
           options.matchAll
         )
       ) {
-        const { onAccessDenied = (): JSX.Element => <div>Access Denied</div> } =
+        const { groupFallback = (): JSX.Element => <div>Access Denied</div> } =
           options;
-        return onAccessDenied(user);
+        return groupFallback(user);
       }
 
       return <Component user={user} {...props} />;
