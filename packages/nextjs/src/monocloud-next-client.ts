@@ -60,6 +60,8 @@ import {
   isMonoCloudRequest,
   isMonoCloudResponse,
   mergeResponse,
+  isNodeRequest,
+  isNodeResponse,
 } from './utils';
 import MonoCloudCookieRequest from './requests/monocloud-cookie-request';
 import MonoCloudCookieResponse from './responses/monocloud-cookie-response';
@@ -67,7 +69,7 @@ import MonoCloudAppRouterRequest from './requests/monocloud-app-router-request';
 import MonoCloudAppRouterResponse from './responses/monocloud-app-router-response';
 import { JSX } from 'react';
 import { ParsedUrlQuery } from 'node:querystring';
-import { IncomingMessage, ServerResponse } from 'node:http';
+import type { IncomingMessage, ServerResponse } from 'node:http';
 import MonoCloudPageRouterRequest from './requests/monocloud-page-router-request';
 import MonoCloudPageRouterResponse from './responses/monocloud-page-router-response';
 
@@ -2120,8 +2122,8 @@ export class MonoCloudNextClient {
       }
     } else if (
       args.length === 2 &&
-      args[0] instanceof IncomingMessage &&
-      args[1] instanceof ServerResponse
+      isNodeRequest(args[0]) &&
+      isNodeResponse(args[1])
     ) {
       ({ request, response } = getMonoCloudCookieReqRes(args[0], args[1]));
     } else {
@@ -2855,10 +2857,7 @@ export class MonoCloudNextClient {
         }
       }
 
-      if (
-        args[0] instanceof IncomingMessage &&
-        args[1] instanceof ServerResponse
-      ) {
+      if (isNodeRequest(args[0]) && isNodeResponse(args[1])) {
         ({ request, response } = getMonoCloudCookieReqRes(args[0], args[1]));
         groups = args[2];
       }

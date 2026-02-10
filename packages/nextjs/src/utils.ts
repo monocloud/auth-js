@@ -13,7 +13,7 @@ import MonoCloudAppRouterResponse from './responses/monocloud-app-router-respons
 import MonoCloudPageRouterResponse from './responses/monocloud-page-router-response';
 import MonoCloudCookieResponse from './responses/monocloud-cookie-response';
 import MonoCloudCookieRequest from './requests/monocloud-cookie-request';
-import { IncomingMessage, ServerResponse } from 'node:http';
+import type { IncomingMessage, ServerResponse } from 'node:http';
 import { isPresent } from '@monocloud/auth-node-core/internal';
 
 export const isMonoCloudRequest = (
@@ -34,6 +34,27 @@ export const isAppRouter = (req: unknown): boolean =>
   req instanceof Request ||
   (req as Request).headers instanceof Headers ||
   typeof (req as Request).bodyUsed === 'boolean';
+
+export const isNodeRequest = (req: any): req is IncomingMessage => {
+  return !!(
+    req &&
+    typeof req === 'object' &&
+    'headers' in req &&
+    !('bodyUsed' in req) &&
+    typeof req.on === 'function'
+  );
+};
+
+export const isNodeResponse = (res: any): res is ServerResponse => {
+  return !!(
+    res &&
+    typeof res === 'object' &&
+    'setHeader' in res &&
+    typeof res.setHeader === 'function' &&
+    'end' in res &&
+    typeof res.end === 'function'
+  );
+};
 
 export const getNextRequest = (req: Request | NextRequest): NextRequest => {
   if (req instanceof NextRequest) {
@@ -97,10 +118,7 @@ export const getMonoCloudCookieReqRes = (
         ? new MonoCloudAppRouterResponse(getNextResponse(resOrCtx))
         : new MonoCloudCookieResponse();
   } else {
-    if (
-      !(req instanceof IncomingMessage) ||
-      !(resOrCtx instanceof ServerResponse)
-    ) {
+    if (!isNodeRequest(req) || !isNodeResponse(resOrCtx)) {
       throw new MonoCloudValidationError(
         'Invalid pages router request and response'
       );
