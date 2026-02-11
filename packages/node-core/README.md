@@ -1,4 +1,21 @@
-![MonoCloud Logo](https://raw.githubusercontent.com/monocloud/auth-js/refs/heads/main/MonoCloud.png)
+<div align="center">
+  <a href="https://www.monocloud.com?utm_source=github&utm_medium=auth_js" target="_blank" rel="noopener noreferrer">
+    <picture>
+      <img src="https://raw.githubusercontent.com/monocloud/auth-js/refs/heads/main/packages/node-core/banner.svg" alt="MonoCloud Banner">
+    </picture>
+  </a>
+  <div align="right">
+    <a href="https://www.npmjs.com/package/@monocloud/auth-node-core" target="_blank">
+      <img src="https://img.shields.io/npm/v/@monocloud/auth-node-core" alt="NPM" />
+    </a>
+    <a href="https://opensource.org/licenses/MIT">
+      <img src="https://img.shields.io/:license-MIT-blue.svg?style=flat" alt="License: MIT" />
+    </a>
+    <a href="https://github.com/monocloud/auth-js/actions/workflows/build.yml">
+      <img src="https://github.com/monocloud/auth-js/actions/workflows/build.yml/badge.svg" alt="Build Status" />
+    </a>
+  </div>
+</div>
 
 ## Introduction
 
@@ -29,7 +46,7 @@ The SDK handles:
 ## Requirements
 
 - A **MonoCloud Tenant**
-- A **Client ID** and **Client Secret** (configured as a *Web Application*)
+- A **Client ID** and **Client Secret** (configured as a _Web Application_)
 - A **Random secret** (32+ characters) for encrypting session cookies
 
 ## 📦 Installation

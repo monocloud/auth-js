@@ -1,20 +1,21 @@
 <div align="center">
   <a href="https://www.monocloud.com?utm_source=github&utm_medium=auth_js" target="_blank" rel="noopener noreferrer">
     <picture>
-      <img src="https://raw.githubusercontent.com/monocloud/auth-js/refs/heads/main/MonoCloud.png" height="100" alt="MonoCloud Logo">
+      <img src="https://raw.githubusercontent.com/monocloud/auth-js/refs/heads/main/banner.svg" alt="MonoCloud Banner">
     </picture>
   </a>
-  <p>Secure, simple auth for everything</p>
-  <img src="https://img.shields.io/npm/v/@monocloud/auth-core" alt="NPM" />
-  <a href="https://opensource.org/licenses/MIT">
-    <img src="https://img.shields.io/:license-MIT-blue.svg?style=flat" alt="License: MIT" />
-  </a>
-  <a href="https://github.com/monocloud/auth-js/actions/workflows/build.yml">
-    <img src="https://github.com/monocloud/auth-js/actions/workflows/build.yml/badge.svg" alt="Build Status" />
-  </a>
+  <div align="right">
+    <a href="https://www.npmjs.com/package/@monocloud/auth-core" target="_blank">
+      <img src="https://img.shields.io/npm/v/@monocloud/auth-core" alt="NPM" />
+    </a>
+    <a href="https://opensource.org/licenses/MIT">
+      <img src="https://img.shields.io/:license-MIT-blue.svg?style=flat" alt="License: MIT" />
+    </a>
+    <a href="https://github.com/monocloud/auth-js/actions/workflows/build.yml">
+      <img src="https://github.com/monocloud/auth-js/actions/workflows/build.yml/badge.svg" alt="Build Status" />
+    </a>
+  </div>
 </div>
-
-<br /><br />
 
 ## Introduction
 
