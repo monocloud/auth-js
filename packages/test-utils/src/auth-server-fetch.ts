@@ -218,7 +218,7 @@ export class AuthorizationServerFetchBuilder {
     error?: string | null;
     error_description?: string | null;
   }): AuthorizationServerFetchBuilder {
-    let body = undefined;
+    let body;
     let responseCode = options?.responseCode ?? 201;
     if (
       typeof options?.error !== 'undefined' ||
@@ -267,7 +267,7 @@ export class AuthorizationServerFetchBuilder {
     skipScope?: boolean;
     skipExpiration?: boolean;
   }): AuthorizationServerFetchBuilder {
-    let body = undefined;
+    let body;
     let responseCode = options?.responseCode ?? 200;
     if (
       typeof options?.error !== 'undefined' ||
