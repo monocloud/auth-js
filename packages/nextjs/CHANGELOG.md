@@ -1,5 +1,17 @@
 # @monocloud/auth-nextjs
 
+## 0.1.6
+
+### Patch Changes
+
+- abc0bc5: Renamed groupFallback to onGroupAccessDenied
+- abc0bc5: Updated packages
+- 1a22540: Updated Readme files
+- abc0bc5: - **Fix:** Resolved Edge Runtime compatibility issues by removing `node:http` imports and implementing safe duck-typing for Node.js request/response checks.
+- Updated dependencies [abc0bc5]
+- Updated dependencies [1a22540]
+  - @monocloud/auth-node-core@0.1.5
+
 ## 0.1.5
 
 ### Patch Changes
