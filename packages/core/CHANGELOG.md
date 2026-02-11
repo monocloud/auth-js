@@ -1,5 +1,12 @@
 # @monocloud/auth-core
 
+## 0.1.4
+
+### Patch Changes
+
+- abc0bc5: Updated packages
+- 1a22540: Updated Readme files
+
 ## 0.1.3
 
 ### Patch Changes
