@@ -1,4 +1,5 @@
 /* eslint-disable import/no-extraneous-dependencies */
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
 import { NextRequest, NextResponse } from 'next/server';
 import { describe, it, expect } from 'vitest';
 import {
@@ -7,6 +8,8 @@ import {
   mergeResponse,
   getNextRequest,
   getNextResponse,
+  isNodeRequest,
+  isNodeResponse,
 } from '../src/utils';
 import MonoCloudAppRouterResponse from '../src/responses/monocloud-app-router-response';
 import MonoCloudAppRouterRequest from '../src/requests/monocloud-app-router-request';
@@ -148,5 +151,84 @@ describe('mergeResponse', () => {
     });
 
     expect(headerCount).toBe(0);
+  });
+
+  describe('isNodeRequest', () => {
+    it('should return true for a valid Node.js IncomingMessage (mocked)', () => {
+      const req = {
+        headers: {},
+        on: () => {},
+      };
+      expect(isNodeRequest(req)).toBe(true);
+    });
+
+    it('should return true for an actual IncomingMessage instance', () => {
+      const req = Object.create(IncomingMessage.prototype);
+      req.headers = {};
+      req.on = () => {};
+      expect(isNodeRequest(req)).toBe(true);
+    });
+
+    it('should return false for a NextRequest (App Router)', () => {
+      const req = new NextRequest('http://example.com');
+      expect(isNodeRequest(req)).toBe(false);
+    });
+
+    it('should return false for a standard Web Request', () => {
+      const req = new Request('http://example.com');
+      expect(isNodeRequest(req)).toBe(false);
+    });
+
+    it('should return false for null/undefined/primitives', () => {
+      expect(isNodeRequest(null)).toBe(false);
+      expect(isNodeRequest(undefined)).toBe(false);
+      expect(isNodeRequest('string')).toBe(false);
+      expect(isNodeRequest(123)).toBe(false);
+    });
+
+    it('should return false for plain objects missing required properties', () => {
+      expect(isNodeRequest({})).toBe(false);
+      expect(isNodeRequest({ headers: {} })).toBe(false);
+      expect(isNodeRequest({ on: () => {} })).toBe(false);
+    });
+  });
+
+  describe('isNodeResponse', () => {
+    it('should return true for a valid Node.js ServerResponse (mocked)', () => {
+      const res = {
+        setHeader: () => {},
+        end: () => {},
+      };
+      expect(isNodeResponse(res)).toBe(true);
+    });
+
+    it('should return true for an actual ServerResponse instance', () => {
+      const res = Object.create(ServerResponse.prototype);
+      res.setHeader = () => {};
+      res.end = () => {};
+      expect(isNodeResponse(res)).toBe(true);
+    });
+
+    it('should return false for a NextResponse (App Router)', () => {
+      const res = new NextResponse();
+      expect(isNodeResponse(res)).toBe(false);
+    });
+
+    it('should return false for a standard Web Response', () => {
+      const res = new Response();
+      expect(isNodeResponse(res)).toBe(false);
+    });
+
+    it('should return false for null/undefined/primitives', () => {
+      expect(isNodeResponse(null)).toBe(false);
+      expect(isNodeResponse(undefined)).toBe(false);
+      expect(isNodeResponse('string')).toBe(false);
+    });
+
+    it('should return false for plain objects missing required methods', () => {
+      expect(isNodeResponse({})).toBe(false);
+      expect(isNodeResponse({ setHeader: () => {} })).toBe(false);
+      expect(isNodeResponse({ end: () => {} })).toBe(false);
+    });
   });
 });

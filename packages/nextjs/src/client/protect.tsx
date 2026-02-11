@@ -1,7 +1,7 @@
 /* eslint-disable react/display-name */
 'use client';
 
-import React, { ComponentType, JSX, useEffect } from 'react';
+import React, { ComponentType, useEffect } from 'react';
 import type { MonoCloudUser } from '@monocloud/auth-node-core';
 import { isUserInGroup } from '@monocloud/auth-node-core/utils';
 import { useAuth } from './use-auth';
@@ -19,12 +19,12 @@ export type ProtectPageOptions = {
   /**
    * A custom react element to render when the user is not authenticated.
    */
-  fallback?: (user?: MonoCloudUser) => JSX.Element;
+  onAccessDenied?: () => React.ReactNode;
 
   /**
    * A custom react element to render when the user is authenticated but does not belong to the required groups.
    */
-  groupFallback?: (user: MonoCloudUser) => JSX.Element;
+  onGroupAccessDenied?: (user: MonoCloudUser) => React.ReactNode;
 
   /**
    * Authorization parameters to be used during authentication.
@@ -38,7 +38,7 @@ export type ProtectPageOptions = {
    * @param error - The error object.
    * @returns JSX element to handle the error.
    */
-  onError?: (error: Error) => JSX.Element;
+  onError?: (error: Error) => React.ReactNode;
 } & GroupOptions;
 
 export const redirectToSignIn = (
@@ -94,7 +94,7 @@ export const redirectToSignIn = (
 const handlePageError = (
   error: Error,
   options?: ProtectPageOptions
-): JSX.Element => {
+): React.ReactNode => {
   /* v8 ignore else -- @preserve */
   if (options?.onError) {
     return options.onError(error);
@@ -143,7 +143,7 @@ const handlePageError = (
  *   { returnUrl: "/dashboard", authParams: { loginHint: "username" } }
  * );
  * ```
- * @example Custom Fallback
+ * @example Fallback with onAccessDenied
  *
  * ```tsx
  * "use client";
@@ -155,12 +155,12 @@ const handlePageError = (
  *     return <>You are signed in</>;
  *   },
  *   {
- *    fallback: () => <div>Please sign in to continue</div>
+ *    onAccessDenied: () => <div>Please sign in to continue</div>
  *   }
  * );
  * ```
  *
- * @example Group Protection with Group Fallback
+ * @example Group Protection with onGroupAccessDenied
  *
  * ```tsx
  * "use client";
@@ -173,7 +173,7 @@ const handlePageError = (
  *   },
  *   {
  *    groups: ["admin"],
- *    groupFallback: (user) => <div>User {user.email} is not an admin</div>
+ *    onGroupAccessDenied: (user) => <div>User {user.email} is not an admin</div>
  *   }
  * );
  * ```
@@ -212,7 +212,7 @@ export const protectPage = <P extends object>(
 
     useEffect(() => {
       if (!user && !isLoading && !error) {
-        if (options?.fallback) {
+        if (options?.onAccessDenied) {
           return;
         }
 
@@ -228,8 +228,8 @@ export const protectPage = <P extends object>(
       return handlePageError(error, options);
     }
 
-    if (!user && !isLoading && options?.fallback) {
-      return options.fallback();
+    if (!user && !isLoading && options?.onAccessDenied) {
+      return options.onAccessDenied();
     }
 
     if (user) {
@@ -243,9 +243,10 @@ export const protectPage = <P extends object>(
           options.matchAll
         )
       ) {
-        const { groupFallback = (): JSX.Element => <div>Access Denied</div> } =
-          options;
-        return groupFallback(user);
+        const {
+          onGroupAccessDenied = (): React.ReactNode => <div>Access Denied</div>,
+        } = options;
+        return onGroupAccessDenied(user);
       }
 
       return <Component user={user} {...props} />;

@@ -1,4 +1,21 @@
-![MonoCloud Logo](https://raw.githubusercontent.com/monocloud/auth-js/refs/heads/main/MonoCloud.png)
+<div align="center">
+  <a href="https://www.monocloud.com?utm_source=github&utm_medium=auth_js" target="_blank" rel="noopener noreferrer">
+    <picture>
+      <img src="https://raw.githubusercontent.com/monocloud/auth-js/refs/heads/main/packages/nextjs/banner.svg" alt="MonoCloud Banner">
+    </picture>
+  </a>
+  <div align="right">
+    <a href="https://www.npmjs.com/package/@monocloud/auth-nextjs" target="_blank">
+      <img src="https://img.shields.io/npm/v/@monocloud/auth-nextjs" alt="NPM" />
+    </a>
+    <a href="https://opensource.org/licenses/MIT">
+      <img src="https://img.shields.io/:license-MIT-blue.svg?style=flat" alt="License: MIT" />
+    </a>
+    <a href="https://github.com/monocloud/auth-js/actions/workflows/build.yml">
+      <img src="https://github.com/monocloud/auth-js/actions/workflows/build.yml/badge.svg" alt="Build Status" />
+    </a>
+  </div>
+</div>
 
 ## Introduction
 
@@ -11,8 +28,8 @@ This SDK is designed specifically for **Next.js**, providing first-class integra
 ## 📘 Documentation
 
 - **Documentation:** [https://www.monocloud.com/docs](https://www.monocloud.com/docs?utm_source=github&utm_medium=auth_js)
-- **Quickstart:**  [https://www.monocloud.com/docs/quickstarts/nextjs-app-router](https://www.monocloud.com/docs/quickstarts/nextjs-app-router?utm_source=github&utm_medium=auth_js)
-- **SDK Reference:**  [https://www.monocloud.com/docs/sdk-reference/nextjs](https://www.monocloud.com/docs/sdk-reference/nextjs/index?utm_source=github&utm_medium=auth_js)
+- **Quickstart:** [https://www.monocloud.com/docs/quickstarts/nextjs-app-router](https://www.monocloud.com/docs/quickstarts/nextjs-app-router?utm_source=github&utm_medium=auth_js)
+- **SDK Reference:** [https://www.monocloud.com/docs/sdk-reference/nextjs](https://www.monocloud.com/docs/sdk-reference/nextjs/index?utm_source=github&utm_medium=auth_js)
 - **API Reference:** [https://monocloud.github.io/auth-js](https://monocloud.github.io/auth-js?utm_source=github&utm_medium=auth_js)
 
 ## Supported Platforms

@@ -1,4 +1,4 @@
-import React, { JSX } from 'react';
+import React from 'react';
 import { ExtraAuthParams } from '../types';
 
 export interface SignUpProps extends Omit<
@@ -59,7 +59,7 @@ export const SignUp = ({
   Omit<
     React.AnchorHTMLAttributes<HTMLAnchorElement>,
     'resource'
-  >): JSX.Element => {
+  >): React.ReactNode => {
   const signInUrl =
     process.env.NEXT_PUBLIC_MONOCLOUD_AUTH_SIGNIN_URL ??
     // eslint-disable-next-line no-underscore-dangle

@@ -52,6 +52,7 @@ export default defineConfig([
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-unused-vars': 'off',
       '@typescript-eslint/prefer-for-of': 'off',
+      '@typescript-eslint/consistent-generic-constructors': 'off',
       '@typescript-eslint/no-redeclare': 'error',
       '@typescript-eslint/no-dynamic-delete': 'error',
       '@typescript-eslint/only-throw-error': 'error',

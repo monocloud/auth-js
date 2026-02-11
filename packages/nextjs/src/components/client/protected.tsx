@@ -1,6 +1,7 @@
 import { isUserInGroup } from '@monocloud/auth-node-core/utils';
-import React, { JSX } from 'react';
+import React from 'react';
 import { useAuth } from '../../client';
+import type { MonoCloudUser } from '@monocloud/auth-node-core';
 
 export interface ProtectedComponentProps {
   /**
@@ -31,7 +32,7 @@ export interface ProtectedComponentProps {
   /**
    * A fallback component that should render if the user is authenticated but does not belong to the required groups.
    */
-  groupFallback?: React.ReactNode;
+  onGroupAccessDenied?: (user?: MonoCloudUser) => React.ReactNode;
 }
 
 /**
@@ -42,7 +43,7 @@ export interface ProtectedComponentProps {
  *
  * @param props - Props for customizing the Protected component.
  *
- * @returns The children if authorized, the `fallback` or `groupFallback` content if unauthenticated or unauthorized,
+ * @returns The children if authorized, the `fallback` or `onGroupAccessDenied` content if unauthenticated or unauthorized,
  * or `null` while loading.
  *
  * @example App Router
@@ -73,7 +74,7 @@ export interface ProtectedComponentProps {
  * export default function Home() {
  *   return (
  *     <Protected
- *       groupFallback={<>Only admins are allowed.</>}
+ *       onGroupAccessDenied={() => <>Only admins are allowed.</>}
  *       groups={["admin"]}
  *     >
  *       <>Signed in as admin</>
@@ -106,7 +107,7 @@ export interface ProtectedComponentProps {
  * export default function Home() {
  *   return (
  *     <Protected
- *       groupFallback={<>Only admins are allowed.</>}
+ *       onGroupAccessDenied={(user) => <>User {user?.email} is not allowed.</>}
  *       groups={["admin"]}
  *     >
  *       <>Signed in as admin</>
@@ -122,8 +123,8 @@ export const Protected = ({
   groupsClaim,
   matchAllGroups = false,
   fallback = null,
-  groupFallback = null,
-}: ProtectedComponentProps): JSX.Element | null => {
+  onGroupAccessDenied = (): React.ReactNode => <></>,
+}: ProtectedComponentProps): React.ReactNode | null => {
   const { isLoading, error, isAuthenticated, user } = useAuth();
 
   if (isLoading) {
@@ -132,7 +133,7 @@ export const Protected = ({
 
   if (error || !isAuthenticated || !user) {
     if (fallback) {
-      return <>{fallback}</>;
+      return fallback;
     }
 
     return null;
@@ -148,7 +149,7 @@ export const Protected = ({
         matchAllGroups
       )
         ? children
-        : groupFallback}
+        : onGroupAccessDenied(user)}
     </>
   );
 };

@@ -65,18 +65,18 @@
   "dependencies": {
     "@monocloud/auth-node-core": "workspace:*",
     "cookie": "1.1.1",
-    "swr": "2.3.8"
+    "swr": "2.4.0"
   },
   "devDependencies": {
     "@edge-runtime/vm": "5.0.0",
     "@monocloud/auth-test-utils": "workspace:*",
     "@testing-library/dom": "10.4.1",
-    "@testing-library/react": "16.3.1",
+    "@testing-library/react": "16.3.2",
     "@types/body-parser": "1.19.6",
-    "@types/react": "19.2.7",
+    "@types/react": "19.2.13",
     "@types/react-dom": "19.2.3",
-    "body-parser": "2.2.1",
-    "eslint": "9.39.2",
+    "body-parser": "2.2.2",
+    "eslint": "10.0.0",
     "nock": "15.0.0",
     "tough-cookie": "6.0.0",
     "url-search-params-polyfill": "8.2.5"
