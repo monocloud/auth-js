@@ -2,6 +2,7 @@
 import { render, waitFor } from '@testing-library/react';
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import React, { JSX } from 'react';
+import type { MonoCloudUser } from '@monocloud/auth-node-core';
 import {
   fetch500,
   fetchNoContent,
@@ -10,24 +11,25 @@ import {
   wrapper,
 } from '../client-helper';
 import { Protected } from '../../src/components/client/protected';
+import { userWithGroupsSessionCookieValue } from '../common-helper';
 
 export const ProtectedComponent = ({
   groups,
   groupsClaim,
   fallback,
-  groupFallback,
+  onGroupAccessDenied,
 }: {
   groups?: string[];
   groupsClaim?: string;
   fallback?: React.ReactNode;
-  groupFallback?: React.ReactNode;
+  onGroupAccessDenied?: (user?: MonoCloudUser) => React.ReactNode;
 }): JSX.Element => {
   return (
     <Protected
       groups={groups}
       groupsClaim={groupsClaim}
       fallback={fallback}
-      groupFallback={groupFallback}
+      onGroupAccessDenied={onGroupAccessDenied}
     >
       <p>Great Success!!!</p>
     </Protected>
@@ -149,13 +151,13 @@ describe('<Protected/> (Client)', () => {
     });
   });
 
-  it('should render groupFallback if the user does not belong to any groups', async () => {
+  it('should render onGroupAccessDenied if the user does not belong to any groups', async () => {
     fetchOkGroups();
 
     const { container } = render(
       <ProtectedComponent
         groups={['NOPE']}
-        groupFallback={<>Group Specific Failure!!!</>}
+        onGroupAccessDenied={() => <>Group Specific Failure!!!</>}
       />,
       {
         wrapper,
@@ -167,14 +169,39 @@ describe('<Protected/> (Client)', () => {
     });
   });
 
-  it('should prioritize groupFallback over fallback when user is authenticated but unauthorized', async () => {
+  it('should pass the user object to onGroupAccessDenied', async () => {
+    fetchOkGroups();
+
+    let capturedUser: MonoCloudUser | undefined;
+
+    const { container } = render(
+      <ProtectedComponent
+        groups={['NOPE']}
+        onGroupAccessDenied={user => {
+          capturedUser = user;
+          return <>User Captured</>;
+        }}
+      />,
+      {
+        wrapper,
+      }
+    );
+
+    await waitFor(() => {
+      expect(container.textContent).toContain('User Captured');
+      expect(capturedUser).toBeDefined();
+      expect(capturedUser?.sub).toBe(userWithGroupsSessionCookieValue.user.sub);
+    });
+  });
+
+  it('should prioritize onGroupAccessDenied over fallback when user is authenticated but unauthorized', async () => {
     fetchOkGroups();
 
     const { container } = render(
       <ProtectedComponent
         groups={['NOPE']}
         fallback={<>Generic Failure</>}
-        groupFallback={<>Group Specific Failure!!!</>}
+        onGroupAccessDenied={() => <>Group Specific Failure!!!</>}
       />,
       {
         wrapper,

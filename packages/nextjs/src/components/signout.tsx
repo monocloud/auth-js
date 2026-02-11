@@ -1,4 +1,4 @@
-import React, { JSX } from 'react';
+import React from 'react';
 
 export interface SignOutProps {
   /** URL to redirect the user to after they have been signed out. */
@@ -47,7 +47,7 @@ export const SignOut = ({
   federated,
   ...props
 }: SignOutProps &
-  React.AnchorHTMLAttributes<HTMLAnchorElement>): JSX.Element => {
+  React.AnchorHTMLAttributes<HTMLAnchorElement>): React.ReactNode => {
   const signOutUrl =
     process.env.NEXT_PUBLIC_MONOCLOUD_AUTH_SIGNOUT_URL ??
     // eslint-disable-next-line no-underscore-dangle

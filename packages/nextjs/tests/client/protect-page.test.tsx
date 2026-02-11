@@ -59,7 +59,7 @@ describe('protectPage() - CSR', () => {
     fetchNoContent();
 
     const ProtectedComponent = protectPage(Component(false), {
-      fallback: () => <p>CUSTOM</p>,
+      onAccessDenied: () => <p>CUSTOM</p>,
     });
 
     const { container } = render(<ProtectedComponent />, { wrapper });
@@ -196,7 +196,7 @@ describe('protectPage() - CSR', () => {
 
     const ProtectedComponent = protectPage(Component(false), {
       groups: ['NOPE'],
-      fallback: () => <p>CUSTOM FALLBACK</p>,
+      onAccessDenied: () => <p>CUSTOM FALLBACK</p>,
     });
 
     const { container } = render(<ProtectedComponent />, { wrapper });
@@ -214,7 +214,7 @@ describe('protectPage() - CSR', () => {
 
     const ProtectedComponent = protectPage(Component(false), {
       groups: ['NOPE'],
-      groupFallback: () => <p>GROUP FALLBACK</p>,
+      onGroupAccessDenied: () => <p>GROUP FALLBACK</p>,
     });
 
     const { container } = render(<ProtectedComponent />, { wrapper });
@@ -233,8 +233,8 @@ describe('protectPage() - CSR', () => {
 
     const ProtectedComponent = protectPage(Component(false), {
       groups: ['NOPE'],
-      fallback: () => <p>GENERIC FALLBACK</p>,
-      groupFallback: () => <p>SPECIFIC GROUP FALLBACK</p>,
+      onAccessDenied: () => <p>GENERIC FALLBACK</p>,
+      onGroupAccessDenied: () => <p>SPECIFIC GROUP FALLBACK</p>,
     });
 
     const { container } = render(<ProtectedComponent />, { wrapper });
