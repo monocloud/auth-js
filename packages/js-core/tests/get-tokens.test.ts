@@ -1,249 +1,3 @@
-// // eslint-disable-next-line import/no-extraneous-dependencies
-// import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-// import { fetchBuilder } from '@monocloud/auth-test-utils';
-// import { now } from '@monocloud/auth-core/internal';
-// import type { MonoCloudSession } from '@monocloud/auth-core';
-// import { MonoCloudValidationError } from '@monocloud/auth-core';
-// import { setSession, testInstance, VanillaJsMockStorage } from './utils';
-
-// describe('getTokens() Tests', () => {
-//   let mockStorage: VanillaJsMockStorage;
-
-//   beforeEach(() => {
-//     mockStorage = new VanillaJsMockStorage();
-
-//     if (!(globalThis as any).LockManager) {
-//       (globalThis as any).LockManager = class LockManager {};
-//     }
-
-//     (globalThis as any).navigator = (globalThis as any).navigator ?? {};
-//   });
-
-//   afterEach(() => {
-//     window.localStorage.clear();
-//     window.sessionStorage.clear();
-//   });
-
-//   it('should throw if session does not exist', async () => {
-//     const instance = testInstance({ storage: mockStorage });
-
-//     const error = await instance.getTokens().catch(e => e);
-
-//     expect(error).toBeInstanceOf(MonoCloudValidationError);
-//     expect(error.message).toBe('Session does not exist');
-//   });
-
-//   it('should return existing token without refresh when it is not expired', async () => {
-// const session: MonoCloudSession = {
-//   idToken: 'idToken',
-//   refreshToken: 'rt',
-//   authorizedScopes: 'openid offline_access',
-//   user: { sub: 'sub' },
-//   accessTokens: [
-//     {
-//       accessToken: 'at',
-//       accessTokenExpiration: now() + 1000,
-//       scopes: 'openid offline_access',
-//       requestedScopes: 'openid offline_access',
-//     },
-//   ],
-// };
-
-// setSession(mockStorage, session);
-
-// const instance = testInstance({ storage: mockStorage });
-
-// const tokens = await instance.getTokens();
-
-// expect(tokens).toEqual(
-//   expect.objectContaining({
-//     accessToken: 'at',
-//     accessTokenExpiration: expect.any(Number),
-//     scopes: 'openid offline_access',
-//     requestedScopes: 'openid offline_access',
-//     idToken: 'idToken',
-//     refreshToken: 'rt',
-//     isExpired: false,
-//   })
-// );
-//   });
-
-//   it('should refresh when token is expired', async () => {
-//     const fetchSpy = fetchBuilder()
-//       .configureMetadata()
-//       .configureRefreshToken({
-//         body: 'grant_type=refresh_token&refresh_token=rt',
-//         accessToken: 'newAt',
-//         refreshToken: 'newRt',
-//         scope: 'openid offline_access',
-//         skipIdToken: true,
-//       })
-//       .createSpy();
-
-//     const session: MonoCloudSession = {
-//       idToken: 'oldId',
-//       refreshToken: 'rt',
-//       authorizedScopes: 'openid offline_access',
-//       user: { sub: 'sub' },
-//       accessTokens: [
-//         {
-//           accessToken: 'at',
-//           accessTokenExpiration: now() + 10,
-//           scopes: 'openid offline_access',
-//           requestedScopes: 'openid offline_access',
-//         },
-//       ],
-//     };
-
-//     setSession(mockStorage, session);
-
-//     const instance = testInstance({ storage: mockStorage });
-
-//     const tokens = await instance.getTokens();
-
-//     expect(tokens).toEqual(
-//       expect.objectContaining({
-//         accessToken: 'newAt',
-//         refreshToken: 'newRt',
-//         idToken: 'oldId',
-//         isExpired: false,
-//       })
-//     );
-
-//     fetchSpy.assert();
-//   });
-
-//   it('should refresh when forceRefresh is true even if token is not expired', async () => {
-//     const fetchSpy = fetchBuilder()
-//       .configureMetadata()
-//       .configureRefreshToken({
-//         body: 'grant_type=refresh_token&refresh_token=rt',
-//         accessToken: 'newAt',
-//         refreshToken: 'newRt',
-//         scope: 'openid offline_access',
-//         skipIdToken: true,
-//       })
-//       .createSpy();
-
-//     const session: MonoCloudSession = {
-//       idToken: 'oldId',
-//       refreshToken: 'rt',
-//       authorizedScopes: 'openid offline_access',
-//       user: { sub: 'sub' },
-//       accessTokens: [
-//         {
-//           accessToken: 'at',
-//           accessTokenExpiration: now() + 1000,
-//           scopes: 'openid offline_access',
-//           requestedScopes: 'openid offline_access',
-//         },
-//       ],
-//     };
-
-//     setSession(mockStorage, session);
-
-//     const instance = testInstance({ storage: mockStorage });
-
-//     const tokens = await instance.getTokens({ forceRefresh: true });
-
-//     expect(tokens.accessToken).toBe('newAt');
-//     expect(tokens.refreshToken).toBe('newRt');
-
-//     fetchSpy.assert();
-//   });
-
-//   it('should resolve scopes from options.resources when resource is provided without scopes, then refresh using those scopes', async () => {
-//     const fetchSpy = fetchBuilder()
-//       .configureMetadata()
-//       .configureRefreshToken({
-//         body: 'grant_type=refresh_token&refresh_token=rt&scope=api.read&resource=api',
-//         accessToken: 'newAt',
-//         refreshToken: 'newRt',
-//         scope: 'api.read',
-//         skipIdToken: true,
-//       })
-//       .createSpy();
-
-//     const session: MonoCloudSession = {
-//       idToken: 'oldId',
-//       refreshToken: 'rt',
-//       authorizedScopes: 'openid offline_access',
-//       user: { sub: 'sub' },
-//       accessTokens: [
-//         {
-//           accessToken: 'at',
-//           accessTokenExpiration: now() + 1000,
-//           scopes: 'openid offline_access',
-//           requestedScopes: 'openid offline_access',
-//         },
-//       ],
-//     };
-
-//     setSession(mockStorage, session);
-
-//     const instance = testInstance({
-//       storage: mockStorage,
-//       resources: [{ resource: 'api', scopes: 'api.read' }],
-//     });
-
-//     const tokens = await instance.getTokens({ resource: 'api' });
-
-//     expect(tokens).toEqual(
-//       expect.objectContaining({
-//         accessToken: 'newAt',
-//         refreshToken: 'newRt',
-//         requestedScopes: 'api.read',
-//         scopes: 'api.read',
-//       })
-//     );
-
-//     fetchSpy.assert();
-//   });
-
-//   it('should not infer scopes if a no-scope resource entry exists (resource match with scopes undefined)', async () => {
-//     const fetchSpy = fetchBuilder()
-//       .configureMetadata()
-//       .configureRefreshToken({
-//         body: 'grant_type=refresh_token&refresh_token=rt&resource=api',
-//         accessToken: 'newAt',
-//         refreshToken: 'newRt',
-//         scope: 'openid',
-//         skipIdToken: true,
-//       })
-//       .createSpy();
-
-//     const session: MonoCloudSession = {
-//       idToken: 'oldId',
-//       refreshToken: 'rt',
-//       authorizedScopes: 'openid offline_access',
-//       user: { sub: 'sub' },
-//       accessTokens: [
-//         {
-//           accessToken: 'at',
-//           accessTokenExpiration: now() + 1000,
-//           scopes: 'openid offline_access',
-//           requestedScopes: 'openid offline_access',
-//         },
-//       ],
-//     };
-
-//     setSession(mockStorage, session);
-
-//     const instance = testInstance({
-//       storage: mockStorage,
-//       resources: [{ resource: 'api' }, { resource: 'api', scopes: 'api.read' }],
-//     });
-
-//     const tokens = await instance.getTokens({
-//       resource: 'api',
-//       forceRefresh: true,
-//     });
-
-//     expect(tokens.accessToken).toBe('newAt');
-//     fetchSpy.assert();
-//   });
-// });
-
 // eslint-disable-next-line import/no-extraneous-dependencies
 /* eslint-disable import/no-extraneous-dependencies */
 /* eslint-disable no-param-reassign */
@@ -253,6 +7,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { fetchBuilder, generateIdToken } from '@monocloud/auth-test-utils';
 import { now } from '@monocloud/auth-core/internal';
 import {
+  MonoCloudHttpError,
   MonoCloudValidationError,
   type MonoCloudSession,
   type MonoCloudUser,
@@ -784,17 +539,14 @@ describe('getTokens() Tests', () => {
     const frozenTimeMs = 1330688329321;
     freeze(frozenTimeMs);
 
-    // 2. Prepare Data
     const originalIdToken = await generateIdToken({
       claims: { sub: 'test-user', aud: 'clientId', nonce: 'original-nonce' },
     });
 
-    // New ID Token (No nonce)
     const newIdToken = await generateIdToken({
       claims: { sub: 'test-user', aud: 'clientId' },
     });
 
-    // 3. Setup Fetch Mock
     const fetchSpy = fetchBuilder()
       .configureMetadata()
       .configureJwks()
@@ -804,12 +556,10 @@ describe('getTokens() Tests', () => {
         refreshToken: 'rt1',
         idToken: newIdToken,
         scope: 'openid something',
-        expires_in: 999,
       })
       .createSpy();
 
-    // 4. Setup Initial Session
-    const session: MonoCloudSession = {
+    const initialSession: MonoCloudSession = {
       user: { sub: 'test-user' },
       idToken: originalIdToken,
       refreshToken: 'rt',
@@ -824,18 +574,15 @@ describe('getTokens() Tests', () => {
       ],
     };
 
-    await setSession(mockStorage, session);
+    await setSession(mockStorage, initialSession);
 
-    // 5. Initialize Instance with onSessionCreating hook
     const instance = testInstance({
       storage: mockStorage,
-      // Hook logic from your source test
       onSessionCreating: async (session, idtoken, userinfo, appState) => {
         expect(appState).toBeUndefined();
         expect(userinfo).toBeUndefined();
         expect(idtoken).toBeDefined();
 
-        // Modify the session
         (session as any).custom = 1;
       },
     });
@@ -843,10 +590,8 @@ describe('getTokens() Tests', () => {
     const newFrozenTime = frozenTimeMs + 2000;
     travel(newFrozenTime);
 
-    // 7. Act: Force Refresh
     const tokens = await instance.getTokens({ forceRefresh: true });
 
-    // 8. Assert: Returned tokens are correct
     expect(tokens).toEqual({
       accessToken: 'at1',
       scopes: 'openid something',
@@ -857,7 +602,6 @@ describe('getTokens() Tests', () => {
       isExpired: false,
     });
 
-    // 9. Assert: Session Storage contains the custom modification
     const updatedSession = await instance.getSession();
 
     expect(updatedSession).toEqual(
@@ -871,9 +615,207 @@ describe('getTokens() Tests', () => {
             scopes: 'openid something',
           }),
         ],
-        // ✅ Verified: The custom property added by the hook is present
         custom: 1,
       })
+    );
+
+    fetchSpy.assert();
+  });
+
+  it('should throw if session is not found', async () => {
+    await mockStorage.clear();
+
+    const instance = testInstance({ storage: mockStorage });
+
+    const tokensPromise = instance.getTokens();
+
+    await expect(tokensPromise).rejects.toBeInstanceOf(
+      MonoCloudValidationError
+    );
+    await expect(tokensPromise).rejects.toThrow('Session does not exist');
+  });
+
+  it('should throw error if refresh grant fails', async () => {
+    const fetchSpy = fetchBuilder()
+      .configureMetadata()
+      .configureRefreshToken({
+        responseCode: 400,
+        error: 'some_error_code',
+        error_description: 'errorDescription',
+      })
+      .createSpy();
+
+    const session: MonoCloudSession = {
+      user: { sub: 'test-user' },
+      idToken: 'idtoken',
+      refreshToken: 'rt',
+      authorizedScopes: 'abc',
+      accessTokens: [
+        {
+          accessToken: 'at',
+          accessTokenExpiration: now() + 100,
+          scopes: 'abc',
+          requestedScopes: 'abc',
+        },
+      ],
+    };
+
+    await setSession(mockStorage, session);
+
+    const instance = testInstance({ storage: mockStorage });
+
+    const tokensPromise = instance.getTokens({ forceRefresh: true });
+
+    await expect(tokensPromise).rejects.toThrow('some_error_code');
+    await expect(tokensPromise).rejects.toMatchObject({
+      error: 'some_error_code',
+      errorDescription: 'errorDescription',
+    });
+
+    fetchSpy.assert();
+  });
+
+  it('should throw error if userinfo fails', async () => {
+    const newIdToken = await generateIdToken();
+
+    const fetchSpy = fetchBuilder()
+      .configureMetadata()
+      .configureRefreshToken({
+        body: 'grant_type=refresh_token&refresh_token=rt',
+        accessToken: 'at1',
+        refreshToken: 'rt1',
+        idToken: newIdToken,
+        scope: 'openid something',
+      })
+      .configureUserinfo({
+        accessToken: 'at1',
+        responseCode: 400,
+        claims: {
+          error: 'error',
+          error_description: 'errorDescription',
+        },
+      })
+      .createSpy();
+
+    const session: MonoCloudSession = {
+      user: { sub: 'sub' },
+      accessTokens: [
+        {
+          scopes: 'openid abc',
+          accessToken: 'at',
+          accessTokenExpiration: now() + 100,
+        },
+      ],
+      idToken: 'idtoken',
+      refreshToken: 'rt',
+      authorizedScopes: 'openid abc',
+    };
+
+    await setSession(mockStorage, session);
+
+    const instance = testInstance({
+      storage: mockStorage,
+      fetchUserinfo: true,
+    });
+
+    const tokensPromise = instance.getTokens({
+      forceRefresh: true,
+      refetchUserInfo: true,
+    });
+
+    await expect(tokensPromise).rejects.toThrow(MonoCloudHttpError);
+    await expect(tokensPromise).rejects.toThrow(
+      'Error while fetching userinfo. Unexpected status code: 400'
+    );
+
+    fetchSpy.assert();
+  });
+
+  it('should throw error if jwks fetch fails', async () => {
+    const newIdToken = await generateIdToken();
+
+    const fetchSpy = fetchBuilder()
+      .configureMetadata()
+      .configureRefreshToken({
+        body: 'grant_type=refresh_token&refresh_token=rt',
+        accessToken: 'at1',
+        refreshToken: 'rt1',
+        idToken: newIdToken,
+        scope: 'openid something',
+      })
+      .configureJwks({
+        responseCode: 400,
+      })
+      .createSpy();
+
+    const session: MonoCloudSession = {
+      user: { sub: 'sub' },
+      accessTokens: [
+        {
+          scopes: 'abc',
+          accessToken: 'at',
+          accessTokenExpiration: now() + 100,
+        },
+      ],
+      idToken: 'idtoken',
+      refreshToken: 'rt',
+      authorizedScopes: 'abc',
+    };
+
+    await setSession(mockStorage, session);
+
+    const instance = testInstance({
+      storage: mockStorage,
+      fetchUserinfo: false,
+    });
+
+    const tokensPromise = instance.getTokens({ forceRefresh: true });
+
+    await expect(tokensPromise).rejects.toThrow(MonoCloudHttpError);
+    await expect(tokensPromise).rejects.toThrow(
+      'Error while fetching JWKS. Unexpected status code: 400'
+    );
+
+    fetchSpy.assert();
+  });
+
+  it('should throw error if id token validation fails', async () => {
+    const validIdToken = await generateIdToken();
+
+    const fetchSpy = fetchBuilder()
+      .configureMetadata()
+      .configureJwks()
+      .configureRefreshToken({
+        body: 'grant_type=refresh_token&refresh_token=rt',
+        accessToken: 'at1',
+        refreshToken: 'rt1',
+        idToken: 'malformed_token_string',
+        scope: 'openid something',
+      })
+      .createSpy();
+
+    const session: MonoCloudSession = {
+      user: { sub: 'test-user' },
+      accessTokens: [
+        {
+          scopes: 'abc',
+          accessToken: 'at',
+          accessTokenExpiration: now() + 100,
+        },
+      ],
+      idToken: validIdToken,
+      refreshToken: 'rt',
+      authorizedScopes: 'abc',
+    };
+
+    await setSession(mockStorage, session);
+
+    const instance = testInstance({ storage: mockStorage });
+
+    const tokensPromise = instance.getTokens({ forceRefresh: true });
+
+    await expect(tokensPromise).rejects.toThrow(
+      'ID Token must have a header, payload and signature'
     );
 
     fetchSpy.assert();
