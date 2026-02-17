@@ -1,0 +1,30 @@
+---
+rootSdk: Next.js
+title: "ProtectPagePageOnGroupAccessDeniedType"
+category: Handler Types
+---
+
+# Handler Type: ProtectPagePageOnGroupAccessDeniedType
+
+> **ProtectPagePageOnGroupAccessDeniedType**\<`P`, `Q`\> = (`context`: `GetServerSidePropsContext`\<`Q`\> & \{ `user`: [`MonoCloudUser`](/sdks/nextjs/api-reference/types/monoclouduser); \}) => `Promise`\<`GetServerSidePropsResult`\<`P`\>\> \| `GetServerSidePropsResult`\<`P`\>
+
+Handler invoked when an authenticated user does not satisfy the required group restrictions while running a Pages Router `getServerSideProps` protected by `protectPage()`.
+
+## Type Parameters
+
+| Type Parameter                 | Description                               |
+| ------------------------------ | ----------------------------------------- |
+| `P`                            | Props returned from `getServerSideProps`. |
+| `Q` _extends_ `ParsedUrlQuery` | Query parameters parsed from the URL.     |
+
+## Parameters
+
+| Parameter | Type                                                                                                                          | Description                               |
+| --------- | ----------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------- |
+| `context` | `GetServerSidePropsContext`\<`Q`\> & \{ `user`: [`MonoCloudUser`](/sdks/nextjs/api-reference/types/monoclouduser); \} | The Next.js `getServerSideProps` context. |
+
+## Returns
+
+`Promise`\<`GetServerSidePropsResult`\<`P`\>\> \| `GetServerSidePropsResult`\<`P`\>
+
+A `getServerSideProps` result.

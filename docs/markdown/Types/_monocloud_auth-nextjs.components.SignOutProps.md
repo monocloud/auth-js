@@ -1,0 +1,17 @@
+---
+rootSdk: Next.js
+title: "SignOutProps"
+category: Types
+---
+
+# Type: SignOutProps
+
+Props for the `<SignOut />` component.
+
+## Properties
+
+| Property                                    | Type        | Description                                                                                                                                           |
+| ------------------------------------------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `children`            | `ReactNode` | Content rendered inside the link (for example, button text).                                                                                          |
+| `federated?`         | `boolean`   | If `true`, also signs the user out of the MonoCloud server session, ensuring the user is fully logged out of MonoCloud and not just your application. |
+| `postLogoutUrl?` | `string`    | URL to redirect the user to after they have been signed out.                                                                                          |
