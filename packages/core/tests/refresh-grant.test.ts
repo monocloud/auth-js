@@ -71,7 +71,7 @@ describe('MonoCloudOidcClient.refreshGrant()', () => {
   it.each([
     {
       error: 'some_unkown_error',
-      error_description: 'Some unkown error occured',
+      error_description: 'Some unkown error occurred',
     },
     { error: null, error_description: null },
   ])('should return a failed result if server returned a 400', async error => {

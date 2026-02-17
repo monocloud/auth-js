@@ -9,7 +9,7 @@ import {
   setSessionCookie,
   setStateCookie,
 } from './common-helper';
-import { MonoCloudOidcClient } from '@monocloud/auth-node-core';
+import { MonoCloudOidcClient } from '@monocloud/auth-core';
 
 describe('Base Path', () => {
   let monoCloud: MonoCloudNextClient;

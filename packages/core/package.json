@@ -24,27 +24,36 @@
     "name": "MonoCloud",
     "email": "support@monocloud.com"
   },
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.mjs",
-  "types": "./dist/index.d.mts",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
   "exports": {
-    ".": {
-      "types": "./dist/index.d.mts",
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.cjs",
-      "default": "./dist/index.mjs"
-    },
-    "./utils": {
-      "types": "./dist/utils/index.d.mts",
-      "import": "./dist/utils/index.mjs",
-      "require": "./dist/utils/index.cjs",
-      "default": "./dist/utils/index.mjs"
-    },
-    "./internal": {
-      "types": "./dist/utils/internal.d.mts",
-      "import": "./dist/utils/internal.mjs",
-      "require": "./dist/utils/internal.cjs",
-      "default": "./dist/utils/internal.mjs"
+    ".": "./src/index.ts",
+    "./utils": "./src/utils/index.ts",
+    "./internal": "./src/utils/internal.ts"
+  },
+  "publishConfig": {
+    "main": "./dist/index.cjs",
+    "module": "./dist/index.mjs",
+    "types": "./dist/index.d.mts",
+    "exports": {
+      ".": {
+        "types": "./dist/index.d.mts",
+        "import": "./dist/index.mjs",
+        "require": "./dist/index.cjs",
+        "default": "./dist/index.mjs"
+      },
+      "./utils": {
+        "types": "./dist/utils/index.d.mts",
+        "import": "./dist/utils/index.mjs",
+        "require": "./dist/utils/index.cjs",
+        "default": "./dist/utils/index.mjs"
+      },
+      "./internal": {
+        "types": "./dist/utils/internal.d.mts",
+        "import": "./dist/utils/internal.mjs",
+        "require": "./dist/utils/internal.cjs",
+        "default": "./dist/utils/internal.mjs"
+      }
     }
   },
   "files": [

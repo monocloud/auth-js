@@ -18,9 +18,9 @@ import {
   fetchOkGroups,
   wrapper,
 } from '../client-helper';
-import { protectPage } from '../../src/client';
+import { protectClientPage } from '../../src/client';
 
-describe('protectPage() - CSR', () => {
+describe('protectClientPage() - CSR', () => {
   beforeAll(() => {
     Object.defineProperty(window, 'location', {
       writable: true,
@@ -43,7 +43,7 @@ describe('protectPage() - CSR', () => {
   it('should redirect the to sign in endpoint if the user is not authenticated', async () => {
     fetchNoContent();
 
-    const ProtectedComponent = protectPage(Component());
+    const ProtectedComponent = protectClientPage(Component());
 
     const { container } = render(<ProtectedComponent />, { wrapper });
 
@@ -58,7 +58,7 @@ describe('protectPage() - CSR', () => {
   it('can set custom fallback component if user is not authenticated', async () => {
     fetchNoContent();
 
-    const ProtectedComponent = protectPage(Component(false), {
+    const ProtectedComponent = protectClientPage(Component(false), {
       onAccessDenied: () => <p>CUSTOM</p>,
     });
 
@@ -76,7 +76,7 @@ describe('protectPage() - CSR', () => {
   it('should render the component if user is authenticated', async () => {
     fetchOk();
 
-    const ProtectedComponent = protectPage(Component());
+    const ProtectedComponent = protectClientPage(Component());
 
     const { container } = render(<ProtectedComponent />, { wrapper });
 
@@ -92,7 +92,7 @@ describe('protectPage() - CSR', () => {
   it('should redirect with auth params from options', async () => {
     fetchNoContent();
 
-    const ProtectedComponent = protectPage(Component(), {
+    const ProtectedComponent = protectClientPage(Component(), {
       authParams: {
         authenticatorHint: 'google',
         acrValues: ['test'],
@@ -120,7 +120,7 @@ describe('protectPage() - CSR', () => {
   it('should display onError component', async () => {
     fetch500();
 
-    const ProtectedComponent = protectPage(Component(), {
+    const ProtectedComponent = protectClientPage(Component(), {
       onError: () => <strong>Error</strong>,
     });
 
@@ -139,7 +139,7 @@ describe('protectPage() - CSR', () => {
   it('should render the component if the user belong to any of the specified groups', async () => {
     fetchOkGroups();
 
-    const ProtectedComponent = protectPage(Component(false), {
+    const ProtectedComponent = protectClientPage(Component(false), {
       groups: ['testName'],
     });
 
@@ -157,7 +157,7 @@ describe('protectPage() - CSR', () => {
   it('can customize groups claim', async () => {
     fetchOkGroups();
 
-    const ProtectedComponent = protectPage(Component(false), {
+    const ProtectedComponent = protectClientPage(Component(false), {
       groups: ['testName'],
       groupsClaim: 'CUSTOM_GROUPS',
     });
@@ -176,7 +176,7 @@ describe('protectPage() - CSR', () => {
   it('should not render the component if the user does not belong to any of the specified groups', async () => {
     fetchOkGroups();
 
-    const ProtectedComponent = protectPage(Component(false), {
+    const ProtectedComponent = protectClientPage(Component(false), {
       groups: ['NOPE'],
     });
 
@@ -194,7 +194,7 @@ describe('protectPage() - CSR', () => {
   it('does not fall back to fallback component when group check fails', async () => {
     fetchOkGroups();
 
-    const ProtectedComponent = protectPage(Component(false), {
+    const ProtectedComponent = protectClientPage(Component(false), {
       groups: ['NOPE'],
       onAccessDenied: () => <p>CUSTOM FALLBACK</p>,
     });
@@ -212,7 +212,7 @@ describe('protectPage() - CSR', () => {
   it('should render groupFallback if the user does not belong to any groups', async () => {
     fetchOkGroups();
 
-    const ProtectedComponent = protectPage(Component(false), {
+    const ProtectedComponent = protectClientPage(Component(false), {
       groups: ['NOPE'],
       onGroupAccessDenied: () => <p>GROUP FALLBACK</p>,
     });
@@ -231,7 +231,7 @@ describe('protectPage() - CSR', () => {
   it('should prioritize groupFallback over fallback when unauthorized', async () => {
     fetchOkGroups();
 
-    const ProtectedComponent = protectPage(Component(false), {
+    const ProtectedComponent = protectClientPage(Component(false), {
       groups: ['NOPE'],
       onAccessDenied: () => <p>GENERIC FALLBACK</p>,
       onGroupAccessDenied: () => <p>SPECIFIC GROUP FALLBACK</p>,

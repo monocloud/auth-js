@@ -1,4 +1,4 @@
-import { monoCloud } from '@/monocloud';
+import { getSession } from '@monocloud/auth-nextjs';
 import {
   SignIn,
   SignOut,
@@ -7,14 +7,14 @@ import {
 import Link from 'next/link';
 
 export const Header = async () => {
-  const session = await monoCloud.getSession();
+  const session = await getSession();
 
   return (
     <nav className="flex bg-blue-900 text-white justify-between p-6">
       {session?.user ? <h1>Hello {session.user.email}</h1> : <h1>Welcome</h1>}
       <div className="flex gap-4">
         <Link href="/">Home</Link>
-        <Link href="/client">Client</Link>
+        <Link href="/client">Protect Client Page</Link>
         <Link href="/client/use-monocloud-auth">useAuth() Hook</Link>
         <Link href="/server">Server</Link>
         <Link href="/api-profile">Api</Link>

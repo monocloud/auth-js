@@ -150,19 +150,19 @@ describe('Configuration Options', () => {
     expect(missing).toEqual(
       expect.arrayContaining([
         expect.stringMatching(
-          'Missing: clientId - Set MONOCLOUD_AUTH_CLIENT_ID enviornment variable in your .env file.'
+          'Missing: clientId - Set MONOCLOUD_AUTH_CLIENT_ID environment variable in your .env file.'
         ),
         expect.stringMatching(
-          'Missing: clientSecret - Set MONOCLOUD_AUTH_CLIENT_SECRET enviornment variable in your .env file.'
+          'Missing: clientSecret - Set MONOCLOUD_AUTH_CLIENT_SECRET environment variable in your .env file.'
         ),
         expect.stringMatching(
-          'Missing: tenantDomain - Set MONOCLOUD_AUTH_TENANT_DOMAIN enviornment variable in your .env file.'
+          'Missing: tenantDomain - Set MONOCLOUD_AUTH_TENANT_DOMAIN environment variable in your .env file.'
         ),
         expect.stringMatching(
-          'Missing: cookieSecret - Set MONOCLOUD_AUTH_COOKIE_SECRET enviornment variable in your .env file.'
+          'Missing: cookieSecret - Set MONOCLOUD_AUTH_COOKIE_SECRET environment variable in your .env file.'
         ),
         expect.stringMatching(
-          'Missing: appUrl - Set MONOCLOUD_AUTH_APP_URL enviornment variable in your .env file.'
+          'Missing: appUrl - Set MONOCLOUD_AUTH_APP_URL environment variable in your .env file.'
         ),
       ])
     );

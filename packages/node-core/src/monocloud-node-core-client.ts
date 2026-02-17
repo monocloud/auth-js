@@ -64,6 +64,9 @@ import {
 } from './options/validation';
 import dbug, { Debugger } from 'debug';
 
+/**
+ * @category Classes
+ */
 export class MonoCloudCoreClient {
   public readonly oidcClient: MonoCloudOidcClient;
 
@@ -103,7 +106,7 @@ export class MonoCloudCoreClient {
    * Initiates the sign-in flow by redirecting the user to the MonoCloud authorization endpoint.
    *
    * This method handles scope and resource merging, state generation (nonce, state, PKCE),
-   * and Constructing the final authorization URL.
+   * and constructing the final authorization URL.
    *
    * @param request - MonoCloud request object.
    * @param response - MonoCloud response object.
@@ -908,7 +911,7 @@ export class MonoCloudCoreClient {
    * @param response - MonoCloud cookie response object.
    * @param options - Configuration for token retrieval (force refresh, specific scopes/resources).
    *
-   * @returns Fetched tokens
+   * @returns Fetched tokens.
    *
    * @throws {@link MonoCloudValidationError} If the session does not exist or tokens cannot be found/refreshed.
    */

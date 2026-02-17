@@ -1,4 +1,3 @@
-import type { Except, PartialDeep } from 'type-fest';
 import type {
   AccessToken,
   AuthorizationParams,
@@ -7,84 +6,119 @@ import type {
   IdTokenClaims,
   MonoCloudSession,
   RefreshGrantOptions,
+  SecurityAlgorithms,
   UserinfoResponse,
 } from '@monocloud/auth-core';
 import { MonoCloudRequest } from './internal';
 
 /**
- * Possible values for the SameSite attribute in cookies.
+ * Allowed values for the cookie `SameSite` attribute.
+ *
+ * The `SameSite` setting controls when cookies are included in cross-site requests and helps protect against cross-site request forgery (CSRF) attacks.
+ *
+ * @category Types (Enums)
  */
-export type SameSiteValues = 'strict' | 'lax' | 'none';
+export type SameSiteValues =
+  /**
+   * Cookies are only sent for same-site requests.
+   *
+   * Cookies will NOT be included in cross-site navigations, redirects, or embedded requests.
+   *
+   * Provides the strongest CSRF protection but may break authentication flows that rely on cross-site redirects.
+   */
+  | 'strict'
+
+  /**
+   * Cookies are sent for same-site requests and top-level cross-site navigations (for example, following a link).
+   *
+   * This is the recommended default for most authentication flows.
+   */
+  | 'lax'
+
+  /**
+   * Cookies are sent with all requests, including cross-site requests.
+   *
+   * Must be used together with `Secure=true` (HTTPS only).
+   *
+   * Required for some third-party or cross-origin authentication scenarios.
+   */
+  | 'none';
 
 /**
- * Possible values for the Security Algorithms.
- */
-export type SecurityAlgorithms =
-  | 'RS256'
-  | 'RS384'
-  | 'RS512'
-  | 'PS256'
-  | 'PS384'
-  | 'PS512'
-  | 'ES256'
-  | 'ES384'
-  | 'ES512';
-
-/**
- * Represents the lifetime information of a session, including the creation time (c),
- * the last updated time (u), and optionally the expiration time (e).
+ * Represents the lifetime metadata associated with a user session.
+ *
+ * The properties use short keys to minimize cookie and storage size, since this structure may be serialized as part of session data.
+ *
+ * All timestamps are expressed as **Unix epoch time (seconds)**.
+ *
+ * @category Types
  */
 export interface SessionLifetime {
   /**
-   * The time at which the session was created (in epoch).
+   * Session creation time.
+   *
+   * The moment the session was initially established.
    */
   c: number;
 
   /**
-   * The time at which the session was last updated (in epoch).
+   * Last updated time.
+   *
+   * Updated whenever the session is refreshed or extended (for example, during sliding expiration).
    */
   u: number;
 
   /**
-   * Optional. The expiration time of the session (in epoch).
+   * Optional expiration time.
    */
   e?: number;
 }
 
 /**
- * Represents the authentication state information including the state parameter,
- * nonce, custom application state, code verifier, maximum age of the session,
- * response type and optional return URL.
+ * Represents the authentication transaction state used during the authorization flow.
+ *
+ * This state is created before redirecting the user to MonoCloud and is validated when the user returns to the application during the callback.
  */
 export interface MonoCloudState extends AuthState {
   /**
-   * Additional custom application specific state information.
+   * Custom application state associated with the authentication request.
+   *
+   * This value is preserved across the redirect to MonoCloud and restored after authentication completes.
    */
   appState: string;
 
   /**
-   * Optional. The URL to which the user will be redirected after authentication.
+   * Optional return URL.
+   *
+   * If provided, the user will be redirected to this URL after authentication completes successfully.
    */
   returnUrl?: string;
 }
 
 /**
- * Represents a session store interface for managing session data.
+ * Defines a storage adapter used to persist authentication sessions.
+ *
+ * Implement this interface to store sessions outside the default cookie-based storage — for example in Redis, a database, or a distributed cache.
+ *
+ * @category Types
  */
 export interface MonoCloudSessionStore {
   /**
-   * Retrieves a session from the store based on the provided key.
-   * @param key - The key used to identify the session.
-   * @returns A Promise that resolves with the session data, or undefined / null if not found.
+   * Retrieves a session associated with the provided key.
+   *
+   * @param key Unique identifier of the session.
+   * @returns Returns the stored session, or `undefined` / `null` if no session exists.
    */
   get(key: string): Promise<MonoCloudSession | undefined | null>;
 
   /**
-   * Stores a session in the store with the specified key.
-   * @param key - The key used to identify the session.
-   * @param data - The session data to be stored.
-   * @param lifetime - The lifetime information of the session.
-   * @returns A Promise that resolves when the session is successfully stored.
+   * Persists or updates a session.
+   *
+   * The provided lifetime information can be used by the store to configure TTL/expiration policies.
+   *
+   * @param key Unique identifier of the session.
+   * @param data The session data to persist.
+   * @param lifetime Session lifetime metadata (creation, update, expiration).
    */
   set(
     key: string,
@@ -93,233 +127,317 @@ export interface MonoCloudSessionStore {
   ): Promise<void>;
 
   /**
-   * Deletes a session from the store based on the provided key.
-   * @param key - The key used to identify the session to be deleted.
-   * @returns A Promise that resolves when the session is successfully deleted.
+   * Removes a session from the store.
+   *
+   * @param key Unique identifier of the session to delete.
    */
   delete(key: string): Promise<void>;
 }
 
 /**
- * Options for cookies.
+ * Configuration options for authentication cookies.
+ *
+ * These settings control how MonoCloud session and state cookies are created, scoped, and transmitted by the browser.
+ *
+ * @category Types
  */
 export interface MonoCloudCookieOptions {
   /**
-   * The name of the cookie.
-   * For session cookies, the default value is 'session'.
-   * For state cookies, the default value is 'state'.
+   * The cookie name.
+   *
+   * - Session cookie default: `"session"`
+   * - State cookie default: `"state"`
    */
   name: string;
 
   /**
-   * The path for which the cookie is valid.
+   * The URL path for which the cookie is valid.
+   *
    * @defaultValue '/'
    */
   path: string;
 
   /**
-   * Optional: The domain for which the cookie is valid.
+   * Optional domain scope for the cookie.
    */
   domain?: string;
 
   /**
-   * Determines whether the cookie is accessible only through HTTP requests.
-   * This setting will be ignored for the state cookie and will always be true.
+   * Indicates whether the cookie is accessible only via HTTP requests. Helps mitigate XSS attacks by preventing client-side JavaScript access.
+   *
+   * > Always enforced as `true` for state cookies.
+   *
    * @defaultValue true
    */
   httpOnly: boolean;
 
   /**
-   * Determines whether the cookie should only be sent over HTTPS connections.
-   * If not provided, this settings will be auto-detected basis the scheme of the application url.
+   * Indicates whether the cookie should only be transmitted over HTTPS.
+   *
+   * If not explicitly provided, this value is automatically inferred from the application URL scheme.
    */
   secure: boolean;
 
   /**
-   * The SameSite attribute value for the cookie, ensuring cross-site request forgery protection.
+   * The SameSite policy applied to the cookie. Controls cross-site request behavior and CSRF protection.
+   *
    * @defaultValue 'lax'
    */
   sameSite: SameSiteValues;
 
   /**
-   * Determines whether the cookie should persist beyond the current session.
-   * For session cookies, the default value is true.
-   * For state cookies, the default value is false.
+   * Determines whether the cookie persists across browser restarts.
+   *
+   * - Session cookies default to `true`
+   * - State cookies default to `false`
    */
   persistent: boolean;
 }
 
 /**
- * Options for the authentication sessions.
+ * Configuration options for authentication sessions.
+ *
+ * These options control how user sessions are created, persisted, and expired.
+ *
+ * @category Types
  */
 export interface MonoCloudSessionOptionsBase {
   /**
-   * Configuration options for the authentication session cookie.
+   * Configuration for the session cookie used to identify the user session.
    */
   cookie: MonoCloudCookieOptions;
 
   /**
-   * Determines whether the session should use sliding expiration.
+   * Enables sliding session expiration.
+   *
+   * When enabled, the session expiration is extended on active requests, up to the configured `maximumDuration`.
+   *
+   * When disabled, the session expires after a fixed duration regardless of user activity.
+   *
    * @defaultValue false
    */
   sliding: boolean;
 
   /**
-   * The duration of the session in seconds.
+   * The session lifetime in seconds.
+   *
+   * - With **absolute sessions** (`sliding = false`), this defines the total session lifetime.
+   * - With **sliding sessions**, this defines the idle timeout before the session expires.
+   *
    * @defaultValue 86400 (1 Day)
    */
   duration: number;
 
   /**
-   * The maximum duration for the session in seconds.
-   * Will only be used when the session is set to 'sliding'.
-   * @defaultValue 604800 (1 Week)
+   * The absolute maximum lifetime of a sliding session in seconds.
+   *
+   * This value limits how long a session can exist even if the user remains continuously active.
+   *
+   * Only applies when `sliding` is enabled.
+   *
+   * @defaultValue 604800 (7 days)
    */
   maximumDuration: number;
 
   /**
-   * Optional: The session store to use for storing session data.
+   * Optional session store used to persist session data.
+   *
+   * If not provided, The SDK uses the default cookie-based session storage.
+   *
+   * Custom stores allow centralized session management (e.g. Redis, database).
    */
   store?: MonoCloudSessionStore;
 }
 
 /**
- * Options for the authentication state.
+ * Partial configuration options for authentication state handling.
+ *
+ * @category Types
+ */
+export interface MonoCloudStatePartialOptions {
+  /**
+   * Partial configuration for the state cookie.
+   *
+   * This cookie temporarily stores authorization transaction data required to validate the callback response and prevent replay or CSRF attacks.
+   */
+  cookie?: Partial<MonoCloudCookieOptions>;
+}
+
+/**
+ * Configuration options for authentication state handling.
+ *
+ * @category Types
  */
 export interface MonoCloudStateOptions {
   /**
-   * Configuration options for the authentication state cookie.
+   * Configuration for the state cookie.
+   *
+   * This cookie temporarily stores authorization transaction data required to validate the callback response and prevent replay or CSRF attacks.
    */
   cookie: MonoCloudCookieOptions;
 }
 
 /**
- * Options for the MonoCloud Authentication route handlers.
+ * Route configuration for MonoCloud authentication handlers.
+ *
+ * These routes define the internal application endpoints used by the SDK to process authentication flows such as sign-in, callback handling, sign-out, and user profile retrieval.
+ *
+ * You typically do not need to change these values unless you want to customize your application's authentication URLs.
+ *
+ * > When customizing routes, ensure the corresponding URLs are also configured in your MonoCloud Dashboard and exposed to the client using the matching environment variables.
+ *
+ * @category Types
  */
 export interface MonoCloudRoutes {
   /**
-   * The URL of the callback handler
+   * Route that receives the authorization callback from MonoCloud after a successful authentication.
+   *
    * @defaultValue '/api/auth/callback'
    */
   callback: string;
 
   /**
-   * The URL of the back-channel logout handler
+   * Route that handles OpenID Connect back-channel logout requests initiated by MonoCloud.
+   *
    * @defaultValue '/api/auth/backchannel-logout'
    */
   backChannelLogout: string;
 
   /**
-   * The URL of the sign-in handler
+   * Route used to initiate the sign-in flow.
+   *
    * @defaultValue '/api/auth/signin'
    */
   signIn: string;
 
   /**
-   * The URL of the sign-out handler
+   * Route used to initiate the sign-out flow.
+   *
    * @defaultValue '/api/auth/signout'
    */
   signOut: string;
 
   /**
-   * The URL of the userinfo handler
+   * Route that exposes the authenticated user's profile information.
+   *
    * @defaultValue '/api/auth/userinfo'
    */
   userInfo: string;
 }
 
 /**
- * Represents an indicator for additional resources that can be requested.
+ * Represents an additional resource indicator that can be requested during token acquisition.
+ *
+ * Resource indicators allow an access token to be scoped to a specific API or service (audience). Multiple indicators may be provided when requesting tokens for different protected resources.
+ *
+ * @category Types
  */
 export interface Indicator {
   /**
-   * Space separated list of resources to scope the access token to
+   * Space-separated list of resource identifiers (audiences) that the access token should be issued for.
+   *
+   * Each value typically represents an API identifier or resource URI.
    */
   resource: string;
+
   /**
-   * Optional: Space separated list of scopes to request
+   * Optional. Space-separated list of scopes to request specifically for this resource.
    */
   scopes?: string;
 }
 
 /**
- * Options for configuration MonoCloud Authentication.
+ * Core configuration options for the SDK.
+ *
+ * These options define how the SDK communicates with your MonoCloud tenant, manages sessions, and performs authentication flows.
+ *
+ * @category Types
  */
 export interface MonoCloudOptionsBase {
   /**
-   * The client ID of the authenticating application.
+   * Client identifier of the application registered in MonoCloud.
    */
   clientId: string;
 
   /**
-   * Optional: The client secret of the authenticating application.
+   * Optional client secret used for confidential clients.
    */
   clientSecret?: string;
 
   /**
-   * MonoCloud tenant domain.
+   * MonoCloud tenant domain (for example, `https://your-tenant.us.monocloud.com`).
    */
   tenantDomain: string;
 
   /**
-   * A secret key that will be used for encrypting cookies.
+   * Secret used to encrypt and sign authentication cookies. This value should be long, random, and kept private.
    */
   cookieSecret: string;
 
   /**
-   * The URL of the application.
+   * Base URL where the application is hosted.
+   *
+   * Used to construct redirect URLs and validate requests.
    */
   appUrl: string;
 
   /**
-   * Configuration options for the route handler URLs.
+   * Route paths used by MonoCloud authentication handlers.
    */
   routes: MonoCloudRoutes;
 
   /**
-   * The maximum allowed clock skew (in seconds) for token validation.
+   * Allowed clock skew (in seconds) when validating token timestamps.
+   *
    * @defaultValue 60 (seconds)
    */
   clockSkew: number;
 
   /**
-   * The timeout (in milliseconds) for receiving responses from the authentication service.
+   * Maximum time (in milliseconds) to wait for responses from the MonoCloud authorization server.
+   *
    * @defaultValue 10000 (10 seconds)
    */
   responseTimeout: number;
 
   /**
-   * Determines whether to use PAR (Pushed Authorization Requests) for authorization requests.
+   * Enables Pushed Authorization Requests (PAR).
+   *
+   * When enabled, authorization parameters are sent securely via the PAR endpoint instead of the browser.
+   *
    * @defaultValue false
    */
   usePar: boolean;
 
   /**
-   * Optional: The URI to redirect to after the user logs out.
+   * URL to redirect users to after logout completes.
    */
   postLogoutRedirectUri?: string;
 
   /**
-   * Determines whether the user will be logged out of the authentication service.
+   * When `true`, signing out also logs the user out of MonoCloud (Single Sign-Out).
+   *
    * @defaultValue true
    */
   federatedSignOut: boolean;
 
   /**
-   * Determines whether to fetch the user information from the 'userinfo' endpoint during authentication.
+   * Fetch user profile data from the `UserInfo` endpoint after authentication completes.
+   *
    * @defaultValue true
    */
   userInfo: boolean;
 
   /**
-   * Determines whether to refetch the user information from the authentication service on each request to the
-   * application's userinfo endpoint.
+   * Refetch user profile data whenever the application's `UserInfo` endpoint is invoked.
+   *
    * @defaultValue false
    */
   refetchUserInfo: boolean;
 
   /**
-   * Default authorization parameters to include in authentication requests.
+   * Default authorization parameters included in authentication requests.
+   *
    * @defaultValue {
    *   scope: 'openid email profile',
    *   response_type: 'code'
@@ -328,315 +446,452 @@ export interface MonoCloudOptionsBase {
   defaultAuthParams: AuthorizationParams;
 
   /**
-   * Optional: Additional resources that can be requested in `getTokens()`.
+   * Optional resource indicators available when requesting tokens via `getTokens()`.
    *
    */
   resources?: Indicator[];
 
   /**
-   * Configuration options for the user session.
+   * Session configuration.
    */
   session: MonoCloudSessionOptionsBase;
 
   /**
-   * Configuration options for state management during authentication.
+   * Authentication state configuration.
    */
   state: MonoCloudStateOptions;
 
   /**
-   * The signing algorithm that is expected to be used for signing ID tokens.
+   * Expected signing algorithm for ID tokens.
+   *
    * @defaultValue 'RS256'
    */
   idTokenSigningAlg: SecurityAlgorithms;
 
   /**
-   *  Array of strings representing the filtered ID token claims.
+   *  List of ID token claims that should be removed before storing data in the session.
    */
   filteredIdTokenClaims: string[];
 
   /**
-   * The name of the debugger instance.
+   * Identifier used for internal debugging/logging.
    */
   debugger: string;
 
   /**
-   * The name of the user agent.
+   * Custom User-Agent value sent with requests to MonoCloud.
    */
   userAgent: string;
 
   /**
-   * Jwks Cache Duration
+   * Duration (in seconds) to cache the JWKS document.
    *
-   * Time in seconds to cache the JWKS document after it is fetched
-   *
-   * @default 60 (seconds)
-   *
-   * */
+   * @defaultValue 300
+   */
   jwksCacheDuration?: number;
 
   /**
-   * Metadata Cache Duration
+   * Duration (in seconds) to cache OpenID discovery metadata.
    *
-   * Time in seconds to cache the metadata document after it is fetched.
-   *
-   * @default 60 (seconds)
-   * */
+   * @defaultValue 300
+   */
   metadataCacheDuration?: number;
 
   /**
-   * Determines whether authorization parameters should be dynamically extracted
-   * from query.
+   * Allows authorization parameters to be overridden using query parameters.
    *
-   * When set to `true`, parameters such as `scope`, `resource`, `prompt` etc
-   * from the query parameters will be merged into the authentication request.
+   * When disabled, parameters such as `scope`, `resource`, `prompt`, and `login_hint` present in the request URL are ignored and cannot modify the authentication request.
    *
-   * @example
-   *
-   * // The SDK will automatically use prompt='login' and the login_hint.
-   * https://example.com/api/auth/signin?prompt=login&login_hint=user@example.com
-   *
-   * @default false
+   * @defaultValue false
    */
   allowQueryParamOverrides?: boolean;
 
   /**
-   * Optional: A callback function invoked when a back-channel logout event is received.
+   * Invoked when a back-channel logout request is received.
    */
   onBackChannelLogout?: OnBackChannelLogout;
 
   /**
-   * Optional: A callback function invoked when an authentication state is being set (before sign-in).
+   * Invoked before authentication begins to attach custom application state.
    */
   onSetApplicationState?: OnSetApplicationState;
 
   /**
-   * Optional: A callback function invoked before creating or updating the user session.
+   * Invoked before a session is created or updated. Can be used to modify session data or attach custom fields.
    */
   onSessionCreating?: OnSessionCreating;
 }
 
 /**
- * Options for the authentication sessions.
+ * Partial configuration options for authentication sessions.
+ *
+ * @category Types
  */
-export type MonoCloudSessionOptions = Except<
-  PartialDeep<MonoCloudSessionOptionsBase>,
-  'store'
-> & {
+export interface MonoCloudSessionOptions extends Partial<
+  Omit<MonoCloudSessionOptionsBase, 'store' | 'cookie'>
+> {
   /**
-   * Optional: The session store to use for storing session data.
+   * Session cookie settings.
+   */
+  cookie?: Partial<MonoCloudCookieOptions>;
+
+  /**
+   * A custom session store implementation.
+   *
+   * When provided, sessions are persisted using this store instead of cookies-only storage.
    */
   store?: MonoCloudSessionStore;
-};
+}
 
 /**
- * Options for configuration MonoCloud Authentication.
+ * Configuration options used to initialize the SDK client.
+ *
+ * ## Configuration Sources
+ *
+ * Configuration values can be provided using either:
+ *
+ * - **Constructor options** - passed when creating the client instance.
+ * - **Environment variables** - using `MONOCLOUD_AUTH_*` variables.
+ *
+ * When both are provided, **constructor options override environment variables**.
+ *
+ * ## Environment Variables
+ *
+ * ### Core Configuration (Required)
+ *
+ * | Environment Variable | Description |
+ * |----------------------|-------------|
+ * | `MONOCLOUD_AUTH_CLIENT_ID` | Unique identifier for your application/client. |
+ * | `MONOCLOUD_AUTH_CLIENT_SECRET` | Application/client secret used for authentication. |
+ * | `MONOCLOUD_AUTH_TENANT_DOMAIN` | The domain of your MonoCloud tenant (for example, `https://your-tenant.us.monocloud.com`). |
+ * | `MONOCLOUD_AUTH_APP_URL` | The base URL where your application is hosted. |
+ * | `MONOCLOUD_AUTH_COOKIE_SECRET` | A long, random string used to encrypt and sign session cookies. |
+ *
+ * ### Authentication & Security
+ *
+ * | Environment Variable | Description |
+ * |----------------------|-------------|
+ * | `MONOCLOUD_AUTH_SCOPES` | Space-separated list of OIDC scopes to request (for example, `openid profile email`). |
+ * | `MONOCLOUD_AUTH_RESOURCE` | Default resource (audience) identifier used when issuing access tokens. |
+ * | `MONOCLOUD_AUTH_USE_PAR` | Enables Pushed Authorization Requests (PAR) for authorization flows. |
+ * | `MONOCLOUD_AUTH_CLOCK_SKEW` | Allowed clock drift (in seconds) when validating token timestamps. |
+ * | `MONOCLOUD_AUTH_FEDERATED_SIGNOUT` | If `true`, signing out of the application also signs the user out of MonoCloud (SSO sign-out). |
+ * | `MONOCLOUD_AUTH_RESPONSE_TIMEOUT` | Maximum time (in milliseconds) to wait for responses from the authentication service. |
+ * | `MONOCLOUD_AUTH_ALLOW_QUERY_PARAM_OVERRIDES` | Allows authorization parameters (such as `scope`, `resource`, or `prompt`) to be overridden via URL query parameters. |
+ * | `MONOCLOUD_AUTH_POST_LOGOUT_REDIRECT_URI` | URL users are redirected to after a successful logout. |
+ * | `MONOCLOUD_AUTH_USER_INFO` | Determines whether user profile data is fetched from the `UserInfo` endpoint after authorization. |
+ * | `MONOCLOUD_AUTH_REFETCH_USER_INFO` | If `true`, user information is re-fetched on each userinfo request. |
+ * | `MONOCLOUD_AUTH_ID_TOKEN_SIGNING_ALG` | Expected signing algorithm for ID tokens (for example, `RS256`). |
+ * | `MONOCLOUD_AUTH_FILTERED_ID_TOKEN_CLAIMS` | Space-separated list of ID token claims excluded from the session object. |
+ *
+ *  ### Routes
+ *
+ * | Environment Variable | Description |
+ * |----------------------|-------------|
+ * | `MONOCLOUD_AUTH_CALLBACK_URL` | Application path where the authorization server redirects the user after authentication. |
+ * | `MONOCLOUD_AUTH_SIGNIN_URL` | Internal route used to initiate the sign-in flow. |
+ * | `MONOCLOUD_AUTH_SIGNOUT_URL` | Internal route used to initiate the sign-out flow. |
+ * | `MONOCLOUD_AUTH_USER_INFO_URL` | Route that exposes the authenticated user’s profile retrieved from the UserInfo endpoint. |
+ *
+ * ### Session Cookie Settings
+ *
+ * | Environment Variable | Description |
+ * |----------------------|-------------|
+ * | `MONOCLOUD_AUTH_SESSION_COOKIE_NAME` | Name of the cookie used to store the authenticated user session. |
+ * | `MONOCLOUD_AUTH_SESSION_COOKIE_PATH` | Path scope for which the session cookie is valid. |
+ * | `MONOCLOUD_AUTH_SESSION_COOKIE_DOMAIN` | Domain scope for which the session cookie is valid. |
+ * | `MONOCLOUD_AUTH_SESSION_COOKIE_HTTP_ONLY` | Prevents client-side scripts from accessing the session cookie. |
+ * | `MONOCLOUD_AUTH_SESSION_COOKIE_SECURE` | Ensures the session cookie is only sent over HTTPS connections. |
+ * | `MONOCLOUD_AUTH_SESSION_COOKIE_SAME_SITE` | SameSite policy applied to the session cookie (`lax`, `strict`, or `none`). |
+ * | `MONOCLOUD_AUTH_SESSION_COOKIE_PERSISTENT` | Determines whether the session cookie persists across browser restarts. |
+ * | `MONOCLOUD_AUTH_SESSION_SLIDING` | Enables sliding session expiration instead of absolute expiration. |
+ * | `MONOCLOUD_AUTH_SESSION_DURATION` | Session lifetime in seconds. |
+ * | `MONOCLOUD_AUTH_SESSION_MAX_DURATION` | Maximum allowed lifetime of a sliding session in seconds. |
+ *
+ * ### State Cookie Settings
+ *
+ * | Environment Variable | Description |
+ * |----------------------|-------------|
+ * | `MONOCLOUD_AUTH_STATE_COOKIE_NAME` | Name of the cookie used to store OpenID Connect state and nonce values during authentication. |
+ * | `MONOCLOUD_AUTH_STATE_COOKIE_PATH` | Path scope for which the state cookie is valid. |
+ * | `MONOCLOUD_AUTH_STATE_COOKIE_DOMAIN` | Domain scope for which the state cookie is valid. |
+ * | `MONOCLOUD_AUTH_STATE_COOKIE_SECURE` | Ensures the state cookie is only sent over HTTPS connections. |
+ * | `MONOCLOUD_AUTH_STATE_COOKIE_SAME_SITE` | SameSite policy applied to the state cookie (`lax`, `strict`, or `none`). |
+ * | `MONOCLOUD_AUTH_STATE_COOKIE_PERSISTENT` | Determines whether the state cookie persists beyond the current browser session. |
+ *
+ * ### Caching
+ *
+ * | Environment Variable | Description |
+ * |----------------------|-------------|
+ * | `MONOCLOUD_AUTH_JWKS_CACHE_DURATION` | Duration (in seconds) to cache the JSON Web Key Set (JWKS) used to verify tokens. |
+ * | `MONOCLOUD_AUTH_METADATA_CACHE_DURATION` | Duration (in seconds) to cache the OpenID Connect discovery metadata. |
+ *
+ * @category Types
  */
-export type MonoCloudOptions = Except<
-  PartialDeep<MonoCloudOptionsBase>,
-  'defaultAuthParams' | 'session'
-> & {
+export interface MonoCloudOptions extends Partial<
+  Omit<
+    MonoCloudOptionsBase,
+    'defaultAuthParams' | 'session' | 'routes' | 'state'
+  >
+> {
   /**
-   * Default authorization parameters to include in authentication requests.
+   * Default authorization parameters automatically included in authentication requests unless explicitly overridden.
+   *
    * @defaultValue {
    *   scope: 'openid email profile',
    *   response_type: 'code'
    * }
    */
-  defaultAuthParams?: Partial<AuthorizationParams>;
+  defaultAuthParams?: AuthorizationParams;
 
   /**
-   * Configuration options for the user session.
+   * Overrides for built-in authentication route paths.
+   */
+  routes?: Partial<MonoCloudRoutes>;
+
+  /**
+   * Session configuration overrides.
    */
   session?: MonoCloudSessionOptions;
-};
+
+  /**
+   * Configuration for authentication state handling.
+   */
+  state?: MonoCloudStatePartialOptions;
+}
 
 /**
- * Defines a callback function to be invoked when a back-channel logout event is received.
- * This function receives an optional subject identifier (sub) of the user and an optional session identifier (sid).
+ * Callback invoked when a back-channel logout event is received from the authorization server.
  *
- * @param sub - Optional. The subject identifier (sub) of the user.
- * @param sid - Optional. The session identifier (sid) associated with the user's session.
- * @returns A Promise that resolves when the operation is completed, or void.
+ * Back-channel logout allows MonoCloud to notify the application that a user session should be terminated without browser interaction.
+ *
+ * @category Types (Handler)
+ *
+ * @param sub Optional subject identifier (`sub`) of the user associated with the logout event.
+ * @param sid Optional session identifier (`sid`) for the session being terminated.
+ * @returns Returns a promise or void. Execution completes once logout handling finishes.
  */
 export type OnBackChannelLogout = (
   /**
-   * Optional. The subject identifier (sub) of the user.
+   * Subject identifier of the user.
    */
   sub?: string,
+
   /**
-   * Optional. The session identifier (sid) associated with the user's session.
+   * Session identifier associated with the logout event.
    */
   sid?: string
 ) => Promise<void> | void;
 
 /**
- * The custom application state.
+ * Represents custom application state associated with an authentication request.
+ *
+ * This object is populated via `onSetApplicationState` and is persisted through the authentication flow. The resolved value is later available during session creation and can be used to carry application-specific context (for example: return targets, workflow state, or tenant hints).
+ *
+ * @category Types
  */
-export type ApplicationState = Record<string, any>;
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export interface ApplicationState extends Record<string, any> {}
 
 /**
- * Defines a callback function to be executed when a new session is being created or updated.
- * This function receives parameters related to the session being created,
- * including the session object itself, optional ID token and user information claims,
- * and the application state.
+ * Callback invoked before a session is created or updated.
  *
- * @param session - The Session object being created.
- * @param idToken - Optional. Claims from the ID token received during authentication.
- * @param userInfo - Optional. Claims from the user information received during authentication.
- * @param state - Optional. The application state associated with the session.
- * @returns A Promise that resolves when the operation is completed, or void.
+ * Use this hook to modify or enrich the session before it is persisted. The callback receives the resolved session along with optional claims obtained during authentication and any custom application state.
+ *
+ * Common use cases include:
+ * - Adding custom properties to the session
+ * - Mapping or filtering claims
+ * - Attaching tenant or application-specific metadata
+ *
+ * @category Types (Handler)
+ *
+ * @param session The session being created or updated. Changes made to this object are persisted.
+ * @param idToken Optional claims extracted from the ID token.
+ * @param userInfo Optional claims returned from the `UserInfo` endpoint.
+ * @param state Optional application state created during the authentication request.
+ * @returns Returns a promise or void. Execution continues once the callback completes.
  */
 export type OnSessionCreating = (
   /**
-   * The Session object being created.
+   * The session being created or updated.
    */
   session: MonoCloudSession,
 
   /**
-   * Optional. Claims from the ID token received during authentication.
+   * Optional claims extracted from the ID token.
    */
   idToken?: Partial<IdTokenClaims>,
 
   /**
-   * Optional. Claims from the user information received during authentication.
+   * Optional claims returned from the `UserInfo` endpoint.
    */
   userInfo?: UserinfoResponse,
 
   /**
-   * Optional. The application state associated with the session.
+   * Optional application state associated with the authentication flow.
    */
   state?: ApplicationState
 ) => Promise<void> | void;
 
 /**
- * Defines a callback function to be executed when an authentication state is being set.
- * This function receives the incoming request and should return or resolve with an ApplicationState object.
+ * Callback invoked when the authentication state is being created before redirecting the user to the authorization server.
  *
- * @param req - The incoming request.
- * @returns A Promise that resolves with the ApplicationState object when the operation is completed, or the ApplicationState object directly.
+ * Use this hook to attach custom application state that should survive the authentication round-trip and be available after the user returns from sign-in.
+ *
+ * The returned value is stored securely and later provided during session creation.
+ *
+ * Common use cases include:
+ * - Preserving return URLs or navigation context
+ * - Passing tenant or organization identifiers
+ * - Storing temporary workflow state across authentication
+ *
+ * @category Types (Handler)
+ *
+ * @param req The incoming request initiating authentication.
+ * @returns Returns an application state object, either synchronously or as a Promise.
  */
 export type OnSetApplicationState = (
   /**
-   * The incoming request.
+   * The incoming request initiating authentication.
    */
   req: MonoCloudRequest
 ) => Promise<ApplicationState> | ApplicationState;
 
 /**
- * Represents the tokens obtained during authentication that are available in the session.
+ * Represents the token set associated with the currently authenticated user.
+ *
+ * This object extends {@link AccessToken} and includes additional tokens issued during authentication, along with convenience metadata used by the SDK to indicate token validity.
+ *
+ * @category Types
  */
 export interface MonoCloudTokens extends AccessToken {
   /**
-   * The ID token obtained during authentication.
+   * The ID token issued during authentication. Contains identity claims about the authenticated user.
    */
   idToken?: string;
 
   /**
-   * The refresh token obtained during authentication.
+   * The refresh token used to obtain new access tokens without requiring the user to re-authenticate.
    */
   refreshToken?: string;
 
   /**
-   * Specifies if the access token has expired.
+   * Indicates whether the current access token is expired at the time of evaluation.
    */
   isExpired: boolean;
 }
 
 /**
- * A function used to handle errors that occur during the signin, callback, signout and userinfo endpoint execution.
+ * Defines a callback invoked when an unexpected error occurs during execution of authentication endpoints such as sign-in, callback, sign-out, or userinfo.
  *
- * @param error - Error occured during execution of the endpoint.
+ * This handler allows applications to log, transform, or respond to errors before the SDK applies its default error handling behavior.
+ *
+ * @category Types (Handler)
+ *
+ * @param error - The error thrown during endpoint execution.
  */
 export type OnError = (error: Error) => Promise<any> | any;
 
 /**
- * Represents options for the sign-in handler.
+ * Options used to customize the sign-in flow.
+ *
+ * @category Types
  */
 export interface SignInOptions {
   /**
-   * The application URL to which the user should be redirected after successful authentication.
-   * Must be a relative Url.
-   * Defaults to the appUrl.
+   * Relative URL to redirect the user to after successful authentication.
+   *
+   * If not provided, the application base URL (`appUrl`) is used.
    */
   returnUrl?: string;
 
   /**
-   * Specifies whether to initiate a user registration process.
+   * When `true`, initiates the user registration (sign-up) flow instead of a standard sign-in.
    */
   register?: boolean;
 
   /**
-   * Additional authorization parameters to include in the authentication request.
+   * Additional authorization parameters merged into the authentication request.
    */
   authParams?: AuthorizationParams;
 
   /**
-   * A custom function to handle unexpected errors while signing in.
+   * Callback invoked if an unexpected error occurs during the sign-in flow.
    */
   onError?: OnError;
 }
 
 /**
- * Represents options for the callback handler.
+ * Options used to customize callback processing after authentication.
+ *
+ * @category Types
  */
 export interface CallbackOptions {
   /**
-   * Determines whether to fetch the user information from the 'userinfo' endpoint after processing the callback.
+   * When `true`, fetches user profile data from the `UserInfo` endpoint after the authorization code exchange completes.
    */
   userInfo?: boolean;
 
   /**
-   * Url to be sent to the token endpoint.
+   * Redirect URI sent to the token endpoint during the authorization code exchange.
+   *
+   * > This must match the redirect URI used during the sign-in request.
    */
   redirectUri?: string;
 
   /**
-   * A custom function to handle unexpected errors while processing callback from MonoCloud.
+   * Callback invoked if an unexpected error occurs while processing the authentication callback.
    */
   onError?: OnError;
 }
 
 /**
- * Represents options for the userinfo handler.
+ * Options used to customize the behavior of the userinfo handler.
+ *
+ * @category Types
  */
 export interface UserInfoOptions {
   /**
-   * Determines whether to refetch the user information from the authentication service.
+   * When `true`, forces user profile data to be re-fetched from the authentication service instead of using cached session data.
    */
   refresh?: boolean;
 
   /**
-   * A custom function to handle unexpected errors while fetching userinfo.
+   * Callback invoked if an unexpected error occurs while retrieving user information.
    */
   onError?: OnError;
 }
 
 /**
- * Represents options for the sign-out handler.
+ * Options used to customize the behavior of the sign-out handler.
+ *
+ * @category Types
  */
-export type SignOutOptions = {
+export interface SignOutOptions extends EndSessionParameters {
   /**
-   * Determines whether the user will be logged out of the authentication service.
+   * When `true`, also signs the user out of the MonoCloud session (Single Sign-Out) in addition to the local application session.
    */
   federatedSignOut?: boolean;
 
   /**
-   * A custom function to handle unexpected errors while signing out.
+   * Callback invoked if an unexpected error occurs during the sign-out flow.
    */
   onError?: OnError;
-} & EndSessionParameters;
+}
 
 /**
- * Represents options for the GetTokens handler.
+ * Options used to control token retrieval and refresh behavior when calling `getTokens()`.
+ *
+ * @category Types
  */
 export interface GetTokensOptions extends RefreshGrantOptions {
   /**
-   * Specifies whether to force the refresh of the access token.
+   * When `true`, forces a refresh of the access token even if the current token has not expired.
    */
   forceRefresh?: boolean;
 
   /**
-   * Determines whether to refetch the user information.
+   * When enabled, refetches user information from the `UserInfo` endpoint after tokens are refreshed.
    */
   refetchUserInfo?: boolean;
 }

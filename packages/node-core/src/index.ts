@@ -8,7 +8,6 @@ export type {
   MonoCloudOptions,
   OnError,
   MonoCloudOptionsBase,
-  SecurityAlgorithms,
   OnBackChannelLogout,
   OnSessionCreating,
   OnSetApplicationState,
@@ -18,6 +17,7 @@ export type {
   MonoCloudSessionStore,
   Indicator,
   MonoCloudStateOptions,
+  MonoCloudStatePartialOptions,
   SameSiteValues,
   SessionLifetime,
   MonoCloudCookieOptions,
@@ -58,11 +58,11 @@ export type {
   Group,
   IdTokenClaims,
   IssuerMetadata,
-  JWSAlgorithm,
   Jwk,
   Jwks,
   MonoCloudSession,
   MonoCloudUser,
+  SecurityAlgorithms,
   Tokens,
   UserinfoResponse,
   CodeChallengeMethod,
@@ -73,5 +73,8 @@ export type {
   RefreshGrantOptions,
   RefetchUserInfoOptions,
   ParResponse,
+  Address,
+  OnSessionCreating as OnCoreSessionCreating,
 } from '@monocloud/auth-core';
-export { MonoCloudOidcClient } from '@monocloud/auth-core';
+
+export type { SerializeOptions, SetCookie } from 'cookie';

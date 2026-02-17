@@ -1,4 +1,4 @@
-import { monoCloud } from '@/monocloud';
+import { protectPage, getTokens } from '@monocloud/auth-nextjs';
 import { InferGetServerSidePropsType } from 'next';
 
 export default function ServerSide({
@@ -33,9 +33,9 @@ export default function ServerSide({
   );
 }
 
-export const getServerSideProps = monoCloud.protectPage({
+export const getServerSideProps = protectPage({
   getServerSideProps: async ctx => {
-    const tokens = await monoCloud.getTokens(ctx.req, ctx.res);
+    const tokens = await getTokens(ctx.req, ctx.res);
 
     return {
       props: {

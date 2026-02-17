@@ -39,7 +39,7 @@ describe('MonoCloudOidcClient.userinfo()', () => {
   it.each([
     {
       error: 'some_unknown_error',
-      error_description: 'Some unknwon error occured',
+      error_description: 'Some unknwon error occurred',
     },
     { error: null, error_description: null },
   ])(

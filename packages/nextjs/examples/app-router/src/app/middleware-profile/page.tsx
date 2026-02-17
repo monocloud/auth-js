@@ -1,7 +1,7 @@
-import { monoCloud } from '../../monocloud';
+import { getSession } from '@monocloud/auth-nextjs';
 
 export default async function MiddlewareProfile() {
-  const session = await monoCloud.getSession();
+  const session = await getSession();
 
   return (
     <div className="mt-5 ml-5">

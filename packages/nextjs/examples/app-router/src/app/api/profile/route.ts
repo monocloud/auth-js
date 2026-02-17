@@ -1,8 +1,9 @@
-import { monoCloud } from '@/monocloud';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { protectApi, getSession } from '@monocloud/auth-nextjs';
 import { NextResponse } from 'next/server';
 
-export const GET = monoCloud.protectApi(async () => {
-  const session = await monoCloud.getSession();
+export const GET: any = protectApi(async () => {
+  const session = await getSession();
   return NextResponse.json(session);
 });
 

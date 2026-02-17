@@ -1,579 +1,1478 @@
-/** Supported Response Types */
+/**
+ * Supported OAuth 2.0 / OpenID Connect response types.
+ *
+ * Response types determine which artifacts are returned from the authorization endpoint during authentication.
+ *
+ * > Modern applications should prefer the Authorization Code Flow (`code`) with PKCE. Implicit flow variants are included for compatibility with legacy or specialized scenarios.
+ *
+ * @category Types (Enums)
+ */
 export type ResponseTypes =
+  /**
+   * Authorization Code Flow (recommended). Returns an authorization code that is exchanged for tokens server-side.
+   */
   | 'code'
+
+  /**
+   * Implicit Flow returning an access token directly from the authorization endpoint.
+   */
   | 'token'
+
+  /**
+   * Implicit Flow returning an ID token.
+   */
   | 'id_token'
+
+  /**
+   * Implicit Flow returning both an ID token and an access token.
+   */
   | 'id_token token'
+
+  /**
+   * Hybrid Flow returning an authorization code and an ID token.
+   */
   | 'code id_token'
+
+  /**
+   * Hybrid Flow returning an authorization code and an access token.
+   */
   | 'code token'
+
+  /**
+   * Hybrid Flow returning an authorization code, ID token, and access token.
+   */
   | 'code id_token token';
 
-/** Supported PKCE code challenge methods */
-export type CodeChallengeMethod = 'plain' | 'S256';
-
-/** Display options */
-export type DisplayOptions = 'page' | 'popup' | 'touch' | 'wap';
-
-/** Allowed Response Modes */
-export type ResponseModes = 'form_post' | 'query' | 'fragment';
-
-/** Valid prompt parameter values */
-export type Prompt = 'none' | 'login' | 'consent' | 'select_account' | 'create';
-
-/** Parameters for creating Authorization URL */
-export interface AuthorizationParams {
-  /** A random string used to prevent CSRF attacks */
-  state?: string;
-  /** Space-separated list of scopes requested from the authorization server */
-  scopes?: string;
-  /** The URI to redirect the user to after successful sign in */
-  redirectUri?: string;
+/**
+ * Supported PKCE (Proof Key for Code Exchange) code challenge methods.
+ *
+ * PKCE protects authorization code flows by binding the authorization request to the token exchange using a cryptographic verifier.
+ *
+ * @category Types (Enums)
+ */
+export type CodeChallengeMethod =
   /**
-   * The desired response type from the authorization server.
-   * - `code`: Authorization code flow.
-   * - `token`: Implicit flow.
-   * - `id_token`: Implicit flow with ID token.
-   * - `id_token token`: Implicit flow with ID token and access token.
-   * - `code id_token`: Authorization code flow with ID token.
-   * - `code token`: Authorization code flow with access token.
-   * - `code id_token token`: Authorization code flow with ID token and access token.
+   * Uses the code verifier directly as the challenge. Not recommended for production use.
+   */
+  | 'plain'
+
+  /**
+   * Uses a SHA-256 hash of the code verifier.
+   */
+  | 'S256';
+
+/**
+ * Supported OpenID Connect `display` parameter values.
+ *
+ * The display parameter hints to the authorization server how the authentication or consent UI should be presented to the user.
+ *
+ * @category Types (Enums)
+ */
+export type DisplayOptions =
+  /**
+   * Full-page authentication experience in the browser.
+   */
+  | 'page'
+
+  /**
+   * Authentication optimized for popup windows.
+   */
+  | 'popup'
+
+  /**
+   * Authentication optimized for touch-based devices.
+   */
+  | 'touch'
+
+  /**
+   * Authentication optimized for legacy mobile or constrained browsers.
+   */
+  | 'wap';
+
+/**
+ * Supported OAuth 2.0 / OpenID Connect `response_mode` values.
+ *
+ * The response mode determines how authorization results are returned from the authorization endpoint to the client application.
+ *
+ * @category Types (Enums)
+ */
+export type ResponseModes =
+  /**
+   * Returns authorization results using an HTTP POST request with parameters encoded in the request body.
+   */
+  | 'form_post'
+
+  /**
+   * Returns authorization results as URL query parameters.
+   */
+  | 'query'
+
+  /**
+   * Returns authorization results in the URL fragment.
+   */
+  | 'fragment';
+
+/**
+ * Supported OpenID Connect `prompt` parameter values.
+ *
+ * The `prompt` parameter controls whether the authorization server should force specific user interactions during authentication.
+ *
+ * @category Types (Enums)
+ */
+export type Prompt =
+  /**
+   * Do not display any authentication or consent UI.
+   */
+  | 'none'
+
+  /**
+   * Forces the user to re-authenticate even if an active session exists.
+   */
+  | 'login'
+
+  /**
+   * Forces the consent screen to be displayed to the user.
+   */
+  | 'consent'
+
+  /**
+   * Prompts the user to choose an account when multiple sessions exist.
+   */
+  | 'select_account'
+
+  /**
+   * Prompts the user to create a new account (sign-up flow).
+   */
+  | 'create';
+
+/**
+ * Parameters used to construct an OAuth 2.0 / OpenID Connect authorization request.
+ *
+ * @category Types
+ */
+export interface AuthorizationParams {
+  /**
+   * A cryptographically random value used to maintain request state
+   * and protect against CSRF attacks.
+   */
+  state?: string;
+
+  /**
+   * Space-separated list of scopes requested during authentication.
+   */
+  scopes?: string;
+
+  /**
+   * The redirect URI where the authorization server sends the user after authentication completes.
+   */
+  redirectUri?: string;
+
+  /**
+   * Determines which artifacts are returned from the authorization endpoint.
    */
   responseType?: ResponseTypes;
-  /** A cryptographic hash used for proof key for code exchange (PKCE). */
-  codeChallenge?: string;
+
   /**
-   * The method used to generate the code challenge, either `plain` or `S256`.
+   * PKCE code challenge derived from the code verifier. Used to secure authorization code exchanges.
+   */
+  codeChallenge?: string;
+
+  /**
+   * Method used to generate the PKCE code challenge.
    */
   codeChallengeMethod?: CodeChallengeMethod;
-  /** A hint to the authorization server about the desired authenticator the client wishes to authenticate the user with */
-  authenticatorHint?: Authenticators;
-  /** Maximum allowed time in seconds since the last End-User authentication. */
-  maxAge?: number;
-  /** A hint to the authorization server about the user's identifier */
-  loginHint?: string;
-  /** A signed JWT containing the authorization request parameters  */
-  request?: string;
+
   /**
-   * The response mode for the authorization response.
-   * - `form_post`: Form-encoded POST request.
-   * - `query`: URI query parameters.
-   * - `fragment`: URI fragment.
+   * Hint to the authorization server indicating which authenticator or connection should be used.
+   */
+  authenticatorHint?: Authenticators;
+
+  /**
+   * Maximum acceptable time (in seconds) since the user last authenticated. If exceeded, the user may be required to sign in again.
+   */
+  maxAge?: number;
+
+  /**
+   * Hint identifying the user (for example, email or username). Used to prefill or optimize the sign-in experience.
+   */
+  loginHint?: string;
+
+  /**
+   * A signed JWT containing authorization request parameters.
+   */
+  request?: string;
+
+  /**
+   * Specifies how the authorization response is returned to the client.
    */
   responseMode?: ResponseModes;
-  /** An array of authentication context class references (ACRs). */
-  acrValues?: string[];
-  /** A random string used to associate to the ID token to prevent replay attacks */
-  nonce?: string;
-  /** User's preferred languages and scripts for the user interface */
-  uiLocales?: string;
-  /** The desired user interface mode */
-  display?: DisplayOptions;
+
   /**
-   * The desired authentication behaviour.
-   * - `none`: User is not prompted to sign in.
-   * - `login`: Prompt the user to log in even if the user is already authenticated.
-   * - `consent`: Prompt the user for consent.
-   * - `select_account`: Prompt the user to sign in.
-   * - `create`: Prompt the user to sign up.
+   * Authentication Context Class Reference (ACR) values requesting specific authentication assurance levels or methods.
+   */
+  acrValues?: string[];
+
+  /**
+   * A cryptographically random value included in the ID token to prevent replay attacks.
+   */
+  nonce?: string;
+
+  /**
+   * Preferred UI language.
+   */
+  uiLocales?: string;
+
+  /**
+   * Preferred display mode for the authentication UI.
+   */
+  display?: DisplayOptions;
+
+  /**
+   * Controls authentication interaction behavior. For example, forcing login or consent.
    */
   prompt?: Prompt;
-  /** The request uri obtained from pushed authorization request. When this parameter is set, all other properties are ignored */
+
+  /**
+   * URI referencing a previously created authorization request (typically via Pushed Authorization Requests — PAR).
+   *
+   * When set, other authorization parameters may be ignored.
+   */
   requestUri?: string;
-  /** Space-separated list of resources the access token should be scoped to */
+
+  /**
+   * Space-separated list of resource indicators that scope the issued access token.
+   */
   resource?: string;
 }
 
-/** Defines the parameters received in the callback URL after authorization */
+/**
+ * Parameters returned to the application after the authorization server redirects the user back to the callback URL.
+ *
+ * @category Types
+ */
 export interface CallbackParams {
-  /** State received from the authorization server */
+  /**
+   * The state value originally sent in the authorization request. Used to validate request integrity and prevent CSRF attacks.
+   */
   state?: string;
-  /** Error message specifying the cause of authentication failure */
+
+  /**
+   * Error code returned when authorization fails.
+   */
   error?: string;
-  /** Explanation of the reason for authentication failure */
+
+  /**
+   * Human-readable description providing additional information about the authorization error.
+   */
   errorDescription?: string;
-  /** Authorization code received from the callback */
+
+  /**
+   * Authorization code returned when using the Authorization Code Flow.
+   */
   code?: string;
-  /** Access token received from the callback */
+
+  /**
+   * Access token returned directly by implicit or hybrid flows.
+   */
   accessToken?: string;
-  /** Expiry of the access token in seconds */
+
+  /**
+   * Lifetime of the access token in seconds.
+   */
   expiresIn?: number;
-  /** ID token received from the callback */
+
+  /**
+   * ID token issued by the authorization server.
+   */
   idToken?: string;
-  /** Refresh token received from the callback */
+
+  /**
+   * Refresh token issued during authorization (if enabled).
+   */
   refreshToken?: string;
-  /** A string that represents the End-User's login state. The `sessionState` can be used to track the user's session in the frontend */
+
+  /**
+   * OIDC session state value used for session monitoring and front-channel session management.
+   */
   sessionState?: string;
 }
 
-/** Represents a JSON Web Key (JWK) */
+/**
+ * Represents a JSON Web Key (JWK) as defined by RFC 7517.
+ *
+ * A JWK describes a cryptographic key used to verify or encrypt JSON Web Tokens (JWTs) as obtained from the JWKS (JSON Web Key Set) endpoint exposed by the authorization server.
+ *
+ * The available properties depend on the key type (`kty`).
+ *
+ * @category Types
+ */
 export interface Jwk {
+  /**
+   * Key type (for example: `RSA`, or `EC`).
+   */
   kty: string;
+
+  /**
+   * Intended algorithm for the key (for example: `RS256`).
+   */
   alg?: string;
+
+  /**
+   * Allowed operations for the key (e.g. `sign`, `verify`, `encrypt`).
+   */
   key_ops?: string[];
+
+  /**
+   * Indicates whether the key is extractable.
+   */
   ext?: boolean;
+
+  /**
+   * Public key use (`sig` for signature or `enc` for encryption).
+   */
   use?: string;
+
+  /**
+   * X.509 certificate chain.
+   */
   x5c?: string[];
+
+  /**
+   * X.509 certificate SHA-1 thumbprint.
+   */
   x5t?: string;
+
+  /**
+   * X.509 certificate SHA-256 thumbprint.
+   */
   'x5t#S256'?: string;
+
+  /**
+   * URL referencing the X.509 certificate.
+   */
   x5u?: string;
+
+  /**
+   * Key identifier used to match keys during verification.
+   */
   kid?: string;
+
+  /**
+   * Elliptic curve name (for example: `P-256`).
+   */
   crv?: string;
-  d?: string;
-  dp?: string;
-  dq?: string;
-  e?: string;
-  k?: string;
+
+  /**
+   * X coordinate for EC public keys.
+   */
+  x?: string;
+
+  /**
+   * Y coordinate for EC public keys.
+   */
+  y?: string;
+
+  /**
+   * RSA modulus.
+   */
   n?: string;
+
+  /**
+   * RSA public exponent.
+   */
+  e?: string;
+
+  /**
+   * RSA private exponent.
+   */
+  d?: string;
+
+  /**
+   * RSA first prime factor.
+   */
+  p?: string;
+
+  /**
+   * RSA second prime factor.
+   */
+  q?: string;
+
+  /**
+   * RSA first factor CRT exponent.
+   */
+  dp?: string;
+
+  /**
+   * RSA second factor CRT exponent.
+   */
+  dq?: string;
+
+  /**
+   * RSA CRT coefficient.
+   */
+  qi?: string;
+
+  /**
+   * Additional prime information (multi-prime RSA).
+   */
   oth?: {
     d?: string;
     r?: string;
     t?: string;
   }[];
-  p?: string;
-  q?: string;
-  qi?: string;
-  x?: string;
-  y?: string;
+
+  /**
+   * Symmetric key value (base64url encoded).
+   */
+  k?: string;
 }
 
-/** A set of public JSON Web Keys that are used to verify JSON Web Tokens */
+/**
+ * Represents a JSON Web Key Set (JWKS).
+ *
+ * A JWKS is a collection of public JSON Web Keys used to verify signatures of JSON Web Tokens (JWTs).
+ *
+ * @category Types
+ */
 export interface Jwks {
-  /** List of JWKs in this JWKS */
+  /**
+   * The list of public keys contained in this key set.
+   */
   keys: Jwk[];
 }
 
-type KnownKeys<T> = {
-  [K in keyof T]: string extends K ? never : number extends K ? never : K;
-} extends { [_ in keyof T]: infer U }
-  ? object extends U
-    ? never
-    : U
-  : never;
+/**
+ * Represents a postal address as defined by the OpenID Connect standard `address` claim.
+ *
+ * @category Types
+ */
+export interface Address {
+  /**
+   * Full mailing address formatted for display or mailing labels.
+   */
+  formatted?: string;
 
-type Override<T1, T2> = Omit<T1, keyof Omit<T2, keyof KnownKeys<T2>>> & T2;
+  /**
+   * Full street address component, which may include house number, street name, apartment, suite, or unit information.
+   */
+  street_address?: string;
+
+  /**
+   * City or locality component.
+   */
+  locality?: string;
+
+  /**
+   * State, province, or region component.
+   */
+  region?: string;
+
+  /**
+   * Postal or ZIP code.
+   */
+  postal_code?: string;
+
+  /**
+   * Country name or ISO country code.
+   */
+  country?: string;
+
+  /**
+   * Additional provider-specific address fields.
+   */
+  [key: string]: unknown;
+}
 
 /**
- * Address type
+ * Represents the OpenID Connect **UserInfo** response.
+ *
+ * @typeParam TAddress - The shape of the `address` claim. Defaults to {@link Address}.
+ *
+ * @category Types
  */
-export type Address<ExtendedAddress extends object = Record<string, unknown>> =
-  Override<
-    {
-      formatted?: string;
-      street_address?: string;
-      locality?: string;
-      region?: string;
-      postal_code?: string;
-      country?: string;
-    },
-    ExtendedAddress
-  >;
+export interface UserinfoResponse<TAddress extends Address = Address> {
+  /**
+   * Subject identifier - a unique, stable identifier for the user within the issuer.
+   */
+  sub: string;
+
+  /**
+   * Group memberships for the user.
+   */
+  groups?: Group[];
+
+  /**
+   * Full name of the user (e.g. "Jane Doe").
+   */
+  name?: string;
+
+  /**
+   * Given name(s) / first name.
+   */
+  given_name?: string;
+
+  /**
+   * Surname(s) / last name.
+   */
+  family_name?: string;
+
+  /**
+   * Middle name(s).
+   */
+  middle_name?: string;
+
+  /**
+   * Casual name used by the user.
+   */
+  nickname?: string;
+
+  /**
+   * Preferred username.
+   */
+  preferred_username?: string;
+
+  /**
+   * URL of the user's profile page.
+   */
+  profile?: string;
+
+  /**
+   * URL of the user's profile picture.
+   */
+  picture?: string;
+
+  /**
+   * URL of the user's website.
+   */
+  website?: string;
+
+  /**
+   * Email address.
+   */
+  email?: string;
+
+  /**
+   * Whether the email address has been verified by the provider.
+   */
+  email_verified?: boolean;
+
+  /**
+   * Gender.
+   */
+  gender?: string;
+
+  /**
+   * Birthday.
+   */
+  birthdate?: string;
+
+  /**
+   * Time zone name.
+   */
+  zoneinfo?: string;
+
+  /**
+   * Locale.
+   */
+  locale?: string;
+
+  /**
+   * Phone number (formatted in E.164 standard).
+   */
+  phone_number?: string;
+
+  /**
+   * Whether the phone number has been verified by the provider.
+   */
+  phone_number_verified?: boolean;
+
+  /**
+   * Time the user's information was last updated (seconds since epoch).
+   */
+  updated_at?: number;
+
+  /**
+   * Postal address.
+   */
+  address?: TAddress;
+
+  /**
+   * Additional provider-specific claims.
+   */
+  [key: string]: unknown;
+}
 
 /**
- * Userinfo response type
+ * Represents a user group included in the authenticated session.
+ *
+ * @category Types
  */
-export type UserinfoResponse<
-  UserInfo extends object = Record<string, unknown>,
-  ExtendedAddress extends object = Record<string, unknown>,
-> = Override<
-  {
-    sub: string;
-    groups?: Group[];
-    name?: string;
-    given_name?: string;
-    family_name?: string;
-    middle_name?: string;
-    nickname?: string;
-    preferred_username?: string;
-    profile?: string;
-    picture?: string;
-    website?: string;
-    email?: string;
-    email_verified?: boolean;
-    gender?: string;
-    birthdate?: string;
-    zoneinfo?: string;
-    locale?: string;
-    phone_number?: string;
-    phone_number_verified?: boolean;
-    updated_at?: number;
-    address?: Address<ExtendedAddress>;
-  },
-  UserInfo
->;
+export type Group =
+  /**
+   * Structured group representation.
+   */
+  | { id: string; name: string }
 
-/** User's group type. The group can be a group object with `id` and `name` or group name or group id */
-export type Group = { id: string; name: string } | string;
+  /**
+   * Group identifier or group name.
+   */
+  | string;
 
-/** Represents a MonoCloudUser */
+/**
+ * Represents the authenticated user stored in a MonoCloud session.
+ *
+ * @category Types
+ */
 export interface MonoCloudUser extends UserinfoResponse {
+  /**
+   * Authentication Methods References (AMR). Indicates how the user authenticated.
+   */
   amr?: string[];
+
+  /**
+   * Identity Provider (IdP) identifier. Specifies the upstream provider used to authenticate the user.
+   */
   idp?: string;
 }
 
+/**
+ * Represents an OAuth 2.0 access token and its associated metadata.
+ *
+ * @category Types
+ */
 export interface AccessToken {
   /**
-   * The access token associated with the session.
+   * The issued access token.
    */
   accessToken: string;
 
   /**
-   * The expiration timestamp of the access token (in epoch).
+   * The expiration time of the access token (Unix epoch, in seconds).
    */
   accessTokenExpiration: number;
 
   /**
-   * The scopes granted by the access token.
+   * Space-separated list of scopes granted to the access token.
+   *
+   * These represent the effective permissions approved by the authorization server.
    */
   scopes: string;
 
   /**
-   * Optional. The resource associated with the access token.
+   * Optional resource (audience) that the access token is scoped for.
    */
   resource?: string;
 
   /**
-   * Optional. The requested scopes.
+   * Optional space-separated list of scopes originally requested during token acquisition.
    */
   requestedScopes?: string;
 }
 
 /**
- * Represents a session containing user information, tokens, and additional custom properties.
+ * Represents an authenticated session, containing the authenticated user profile along with the tokens and metadata issued during authentication.
+ *
+ * @category Types
  */
 export interface MonoCloudSession {
   /**
-   * Information about the authenticated user, typically claims obtained from an ID token or the 'userinfo' endpoint.
+   * The authenticated user profile, typically derived from ID token claims and/or the `UserInfo` endpoint.
    */
   user: MonoCloudUser;
 
   /**
-   * Optional. The ID token associated with the session.
+   * Optional ID token issued during authentication.
    */
   idToken?: string;
 
-  /* The default scopes authorized for the session */
+  /**
+   * Space-separated list of scopes authorized for the session.
+   */
   authorizedScopes?: string;
 
   /**
-   * Optional. The access tokens associated with the session.
+   * Access tokens associated with the session.
+   *
+   * Multiple tokens may exist when access tokens are issued for different resources or scope sets.
    */
   accessTokens?: AccessToken[];
 
   /**
-   * Optional. The refresh token associated with the session.
+   * Optional refresh token used to obtain new access tokens without requiring the user to re-authenticate.
    */
   refreshToken?: string;
 
   /**
-   * Additional custom properties that can be added to the session.
+   * Additional custom properties attached to the session.
+   *
+   * These may be added via hooks such as `onSessionCreating`.
    */
   [key: string]: unknown;
 }
 
-/** Claims obtained from ID token */
+/**
+ * Standard OpenID Connect ID Token claims.
+ *
+ * @category Types
+ */
 export interface IdTokenClaims extends UserinfoResponse {
+  /**
+   * Authentication Context Class Reference. Indicates the assurance level of the authentication performed.
+   */
   acr?: string;
+
+  /**
+   * Authentication Methods References. Lists the authentication methods used (for example: `pwd`, `mfa`, `otp`).
+   */
   amr?: string[];
+
+  /**
+   * Access token hash. Used to validate access tokens returned alongside the ID token.
+   */
   at_hash?: string;
+
+  /**
+   * Intended audience(s) of the ID token.
+   */
   aud: string | string[];
+
+  /**
+   * Time when the end-user authentication occurred (Unix epoch seconds).
+   */
   auth_time?: number;
+
+  /**
+   * Authorized party - identifies the client to which the ID token was issued.
+   */
   azp?: string;
+
+  /**
+   * Authorization code hash. Used to validate authorization codes returned with hybrid flows.
+   */
   c_hash?: string;
+
+  /**
+   * Expiration time of the ID token (Unix epoch seconds).
+   */
   exp: number;
+
+  /**
+   * Time at which the ID token was issued (Unix epoch seconds).
+   */
   iat: number;
+
+  /**
+   * Issuer identifier - the authorization server that issued the token.
+   */
   iss: string;
+
+  /**
+   * Nonce value used to associate the authentication request with the issued ID token and prevent replay attacks.
+   */
   nonce?: string;
+
+  /**
+   * State hash (used in some hybrid flow validations).
+   */
   s_hash?: string;
+
+  /**
+   * Subject identifier — uniquely identifies the authenticated user.
+   */
   sub: string;
+
+  /**
+   * Additional custom or provider-specific claims.
+   */
   [key: string]: unknown;
 }
 
-/** Token endpoint response */
+/**
+ * OAuth 2.0 / OpenID Connect token endpoint response.
+ *
+ * @category Types
+ */
 export interface Tokens {
-  /** Access token */
+  /**
+   * Access token issued by the authorization server.
+   */
   access_token: string;
-  /** Refresh token */
+
+  /**
+   * Optional refresh token used to obtain new access tokens without requiring user re-authentication.
+   */
   refresh_token?: string;
-  /** ID token */
+
+  /**
+   * Optional ID token containing authentication claims about the user.
+   */
   id_token?: string;
-  /** Scopes requested */
+
+  /**
+   * Space-separated list of scopes granted for the access token.
+   */
   scope?: string;
-  /** Access token expiry in seconds */
+
+  /**
+   * Lifetime of the access token (in seconds) from the time the response was issued.
+   */
   expires_in?: number;
-  /** Type of access token */
+
+  /**
+   * Token type issued.
+   */
   token_type?: string;
 }
 
 /**
- * Possible values for the authenticators.
+ * Supported authentication methods and identity providers.
+ *
+ * @category Types (Enums)
  */
 export type Authenticators =
+  /**
+   * Username/password authentication.
+   */
   | 'password'
+
+  /**
+   * Passkey (WebAuthn / FIDO2) authentication.
+   */
   | 'passkey'
+
+  /**
+   * Email-based authentication (magic link or OTP).
+   */
   | 'email'
+
+  /**
+   * Phone-based authentication (SMS OTP).
+   */
   | 'phone'
+
+  /**
+   * Google identity provider.
+   */
   | 'google'
+
+  /**
+   * Apple identity provider.
+   */
   | 'apple'
+
+  /**
+   * Facebook identity provider.
+   */
   | 'facebook'
+
+  /**
+   * Microsoft identity provider.
+   */
   | 'microsoft'
+
+  /**
+   * GitHub identity provider.
+   */
   | 'github'
+
+  /**
+   * GitLab identity provider.
+   */
   | 'gitlab'
+
+  /**
+   * Discord identity provider.
+   */
   | 'discord'
+
+  /**
+   * Twitter (X) identity provider.
+   */
   | 'twitter'
+
+  /**
+   * LinkedIn identity provider.
+   */
   | 'linkedin'
+
+  /**
+   * Xero identity provider.
+   */
   | 'xero';
 
-export type JWSAlgorithm =
+/**
+ * Supported JSON Web Signature (JWS) algorithms used to sign tokens.
+ *
+ * These algorithms define how tokens issued by MonoCloud are cryptographically signed and verified. The expected algorithm should match the configuration of your MonoCloud application.
+ *
+ * @category Types (Enums)
+ */
+export type SecurityAlgorithms =
+  /**
+   * RSA using SHA-256.
+   *
+   * Default and most commonly used signing algorithm.
+   */
   | 'RS256'
+
+  /**
+   * RSA using SHA-384.
+   */
   | 'RS384'
+
+  /**
+   * RSA using SHA-512.
+   */
   | 'RS512'
+
+  /**
+   * RSA-PSS using SHA-256.
+   *
+   * Provides stronger cryptographic padding than RS256.
+   */
   | 'PS256'
+
+  /**
+   * RSA-PSS using SHA-384.
+   */
   | 'PS384'
+
+  /**
+   * RSA-PSS using SHA-512.
+   */
   | 'PS512'
+
+  /**
+   * ECDSA using P-256 curve and SHA-256.
+   *
+   * Produces smaller tokens and faster verification.
+   */
   | 'ES256'
+
+  /**
+   * ECDSA using P-384 curve and SHA-384.
+   */
   | 'ES384'
+
+  /**
+   * ECDSA using P-521 curve and SHA-512.
+   */
   | 'ES512';
 
+/**
+ * Parameters contained in a JSON Web Signature (JWS) header.
+ *
+ * @category Types
+ */
 export interface JwsHeaderParameters {
-  alg: JWSAlgorithm;
+  /**
+   * The cryptographic algorithm used to sign the token.
+   */
+  alg: SecurityAlgorithms;
+
+  /**
+   * Identifier of the key used to sign the token.
+   */
   kid?: string;
+
+  /**
+   * The token type.
+   */
   typ?: string;
+
+  /**
+   * List of header parameters that are marked as critical and must be understood by the token processor.
+   */
   crit?: string[];
+
+  /**
+   * An embedded JSON Web Key (JWK) containing the signing key.
+   */
   jwk?: Jwk;
 }
 
-/** Stores various parameters used in the authentication request */
+/**
+ * Represents the authentication transaction state stored between the authorization request and the callback.
+ *
+ * @category Types
+ */
 export interface AuthState {
   /**
-   * A unique value used to maintain state between the sign-in request and the callback.
+   * A unique value used to correlate the authorization request with the callback and protect against CSRF attacks.
    */
   state: string;
 
   /**
-   * A unique value used to prevent replay attacks in OAuth flows.
+   * A cryptographic value used to associate the ID token with the original authentication request and prevent replay attacks.
    */
   nonce: string;
 
   /**
-   * Optional. A code verifier used in PKCE (Proof Key for Code Exchange) flow.
+   * Optional. PKCE code verifier used to validate the authorization code exchange.
    */
   codeVerifier?: string;
 
   /**
-   * Optional. The maximum age (in seconds) of the session.
+   * Optional. Maximum allowed time (in seconds) since the user's last authentication.
    */
   maxAge?: number;
 
   /**
-   * Optional. Space-separated list of resources to scope the access token to
+   * Optional. Space-separated list of resource indicators requested for the access token.
    */
   resource?: string;
 
   /**
-   * Space-separated list of scopes to request
+   * Space-separated list of scopes requested during authorization.
    */
   scopes: string;
 }
 
-/** Parameters for creating the sign out URL. */
+/**
+ * Parameters used to construct an OpenID Connect end-session (sign-out) request.
+ *
+ * @category Types
+ */
 export interface EndSessionParameters {
-  /** The ID token of the user to be used to hint the user signing out */
+  /**
+   * ID token hint identifying the session to terminate.
+   *
+   * When provided, the authorization server can use this value to determine which user session should be signed out.
+   */
   idToken?: string;
-  /** The URL the authorization server should redirect the user to after a successful sign out. This URL has to be registered in the client's sign out URL section. */
+
+  /**
+   * The URL the authorization server should redirect the user to after a successful sign-out.
+   */
   postLogoutRedirectUri?: string;
-  /** A random string to be sent to the authorization server when the `postLogoutRedirectUri` is set. */
+
+  /**
+   * Optional state value returned to the application after sign-out.
+   */
   state?: string;
 }
 
-/** Authorization server metadata */
+/**
+ * OpenID Connect Discovery metadata published by the authorization server.
+ *
+ * @category Types
+ */
 export interface IssuerMetadata {
+  /**
+   * The issuer identifier for the authorization server.
+   */
   issuer: string;
+
+  /**
+   * JSON Web Key Set (JWKS) endpoint used to obtain signing keys.
+   */
   jwks_uri: string;
+
+  /**
+   * Authorization endpoint used to initiate authentication requests.
+   */
   authorization_endpoint: string;
+
+  /**
+   * Token endpoint used to exchange authorization codes for tokens.
+   */
   token_endpoint: string;
+
+  /**
+   * UserInfo endpoint used to retrieve user profile claims.
+   */
   userinfo_endpoint: string;
+
+  /**
+   * End-session endpoint used to initiate logout.
+   */
   end_session_endpoint: string;
+
+  /**
+   * Session management iframe endpoint.
+   */
   check_session_iframe: string;
+
+  /**
+   * Token revocation endpoint.
+   */
   revocation_endpoint: string;
+
+  /**
+   * Token introspection endpoint.
+   */
   introspection_endpoint: string;
+
+  /**
+   * Device Authorization Grant endpoint.
+   */
   device_authorization_endpoint: string;
+
+  /**
+   * Pushed Authorization Request (PAR) endpoint.
+   */
   pushed_authorization_request_endpoint?: string;
+
+  /**
+   * Indicates support for front-channel logout.
+   */
   frontchannel_logout_supported: boolean;
+
+  /**
+   * Indicates front-channel logout session support.
+   */
   frontchannel_logout_session_supported: boolean;
+
+  /**
+   * Indicates support for back-channel logout.
+   */
   backchannel_logout_supported: boolean;
+
+  /**
+   * Indicates back-channel logout session support.
+   */
   backchannel_logout_session_supported: boolean;
+
+  /**
+   * OAuth scopes supported by the authorization server.
+   */
   scopes_supported: string[];
+
+  /**
+   * Claims that may be returned in tokens or UserInfo responses.
+   */
   claims_supported: string[];
+
+  /**
+   * Supported OAuth grant types.
+   */
   grant_types_supported: string[];
+
+  /**
+   * Supported OAuth/OIDC response types.
+   */
   response_types_supported: string[];
+
+  /**
+   * Supported response modes.
+   */
   response_modes_supported: string[];
+
+  /**
+   * Supported authentication methods for the token endpoint.
+   */
   token_endpoint_auth_methods_supported: string[];
+
+  /**
+   * Supported signing algorithms for ID tokens.
+   */
   id_token_signing_alg_values_supported: string[];
+
+  /**
+   * Supported subject identifier types.
+   */
   subject_types_supported: string[];
+
+  /**
+   * Supported PKCE code challenge methods.
+   */
   code_challenge_methods_supported: string[];
+
+  /**
+   * Indicates support for request objects passed by value.
+   */
   request_parameter_supported: boolean;
+
+  /**
+   * Indicates support for request objects passed by reference (request_uri).
+   */
   request_uri_parameter_supported: boolean;
+
+  /**
+   * Indicates whether PAR is required for authorization requests.
+   */
   require_pushed_authorization_requests: boolean;
+
+  /**
+   * Supported signing algorithms for request objects.
+   */
   request_object_signing_alg_values_supported: string[];
 }
 
+/**
+ * Options used when exchanging a refresh token for a new access token.
+ *
+ * These parameters allow requesting an access token scoped to specific resources or scopes that were previously authorized by the user.
+ *
+ * @category Types
+ */
 export interface RefreshGrantOptions {
   /**
-   * Space-separated list of resources to scope the access token to
+   * Space-separated list of resource indicators that the new access token should be issued for.
+   *
+   * The requested resources must have been previously granted during the original authorization flow.
    */
   resource?: string;
 
   /**
-   * Space-separated list of scopes to request
+   * Space-separated list of scopes to request for the refreshed access token.
+   *
+   * The requested scopes must have been granted during the original authorization flow.
    */
   scopes?: string;
 }
 
-/** Options used for authenticating a user with authorization code */
+/**
+ * Options used when authenticating a user via the Authorization Code flow.
+ *
+ * @category Types
+ */
 export interface AuthenticateOptions {
-  /** The PKCE Code verifier used for authentication */
+  /**
+   * PKCE code verifier associated with the authorization request.
+   */
   codeVerifier?: string;
-  /** When enabled, the userinfo is fetched and populated into the user object. @defaultValue false */
+
+  /**
+   * When enabled, user profile data is fetched from the UserInfo endpoint and merged into the session user object.
+   * @defaultValue false
+   */
   fetchUserInfo?: boolean;
-  /** Whether to validate the ID token or not. @defaultValue true */
+
+  /**
+   * Determines whether the ID token signature and claims should be validated. Disabling validation is not recommended except for advanced or controlled environments.
+   * @defaultValue true
+   */
   validateIdToken?: boolean;
-  /** Jwks to validate the ID token with. JWKS is fetched from the authorization server if `jwks` is not provided. */
+
+  /**
+   * JSON Web Key Set used to validate the ID token signature.
+   *
+   * If not provided, the JWKS is automatically fetched from the authorization server metadata.
+   */
   jwks?: Jwks;
-  /** Nonce to be validated against the claims from the ID token */
+
+  /**
+   * Nonce value expected in the ID token. Used to prevent replay attacks.
+   */
   idTokenNonce?: string;
-  /** Allowed max age in seconds */
+
+  /**
+   * Maximum allowed authentication age (in seconds) for the ID token.
+   */
   idTokenMaxAge?: number;
-  /** Used to adjust the current time to align with the authorization server time */
-  idTokenClockSkew?: number;
-  /** Allowed clock tolerance when checking date-time claims */
-  idTokenClockTolerance?: number;
+
   /**
-   *  List of ID token claims to remove.
+   * Clock skew adjustment (in seconds) applied when validating ID token timestamps against the authorization server.
+   */
+  idTokenClockSkew?: number;
+
+  /**
+   * Additional allowed clock tolerance (in seconds) when validating time-based ID token claims such as `exp`, `iat`, and `nbf`.
+   */
+  idTokenClockTolerance?: number;
+
+  /**
+   * List of ID token claims to remove before storing the session.
    */
   filteredIdTokenClaims?: string[];
+
   /**
-   * A callback function invoked before creating or updating the user session.
+   * Callback invoked before a session is created or updated. Allows customization or enrichment of the session.
    */
   onSessionCreating?: OnSessionCreating;
 }
 
-/** Options for refreshing MonoCloudSession */
+/**
+ * Options used when refreshing an existing MonoCloud session.
+ *
+ * @category Types
+ */
 export interface RefreshSessionOptions {
-  /** When enabled, the userinfo is fetched and populated into the user object. @defaultValue false */
-  fetchUserInfo?: boolean;
-  /** Whether to validate the ID token or not. @defaultValue true */
-  validateIdToken?: boolean;
-  /** Jwks to validate the ID token with. JWKS is fetched from the authorization server if `jwks` is not provided. */
-  jwks?: Jwks;
-  /** Used to adjust the current time to align with the authorization server time */
-  idTokenClockSkew?: number;
-  /** Allowed clock tolerance when checking date-time claims */
-  idTokenClockTolerance?: number;
-  /** Options for the refresh grant */
-  refreshGrantOptions?: RefreshGrantOptions;
   /**
-   *  List of ID token claims to remove.
+   * When enabled, user profile data is fetched from the UserInfo endpoint and merged into the session user object.
+   * @defaultValue false
+   */
+  fetchUserInfo?: boolean;
+
+  /**
+   * Determines whether the ID token signature and claims should be validated. Disabling validation is not recommended except for advanced or controlled environments.
+   * @defaultValue true
+   */
+  validateIdToken?: boolean;
+
+  /**
+   * JSON Web Key Set used to validate the ID token signature.
+   *
+   * If not provided, the JWKS is automatically fetched from the authorization server metadata.
+   */
+  jwks?: Jwks;
+
+  /**
+   * Clock skew adjustment (in seconds) applied when validating ID token timestamps against the authorization server.
+   */
+  idTokenClockSkew?: number;
+
+  /**
+   * Additional allowed clock tolerance (in seconds) when validating time-based ID token claims such as `exp`, `iat`, and `nbf`.
+   */
+  idTokenClockTolerance?: number;
+
+  /**
+   * Options applied to the refresh token grant request, such as requesting tokens for specific resources or scopes.
+   */
+  refreshGrantOptions?: RefreshGrantOptions;
+
+  /**
+   * List of ID token claims to remove before storing the session.
    */
   filteredIdTokenClaims?: string[];
+
   /**
-   * A callback function invoked before creating or updating the user session.
+   * Callback invoked before a session is created or updated. Allows customization or enrichment of the session.
    */
   onSessionCreating?: OnSessionCreating;
 }
 
-/** Options for refetching userinfo */
+/**
+ * Options used when refetching user profile data from the UserInfo endpoint.
+ *
+ * @category Types
+ */
 export interface RefetchUserInfoOptions {
   /**
-   * A callback function invoked before creating or updating the user session.
+   * Callback invoked before a session is created or updated. Allows customization or enrichment of the session.
+
    */
   onSessionCreating?: OnSessionCreating;
 }
 
-/** Client authentication methods supported */
+/**
+ * Supported OAuth 2.0 client authentication methods.
+ *
+ * These methods define how a client authenticates itself when calling the authorization server token endpoint.
+ *
+ * @category Types (Enums)
+ */
 export type ClientAuthMethod =
+  /**
+   * Client credentials are sent using HTTP Basic authentication
+   */
   | 'client_secret_basic'
+
+  /**
+   * Client credentials are included in the request body as form parameters.
+   */
   | 'client_secret_post'
+
+  /**
+   * Client authenticates using a signed JWT created with the client secret.
+   */
   | 'client_secret_jwt'
+
+  /**
+   * Client authenticates using a signed JWT created with a private key.
+   */
   | 'private_key_jwt';
 
-/** Parameters for Pushed Authorization Request (PAR) */
-export type PushedAuthorizationParams = Omit<AuthorizationParams, 'requestUri'>;
+/**
+ * Parameters used when creating a Pushed Authorization Request (PAR).
+ *
+ * This type mirrors {@link AuthorizationParams} but excludes `requestUri`,
+ * since the `request_uri` value is generated by the authorization server
+ * after a successful PAR request and must not be supplied by the client.
+ *
+ * @category Types
+ */
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export interface PushedAuthorizationParams extends Omit<
+  AuthorizationParams,
+  'requestUri'
+> {}
 
-/** Options to initialize the MonoCloudClient */
+/**
+ * Configuration options used to initialize the MonoCloudClient.
+ *
+ * @category Types
+ */
 export interface MonoCloudClientOptions {
   /**
-   * Client secret used for authentication.
+   * Client secret used for client authentication.
    *
-   * When the client authentication method is `client_secret_jwt` and a plain-text secret is provided,
-   * the default signing algorithm is `HS256`.
+   * When `clientAuthMethod` is `client_secret_jwt` and a plain-text secret is provided, the default signing algorithm is `HS256`.
    *
-   * To use a different algorithm, supply a symmetric JSON Web Key (JWK) object (`kty = "oct"`)
-   * that specifies the desired algorithm in its `alg` property.
+   * To use a different algorithm, provide a symmetric JSON Web Key (JWK) (`kty: "oct"`) with the desired algorithm specified in its `alg` property.
    */
-
   clientSecret?: string | Jwk;
-  /** Client authentication method */
-  clientAuthMethod?: ClientAuthMethod;
-  /** ID token signing algorithm. @defaultValue - RS256 */
-  idTokenSigningAlgorithm?: JWSAlgorithm;
+
   /**
-   * Jwks Cache Duration
-   *
-   * Time in seconds to cache the JWKS document after it is fetched
-   *
-   * @defaultValue 60
-   *
-   * */
+   * Client authentication method used when communicating with the token endpoint.
+   */
+  clientAuthMethod?: ClientAuthMethod;
+
+  /**
+   * Expected signing algorithm for validating ID tokens.
+   * @defaultValue 'RS256'
+   */
+  idTokenSigningAlgorithm?: SecurityAlgorithms;
+
+  /**
+   * Duration (in seconds) to cache the JSON Web Key Set (JWKS) retrieved from the authorization server.
+   * @defaultValue 300
+   */
   jwksCacheDuration?: number;
 
   /**
-   * Metadata Cache Duration
-   *
-   * Time in seconds to cache the metadata document after it is fetched.
-   *
-   * @defaultValue 60
-   * */
+   * Duration (in seconds) to cache OpenID Connect discovery metadata.
+   * @defaultValue 300
+   */
   metadataCacheDuration?: number;
 }
 
 /**
- * Response from a Pushed Authorization Request (PAR) endpoint.
+ * Response returned from the Pushed Authorization Request (PAR) endpoint.
+ *
+ * @category Types
  */
 export interface ParResponse {
   /**
-   * URI reference for the pushed authorization request.
+   * The URI reference identifying the pushed authorization request.
+   *
+   * This value must be supplied as the `request_uri` parameter when redirecting the user to the authorization endpoint.
    */
   request_uri: string;
 
   /**
-   * Request URI lifetime in seconds.
+   * Lifetime of the `request_uri`, in seconds. After this duration expires, the authorization request becomes invalid.
    */
   expires_in: number;
 }
 
 /**
- * Defines a callback function to be executed when a new session is being created or updated.
- * This function receives parameters related to the session being created,
- * including the session object itself, optional ID token and user information claims.
+ * Callback invoked before a session is created or updated.
  *
- * @param session - The Session object being created.
- * @param idToken - Optional. Claims from the ID token received during authentication.
- * @param userInfo - Optional. Claims from the user information received during authentication.
- * @returns A Promise that resolves when the operation is completed, or void.
+ * This hook allows you to inspect or modify the session during the authentication lifecycle — for example, to enrich the session with custom claims, normalize user data, or apply application-specific logic.
+ *
+ * @category Types (Handler)
+ *
+ * @param session - The session being created or updated.
+ * @param idToken - Optional. Claims extracted from the ID token.
+ * @param userInfo - Optional. Claims returned from the `UserInfo` endpoint.
+ * @returns Returns a promise or void. Execution continues once the callback completes.
  */
 export type OnSessionCreating = (
   /**
-   * The Session object being created.
+   * The session being created or updated.
    */
   session: MonoCloudSession,
 
   /**
-   * Optional. Claims from the ID token received during authentication.
+   * Optional. Claims extracted from the ID token received during authentication.
    */
   idToken?: Partial<IdTokenClaims>,
 
   /**
-   * Optional. Claims from the user information received during authentication.
+   * Optional. Claims returned from the UserInfo endpoint.
    */
   userInfo?: UserinfoResponse
 ) => Promise<void> | void;

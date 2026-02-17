@@ -10,6 +10,7 @@ export default defineConfig({
     include: [
       'tests/config.test.ts',
       'tests/middleware.test.ts',
+      'tests/initialize.test.ts',
       'tests/server-functions/**/**.test.ts',
       'tests/monocloud-auth/**/**.test.ts',
       'tests/utils.test.ts',

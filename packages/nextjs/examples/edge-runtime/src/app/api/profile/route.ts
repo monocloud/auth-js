@@ -1,8 +1,8 @@
-import { monoCloud } from '@/monocloud';
+import { protectApi, getSession } from '@monocloud/auth-nextjs';
 import { NextResponse } from 'next/server';
 
-export const GET = monoCloud.protectApi(async () => {
-  const session = await monoCloud.getSession();
+export const GET = protectApi(async () => {
+  const session = await getSession();
   return NextResponse.json(session?.user);
 });
 

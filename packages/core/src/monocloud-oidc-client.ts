@@ -17,7 +17,7 @@ import {
   IssuerMetadata,
   Jwk,
   Jwks,
-  JWSAlgorithm,
+  SecurityAlgorithms,
   JwsHeaderParameters,
   MonoCloudClientOptions,
   MonoCloudSession,
@@ -87,6 +87,9 @@ const deserializeJson = async <T = any>(res: Response): Promise<T> => {
   }
 };
 
+/**
+ * @category Classes
+ */
 export class MonoCloudOidcClient {
   private readonly tenantDomain: string;
 
@@ -96,19 +99,19 @@ export class MonoCloudOidcClient {
 
   private readonly authMethod: ClientAuthMethod;
 
-  private readonly idTokenSigningAlgorithm: JWSAlgorithm;
+  private readonly idTokenSigningAlgorithm: SecurityAlgorithms;
 
   private jwks?: Jwks;
 
   private jwksCacheExpiry = 0;
 
-  private jwksCacheDuration = 60;
+  private jwksCacheDuration = 300;
 
   private metadata?: IssuerMetadata;
 
   private metadataCacheExpiry = 0;
 
-  private metadataCacheDuration = 60;
+  private metadataCacheDuration = 300;
 
   constructor(
     tenantDomain: string,
@@ -138,9 +141,9 @@ export class MonoCloudOidcClient {
    *
    * If no values are provided for `responseType`, or `codeChallengeMethod`, they default to `code`, and `S256`, respectively.
    *
-   * @param params Authorization URL parameters
+   * @param params - Authorization URL parameters.
    *
-   * @returns Tenant's authorization url.
+   * @returns Tenant's authorization URL.
    *
    * @throws {@link MonoCloudHttpError} - Thrown if there is a network error during the request or
    * unexpected status code during the request or a serialization error while processing the response.
@@ -281,7 +284,7 @@ export class MonoCloudOidcClient {
   }
 
   /**
-   * Fetches the JSON Web Keys used to sign the id token.
+   * Fetches the JSON Web Keys used to sign the ID token.
    * The JWKS is cached for 1 minute.
    *
    * @param forceRefresh - If `true`, bypasses the cache and fetches fresh set of JWKS from the server.
@@ -321,9 +324,9 @@ export class MonoCloudOidcClient {
   /**
    * Performs a pushed authorization request.
    *
-   * @param params - Authorization Parameters
+   * @param params - Authorization Parameters.
    *
-   * @returns Response from Pushed Authorization Request (PAR) endpoint
+   * @returns Response from Pushed Authorization Request (PAR) endpoint.
    *
    * @throws {@link MonoCloudOPError} - When the request is invalid.
    *
@@ -522,13 +525,13 @@ export class MonoCloudOidcClient {
   }
 
   /**
-   * Generates OpenID end session url for signing out.
+   * Generates OpenID end session URL for signing out.
    *
    * Note - The `state` is added only when `postLogoutRedirectUri` is present.
    *
-   * @param params - Parameters to build end session url
+   * @param params - Parameters to build end session URL.
    *
-   * @returns Tenant's end session url
+   * @returns Tenant's end session URL.
    *
    * @throws {@link MonoCloudHttpError} - Thrown if there is a network error during the request or
    * unexpected status code during the request or a serialization error while processing the response.
@@ -564,7 +567,7 @@ export class MonoCloudOidcClient {
    * @param code - The authorization code received from the authorization server.
    * @param redirectUri - The redirect URI used in the initial authorization request.
    * @param codeVerifier - Code verifier for PKCE.
-   * @param resource - Space-separated list of resources the access token should be scoped to
+   * @param resource - Space-separated list of resources the access token should be scoped to.
    *
    * @returns Tokens obtained by exchanging an authorization code at the token endpoint.
    *
@@ -726,23 +729,23 @@ export class MonoCloudOidcClient {
   /**
    * Generates a session with user and tokens by exchanging authorization code from callback params.
    *
-   * @param code - The authorization code received from the callback
-   * @param redirectUri - The redirect URI that was used in the authorization request
+   * @param code - The authorization code received from the callback.
+   * @param redirectUri - The redirect URI that was used in the authorization request.
    * @param requestedScopes - A space-separated list of scopes originally requested via the `/authorize` endpoint.
    * This is stored in the session to ensure the correct access token can be identified and refreshed during `refreshSession()`.
    * @param resource - A space-separated list of resource indicators originally requested via the `/authorize` endpoint.
    * Used alongside scopes to uniquely identify and refresh the specific access token associated with these resources.
-   * @param options - Options for authenticating a user with authorization code
+   * @param options - Options for authenticating a user with authorization code.
    *
    * @returns The user's session containing authentication tokens and user information.
    *
    * @throws {@link MonoCloudValidationError} - When the token scope does not contain the openid scope,
    * or if 'expires_in' or 'scope' is missing from the token response.
    *
-   * @throws {@link MonoCloudOPError} - When the OpenID Provider returns a standardized
+   * @throws {@link MonoCloudOPError} - When the OpenID Provider returns a standardized.
    * OAuth 2.0 error response.
    *
-   * @throws {@link MonoCloudTokenError} - If ID Token validation fails
+   * @throws {@link MonoCloudTokenError} - If ID Token validation fails.
    *
    * @throws {@link MonoCloudHttpError} - Thrown if there is a network error during the request or
    * unexpected status code during the request or a serialization error while processing the response.
@@ -833,11 +836,11 @@ export class MonoCloudOidcClient {
    * Refetches user information for an existing session using the userinfo endpoint.
    * Updates the session's user object with the latest user information while preserving existing properties.
    *
-   * @param accessToken - Access token used to fetch the userinfo
-   * @param session - The current MonoCloudSession
-   * @param options - Userinfo refetch options
+   * @param accessToken - Access token used to fetch the userinfo.
+   * @param session - The current MonoCloudSession.
+   * @param options - Userinfo refetch options.
    *
-   * @returns Updated session with the latest userinfo
+   * @returns Updated session with the latest userinfo.
    *
    * @throws {@link MonoCloudValidationError} - When the token scope does not contain openid scope
    *
@@ -875,8 +878,8 @@ export class MonoCloudOidcClient {
    * Refreshes an existing session using the refresh token.
    * This function requests new tokens using the refresh token and optionally updates user information.
    *
-   * @param session - The current MonoCloudSession containing the refresh token
-   * @param options - Session refresh options
+   * @param session - The current MonoCloudSession containing the refresh token.
+   * @param options - Session refresh options.
    *
    * @returns User's session containing refreshed authentication tokens and user information.
    *
@@ -993,10 +996,10 @@ export class MonoCloudOidcClient {
   /**
    * Revokes an access token or refresh token, rendering it invalid for future use.
    *
-   * @param token - The token string to be revoked
-   * @param tokenType - Hint about the token type ('access_token' or 'refresh_token')
+   * @param token - The token string to be revoked.
+   * @param tokenType - Hint about the token type ('access_token' or 'refresh_token').
    *
-   * @returns If token revocation succeeded
+   * @returns If token revocation succeeded.
    *
    * @throws {@link MonoCloudValidationError} - If token is invalid or unsupported token type
    *
@@ -1070,14 +1073,14 @@ export class MonoCloudOidcClient {
   /**
    * Validates an ID Token.
    *
-   * @param idToken - The ID Token JWT string to validate
-   * @param jwks - Array of JSON Web Keys (JWK) used to verify the token's signature
-   * @param clockSkew - Number of seconds to adjust the current time to account for clock differences
-   * @param clockTolerance - Additional time tolerance in seconds for time-based claim validation
-   * @param maxAge - maximum authentication age in seconds
-   * @param nonce - nonce value to validate against the token's nonce claim
+   * @param idToken - The ID Token JWT string to validate.
+   * @param jwks - Array of JSON Web Keys (JWK) used to verify the token's signature.
+   * @param clockSkew - Number of seconds to adjust the current time to account for clock differences.
+   * @param clockTolerance - Additional time tolerance in seconds for time-based claim validation.
+   * @param maxAge - Maximum authentication age in seconds.
+   * @param nonce - Nonce value to validate against the token's nonce claim.
    *
-   * @returns Validated ID Token claims
+   * @returns Validated ID Token claims.
    *
    * @throws {@link MonoCloudTokenError} - If ID Token validation fails
    *
@@ -1240,11 +1243,12 @@ export class MonoCloudOidcClient {
 
   /**
    * Decodes the payload of a JSON Web Token (JWT) and returns it as an object.
-   * **THIS METHOD DOES NOT VERIFY JWT TOKENS**.
    *
-   * @param jwt - JWT to decode
+   * >Note: THIS METHOD DOES NOT VERIFY JWT TOKENS.
    *
-   * @returns Decoded payload
+   * @param jwt - JWT to decode.
+   *
+   * @returns Decoded payload.
    *
    * @throws {@link MonoCloudTokenError} - If decoding fails
    *

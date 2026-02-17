@@ -1,4 +1,4 @@
-import { monoCloud } from '@/monocloud';
+import { protectPage } from '@monocloud/auth-nextjs';
 import { InferGetServerSidePropsType } from 'next';
 
 export default function ServerSide({
@@ -13,4 +13,4 @@ export default function ServerSide({
   );
 }
 
-export const getServerSideProps = monoCloud.protectPage();
+export const getServerSideProps = protectPage();

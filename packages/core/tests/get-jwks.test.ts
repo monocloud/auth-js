@@ -110,7 +110,7 @@ describe('MonoCloudOidcClient.getJwks()', () => {
 
     const result = await client.getJwks();
 
-    dateSpy.mockReturnValue(10_000 + 61 * 1000);
+    dateSpy.mockReturnValue(10_000 + 301 * 1000);
 
     const result2 = await client.getJwks();
 

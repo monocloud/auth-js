@@ -17,18 +17,39 @@ import type { ParsedUrlQuery } from 'node:querystring';
 import { JSX } from 'react';
 
 /**
- * Context object passed to App Router API route handlers.
- * Contains the dynamic route parameters.
+ * Context object provided to App Router route handlers.
+ *
+ * Contains dynamic route parameters resolved from the matched route segment (for example, `[id]` or `[...slug]`).
+ *
+ * In streaming or async environments, `params` may be provided as a Promise.
+ *
+ * @category Types
  */
 export interface AppRouterContext {
-  params: Record<string, string | string[]>;
+  /**
+   * Dynamic route parameters extracted from the request URL.
+   */
+  params:
+    | Record<string, string | string[]>
+    | Promise<Record<string, string | string[]>>;
 }
 
 /**
- * Return type of `monoCloudAuth()` handler.
+ * Handler function returned by `monoCloudAuth()`.
+ *
+ * This handler processes authentication routes such as sign-in, callback, sign-out, and userinfo across supported Next.js runtimes (App Router, Pages Router, and API routes).
+ *
+ * @category Types (Handler)
  */
 export type MonoCloudAuthHandler = (
+  /**
+   * Incoming request object.
+   */
   req: Request | NextRequest | NextApiRequest,
+
+  /**
+   * Response object or App Router context.
+   */
   resOrCtx?:
     | Response
     | NextResponse<any>
@@ -36,7 +57,11 @@ export type MonoCloudAuthHandler = (
     | AppRouterContext
 ) => Promise<Response | NextResponse | void | any>;
 
-/** Return type of Next.js middleware/proxy */
+/**
+ * Possible return values from a Next.js middleware or proxy handler.
+ *
+ * @category Types
+ */
 export type NextMiddlewareResult =
   | NextResponse
   | Response
@@ -45,26 +70,34 @@ export type NextMiddlewareResult =
   | void;
 
 /**
- * Handler function triggered when a user is denied access in Next.js Middleware.
+ * Handler invoked when access is denied during Next.js middleware execution.
  *
- * @param request - The incoming Next.js request.
- * @param event - The Next.js fetch event.
- * @returns A `NextMiddlewareResult` (e.g., a redirect or rewrite) or a Promise resolving to one.
+ * This callback allows you to customize how unauthenticated or unauthorized requests are handled, for example by redirecting, rewriting, or returning a custom response.
+ *
+ * @category Types (Handler)
+ *
+ * @param request The incoming Next.js request.
+ * @param event The associated Next.js fetch event.
+ * @returns A middleware result that determines how the request should proceed.
  */
-type NextMiddlewareOnAccessDenied = (
+export type NextMiddlewareOnAccessDenied = (
   request: NextRequest,
   event: NextFetchEvent
 ) => NextMiddlewareResult | Promise<NextMiddlewareResult>;
 
 /**
- * Handler function triggered when a user is denied access in Next.js Middleware due to group restrictions.
+ * Handler invoked when an authenticated user is denied access during Next.js middleware execution due to group authorization rules.
  *
- * @param request - The incoming Next.js request.
- * @param event - The Next.js fetch event.
- * @param user - The authenticated user object.
- * @returns A `NextMiddlewareResult` (e.g., a redirect or rewrite) or a Promise resolving to one.
+ * This callback allows you to customize how authorization failures are handled, for example by redirecting, rewriting, or returning a custom response.
+ *
+ * @category Types (Handler)
+ *
+ * @param request The incoming Next.js request.
+ * @param event The associated Next.js fetch event.
+ * @param user The authenticated user who failed the group authorization check.
+ * @returns A middleware result that determines how the request should proceed.
  */
-type NextMiddlewareOnGroupAccessDenied = (
+export type NextMiddlewareOnGroupAccessDenied = (
   request: NextRequest,
   event: NextFetchEvent,
   user: MonoCloudUser
@@ -72,90 +105,131 @@ type NextMiddlewareOnGroupAccessDenied = (
 
 /**
  *
- * ProtectedRouteMatcher can be a combination of the following types.
+ * Defines how routes are matched and protected by authentication and optional group-based authorization.
  *
- * - `string` : Relative route that should be protected.
- * - `RegExp` : A regular expression used to match relative routes that should be protected.
- * - `{ routes: string[]; groups: string[] }` : Users belonging to any of the group names or IDs listed in groups are granted access to the route paths specified in routes.
+ * @category Types
+ *
  */
-type ProtectedRouteMatcher =
+export type ProtectedRouteMatcher =
   | string
   | RegExp
   | {
       /**
-       * Routes accessible by the users of specified groups
+       * Route patterns that should be protected.
+       *
+       * Each entry may be:
+       * - A relative route path
+       * - A regular expression used to match routes
        */
       routes: (string | RegExp)[];
+
       /**
-       * A list of group IDs or names specifying the groups the user must belong for accessing the routes.
+       * Optional group-based access control.
+       *
+       * When provided, only users belonging to **at least one** of the specified group IDs or names are allowed access.
        */
       groups: string[];
     };
 
 /**
- * A function to be executed that determines whether the route is protected.
+ * Function used to dynamically determine whether a request should be treated as a protected route.
+ *
+ * @category Types (Handler)
+ *
+ * @param req The incoming Next.js request.
+ * @returns Return `true` to require authentication for the request, or `false` to allow it to continue without protection.
  */
-type CustomProtectedRouteMatcher = (
+export type CustomProtectedRouteMatcher = (
   req: NextRequest
 ) => Promise<boolean> | boolean;
 
 /**
- * @param req - The Next.js request object.
- * @param ctx - App Router context that contains dynamic route values.
- * @param error - Error occured during execution of the endpoint.
- * @returns A promise of the response
+ * Handler invoked when an error occurs during execution of an App Router endpoint.
+ *
+ * Allows custom error handling such as logging, transforming the response, or returning a custom `NextResponse`
+ *
+ * @category Types (Handler)
+ *
+ * @param req The incoming Next.js request.
+ * @param ctx The App Router context containing dynamic route parameters.
+ * @param error The error thrown during endpoint execution.
+ * @returns Returns a `NextResponse` or `void`.
  */
-type AppOnError<T = any> = (
+export type AppOnError<T = any> = (
   req: NextRequest,
   ctx: T,
   error: Error
 ) => Promise<NextResponse | void> | NextResponse | void;
 
 /**
- * @param req - The Next.js API request object.
- * @param res - The Next.js API response object.
- * @param error - Error occured during execution of the endpoint.
- * @returns A promise of void
+ * Handler invoked when an error occurs during execution of a Pages Router API endpoint.
+ *
+ * Allows custom error handling such as logging, modifying the response, or sending a custom error payload.
+ *
+ * @category Types (Handler)
+ *
+ * @param req The incoming Next.js API request.
+ * @param res The outgoing Next.js API response.
+ * @param error The error thrown during endpoint execution.
+ * @returns Returns `void` or a Promise that resolves when error handling is complete.
  */
-type PageOnError = (
+export type PageOnError = (
   req: NextApiRequest,
   res: NextApiResponse,
   error: Error
 ) => Promise<void> | void;
 
 /**
- * A route handler function used to handle errors that occur during the signin, callback, signout and userinfo endpoint execution.
+ * Error handler invoked when an exception occurs during execution of the sign-in, callback, sign-out, or userinfo endpoints.
  *
- * `Note` - In the app router error handler, failing to return a `NextResponse` or throw an error will cause the request to hang. Same happens in the page router if you don't call `res.send()` or `res.json()` after you handle the error.
+ * > - In the **App Router**, you must either return a `NextResponse` or throw an error. Otherwise, the request will remain unresolved.
+ * > - In the **Pages Router**, you must send a response (for example, `res.send()` or `res.json()`) after handling the error, or the request will hang.
+ *
+ * @category Types (Handler)
  */
-type OnError = AppOnError | PageOnError;
+export type OnError = AppOnError | PageOnError;
 
 /**
  * Options for `monoCloudAuth()`.
+ *
+ * @category Types
  */
 export interface MonoCloudAuthOptions {
   /**
-   * Error handler for signin, callback, signout and userinfo endpoints.
+   * Optional error handler invoked when an exception occurs during execution of the sign-in, callback, sign-out, or userinfo endpoints.
    */
   onError?: OnError;
 }
 
 /**
- * Configuration for protected routes.
+ * Configuration used to determine which routes require authentication.
+ *
+ * You can provide:
+ *
+ * - An array of {@link ProtectedRouteMatcher} values to declaratively define protected routes.
+ * - A {@link CustomProtectedRouteMatcher} function for fully dynamic protection logic.
+ *
+ * @category Types
  */
-type ProtectedRoutes = ProtectedRouteMatcher[] | CustomProtectedRouteMatcher;
+export type ProtectedRoutes =
+  | ProtectedRouteMatcher[]
+  | CustomProtectedRouteMatcher;
 
 /**
- * Options for configuring MonoCloud authentication middleware.
+ * Options for configuring the MonoCloud authentication middleware.
+ *
+ * These options control which routes are protected and how authentication and authorization failures are handled during request processing.
+ *
+ * @category Types
  */
 export interface MonoCloudMiddlewareOptions {
   /**
-   * Error handler for signin, callback, signout and userinfo endpoints.
+   * Error handler invoked when an error occurs during execution of authentication endpoints handled by the middleware.
    *
-   * @param req - The Next.js request object.
-   * @param evt - The Next.js FetchEvent.
-   * @param error - Error occured during execution of the endpoint.
-   * @returns A promise of the response or void
+   * @param req The incoming Next.js request.
+   * @param evt The associated Next.js fetch event.
+   * @param error The error thrown during execution.
+   * @returns Returns a response to continue the middleware chain, or `void`.
    */
   onError?: (
     req: NextRequest,
@@ -164,37 +238,47 @@ export interface MonoCloudMiddlewareOptions {
   ) => Promise<NextResponse | void> | NextResponse | void;
 
   /**
-   * Specifies the routes that require authentication. @see ProtectedRoutes
+   * Defines which routes require authentication.
    *
-   * If an empty array is passed as the value for the protected routes configuration, no routes will be protected.
+   * Accepts either an array of {@link ProtectedRouteMatcher} or a {@link CustomProtectedRouteMatcher}.
+   *
+   * - If omitted, all routes matched by the middleware config are protected.
+   * - If an empty array is provided, no routes are protected.
    */
   protectedRoutes?: ProtectedRoutes;
 
   /**
-   * The name of the groups claim in the user profile. Default: `groups`.
+   * Name of the claim in the user profile that contains group memberships.
+   *
+   * @defaultValue 'groups'
    */
   groupsClaim?: string;
 
   /**
-   * If true, user must be a member of all groups. Default: false.
+   * When `true`, the user must belong to **all** specified groups for authorization to succeed. Otherwise, membership in any one group is sufficient.
+   *
+   * @defaultValue false
    */
   matchAll?: boolean;
 
   /**
-   * A middleware function called when the user is not authenticated.
+   * Middleware handler invoked when the user is not authenticated.
    */
   onAccessDenied?: NextMiddlewareOnAccessDenied;
 
   /**
-   * A middleware function called when the user is authenticated but is not a member of the specified groups.
+   * Middleware handler invoked when the user is authenticated but does not satisfy group authorization requirements.
    */
   onGroupAccessDenied?: NextMiddlewareOnGroupAccessDenied;
 }
 
 /**
- * A subset of authorization parameters used on client side functions
+ * A subset of authorization parameters supported by client-side helpers.
+ *
+ * @category Types
  */
-export type ExtraAuthParams = Pick<
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export interface ExtraAuthParams extends Pick<
   AuthorizationParams,
   | 'scopes'
   | 'resource'
@@ -205,21 +289,37 @@ export type ExtraAuthParams = Pick<
   | 'authenticatorHint'
   | 'maxAge'
   | 'loginHint'
->;
+> {}
 
 /**
- * Represents a Next.js App Router React Server Component.
+ * Represents a Next.js App Router page component (Server Component).
  *
- * @param props - The props object containing `params` and `searchParams`.
+ * @category Types (Handler)
  *
- * @returns A JSX Element or a Promise resolving to one.
+ * @param props Page props provided by Next.js, including dynamic route parameters and URL search parameters.
+ * @returns A JSX element, or a Promise resolving to one.
  */
 export type AppRouterPageHandler = (props: {
+  /**
+   * Dynamic route parameters extracted from the URL.
+   */
   params?: Record<string, string | string[]>;
+
+  /**
+   * URL search parameters (`?key=value`) parsed by Next.js.
+   */
   searchParams?: Record<string, string | string[] | undefined>;
 }) => Promise<JSX.Element> | JSX.Element;
 
-/** App Router API Route Handler */
+/**
+ * Represents a Next.js App Router Route Handler function.
+ *
+ * @category Types (Handler)
+ *
+ * @param req The incoming request object.
+ * @param ctx Route context containing dynamic route parameters.
+ * @returns A `Response` or `NextResponse`, or a Promise resolving to one.
+ */
 export type AppRouterApiHandlerFn = (
   req: NextRequest | Request,
   ctx: AppRouterContext
@@ -227,15 +327,21 @@ export type AppRouterApiHandlerFn = (
 
 /**
  * Options for configuring `protectPage()` in the App Router.
+ *
+ * @category Types
  */
-export type ProtectAppPageOptions = {
+export interface ProtectAppPageOptions extends GroupOptions {
   /**
-   * The URL to return to after authentication.
+   * The URL the user should be returned to after successful authentication.
+   *
+   * Defaults to the current request URL.
    */
   returnUrl?: string;
 
   /**
-   * Alternate page handler called when the user is not authenticated.
+   * Alternate Server Component rendered when the user is **not authenticated**.
+   *
+   * If not provided, the default behavior redirects the user to the sign-in flow.
    */
   onAccessDenied?: (props: {
     params?: Record<string, string | string[]>;
@@ -243,7 +349,9 @@ export type ProtectAppPageOptions = {
   }) => Promise<JSX.Element> | JSX.Element;
 
   /**
-   * Alternate page handler called when the user is authenticated but is not a member of the specified groups.
+   * Alternate Server Component rendered when the user is authenticated but does **not** belong to the required groups.
+   *
+   * Receives the resolved authenticated user.
    */
   onGroupAccessDenied?: (props: {
     user: MonoCloudUser;
@@ -252,60 +360,64 @@ export type ProtectAppPageOptions = {
   }) => Promise<JSX.Element> | JSX.Element;
 
   /**
-   * Authorization parameters to be used during authentication.
+   * Additional authorization parameters applied when redirecting the user to authenticate.
    */
   authParams?: ExtraAuthParams;
-} & GroupOptions;
+}
 
 /**
  * Options for configuring `protectPage()` in the Pages Router.
  *
- * @typeParam P - The type of the props returned by `getServerSideProps`.
- * @typeParam Q - The type of the parsed query object.
+ * @category Types
+ *
+ * @typeParam P Props returned from `getServerSideProps`.
+ * @typeParam Q Query parameters parsed from the URL.
  */
-export type ProtectPagePageOptions<
+export interface ProtectPagePageOptions<
   P extends Record<string, any> = Record<string, any>,
   Q extends ParsedUrlQuery = ParsedUrlQuery,
-> = {
+> extends GroupOptions {
   /**
-   * Function to fetch server-side props for the protected page handler.
-   * If provided, this function will be called before rendering the protected page.
-   *
-   * @param context - The Next.js context object, including the request and response objects.
-   * @returns Server-side props for the protected page.
+   * An optional `getServerSideProps` implementation that runs after authentication (and group checks, if configured). Use this to compute additional props for the page.
    */
   getServerSideProps?: GetServerSideProps<P, Q>;
 
   /**
-   * Specifies the URL to redirect to after authentication.
+   * The URL the user should be returned to after successful authentication.
+   *
+   * Defaults to the current request URL.
    */
   returnUrl?: string;
 
   /**
-   * Alternate `getServerSideProps` function called when the user is not authenticated.
+   * Called when no valid session exists.
+   *
+   * If not provided, the default behavior redirects the user to the sign-in flow.
    */
   onAccessDenied?: ProtectPagePageOnAccessDeniedType<P, Q>;
 
   /**
-   * Alternate `getServerSideProps` function called when the user IS authenticated but is not a member of the specified groups.
+   * Called when the user is authenticated but does not satisfy the group requirements.
+   *
+   * If not provided, the default behavior continues rendering and sets `groupAccessDenied` in the returned props, or applies the SDK’s default access-denied behavior.
    */
   onGroupAccessDenied?: ProtectPagePageOnGroupAccessDeniedType<P, Q>;
 
   /**
-   * Authorization parameters to be used during authentication.
+   * Additional authorization parameters applied when redirecting the user to authenticate.
    */
   authParams?: ExtraAuthParams;
-} & GroupOptions;
+}
 
 /**
- * Handler function triggered when a user is not authenticated in a Pages Router `getServerSideProps` flow.
+ * Handler invoked when no valid session exists while running a Pages Router `getServerSideProps` protected by `protectPage()`.
  *
- * @typeParam P - The type of the props.
- * @typeParam Q - The type of the parsed query object.
+ * @category Types (Handler)
  *
- * @param context - The server-side props context
- *
- * @returns The result for `getServerSideProps`.
+ * @typeParam P Props returned from `getServerSideProps`.
+ * @typeParam Q Query parameters parsed from the URL.
+ * @param context The Next.js `getServerSideProps` context.
+ * @returns A `getServerSideProps` result.
  */
 export type ProtectPagePageOnAccessDeniedType<
   P,
@@ -315,14 +427,14 @@ export type ProtectPagePageOnAccessDeniedType<
 ) => Promise<GetServerSidePropsResult<P>> | GetServerSidePropsResult<P>;
 
 /**
- * Handler function triggered when a user is denied access in a Pages Router `getServerSideProps` flow due to group restrictions.
+ * Handler invoked when an authenticated user does not satisfy the required group restrictions while running a Pages Router `getServerSideProps` protected by `protectPage()`.
  *
- * @typeParam P - The type of the props.
- * @typeParam Q - The type of the parsed query object.
+ * @category Types (Handler)
  *
- * @param context - The server-side props context with the user object.
- *
- * @returns The result for `getServerSideProps`.
+ * @typeParam P Props returned from `getServerSideProps`.
+ * @typeParam Q Query parameters parsed from the URL.
+ * @param context The Next.js `getServerSideProps` context.
+ * @returns A `getServerSideProps` result.
  */
 export type ProtectPagePageOnGroupAccessDeniedType<
   P,
@@ -332,13 +444,14 @@ export type ProtectPagePageOnGroupAccessDeniedType<
 ) => Promise<GetServerSidePropsResult<P>> | GetServerSidePropsResult<P>;
 
 /**
- * The return type of the `protectPage()` wrapper for Pages Router.
- * It returns a function compatible with `getServerSideProps` that injects the user into props.
+ * Return type produced by the `protectPage()` wrapper for the Pages Router.
  *
- * @typeParam P - The type of the props.
- * @typeParam Q - The type of the parsed query object.
+ * Represents a `getServerSideProps` compatible function that resolves authentication before executing page logic and injects the authenticated `user` into the returned props.
  *
- * @returns `GetServerSidePropsResult` with user injected
+ * @category Types (Handler)
+ *
+ * @typeParam P Props returned from `getServerSideProps`.
+ * @typeParam Q Query parameters parsed from the URL.
  */
 export type ProtectPagePageReturnType<
   P,
@@ -350,21 +463,38 @@ export type ProtectPagePageReturnType<
 >;
 
 /**
- * The App Router server component that protectPage wraps and secures
+ * App Router Server Component wrapped by `protectPage()`.
+ *
+ * This component is only executed after authentication (and optional authorization) succeeds. The authenticated `user` is injected into the component props automatically.
+ *
+ * @category Types (Handler)
  */
 export type ProtectedAppServerComponent = (props: {
+  /**
+   * The authenticated user resolved from the current session.
+   */
   user: MonoCloudUser;
+
+  /**
+   * Dynamic route parameters provided by the App Router.
+   */
   params?: Record<string, string | string[]>;
+
+  /**
+   * URL search parameters provided by the App Router.
+   */
   searchParams?: Record<string, string | string[] | undefined>;
 }) => Promise<JSX.Element> | JSX.Element;
 
 /**
- * Handler function triggered when a user is not authenticated in an App Router API route.
+ * Handler invoked when a request is denied because the user is not authenticated in an App Router API route.
  *
- * @param req - The incoming Next.js request.
- * @param ctx - The App Router context.
+ * @category Types (Handler)
  *
- * @returns A Response/NextResponse or Promise resolving to one.
+ * @param req The incoming Next.js request.
+ * @param ctx The App Router context containing dynamic route parameters.
+ *
+ * @returns Returns a `Response` (or `NextResponse`) or a Promise resolving to one.
  */
 export type AppRouterApiOnAccessDeniedHandler = (
   req: NextRequest,
@@ -372,13 +502,15 @@ export type AppRouterApiOnAccessDeniedHandler = (
 ) => Promise<Response> | Response;
 
 /**
- * Handler function triggered when a user is denied access in an App Router API route due to group restrictions.
+ * Handler invoked when a request is denied because the authenticated user does not satisfy the required group restrictions in an App Router API route.
  *
- * @param req - The incoming Next.js request.
- * @param ctx - The App Router context.
- * @param user - The authenticated user object.
+ * @category Types (Handler)
  *
- * @returns A Response/NextResponse or Promise resolving to one.
+ * @param req The incoming Next.js request.
+ * @param ctx The App Router context containing dynamic route parameters.
+ * @param user The authenticated user associated with the request.
+ *
+ * @returns Returns a `Response` (or `NextResponse`) or a Promise resolving to one.
  */
 export type AppRouterApiOnGroupAccessDeniedHandler = (
   req: NextRequest,
@@ -386,26 +518,31 @@ export type AppRouterApiOnGroupAccessDeniedHandler = (
   user: MonoCloudUser
 ) => Promise<Response> | Response;
 
-/** Options for App Router `protectApi()` */
-export type ProtectApiAppOptions = {
+/**
+ * Options for configuring `protectApi()` in the App Router.
+ *
+ * @category Types
+ */
+export interface ProtectApiAppOptions extends GroupOptions {
   /**
-   * Alternate app router api handler called when the user is not authenticated.
+   * Alternate API route handler invoked when the request is not authenticated.
    */
   onAccessDenied?: AppRouterApiOnAccessDeniedHandler;
 
   /**
-   * Alternate app router api handler called when the user is authenticated but is not a member of the specified groups.
+   * Alternate API route handler invoked when the request is authenticated but the user does not satisfy the required group restrictions.
    */
   onGroupAccessDenied?: AppRouterApiOnGroupAccessDeniedHandler;
-} & GroupOptions;
+}
 
 /**
- * Handler function triggered when a user is not authenticated in a Pages Router API route.
+ * Handler function invoked when a request is not authenticated in a Pages Router API route.
  *
- * @param req - The incoming Next.js API request.
- * @param res - The Next.js API response.
+ * @category Types (Handler)
  *
- * @returns
+ * @param req The incoming Next.js API request.
+ * @param res The Next.js API response object used to send the custom response.
+ * @returns The handler should send a response using `res` (for example, `res.status(...).json(...)`). Returning a value does not automatically end the request.
  */
 export type PageRouterApiOnAccessDeniedHandler = (
   req: NextApiRequest,
@@ -413,11 +550,13 @@ export type PageRouterApiOnAccessDeniedHandler = (
 ) => Promise<unknown> | unknown;
 
 /**
- * Handler function triggered when a user is denied access in a Pages Router API route due to group restrictions.
+ * Handler function invoked when an authenticated user is denied access in a Pages Router API route due to group authorization restrictions.
  *
- * @param req - The incoming Next.js API request.
- * @param res - The Next.js API response.
- * @param user - The authenticated user object.
+ * @category Types (Handler)
+ *
+ * @param req The incoming Next.js API request.
+ * @param res The Next.js API response object used to send the custom response.
+ * @returns The handler should send a response using `res` (for example, `res.status(...).json(...)`). Returning a value does not automatically end the request.
  *
  * @returns
  */
@@ -427,119 +566,149 @@ export type PageRouterApiOnGroupAccessDeniedHandler = (
   user: MonoCloudUser
 ) => Promise<unknown> | unknown;
 
-/** Options for Page Router `protectApi()` */
-export type ProtectApiPageOptions = {
+/**
+ * Options for configuring `protectApi()` in the Pages Router.
+ *
+ * @category Types
+ */
+export interface ProtectApiPageOptions extends GroupOptions {
   /**
-   * Alternate page router api handler called when the user is not authenticated.
+   * Alternate API handler invoked when the request is unauthenticated.
    */
   onAccessDenied?: PageRouterApiOnAccessDeniedHandler;
 
   /**
-   * Alternate page router api handler called when the user is authenticated but is not a member of the specified groups.
+   * Alternate API handler invoked when the user is authenticated but does not satisfy the configured group authorization rules.
    */
   onGroupAccessDenied?: PageRouterApiOnGroupAccessDeniedHandler;
-} & GroupOptions;
+}
 
 /**
- * Options for the `protect()` helper function.
+ * Options for configuring the `protect()` helper.
+ *
+ * @category Types
  */
-export type ProtectOptions = {
+export interface ProtectOptions extends GroupOptions {
   /**
-   * The url where the user will be redirected to after sign in.
+   * The URL to return to after successful authentication.
+   *
+   * If not provided, the current request URL is used.
    */
   returnUrl?: string;
 
   /**
-   * Authorization parameters to be used during authentication.
+   * Additional authorization parameters to include when redirecting the user to the sign-in flow.
    */
   authParams?: ExtraAuthParams;
-} & GroupOptions;
+}
 
 /**
- * Configuration options for checking if a user belongs to specific groups.
+ * Configuration options for evaluating user group membership.
+ *
+ * @category Types
  */
 export interface IsUserInGroupOptions {
   /**
-   * The name of the groups claim in the user profile. Default: `groups`.
+   * The name of the claim in the user profile that contains group information. This value is read from the authenticated user's session.
+   *
+   * @defaultValue 'groups'
    */
   groupsClaim?: string;
 
   /**
-   * If true, user must be a member of all groups. Default: false.
+   * Determines how multiple groups are evaluated. When `true`, the user must belong to **all** specified groups for authorization to succeed. Otherwise, membership in any one group is sufficient.
+   *
+   * @defaultValue false
    */
   matchAll?: boolean;
 }
 
 /**
- * Extended configuration options that include a list of required groups.
+ * Configuration options that require the user to belong to specific groups.
+ *
+ * @category Types
  */
 export interface GroupOptions extends IsUserInGroupOptions {
   /**
-   * A list of group IDs or names specifying the groups the user must belong to.
+   * A list of group IDs or group names the authenticated user must belong to.
+   *
+   * Group membership is evaluated using the configured `groupsClaim` from the user session.
    */
   groups?: string[];
 }
 
 /**
  * Options for `redirectToSignIn()`
+ *
+ * @category Types
  */
 export interface RedirectToSignInOptions {
   /**
-   * The URL to which the user should be redirected after successful sign-in.
+   * URL to return the user to after successful authentication. Must be a relative application URL.
    */
   returnUrl?: string;
+
   /**
-   * Maximum allowed time in seconds since the last End-User authentication.
+   * Maximum allowed time (in seconds) since the user's last authentication.
    */
   maxAge?: number;
+
   /**
-   * A hint to the authorization server about the desired authenticator the client wishes to authenticate the user with
+   * Hint to the authorization server indicating which authenticator should be used during sign-in.
    */
   authenticatorHint?: Authenticators;
+
   /**
-   * An array of scopes requested from the authorization server
+   * Scopes to request during authentication.
    */
   scopes?: string[];
+
   /**
-   * List of resources the access token should be scoped to
+   * Resource indicators the access token should be issued for.
    */
   resource?: string[];
+
   /**
-   * User's preferred languages and scripts for the user interface
+   * Preferred UI language(s) for the authentication experience.
    */
   uiLocales?: string;
+
   /**
-   * The desired user interface mode
+   * Preferred display mode for the authentication UI.
    */
   display?: DisplayOptions;
+
   /**
-   * An array of authentication context class references (ACRs).
+   * Authentication Context Class Reference (ACR) values requesting specific authentication methods or assurance levels.
    */
   acrValues?: string[];
+
   /**
-   * A hint to the authorization server about the user's identifier
+   * Hint about the user's identifier (for example, email or username).
    */
   loginHint?: string;
+
   /**
-   * The desired authentication behaviour.
-   * - `none`: User is not prompted to sign in.
-   * - `login`: Prompt the user to log in even if the user is already authenticated.
-   * - `consent`: Prompt the user for consent.
-   * - `select_account`: Prompt the user to sign in.
-   * - `create`: Prompt the user to sign up.
+   * Controls whether the authorization server should force specific user interactions during authentication
    */
   prompt?: Prompt;
 }
 
 /**
  * Options for `redirectToSignOut()`
+ *
+ * @category Types
  */
 export interface RedirectToSignOutOptions {
   /**
-   * The url authorization server should redirect the user to after a successful sign out. This url has to be registered in the client's sign out url section.
+   * URL where the authorization server should redirect the user after a successful sign-out.
+   *
+   * This value must match one of the registered Sign-out Redirect URLs configured for the application.
    */
   postLogoutRedirectUri?: string;
 
-  /** Whether to also sign out the user from MonoCloud */
+  /**
+   * When enabled, the user is also signed out from MonoCloud (Single Sign-Out).
+   */
   federated?: boolean;
 }

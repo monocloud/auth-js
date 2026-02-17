@@ -190,7 +190,7 @@ export const encryptSession = (
  *
  * @returns Session object on success.
  *
- * @throws If decryption fails or the session has expired
+ * @throws If decryption fails or the session has expired.
  */
 export const decryptSession = async (
   encryptedSession: string,
@@ -251,9 +251,9 @@ export const encryptAuthState = <T extends AuthState>(
  * @param encryptedAuthState - The encrypted auth state string to decrypt.
  * @param secret - The secret used for decryption.
  *
- * @returns State object on success
+ * @returns State object on success.
  *
- * @throws If decryption fails or the auth state has expired
+ * @throws If decryption fails or the auth state has expired.
  *
  */
 export const decryptAuthState = async <T extends AuthState>(
@@ -346,7 +346,6 @@ export const generateState = (): string => randomBytes(32);
 
 /**
  * Generates a PKCE (Proof Key for Code Exchange) code verifier and code challenge.
- *
  */
 export const generatePKCE = async (): Promise<{
   codeVerifier: string;
@@ -373,7 +372,7 @@ export const generateNonce = (): string => randomBytes(32);
  * @ignore
  * Merges multiple arrays of strings, removing duplicates.
  *
- * @param args - List of arrays to merge
+ * @param args - List of arrays to merge.
  *
  * @returns A new array containing unique strings from both input arrays, or `undefined` if both inputs are `undefined`.
  */

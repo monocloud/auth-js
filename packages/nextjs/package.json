@@ -64,6 +64,7 @@
   },
   "dependencies": {
     "@monocloud/auth-node-core": "workspace:*",
+    "@monocloud/auth-core": "workspace:*",
     "cookie": "1.1.1",
     "swr": "2.4.0"
   },

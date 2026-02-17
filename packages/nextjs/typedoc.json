@@ -1,0 +1,8 @@
+{
+  "entryPoints": [
+    "src/index.ts",
+    "src/components/index.tsx",
+    "src/components/client/index.tsx",
+    "src/client/index.tsx"
+  ]
+}
