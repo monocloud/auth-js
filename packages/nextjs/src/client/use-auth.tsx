@@ -5,8 +5,10 @@ import useSWR from 'swr';
 
 /**
  * Authentication State returned by `useAuth` hook.
+ *
+ * @category Types
  */
-export interface AuthState {
+export interface AuthenticationState {
   /**
    * Flag indicating if the authentication state is still loading.
    */
@@ -46,32 +48,33 @@ const fetchUser = async (url: string): Promise<MonoCloudUser | undefined> => {
 
 /**
  *
- * Hook for getting the user's profile on client components
+ * `useAuth()` is a client-side hook that provides access to the current authentication state.
  *
- * @returns Authentication State
+ * It can only be used inside **Client Components**.
  *
- * @example App Router
- *
- * ```tsx
+ * @example Basic Usage
+ * ```tsx title="Basic Usage"
  * "use client";
  *
  * import { useAuth } from "@monocloud/auth-nextjs/client";
  *
  * export default function Home() {
- *   const { user } = useAuth();
+ *   const { user, isAuthenticated } = useAuth();
+ *
+ *   if (!isAuthenticated) {
+ *     return <>Not signed in</>;
+ *   }
  *
  *   return <>User Id: {user?.sub}</>;
  * }
  * ```
  *
- * @example App Router - Refetch user from Userinfo endpoint
+ * @example Refetch user
  *
- * Calling `refetch(true)` will force refresh the user's profile from the userinfo endpoint.
- * If you do not intent to refersh from your tenants userinfo endpoint, use just `refetch()`
+ * Calling `refetch(true)` forces a refresh of the user profile from the UserInfo endpoint.
+ * Calling `refetch()` refreshes authentication state without forcing a UserInfo request.
  *
- * **Note⚠️: You need to set the env `MONOCLOUD_AUTH_ALLOW_QUERY_PARAM_OVERRIDES=true` or `allowQueryParamOverrides` should be `true` in the client initialization for force refresh to work**
- *
- * ```tsx
+ * ```tsx title="Refetch User"
  * "use client";
  *
  * import { useAuth } from "@monocloud/auth-nextjs/client";
@@ -81,49 +84,18 @@ const fetchUser = async (url: string): Promise<MonoCloudUser | undefined> => {
  *
  *   return (
  *     <>
- *       <pre>{JSON.stringify(user)}</pre>
- *       <button onClick={() => refetch(true)}>Refresh</button>
+ *       <pre>{JSON.stringify(user, null, 2)}</pre>
+ *       <button onClick={() => refetch(true)}>Refresh Profile</button>
  *     </>
  *   );
  * }
  * ```
  *
- * @example Pages Router
+ * @returns
  *
- * ```tsx
- * import { useAuth } from "@monocloud/auth-nextjs/client";
- *
- * export default function Home() {
- *   const { user } = useAuth();
- *
- *   return <>User Id: {user?.sub}</>;
- * }
- * ```
- *
- * @example Pages Router - Refetch user from Userinfo endpoint
- *
- *  Calling `refetch(true)` will force refresh the user's profile from the userinfo endpoint.
- * If you do not intent to refersh from your tenants userinfo endpoint, use just `refetch()`
- *
- * **Note⚠️: You need to set the env `MONOCLOUD_AUTH_ALLOW_QUERY_PARAM_OVERRIDES=true` or `allowQueryParamOverrides` should be `true` in the client initialization for force refresh to work**
- *
- * ```tsx
- * import { useAuth } from "@monocloud/auth-nextjs/client";
- *
- * export default function Home() {
- *   const { user, refetch } = useAuth();
- *
- *   return (
- *     <>
- *       <pre>{JSON.stringify(user)}</pre>
- *       <button onClick={() => refetch(true)}>Refresh</button>
- *     </>
- *   );
- * }
- * ```
- *
+ * @category Hooks
  */
-export const useAuth = (): AuthState => {
+export const useAuth = (): AuthenticationState => {
   const key =
     process.env.NEXT_PUBLIC_MONOCLOUD_AUTH_USER_INFO_URL ??
     // eslint-disable-next-line no-underscore-dangle

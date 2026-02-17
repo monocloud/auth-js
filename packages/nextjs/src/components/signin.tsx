@@ -1,26 +1,31 @@
 import React from 'react';
 import { ExtraAuthParams } from '../types';
 
+/**
+ * Props for the `<SignIn />` component.
+ *
+ * @category Types
+ */
 export interface SignInProps extends ExtraAuthParams {
-  children: React.ReactNode;
   /**
-   * URL to redirect to after a successful sign-in.
+   * Content rendered inside the link (for example, button text).
+   */
+  children: React.ReactNode;
+
+  /**
+   * URL to redirect to after successful sign-in.
    */
   returnUrl?: string;
 }
 
 /**
- * A component that renders an anchor tag configured to initiate the sign-in flow.
+ * `<SignIn>` renders a link that initiates the MonoCloud sign-in flow.
  *
- * @param props - Properties for the SignIn component.
+ * It can be used in both **App Router** and **Pages Router**, and may be rendered from either **Server** or **Client Components**.
  *
- * @returns An anchor element that links to the sign-in endpoint with the specified parameters.
+ * @example Basic Usage
  *
- * @example App Router and Pages Router
- *
- * **Sign-in component works on both the server and the client in pages router and app router.**
- *
- * ```tsx
+ * ```tsx title="Basic Usage"
  * import { SignIn } from "@monocloud/auth-nextjs/components";
  *
  * export default function Home() {
@@ -30,21 +35,24 @@ export interface SignInProps extends ExtraAuthParams {
  *
  * @example Customize the authorization request
  *
- * You can customize the authorization request by passing in props. See {@link SignInProps}.
+ * You can customize the authorization request by passing props:
  *
- * **Note⚠️: You need to set the env `MONOCLOUD_AUTH_ALLOW_QUERY_PARAM_OVERRIDES=true` or `allowQueryParamOverrides` should be `true` in the client initialization for props to work**
- *
- * ```tsx
+ * ```tsx title="Customize the authorization request"
  * import { SignIn } from "@monocloud/auth-nextjs/components";
  *
  * export default function Home() {
  *   return (
- *     <SignIn loginHint="username" authenticatorHint="password">
+ *     <SignIn loginHint="user@example.com" authenticatorHint="password" returnUrl="/dashboard">
  *       Sign In
  *     </SignIn>
  *   );
  * }
  * ```
+ *
+ * @param props - Properties for the SignIn component.
+ * @returns An anchor element that links to the sign-in endpoint with the specified parameters.
+ *
+ * @category Components
  */
 export const SignIn = ({
   children,

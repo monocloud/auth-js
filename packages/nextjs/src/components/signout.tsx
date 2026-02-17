@@ -1,25 +1,29 @@
 import React from 'react';
 
+/**
+ * Props for the `<SignOut />` component.
+ *
+ * @category Types
+ */
 export interface SignOutProps {
+  /** Content rendered inside the link (for example, button text). */
+  children: React.ReactNode;
+
   /** URL to redirect the user to after they have been signed out. */
   postLogoutUrl?: string;
 
-  /** Whether to also sign out the user from MonoCloud */
+  /** If `true`, also signs the user out of the MonoCloud server session, ensuring the user is fully logged out of MonoCloud and not just your application. */
   federated?: boolean;
 }
 
 /**
- * A component that renders an anchor tag configured to initiate the sign-out flow.
+ * `<SignOut>` renders a link that initiates the MonoCloud sign-out flow.
  *
- * @param props - Properties for the SignOut component.
+ * It can be used in both **App Router** and **Pages Router**, and may be rendered from either **Server** or **Client Components**.
  *
- * @returns An anchor element that links to the sign-out endpoint.
+ * @example Basic usage
  *
- * @example App Router and Pages Router
- *
- * **Sign-out component works on both the server and the client in pages router and app router.**
- *
- * ```tsx
+ * ```tsx title="Basic Usage"
  * import { SignOut } from "@monocloud/auth-nextjs/components";
  *
  * export default function Home() {
@@ -27,19 +31,20 @@ export interface SignOutProps {
  * }
  * ```
  *
- * @example Customize the request
+ * @example Customize the sign-out request
  *
- * You can customize the request by passing in props. See {@link SignOutProps}.
- *
- * **Note⚠️: You need to set the env `MONOCLOUD_AUTH_ALLOW_QUERY_PARAM_OVERRIDES=true` or `allowQueryParamOverrides` should be `true` in the client initialization for props to work**
- *
- * ```tsx
+ * ```tsx title="Customize the sign-out request"
  * import { SignOut } from "@monocloud/auth-nextjs/components";
  *
  * export default function Home() {
- *   return <SignOut federated={true}>Sign Out</SignOut>;
+ *   return <SignOut federated postLogoutUrl="/goodbye">Sign Out</SignOut>;
  * }
  * ```
+ *
+ * @param props - Properties for the SignOut component.
+ * @returns An anchor element that links to the sign-out endpoint.
+ *
+ * @category Components
  */
 export const SignOut = ({
   children,

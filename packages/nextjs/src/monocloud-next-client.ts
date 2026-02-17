@@ -1,5 +1,17 @@
 /* eslint-disable import/extensions */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
+import type {
+  monoCloudAuth,
+  protect,
+  protectPage,
+  authMiddleware,
+  getSession,
+  getTokens,
+  isAuthenticated,
+  isUserInGroup,
+  redirectToSignIn,
+  redirectToSignOut,
+} from './initialize';
 import {
   NextFetchEvent,
   NextRequest,
@@ -16,7 +28,7 @@ import {
   ensureLeadingSlash,
   isAbsoluteUrl,
 } from '@monocloud/auth-node-core/internal';
-import { isUserInGroup } from '@monocloud/auth-node-core/utils';
+import { isUserInGroup as isUserInGroupCore } from '@monocloud/auth-node-core/utils';
 import type {
   GetTokensOptions,
   IMonoCloudCookieRequest,
@@ -28,10 +40,10 @@ import type {
   MonoCloudSession,
   OnError,
 } from '@monocloud/auth-node-core';
+import { MonoCloudOidcClient } from '@monocloud/auth-core';
 import {
   MonoCloudCoreClient,
   MonoCloudValidationError,
-  MonoCloudOidcClient,
 } from '@monocloud/auth-node-core';
 import {
   AppRouterApiHandlerFn,
@@ -67,203 +79,146 @@ import MonoCloudCookieRequest from './requests/monocloud-cookie-request';
 import MonoCloudCookieResponse from './responses/monocloud-cookie-response';
 import MonoCloudAppRouterRequest from './requests/monocloud-app-router-request';
 import MonoCloudAppRouterResponse from './responses/monocloud-app-router-response';
-import { JSX } from 'react';
-import { ParsedUrlQuery } from 'node:querystring';
+import type { JSX } from 'react';
+import type { ParsedUrlQuery } from 'node:querystring';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import MonoCloudPageRouterRequest from './requests/monocloud-page-router-request';
 import MonoCloudPageRouterResponse from './responses/monocloud-page-router-response';
 
 /**
- * The MonoCloud Next.js Client.
+ * `MonoCloudNextClient` is the core SDK entry point for integrating MonoCloud authentication into a Next.js application.
  *
- * @example Using Environment Variables (Recommended)
+ * It provides:
+ * - Authentication middleware
+ * - Route protection helpers
+ * - Session and token access
+ * - Redirect utilities
+ * - Server-side enforcement helpers
  *
- * 1. Add following variables to your `.env`.
+ * ## 1. Add environment variables
  *
- * ```bash
+ * ```bash:.env.local
  * MONOCLOUD_AUTH_TENANT_DOMAIN=<tenant-domain>
  * MONOCLOUD_AUTH_CLIENT_ID=<client-id>
  * MONOCLOUD_AUTH_CLIENT_SECRET=<client-secret>
- * MONOCLOUD_AUTH_SCOPES=openid profile email # Default
+ * MONOCLOUD_AUTH_SCOPES=openid profile email
  * MONOCLOUD_AUTH_APP_URL=http://localhost:3000
  * MONOCLOUD_AUTH_COOKIE_SECRET=<cookie-secret>
  * ```
  *
- * 2. Instantiate the client in a shared file (e.g., lib/monocloud.ts)
+ * ## 2. Register middleware
  *
- * ```typescript
- * import { MonoCloudNextClient } from '@monocloud/auth-nextjs';
+ * ```typescript:src/proxy.ts
+ * import { authMiddleware } from "@monocloud/auth-nextjs";
+ *
+ * export default authMiddleware();
+ *
+ * export const config = {
+ *   matcher: [
+ *     "/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)",
+ *   ],
+ * };
+ * ```
+ *
+ * ## Advanced usage
+ *
+ * ### Create a shared client instance
+ *
+ * By default, the SDK exposes function exports (for example, `authMiddleware()`, `getSession()`, `getTokens()`) that internally use a shared singleton `MonoCloudNextClient`.
+ *
+ * Create your own `MonoCloudNextClient` instance when you need multiple configurations, dependency injection, or explicit control over initialization.
+ *
+ * ```ts:src/monocloud.ts
+ * import { MonoCloudNextClient } from "@monocloud/auth-nextjs";
  *
  * export const monoCloud = new MonoCloudNextClient();
  * ```
  *
- * 3. Add MonoCloud middleware/proxy
+ * ### Using instance methods
  *
- * ```typescript
- * import { monoCloud } from "@/lib/monocloud";
+ * Once you create a client instance, call methods directly on it instead of using the default function exports.
  *
- * export default monoCloud.authMiddleware();
+ * ```ts:src/app/page.tsx
+ * import { monoCloud } from "@/monocloud";
  *
- * export const config = {
- *   matcher: [
- *     "/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)",
- *   ],
- * };
+ * export default async function Page() {
+ *   const session = await monoCloud.getSession();
+ *
+ *   if (!session) {
+ *     return <>Not signed in</>;
+ *   }
+ *
+ *   return <>Hello {session.user.name}</>;
+ * }
  * ```
  *
- * @example Using Constructor Options
+ * #### Using constructor options
  *
- * ⚠️ Security Note: Never commit your credentials to version control. Load them from environment variables.
+ * When configuration is provided through both constructor options and environment variables, the values passed to the constructor take precedence. Environment variables are used only for options that are not explicitly supplied.
  *
- * 1. Instantiate the client in a shared file (e.g., lib/monocloud.ts)
- *
- * ```typescript
- * import { MonoCloudNextClient } from '@monocloud/auth-nextjs';
+ * ```ts:src/monocloud.ts
+ * import { MonoCloudNextClient } from "@monocloud/auth-nextjs";
  *
  * export const monoCloud = new MonoCloudNextClient({
- *  tenantDomain: '<tenant-domain>',
- *  clientId: '<client-id>',
- *  clientSecret: '<client-secret>',
- *  scopes: 'openid profile email', // Default
- *  appUrl: 'http://localhost:3000',
- *  cookieSecret: '<cookie-secret>'
+ *   tenantDomain: "<tenant-domain>",
+ *   clientId: "<client-id>",
+ *   clientSecret: "<client-secret>",
+ *   appUrl: "http://localhost:3000",
+ *   cookieSecret: "<cookie-secret>",
+ *   defaultAuthParams: {
+ *     scopes: "openid profile email",
+ *   },
  * });
  * ```
- * 2. Add MonoCloud middleware/proxy
  *
- * ```typescript
- * import { monoCloud } from "@/lib/monocloud";
+ * ### Modifying default routes
  *
- * export default monoCloud.authMiddleware();
+ * If you customize any of the default auth route paths:
  *
- * export const config = {
- *   matcher: [
- *     "/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)",
- *   ],
- * };
+ * - Also set the corresponding `NEXT_PUBLIC_` environment variables so client-side helpers
+ *   (for example `<SignIn />`, `<SignOut />`, and `useAuth()`) can discover the correct URLs.
+ * - Update the **Application URLs** in your MonoCloud Dashboard to match the new paths.
+ *
+ * Example:
+ *
+ * ```bash:.env.local
+ * MONOCLOUD_AUTH_CALLBACK_URL=/api/custom_callback
+ * NEXT_PUBLIC_MONOCLOUD_AUTH_CALLBACK_URL=/api/custom_callback
  * ```
  *
- * <details>
- * <summary>All Environment Variables</summary>
- *  <h4>Core Configuration (Required)</h4>
+ * When routes are overridden, the Redirect URI configured in the dashboard
+ * must reflect the new path. For example, during local development:
  *
- *  <ul>
- *    <li><strong>MONOCLOUD_AUTH_CLIENT_ID : </strong>Unique identifier for your application/client.</li>
- *    <li><strong>MONOCLOUD_AUTH_CLIENT_SECRET : </strong>Application/client secret.</li>
- *    <li><strong>MONOCLOUD_AUTH_TENANT_DOMAIN : </strong>The domain of your MonoCloud tenant (e.g., https://your-tenant.us.monocloud.com).</li>
- *    <li><strong>MONOCLOUD_AUTH_APP_URL : </strong>The base URL where your application is hosted.</li>
- *    <li><strong>MONOCLOUD_AUTH_COOKIE_SECRET : </strong>A long, random string used to encrypt and sign session cookies.</li>
- *  </ul>
+ * `http://localhost:3000/api/custom_callback`
  *
- *  <h4>Authentication &amp; Security</h4>
- *
- *  <ul>
- *    <li><strong>MONOCLOUD_AUTH_SCOPES : </strong>A space-separated list of OIDC scopes to request (e.g., openid profile email).</li>
- *    <li><strong>MONOCLOUD_AUTH_RESOURCE : </strong>The default resource/audience identifier for access tokens.</li>
- *    <li><strong>MONOCLOUD_AUTH_USE_PAR : </strong>Enables Pushed Authorization Requests.</li>
- *    <li><strong>MONOCLOUD_AUTH_CLOCK_SKEW : </strong>The allowed clock drift in seconds when validating token timestamps.</li>
- *    <li><strong>MONOCLOUD_AUTH_FEDERATED_SIGNOUT : </strong>If true, signs the user out of MonoCloud (SSO sign-out) when they sign out of the app.</li>
- *    <li><strong>MONOCLOUD_AUTH_RESPONSE_TIMEOUT : </strong>The maximum time in milliseconds to wait for a response.</li>
- *    <li><strong>MONOCLOUD_AUTH_ALLOW_QUERY_PARAM_OVERRIDES : </strong>Allows dynamic overrides of auth parameters via URL query strings.</li>
- *    <li><strong>MONOCLOUD_AUTH_POST_LOGOUT_REDIRECT_URI : </strong>The URL users are sent to after a successful logout.</li>
- *    <li><strong>MONOCLOUD_AUTH_USER_INFO : </strong>Determines if user profile data from the UserInfo endpoint should be fetched after authorization code exchange.</li>
- *    <li><strong>MONOCLOUD_AUTH_REFETCH_USER_INFO : </strong>If true, re-fetches user information on every request to userinfo endpoint or when calling getTokens()</li>
- *    <li><strong>MONOCLOUD_AUTH_ID_TOKEN_SIGNING_ALG : </strong>The expected algorithm for signing ID tokens (e.g., RS256).</li>
- *    <li><strong>MONOCLOUD_AUTH_FILTERED_ID_TOKEN_CLAIMS : </strong>A space-separated list of claims to exclude from the session object.</li>
- *  </ul>
- *
- *  <h4>Routes</h4>
- *
- *   <aside>
- *     <strong>⚠️ Important: Modifying Default Routes</strong>
- *     <p>If you choose to customize any of the default route paths, you must adhere to the following requirements:</p>
- *     <ul>
- *       <li>
- *         <strong>Client-Side Synchronization:</strong> You must also define a corresponding <code>NEXT_PUBLIC_</code> version of the environment variable (e.g., <code>NEXT_PUBLIC_MONOCLOUD_AUTH_CALLBACK_URL</code>). This ensures that client-side components like <code>&lt;SignIn /&gt;</code>, <code>&lt;SignOut /&gt;</code>, and the <code>useAuth()</code> hook can correctly identify your custom endpoints.
- *       </li>
- *       <li>
- *         <strong>Dashboard Configuration:</strong> Changing these URLs will alter the endpoints required by MonoCloud. You must update the <strong>Application URLs</strong> section in your MonoCloud Dashboard to match these new paths.
- *       </li>
- *     </ul>
- *     <p><em>Example:</em></p>
- *     <code>
- *       MONOCLOUD_AUTH_CALLBACK_URL=/api/custom_callback<br />
- *       NEXT_PUBLIC_MONOCLOUD_AUTH_CALLBACK_URL=/api/custom_callback
- *     </code>
- *     <p>In this case, the Redirect URI in your dashboard should be set to: <code>http://localhost:3000/api/custom_callback</code> (assuming local development).</p>
- *   </aside>
- *
- *  <ul>
- *    <li><strong>MONOCLOUD_AUTH_CALLBACK_URL : </strong>The application path where MonoCloud sends the user after authentication.</li>
- *    <li><strong>MONOCLOUD_AUTH_SIGNIN_URL : </strong>The internal route path to trigger the sign-in.</li>
- *    <li><strong>MONOCLOUD_AUTH_SIGNOUT_URL : </strong>The internal route path to trigger the sign-out.</li>
- *    <li><strong>MONOCLOUD_AUTH_USER_INFO_URL : </strong>The route that exposes the current user's profile from userinfo endpoint.</li>
- *  </ul>
- *
- *  <h4>Session Cookie Settings</h4>
- *
- *  <ul>
- *    <li><strong>MONOCLOUD_AUTH_SESSION_COOKIE_NAME : </strong>The name of the cookie used to store the user session.</li>
- *    <li><strong>MONOCLOUD_AUTH_SESSION_COOKIE_PATH : </strong>The scope path for the session cookie.</li>
- *    <li><strong>MONOCLOUD_AUTH_SESSION_COOKIE_DOMAIN : </strong>The domain scope for the session cookie.</li>
- *    <li><strong>MONOCLOUD_AUTH_SESSION_COOKIE_HTTP_ONLY : </strong>Prevents client-side scripts from accessing the session cookie.</li>
- *    <li><strong>MONOCLOUD_AUTH_SESSION_COOKIE_SECURE : </strong>Ensures the session cookie is only sent over HTTPS.</li>
- *    <li><strong>MONOCLOUD_AUTH_SESSION_COOKIE_SAME_SITE : </strong>The SameSite policy for the session cookie (Lax, Strict, or None).</li>
- *    <li><strong>MONOCLOUD_AUTH_SESSION_COOKIE_PERSISTENT : </strong>If true, the session survives browser restarts.</li>
- *    <li><strong>MONOCLOUD_AUTH_SESSION_SLIDING : </strong>If true, the session will be a sliding session instead of absolute.</li>
- *    <li><strong>MONOCLOUD_AUTH_SESSION_DURATION : </strong>The session lifetime in seconds.</li>
- *    <li><strong>MONOCLOUD_AUTH_SESSION_MAX_DURATION : </strong>The absolute maximum lifetime of a session in seconds.</li>
- *  </ul>
- *
- *  <h4>State Cookie Settings</h4>
- *
- *  <ul>
- *    <li><strong>MONOCLOUD_AUTH_STATE_COOKIE_NAME : </strong>The name of the cookie used to store OpenID state/nonce.</li>
- *    <li><strong>MONOCLOUD_AUTH_STATE_COOKIE_PATH : </strong>The scope path for the state cookie.</li>
- *    <li><strong>MONOCLOUD_AUTH_STATE_COOKIE_DOMAIN : </strong>The domain scope for the state cookie.</li>
- *    <li><strong>MONOCLOUD_AUTH_STATE_COOKIE_SECURE : </strong>Ensures the state cookie is only sent over HTTPS</li>
- *    <li><strong>MONOCLOUD_AUTH_STATE_COOKIE_SAME_SITE : </strong>The SameSite policy for the state cookie.</li>
- *    <li><strong>MONOCLOUD_AUTH_STATE_COOKIE_PERSISTENT : </strong>Whether the state cookie is persistent.</li>
- *  </ul>
- *
- *  <h4>Caching</h4>
- *
- *  <ul>
- *    <li><strong>MONOCLOUD_AUTH_JWKS_CACHE_DURATION : </strong>Duration in seconds to cache the JSON Web Key Set.</li>
- *    <li><strong>MONOCLOUD_AUTH_METADATA_CACHE_DURATION : </strong>Duration in seconds to cache the OpenID discovery metadata.</li>
- *  </ul>
- * </details>
- *
- *
+ * @category Classes
  */
 export class MonoCloudNextClient {
-  /**
-   * The underlying MonoCloud Node Core Client instance.
-   *
-   * This property exposes the framework-agnostic node core client used by the Next.js client.
-   * You can access this to use low-level methods not directly exposed by the Next.js wrapper.
-   *
-   * @example Manually destroy session
-   * ```typescript
-   * // req and res must implement IMonoCloudCookieRequest/Response
-   * await monoCloud.coreClient.destroySession(request, response);
-   * ```
-   */
-  public readonly coreClient: MonoCloudCoreClient;
+  private readonly _coreClient: MonoCloudCoreClient;
 
   /**
-   * The underlying OIDC client instance used for low-level OpenID Connect operations.
+   * This exposes the framework-agnostic MonoCloud client used internally by the Next.js SDK.
+   * Use it if you need access to lower-level functionality not directly exposed by MonoCloudNextClient.
    *
-   * @example
-   * // Manually revoke an access token
-   * await client.oidcClient.revokeToken(accessToken, 'access_token');
+   * @returns Returns the underlying **Node client** instance.
+   */
+  public get coreClient(): MonoCloudCoreClient {
+    return this._coreClient;
+  }
+
+  /**
+   * This is intended for advanced scenarios requiring direct control over the authorization or token flow.
+   *
+   * @returns Returns the underlying **OIDC client** used for OpenID Connect operations.
    */
   public get oidcClient(): MonoCloudOidcClient {
     return this.coreClient.oidcClient;
   }
 
   /**
-   * @param options Configuration options including domain, client ID, and secret.
+   * Creates a new client instance.
+   *
+   * @param options Optional configuration for initializing the MonoCloud client. If not provided, settings are automatically resolved from environment variables.
    */
   constructor(options?: MonoCloudOptions) {
     const opt = {
@@ -273,73 +228,13 @@ export class MonoCloudNextClient {
     };
 
     this.registerPublicEnvVariables();
-    this.coreClient = new MonoCloudCoreClient(opt);
+    this._coreClient = new MonoCloudCoreClient(opt);
   }
 
   /**
-   * Creates a **Next.js API route handler** (for both Pages Router and App Router)
-   * that processes all MonoCloud authentication endpoints
-   * (`/signin`, `/callback`, `/userinfo`, `/signout`).
-   *
-   * @param options Authentication configuration routes.
-   *
-   * **Note:** If you are already using `authMiddleware()`, you typically do **not**
-   * need this API route handler. This function is intended for applications where
-   * middleware cannot be used—such as statically generated (SSG) deployments that still
-   * require server-side authentication flows.
-   *
-   * @example App Router
-   *
-   * ```typescript
-   * // app/api/auth/[...monocloud]/route.ts
-   *
-   * import { monoCloud } from "@/lib/monocloud";
-   *
-   * export const GET = monoCloud.monoCloudAuth();
-   *```
-   *
-   * @example App Router with Response
-   *
-   * ```typescript
-   * import { monoCloud } from "@/lib/monocloud";
-   * import { NextRequest, NextResponse } from "next/server";
-   *
-   * export const GET = (req: NextRequest) => {
-   *   const authHandler = monoCloud.monoCloudAuth();
-   *
-   *   const res = new NextResponse();
-   *
-   *   res.cookies.set("last_auth_requested", `${Date.now()}`);
-   *
-   *   return authHandler(req, res);
-   * };
-   * ```
-   *
-   * @example Pages Router
-   *
-   * ```typescript
-   * // pages/api/auth/[...monocloud].ts
-   *
-   * import { monoCloud } from "@/lib/monocloud";
-   *
-   * export default monoCloud.monoCloudAuth();
-   *```
-   *
-   * @example Page Router with Response
-   *
-   * ```typescript
-   * import { monoCloud } from "@/lib/monocloud";
-   * import { NextApiRequest, NextApiResponse } from "next";
-   *
-   * export default function handler(req: NextApiRequest, res: NextApiResponse) {
-   *   const authHandler = monoCloud.monoCloudAuth();
-   *
-   *   res.setHeader("last_auth_requested", `${Date.now()}`);
-   *
-   *   return authHandler(req, res);
-   * }
-   * ```
-   *
+   * @see {@link monoCloudAuth} for full docs and examples.
+   * @param options Optional configuration for the auth handler.
+   * @returns Returns a Next.js-compatible handler for App Router route handlers or Pages Router API routes.
    */
   public monoCloudAuth(options?: MonoCloudAuthOptions): MonoCloudAuthHandler {
     return (req, resOrCtx) => {
@@ -385,44 +280,10 @@ export class MonoCloudNextClient {
   }
 
   /**
-   *
-   * ## App Router
-   *
-   * Restricts access to server-rendered pages in your Next.js App Router application, ensures that only authenticated (and optionally authorized) users can view the page.
-   *
-   * **Note⚠️ - When using groups to protect a page, 'Access Denied' is rendered by default when the user does not belong to the groups.
-   *  To display a custom component, pass the `onGroupAccessDenied` parameter.**
-   *
-   * @param component The App Router server component that protectPage wraps and secures
-   * @param options App Router `protectPage()` configuration options
-   *
-   * @returns A protected page handler.
-   *
-   * @example
-   *
-   * ```typescript
-   * import { monoCloud } from "@/lib/monocloud";
-   *
-   * export default monoCloud.protectPage(async function Home({ user }) {
-   *  return <>Hi {user.email}. You accessed a protected page.</>;
-   * });
-   * ```
-   *
-   * @example App Router with options
-   *
-   * ```typescript
-   * import { monoCloud } from "@/lib/monocloud";
-   *
-   * export default monoCloud.protectPage(
-   *   async function Home({ user }) {
-   *     return <>Hi {user.email}. You accessed a protected page.</>;
-   *   },
-   *   {
-   *     returnUrl: "/dashboard",
-   *     groups: ["admin"],
-   *   }
-   * );
-   * ```
+   * @see {@link protectPage} for full docs and examples.
+   * @param component The App Router server component to protect.
+   * @param options Optional configuration for authentication, authorization, and custom access handling (`onAccessDenied`, `onGroupAccessDenied`).
+   * @returns A wrapped page component that enforces authentication before rendering.
    */
   protectPage(
     component: ProtectedAppServerComponent,
@@ -430,58 +291,11 @@ export class MonoCloudNextClient {
   ): AppRouterPageHandler;
 
   /**
-   * ## Pages Router
-   *
-   * Restricts access to server-rendered pages in your Next.js Pages Router application, ensures that only authenticated (and optionally authorized) users can view the page.
-   *
-   * **Note⚠️ - When using groups to protect a page, the page will be rendered even if the user does not belong to the groups.
-   * You should check the props for `groupAccessDenied` boolean value to determine whether the user is
-   * allowed to access the page. Alternatively, you can pass `onGroupAccessDenied` parameter to return custom props.**
-   *
-   * @param options Pages Router `protectPage()` configuration options
-   *
-   * @typeParam P - The type of parameters accepted by the page handler.
-   * @typeParam Q - The type of query parameters parsed from the URL.
-   *
-   * @returns A protected page handler.
-   *
-   * @example
-   *
-   * ```typescript
-   * import { monoCloud } from "@/lib/monocloud";
-   * import { InferGetServerSidePropsType } from "next";
-   *
-   * export default function Home({
-   *   user,
-   * }: InferGetServerSidePropsType<typeof getServerSideProps>) {
-   *   return <>Hi {user.email}. You accessed a protected page.</>;
-   * }
-   *
-   * export const getServerSideProps = monoCloud.protectPage();
-   * ```
-   *
-   * @example Pages Router with options
-   *
-   * ```typescript
-   * import { monoCloud } from "@/lib/monocloud";
-   * import { GetServerSidePropsContext, InferGetServerSidePropsType } from "next";
-   *
-   * export default function Home({
-   *   user,
-   *   url,
-   * }: InferGetServerSidePropsType<typeof getServerSideProps>) {
-   *   console.log(url);
-   *   return <div>Hi {user?.email}. You accessed a protected page.</div>;
-   * }
-   *
-   * export const getServerSideProps = monoCloud.protectPage({
-   *   returnUrl: "/dashboard",
-   *   groups: ["admin"],
-   *   getServerSideProps: async (context: GetServerSidePropsContext) => ({
-   *     props: { url: context.resolvedUrl },
-   *   }),
-   * });
-   * ```
+   * @see {@link protectPage} for full docs and examples.
+   * @param options Optional configuration for authentication, authorization, and custom access handling (`onAccessDenied`, `onGroupAccessDenied`).
+   * @typeParam P - Props returned from getServerSideProps.
+   * @typeParam Q - Query parameters parsed from the URL.
+   * @returns A getServerSideProps wrapper that enforces authentication before executing the page logic.
    */
   protectPage<
     P extends Record<string, any> = Record<string, any>,
@@ -587,7 +401,7 @@ export class MonoCloudNextClient {
 
       if (
         options?.groups &&
-        !isUserInGroup(
+        !isUserInGroupCore(
           session.user,
           options.groups,
           options.groupsClaim ?? process.env.MONOCLOUD_AUTH_GROUPS_CLAIM,
@@ -703,7 +517,7 @@ export class MonoCloudNextClient {
 
       if (
         options?.groups &&
-        !isUserInGroup(
+        !isUserInGroupCore(
           session.user,
           options.groups,
           options.groupsClaim ?? process.env.MONOCLOUD_AUTH_GROUPS_CLAIM,
@@ -747,27 +561,10 @@ export class MonoCloudNextClient {
   }
 
   /**
-   * ## App Router
-   *
-   * Secures Next.js App Router APIs. It ensures only authenticated (and optionally authorized) requests can access the route.
-   *
-   * @param handler The api route handler function to protect
-   * @param options App Router `protectApi()` configuration options
-   *
-   * @returns Protected route handler
-   *
-   * @example
-   *
-   * ```typescript
-   * import { monoCloud } from "@/lib/monocloud";
-   * import { NextResponse } from "next/server";
-   *
-   * export const GET = monoCloud.protectApi(async () => {
-   *   return NextResponse.json({
-   *     message: "You accessed a protected endpoint",
-   *   });
-   * });
-   * ```
+   * @see {@link protectApi} for full docs and examples.
+   * @param handler The route handler to protect.
+   * @param options Optional configuration controlling authentication and authorization behavior.
+   * @returns Returns a wrapped handler that enforces authentication (and optional authorization) before invoking the original handler.
    */
   protectApi(
     handler: AppRouterApiHandlerFn,
@@ -775,29 +572,10 @@ export class MonoCloudNextClient {
   ): AppRouterApiHandlerFn;
 
   /**
-   * ## Pages Router
-   *
-   * Secures Next.js Pages Router APIs. It ensures only authenticated (and optionally authorized) requests can access the route.
-   *
-   * @param handler The api route handler function to protect
-   * @param options Pages Router `protectApi()` configuration options
-   *
-   * @returns Protected route handler
-   *
-   * @example
-   *
-   * ```typescript
-   * import { monoCloud } from "@/lib/monocloud";
-   * import type { NextApiRequest, NextApiResponse } from "next";
-   *
-   * export default monoCloud.protectApi(
-   *   async (req: NextApiRequest, res: NextApiResponse) => {
-   *     return res.json({
-   *       message: "You accessed a protected endpoint",
-   *     });
-   *   }
-   * );
-   * ```
+   * @see {@link protectApi} for full docs and examples.
+   * @param handler - The route handler to protect.
+   * @param options Optional configuration controlling authentication and authorization behavior.
+   * @returns Returns a wrapped handler that enforces authentication (and optional authorization) before invoking the original handler.
    */
   protectApi(
     handler: NextApiHandler,
@@ -858,7 +636,7 @@ export class MonoCloudNextClient {
 
     if (
       options?.groups &&
-      !isUserInGroup(
+      !isUserInGroupCore(
         session.user,
         options.groups,
         options.groupsClaim ?? process.env.MONOCLOUD_AUTH_GROUPS_CLAIM,
@@ -914,7 +692,7 @@ export class MonoCloudNextClient {
 
     if (
       options?.groups &&
-      !isUserInGroup(
+      !isUserInGroupCore(
         session.user,
         options.groups,
         options.groupsClaim ?? process.env.MONOCLOUD_AUTH_GROUPS_CLAIM,
@@ -934,142 +712,19 @@ export class MonoCloudNextClient {
   }
 
   /**
-   * A middleware/proxy that protects pages and APIs and handles authentication.
-   *
-   * @param options Middleware configuration options
-   *
-   * @returns A Next.js middleware/proxy function.
-   *
-   * @example Protect All Routes
-   *
-   * - Default behavior: protect all routes matched by `config.matcher`
-   *
-   * ```typescript
-   * import { monoCloud } from "@/lib/monocloud";
-   *
-   * export default monoCloud.authMiddleware();
-   *
-   * export const config = {
-   *   matcher: [
-   *     "/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)",
-   *   ],
-   * };
-   * ```
-   *
-   * @example Protect Selected Routes
-   *
-   * - Protect only the routes listed in `protectedRoutes`
-   *
-   * ```typescript
-   * import { monoCloud } from "@/lib/monocloud";
-   *
-   * export default monoCloud.authMiddleware({
-   *   protectedRoutes: ["/api/admin", "^/api/protected(/.*)?$"],
-   * });
-   *
-   * export const config = {
-   *   matcher: [
-   *     "/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)",
-   *   ],
-   * };
-   *```
-   *
-   * @example Make All Routes Public
-   *
-   * - Do not protect any routes; MonoCloud still handles auth endpoints
-   *
-   * ```typescript
-   * import { monoCloud } from "@/lib/monocloud";
-   *
-   * export default monoCloud.authMiddleware({
-   *   protectedRoutes: [],
-   * });
-   *
-   * export const config = {
-   *   matcher: [
-   *     "/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)",
-   *   ],
-   * };
-   * ```
-   *
-   * @example Protect Routes Dynamically
-   *
-   * - Decide at runtime which routes to protect
-   *
-   * ```typescript
-   * import { monoCloud } from "@/lib/monocloud";
-   *
-   * export default monoCloud.authMiddleware({
-   *   protectedRoutes: (req) => {
-   *     return req.nextUrl.pathname.startsWith("/api/protected");
-   *   },
-   * });
-   *
-   * export const config = {
-   *   matcher: [
-   *     "/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)",
-   *   ],
-   * };
-   * ```
-   *
-   * @example Protect routes based on groups
-   *
-   * ```typescript
-   * import { monoCloud } from "@/lib/monocloud";
-   *
-   * export default monoCloud.authMiddleware({
-   *   // group names or IDs
-   *   protectedRoutes: [
-   *     {
-   *       groups: ["admin", "editor", "537e7c3d-a442-4b5b-b308-30837aa045a4"],
-   *       routes: ["/internal", "/api/internal(.*)"],
-   *     },
-   *   ],
-   * });
-   *
-   * export const config = {
-   *   matcher: [
-   *     "/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)",
-   *   ],
-   * };
-   * ```
-   *
+   * @see {@link authMiddleware} for full docs and examples.
+   * @param options Optional configuration that controls how authentication is enforced (for example, redirect behavior, route matching, or custom handling of unauthenticated requests).
+   * @returns Returns a Next.js middleware result (`NextResponse`, redirect, or `undefined` to continue processing).
    */
   authMiddleware(
     options?: MonoCloudMiddlewareOptions
   ): NextMiddleware | NextProxy;
 
   /**
-   * A middleware that protects pages and APIs and handles authentication.
-   *
-   * @param request The Next.js fetch event object.
-   * @param event The associated fetch event [Docs](https://nextjs.org/docs/app/api-reference/file-conventions/proxy#waituntil-and-nextfetchevent).
-   *
-   * @returns A promise resolving to a Next.js middleware result or a Next.js middleware result.
-   *
-   * @example Nest Custom Middleware
-   *
-   * - Use your own middleware wrapper and call MonoCloud only for specific routes
-   *
-   * ```typescript
-   * import { monoCloud } from "@/lib/monocloud";
-   * import { NextFetchEvent, NextRequest, NextResponse } from "next/server";
-   *
-   * export default function customMiddleware(req: NextRequest, evt: NextFetchEvent) {
-   *   if (req.nextUrl.pathname.startsWith("/api/protected")) {
-   *     return monoCloud.authMiddleware(req, evt);
-   *   }
-   *
-   *   return NextResponse.next();
-   * }
-   *
-   * export const config = {
-   *   matcher: [
-   *     "/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)",
-   *   ],
-   * };
-   * ```
-   *
+   * @see {@link authMiddleware} for full docs and examples.
+   * @param request Incoming Next.js middleware request used to resolve authentication state.
+   * @param event Next.js middleware event providing lifecycle hooks such as `waitUntil`.
+   * @returns Returns a Next.js middleware result (`NextResponse`, redirect, or `undefined` to continue processing).
    */
   authMiddleware(
     request: NextRequest,
@@ -1077,7 +732,7 @@ export class MonoCloudNextClient {
   ): Promise<NextMiddlewareResult> | NextMiddlewareResult;
 
   public authMiddleware(
-    ...args: unknown[]
+    ...args: any[]
   ):
     | NextMiddleware
     | NextProxy
@@ -1237,7 +892,7 @@ export class MonoCloudNextClient {
 
     if (
       allowedGroups &&
-      !isUserInGroup(session.user, allowedGroups, groupsClaim)
+      !isUserInGroupCore(session.user, allowedGroups, groupsClaim)
     ) {
       if (options?.onGroupAccessDenied) {
         const result = await options.onGroupAccessDenied(
@@ -1310,183 +965,16 @@ export class MonoCloudNextClient {
   }
 
   /**
-   * ## SSR Components, Actions, Middleware or API Handlers
-   *
-   * Retrieves the session object for the currently authenticated user on the server.
-   *
-   * **Use Case:**
-   * - App Router Server Components (RSC).
-   * - Server Actions
-   * - Route Handlers (App Router only).
-   * - Middleware (App Router and Pages Router).
-   *
-   * *Note: If the session cannot be resolved or an underlying error occurs, the promise rejects with an error.*
-   *
-   * @returns `MonoCloudSession` if found, or `undefined`.
-   *
-   * @example Middleware/Proxy
-   *
-   * ```typescript
-   * import { monoCloud } from "@/lib/monocloud";
-   * import { NextResponse } from "next/server";
-   *
-   * export default async function middleware() {
-   *   const session = await monoCloud.getSession();
-   *
-   *   if (!session) {
-   *     return new NextResponse("User not signed in", { status: 401 });
-   *   }
-   *
-   *   return NextResponse.next();
-   * }
-   *
-   * export const config = {
-   *   matcher: [
-   *     "/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)",
-   *   ],
-   * };
-   * ```
-   *
-   * @example App Router API Handler
-   *
-   * ```typescript
-   * import { NextResponse } from "next/server";
-   * import { monoCloud } from "@/lib/monocloud";
-   *
-   * export const GET = async () => {
-   *   const session = await monoCloud.getSession();
-   *
-   *   return NextResponse.json({ name: session?.user.name });
-   * };
-   * ```
-   *
-   * @example React Server Components
-   *
-   * ```tsx
-   * import { monoCloud } from "@/lib/monocloud";
-   *
-   * export default async function Home() {
-   *   const session = await monoCloud.getSession();
-   *
-   *   return <div>{session?.user.name}</div>;
-   * }
-   * ```
-   *
-   * @example Server Action
-   *
-   * ```typescript
-   * "use server";
-   *
-   * import { monoCloud } from "@/lib/monocloud";
-   *
-   * export async function getUserAction() {
-   *   const session = await monoCloud.getSession();
-   *
-   *   return { name: session?.user.name };
-   * }
-   * ```
-   *
+   * @see {@link getSession} for full docs and examples.
+   * @returns Returns the resolved session, or `undefined` if none exists.
    */
   public getSession(): Promise<MonoCloudSession | undefined>;
 
   /**
-   * ## Middleware/Proxy or Route Handlers
-   *
-   * Retrieves the session object for the currently authenticated user on the server.
-   *
-   * **Use Case:**
-   * - Middleware (for both App and Pages Router).
-   * - App Router Route Handlers (API routes).
-   * - Edge functions.
-   *
-   * *Note: If the session cannot be resolved or an underlying error occurs, the promise rejects with an error.*
-   *
-   * @param req NextRequest
-   * @param res An optional `NextResponse` instance. Pass this if you have already initialized a response; otherwise, omit this parameter.
-   *
-   * @returns `MonoCloudSession` if found, or `undefined`.
-   *
-   * @example Middleware/Proxy
-   *
-   * ```typescript
-   * import { monoCloud } from "@/lib/monocloud";
-   * import { NextRequest, NextResponse } from "next/server";
-   *
-   * export default async function middleware(req: NextRequest) {
-   *   const session = await monoCloud.getSession(req);
-   *
-   *   if (!session) {
-   *     return new NextResponse("User not signed in", { status: 401 });
-   *   }
-   *
-   *   return NextResponse.next();
-   * }
-   *
-   * export const config = {
-   *   matcher: [
-   *     "/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)",
-   *   ],
-   * };
-   * ```
-   *
-   * @example Middleware/Proxy (Custom Response)
-   *
-   * ```typescript
-   * import { monoCloud } from "@/lib/monocloud";
-   * import { NextRequest, NextResponse } from "next/server";
-   *
-   * export default async function middleware(req: NextRequest) {
-   *   const res = NextResponse.next();
-   *
-   *   const session = await monoCloud.getSession(req, res);
-   *
-   *   if (!session) {
-   *     return new NextResponse("User not signed in", { status: 401 });
-   *   }
-   *
-   *   res.headers.set("x-auth-status", "active");
-   *
-   *   return res;
-   * }
-   *
-   * export const config = {
-   *   matcher: [
-   *     "/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)",
-   *   ],
-   * };
-   * ```
-   *
-   * @example API Handler
-   *
-   * ```typescript
-   * import { NextRequest, NextResponse } from "next/server";
-   * import { monoCloud } from "@/lib/monocloud";
-   *
-   * export const GET = async (req: NextRequest) => {
-   *   const session = await monoCloud.getSession(req);
-   *
-   *   return NextResponse.json({ name: session?.user.name });
-   * };
-   * ```
-   *
-   * @example API Handler with NextResponse
-   *
-   * ```typescript
-   * import { NextRequest, NextResponse } from "next/server";
-   * import { monoCloud } from "@/lib/monocloud";
-   *
-   * export const GET = async (req: NextRequest) => {
-   *   const res = new NextResponse("YOUR CUSTOM RESPONSE");
-   *
-   *   const session = await monoCloud.getSession(req, res);
-   *
-   *   if (session?.user) {
-   *     res.cookies.set("something", "important");
-   *   }
-   *
-   *   return res;
-   * };
-   * ```
+   * @see {@link getSession} for full docs and examples.
+   * @param req Incoming request used to read authentication cookies and headers to resolve the current user's session.
+   * @param res Optional response to update if session resolution requires refreshed authentication cookies or headers.
+   * @returns Returns the resolved session, or `undefined` if none exists.
    */
   public getSession(
     req: NextRequest | Request,
@@ -1494,68 +982,10 @@ export class MonoCloudNextClient {
   ): Promise<MonoCloudSession | undefined>;
 
   /**
-   * ## Pages Router (Node.js Runtime)
-   *
-   * Retrieves the session object for the currently authenticated user on the server.
-   *
-   * *Note: If the session cannot be resolved or an underlying error occurs, the promise rejects with an error.*
-   *
-   * @param req NextApiRequest
-   * @param res NextApiResponse
-   *
-   * @returns `MonoCloudSession` if found, or `undefined`.
-   *
-   * @example API Handler
-   *
-   * ```typescript
-   * import { monoCloud } from "@/lib/monocloud";
-   * import type { NextApiRequest, NextApiResponse } from "next";
-   *
-   * type Data = {
-   *   name?: string;
-   * };
-   *
-   * export default async function handler(
-   *   req: NextApiRequest,
-   *   res: NextApiResponse<Data>
-   * ) {
-   *   const session = await monoCloud.getSession(req, res);
-   *
-   *   res.status(200).json({ name: session?.user.name });
-   * }
-   * ```
-   *
-   * @example SSR Component
-   *
-   * ```typescript
-   * import { monoCloud } from "@/monocloud";
-   * import type {
-   *   GetServerSideProps,
-   *   GetServerSidePropsContext,
-   *   InferGetServerSidePropsType,
-   * } from "next";
-   *
-   * type HomeProps = InferGetServerSidePropsType<typeof getServerSideProps>;
-   *
-   * export default function Home({ session }: HomeProps) {
-   *   return <pre>Session: {JSON.stringify(session, null, 2)}</pre>;
-   * }
-   *
-   * export const getServerSideProps = (async (
-   *   context: GetServerSidePropsContext,
-   * ) => {
-   *   const session = await monoCloud.getSession(
-   *     context.req,
-   *     context.res,
-   *   );
-   *
-   *   return {
-   *     props: {
-   *       session: session ?? null,
-   *     },
-   *   };
-   * }) satisfies GetServerSideProps;
-   * ```
+   * @see {@link getSession} for full docs and examples.
+   * @param req Incoming Node.js request used to read authentication cookies and resolve the current user's session.
+   * @param res Outgoing Node.js response used to apply refreshed authentication cookies when required.
+   * @returns Returns the resolved session, or `undefined` if none exists.
    */
   public getSession(
     req: NextApiRequest | IncomingMessage,
@@ -1584,250 +1014,19 @@ export class MonoCloudNextClient {
   }
 
   /**
-   * ## SSR Components, Actions, Middleware or API Handlers
-   *
-   * Retrieves the tokens for the currently signed-in user. Optionally refreshes/fetches new tokens.
-   *
-   * **Use Case:**
-   * - App Router Server Components (RSC).
-   * - Server Actions
-   * - Route Handlers (App Router only).
-   * - Middleware (App Router and Pages Router).
-   *
-   * @param options Configuration options for token retrieval.
-   *
-   * @returns
-   *
-   * @throws {@link MonoCloudValidationError} If session is not found
-   *
-   * @example Middleware/Proxy
-   *
-   * ```typescript
-   * import { monoCloud } from "@/lib/monocloud";
-   * import { NextResponse } from "next/server";
-   *
-   * export default async function middleware() {
-   *   const tokens = await monoCloud.getTokens();
-   *
-   *   if (tokens.isExpired) {
-   *     return new NextResponse("Tokens expired", { status: 401 });
-   *   }
-   *
-   *   return NextResponse.next();
-   * }
-   *
-   * export const config = {
-   *   matcher: [
-   *     "/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)",
-   *   ],
-   * };
-   * ```
-   *
-   * @example App Router API Handler
-   *
-   * ```typescript
-   * import { NextResponse } from "next/server";
-   * import { monoCloud } from "@/lib/monocloud";
-   *
-   * export const GET = async () => {
-   *   const tokens = await monoCloud.getTokens();
-   *
-   *   return NextResponse.json({ expired: tokens.isExpired });
-   * };
-   * ```
-   *
-   * @example React Server Components
-   *
-   * ```tsx
-   * import { monoCloud } from "@/lib/monocloud";
-   *
-   * export default async function Home() {
-   *   const tokens = await monoCloud.getTokens();
-   *
-   *   return <div>Expired: {tokens.isExpired.toString()}</div>;
-   * }
-   * ```
-   *
-   * @example Server Action
-   *
-   * ```typescript
-   * "use server";
-   *
-   * import { monoCloud } from "@/lib/monocloud";
-   *
-   * export async function getExpiredAction() {
-   *   const tokens = await monoCloud.getTokens();
-   *
-   *   return { expired: tokens.isExpired };
-   * }
-   * ```
-   *
-   * @example Refresh Default Token
-   *
-   *  The default token is an access token with scopes set through `MONOCLOUD_AUTH_SCOPES` or
-   * `options.defaultAuthParams.scopes`, and resources set through `MONOCLOUD_AUTH_RESOURCE` or
-   * `options.defaultAuthParams.resource`. This token is refreshed when calling getTokens without resource and scopes parameters.
-   *
-   * ```typescript
-   * import { NextResponse } from "next/server";
-   * import { monoCloud } from "@/lib/monocloud";
-   *
-   * export const GET = async () => {
-   * // Although the token refreshes automatically upon expiration, we are manually refreshing it here.
-   * const tokens = await monoCloud.getTokens({ forceRefresh: true });
-   *
-   * return NextResponse.json({ accessToken: tokens?.accessToken });
-   * };
-   * ```
-   *
-   * @example Request new access token for resource(s)
-   *
-   * **Note: Ensure that the resources and scopes are included in the initial authorization flow**
-   *
-   * The following example shows how to request a new token scoped to two non-exclusive resources.
-   *
-   * ```typescript
-   * import { NextResponse } from "next/server";
-   * import { monoCloud } from "@/lib/monocloud";
-   *
-   * export const GET = async () => {
-   *   const tokens = await monoCloud.getTokens({
-   *     resource: "https://first.example.com https://second.example.com",
-   *     scopes: "read:first read:second shared",
-   *   });
-   *
-   *   return NextResponse.json({ accessToken: tokens?.accessToken });
-   * };
-   * ```
-   *
-   * @example Request an exclusive token
-   *
-   * **Note: Ensure that the resources and scopes are included in the initial authorization flow**
-   *
-   * ```typescript
-   * import { NextResponse } from "next/server";
-   * import { monoCloud } from "@/lib/monocloud";
-   *
-   * export const GET = async () => {
-   *   const tokens = await monoCloud.getTokens({
-   *     resource: "https://exclusive.example.com",
-   *     scopes: "read:exclusive shared",
-   *   });
-   *
-   *   return NextResponse.json({ accessToken: tokens?.accessToken });
-   * };
-   * ```
+   * @see {@link getTokens} for full docs and examples.
+   * @param options Optional configuration controlling refresh behavior and resource/scope selection.
+   * @returns The current user's tokens, refreshed if necessary.
+   * @throws {@link MonoCloudValidationError} If no valid session exists.
    */
   public getTokens(options?: GetTokensOptions): Promise<MonoCloudTokens>;
 
   /**
-   * ## Middleware/Proxy or Route Handlers
-   *
-   * Retrieves the tokens for the currently signed-in user. Optionally refreshes/fetches new tokens.
-   *
-   * **Use Case:**
-   * - Middleware (for both App and Pages Router).
-   * - App Router Route Handlers (API routes).
-   * - Edge functions.
-   *
-   * @param req NextRequest
-   * @param options Configuration options for token retrieval.
-   *
-   * @returns
-   *
-   * @throws {@link MonoCloudValidationError} If session is not found
-   *
-   * @example Middleware/Proxy
-   *
-   * ```typescript
-   * import { monoCloud } from "@/lib/monocloud";
-   * import { NextRequest, NextResponse } from "next/server";
-   *
-   * export default async function middleware(req: NextRequest) {
-   *   const tokens = await monoCloud.getTokens(req);
-   *
-   *   if (tokens.isExpired) {
-   *     return new NextResponse("Tokens expired", { status: 401 });
-   *   }
-   *
-   *   return NextResponse.next();
-   * }
-   *
-   * export const config = {
-   *   matcher: [
-   *     "/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)",
-   *   ],
-   * };
-   * ```
-   *
-   * @example App Router API Handler
-   *
-   * ```typescript
-   * import { NextRequest, NextResponse } from "next/server";
-   * import { monoCloud } from "@/lib/monocloud";
-   *
-   * export const GET = async (req: NextRequest) => {
-   *   const tokens = await monoCloud.getTokens(req);
-   *
-   *   return NextResponse.json({ expired: tokens?.isExpired });
-   * };
-   * ```
-   *
-   * @example Refresh Default Token
-   *
-   *  The default token is an access token with scopes set through `MONOCLOUD_AUTH_SCOPES` or
-   * `options.defaultAuthParams.scopes`, and resources set through `MONOCLOUD_AUTH_RESOURCE` or
-   * `options.defaultAuthParams.resource`. This token is refreshed when calling getTokens without parameters.
-   *
-   * ```typescript
-   * import { NextRequest, NextResponse } from "next/server";
-   * import { monoCloud } from "@/lib/monocloud";
-   *
-   * export const GET = async (req: NextRequest) => {
-   *   // Although the token refreshes automatically upon expiration, we are manually refreshing it here.
-   *   const tokens = await monoCloud.getTokens(req, { forceRefresh: true });
-   *
-   *   return NextResponse.json({ accessToken: tokens?.accessToken });
-   * };
-   * ```
-   *
-   * @example Request new access token for resource(s)
-   *
-   * **Note: Ensure that the resources and scopes are included in the initial authorization flow**
-   *
-   * The following example shows how to request a new token scoped to two non-exclusive resources.
-   *
-   * ```typescript
-   * import { NextRequest, NextResponse } from "next/server";
-   * import { monoCloud } from "@/lib/monocloud";
-   *
-   * export const GET = async (req: NextRequest) => {
-   *   const tokens = await monoCloud.getTokens(req, {
-   *     resource: "https://first.example.com https://second.example.com",
-   *     scopes: "read:first read:second shared",
-   *   });
-   *
-   *   return NextResponse.json({ accessToken: tokens?.accessToken });
-   * };
-   * ```
-   *
-   * @example Request an exclusive token
-   *
-   * **Note: Ensure that the resources and scopes are included in the initial authorization flow**
-   *
-   * ```typescript
-   * import { NextRequest, NextResponse } from "next/server";
-   * import { monoCloud } from "@/lib/monocloud";
-   *
-   * export const GET = async (req: NextRequest) => {
-   *   const tokens = await monoCloud.getTokens(req, {
-   *     resource: "https://exclusive.example.com",
-   *     scopes: "read:exclusive shared",
-   *   });
-   *
-   *   return NextResponse.json({ accessToken: tokens?.accessToken });
-   * };
-   * ```
+   * @see {@link getTokens} for full docs and examples.
+   * @param req Incoming request used to resolve authentication from cookies and headers.
+   * @param options Optional configuration controlling refresh behavior and resource/scope selection.
+   * @returns The current user's tokens, refreshed if necessary.
+   * @throws {@link MonoCloudValidationError} If no valid session exists.
    */
   public getTokens(
     req: NextRequest | Request,
@@ -1835,137 +1034,12 @@ export class MonoCloudNextClient {
   ): Promise<MonoCloudTokens>;
 
   /**
-   * ## Middleware/Proxy or Route Handlers (Custom Response)
-   *
-   * Retrieves the tokens for the currently signed-in user. Optionally refreshes/fetches new tokens and updates the provided response object.
-   *
-   * **Use Case:**
-   * - Middleware (when modifying the response).
-   * - App Router Route Handlers (when a NextResponse is already initialized).
-   *
-   * @param req NextRequest
-   * @param res An optional `NextResponse` instance. Pass this if you have already initialized a response and want token updates (e.g., refreshing) to be applied to it.
-   * @param options Configuration options for token retrieval.
-   *
-   * @returns
-   *
-   * @throws {@link MonoCloudValidationError} If session is not found
-   *
-   * @example Middleware/Proxy
-   *
-   *```typescript
-   * import { monoCloud } from "@/lib/monocloud";
-   * import { NextRequest, NextResponse } from "next/server";
-   *
-   * export default async function middleware(req: NextRequest) {
-   *   const res = NextResponse.next();
-   *
-   *   const tokens = await monoCloud.getTokens(req, res);
-   *
-   *   res.headers.set("x-tokens-expired", tokens.isExpired.toString());
-   *
-   *   return res;
-   * }
-   *
-   * export const config = {
-   *   matcher: [
-   *     "/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)",
-   *   ],
-   * };
-   * ```
-   *
-   * @example API Handler with NextResponse
-   *
-   * ```typescript
-   * import { NextRequest, NextResponse } from "next/server";
-   * import { monoCloud } from "@/lib/monocloud";
-   *
-   * export const GET = async (req: NextRequest) => {
-   *   const res = new NextResponse("Custom Body");
-   *
-   *   const tokens = await monoCloud.getTokens(req, res);
-   *
-   *   if (!tokens.isExpired) {
-   *     res.headers.set("x-auth-status", "active");
-   *   }
-   *
-   *   return res;
-   * };
-   * ```
-   *
-   * @example Refresh Default Token
-   *
-   * The default token is an access token with scopes set through `MONOCLOUD_AUTH_SCOPES` or
-   * `options.defaultAuthParams.scopes`, and resources set through `MONOCLOUD_AUTH_RESOURCE` or
-   * `options.defaultAuthParams.resource`. This token is refreshed when calling getTokens without parameters.
-   *
-   * ```typescript
-   * import { NextRequest, NextResponse } from "next/server";
-   * import { monoCloud } from "@/lib/monocloud";
-   *
-   * export const GET = async (req: NextRequest) => {
-   *   const res = new NextResponse("Custom Body");
-   *
-   *   // Although the token refreshes automatically upon expiration, we are manually refreshing it here.
-   *   const tokens = await monoCloud.getTokens(req, res, { forceRefresh: true });
-   *
-   *   if (!tokens.isExpired) {
-   *     res.headers.set("x-auth-status", "active");
-   *   }
-   *
-   *   return res;
-   * };
-   * ```
-   *
-   * @example Request new access token for resource(s)
-   *
-   * **Note: Ensure that the resources and scopes are included in the initial authorization flow**
-   *
-   * The following example shows how to request a new token scoped to two non-exclusive resources.
-   *
-   * ```typescript
-   * import { NextRequest, NextResponse } from "next/server";
-   * import { monoCloud } from "@/lib/monocloud";
-   *
-   * export const GET = async (req: NextRequest) => {
-   *   const res = new NextResponse("Custom Body");
-   *
-   *   const tokens = await monoCloud.getTokens(req, res, {
-   *     resource: "https://first.example.com https://second.example.com",
-   *     scopes: "read:first read:second shared",
-   *   });
-   *
-   *   if (!tokens.isExpired) {
-   *     res.headers.set("x-auth-status", "active");
-   *   }
-   *
-   *   return res;
-   * };
-   * ```
-   *
-   * @example Request an exclusive token
-   *
-   * **Note: Ensure that the resources and scopes are included in the initial authorization flow**
-   *
-   * ```typescript
-   * import { NextRequest, NextResponse } from "next/server";
-   * import { monoCloud } from "@/lib/monocloud";
-   *
-   * export const GET = async (req: NextRequest) => {
-   *   const res = new NextResponse("Custom Body");
-   *
-   *   const tokens = await monoCloud.getTokens(req, res, {
-   *     resource: "https://exclusive.example.com",
-   *     scopes: "read:exclusive shared",
-   *   });
-   *
-   *   if (!tokens.isExpired) {
-   *     res.headers.set("x-auth-status", "active");
-   *   }
-   *
-   *   return res;
-   * };
-   * ```
+   * @see {@link getTokens} for full docs and examples.
+   * @param req Incoming request used to resolve authentication from cookies and headers.
+   * @param res Existing response to update with refreshed authentication cookies or headers.
+   * @param options Optional configuration controlling refresh behavior and resource/scope selection.
+   * @returns The current user's tokens, refreshed if necessary.
+   * @throws {@link MonoCloudValidationError} If no valid session exists.
    */
   public getTokens(
     req: NextRequest | Request,
@@ -1974,121 +1048,12 @@ export class MonoCloudNextClient {
   ): Promise<MonoCloudTokens>;
 
   /**
-   * ## Pages Router (Node.js Runtime)
-   *
-   * Retrieves the tokens for the currently signed-in user. Optionally refreshes/fetches new tokens.
-   *
-   * @param req The `NextApiRequest` or `IncomingMessage`.
-   * @param res The `NextApiResponse` or `ServerResponse`.
-   * @param options Configuration options for token retrieval.
-   *
-   * @returns
-   *
-   * @throws {@link MonoCloudValidationError} If session is not found
-   *
-   * @example API Route
-   *
-   * ```typescript
-   * import { monoCloud } from "@/lib/monocloud";
-   * import type { NextApiRequest, NextApiResponse } from "next";
-   *
-   * export default async function handler(
-   *   req: NextApiRequest,
-   *   res: NextApiResponse
-   * ) {
-   *   const tokens = await monoCloud.getTokens(req, res);
-   *
-   *   res.status(200).json({ accessToken: tokens?.accessToken });
-   * }
-   * ```
-   *
-   * @example SSR Component
-   *
-   * ```typescript
-   * import { monoCloud } from "@/lib/monocloud";
-   * import type { GetServerSideProps, InferGetServerSidePropsType } from "next";
-   *
-   * type HomeProps = InferGetServerSidePropsType<typeof getServerSideProps>;
-   *
-   * export default function Home({ tokens }: HomeProps) {
-   *   return <pre>Tokens: {JSON.stringify(tokens, null, 2)}</pre>;
-   * }
-   *
-   * export const getServerSideProps: GetServerSideProps = async (context) => {
-   *   const tokens = await monoCloud.getTokens(context.req, context.res);
-   *
-   *   return {
-   *     props: {
-   *       tokens: tokens ?? null,
-   *     },
-   *   };
-   * };
-   * ```
-   *
-   * @example Refresh Default Token
-   *
-   *  The default token is an access token with scopes set through `MONOCLOUD_AUTH_SCOPES` or
-   * `options.defaultAuthParams.scopes`, and resources set through `MONOCLOUD_AUTH_RESOURCE` or
-   * `options.defaultAuthParams.resource`. This token is refreshed when calling getTokens without parameters.
-   *
-   * ```typescript
-   * import { monoCloud } from "@/lib/monocloud";
-   * import type { NextApiRequest, NextApiResponse } from "next";
-   *
-   * export default async function handler(
-   *   req: NextApiRequest,
-   *   res: NextApiResponse
-   * ) {
-   *   // Although the token refreshes automatically upon expiration, we are manually refreshing it here.
-   *   const tokens = await monoCloud.getTokens(req, res, { forceRefresh: true });
-   *
-   *   res.status(200).json({ accessToken: tokens?.accessToken });
-   * }
-   * ```
-   *
-   * @example Request new access token for resource(s)
-   *
-   *  **Note: Ensure that the resources and scopes are included in the initial authorization flow**
-   *
-   *  The following example shows how to request a new token scoped to two non-exclusive resources.
-   *
-   * ```typescript
-   * import { monoCloud } from "@/lib/monocloud";
-   * import type { NextApiRequest, NextApiResponse } from "next";
-   *
-   * export default async function handler(
-   *   req: NextApiRequest,
-   *   res: NextApiResponse
-   * ) {
-   *   const tokens = await monoCloud.getTokens(req, res, {
-   *     resource: "https://first.example.com https://second.example.com",
-   *     scopes: "read:first read:second shared",
-   *   });
-   *
-   *   res.status(200).json({ accessToken: tokens?.accessToken });
-   * }
-   * ```
-   *
-   * @example Request an exclusive token
-   *
-   *  **Note: Ensure that the resources and scopes are included in the initial authorization flow**
-   *
-   * ```typescript
-   * import { monoCloud } from "@/lib/monocloud";
-   * import type { NextApiRequest, NextApiResponse } from "next";
-   *
-   * export default async function handler(
-   *   req: NextApiRequest,
-   *   res: NextApiResponse
-   * ) {
-   *   const tokens = await monoCloud.getTokens(req, res, {
-   *     resource: "https://exclusive.example.com",
-   *     scopes: "read:exclusive shared",
-   *   });
-   *
-   *   res.status(200).json({ accessToken: tokens?.accessToken });
-   * }
-   * ```
+   * @see {@link getTokens} for full docs and examples.
+   * @param req Incoming Node.js request used to resolve authentication from cookies.
+   * @param res Outgoing Node.js response used to apply refreshed authentication cookies when required.
+   * @param options Optional configuration controlling refresh behavior and resource/scope selection.
+   * @returns The current user's tokens, refreshed if necessary.
+   * @throws {@link MonoCloudValidationError} If no valid session exists.
    */
   public getTokens(
     req: NextApiRequest | IncomingMessage,
@@ -2146,178 +1111,16 @@ export class MonoCloudNextClient {
   }
 
   /**
-   * ## SSR Components, Actions, Middleware or API Handlers
-   *
-   * Checks if the current user is authenticated.
-   *
-   * **Use Case:**
-   * - App Router Server Components (RSC).
-   * - Server Actions
-   * - Route Handlers (App Router only).
-   * - Middleware (App Router and Pages Router).
-   *
-   * @returns `true` if the user is authenticated, otherwise `false`.
-   *
-   * @example Middleware/Proxy
-   *
-   * ```typescript
-   * import { monoCloud } from "@/lib/monocloud";
-   * import { NextResponse } from "next/server";
-   *
-   * export default async function middleware() {
-   *   const authenticated = await monoCloud.isAuthenticated();
-   *
-   *   if (!authenticated) {
-   *     return new NextResponse("User not signed in", { status: 401 });
-   *   }
-   *
-   *   return NextResponse.next();
-   * }
-   *
-   * export const config = {
-   *   matcher: [
-   *     "/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)",
-   *   ],
-   * };
-   * ```
-   *
-   * @example App Router API Handler
-   *
-   * ```typescript
-   * import { NextResponse } from "next/server";
-   * import { monoCloud } from "@/lib/monocloud";
-   *
-   * export const GET = async () => {
-   *   const authenticated = await monoCloud.isAuthenticated();
-   *
-   *   return NextResponse.json({ authenticated });
-   * };
-   * ```
-   *
-   * @example React Server Components
-   *
-   * ```tsx
-   * import { monoCloud } from "@/lib/monocloud";
-   *
-   * export default async function Home() {
-   *   const authenticated = await monoCloud.isAuthenticated();
-   *
-   *   return <div>Authenticated: {authenticated.toString()}</div>;
-   * }
-   * ```
-   *
-   * @example Server Action
-   *
-   * ```typescript
-   * "use server";
-   *
-   * import { monoCloud } from "@/lib/monocloud";
-   *
-   * export async function checkAuthAction() {
-   *   const authenticated = await monoCloud.isAuthenticated();
-   *
-   *   return { authenticated };
-   * }
-   * ```
+   * @see {@link isAuthenticated} for full docs and examples.
+   * @returns Returns `true` if a valid session exists; otherwise `false`.
    */
   public isAuthenticated(): Promise<boolean>;
 
   /**
-   * ## Middleware/Proxy or Route Handlers
-   *
-   * Checks if the current user is authenticated.
-   *
-   * **Use Case:**
-   * - Middleware (for both App and Pages Router).
-   * - App Router Route Handlers (API routes).
-   * - Edge functions.
-   *
-   * @param req NextRequest
-   * @param res An optional `NextResponse` instance. Pass this if you have already initialized a response; otherwise, omit this parameter.
-   *
-   * @returns `true` if the user is authenticated, otherwise `false`.
-   *
-   * @example Middleware/Proxy
-   *
-   * ```typescript
-   * import { monoCloud } from "@/lib/monocloud";
-   * import { NextRequest, NextResponse } from "next/server";
-   *
-   * export default async function middleware(req: NextRequest) {
-   *   const authenticated = await monoCloud.isAuthenticated(req);
-   *
-   *   if (!authenticated) {
-   *     return new NextResponse("User not signed in", { status: 401 });
-   *   }
-   *
-   *   return NextResponse.next();
-   * }
-   *
-   * export const config = {
-   *   matcher: [
-   *     "/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)",
-   *   ],
-   * };
-   * ```
-   *
-   * @example Middleware/Proxy (Custom Response)
-   *
-   * ```typescript
-   * import { monoCloud } from "@/lib/monocloud";
-   * import { NextRequest, NextResponse } from "next/server";
-   *
-   * export default async function middleware(req: NextRequest) {
-   *   const res = NextResponse.next();
-   *
-   *   const authenticated = await monoCloud.isAuthenticated(req, res);
-   *
-   *   if (!authenticated) {
-   *     return new NextResponse("User not signed in", { status: 401 });
-   *   }
-   *
-   *   res.headers.set("x-authenticated", "true");
-   *
-   *   return res;
-   * }
-   *
-   * export const config = {
-   *   matcher: [
-   *     "/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)",
-   *   ],
-   * };
-   * ```
-   *
-   * @example API Handler
-   *
-   * ```typescript
-   * import { NextRequest, NextResponse } from "next/server";
-   * import { monoCloud } from "@/lib/monocloud";
-   *
-   * export const GET = async (req: NextRequest) => {
-   *   const authenticated = await monoCloud.isAuthenticated(req);
-   *
-   *   return NextResponse.json({ authenticated });
-   * };
-   * ```
-   *
-   * @example API Handler with NextResponse
-   *
-   * ```typescript
-   * import { NextRequest, NextResponse } from "next/server";
-   * import { monoCloud } from "@/lib/monocloud";
-   *
-   * export const GET = async (req: NextRequest) => {
-   *   const res = new NextResponse("YOUR CUSTOM RESPONSE");
-   *
-   *   const authenticated = await monoCloud.isAuthenticated(req, res);
-   *
-   *   if (authenticated) {
-   *     res.cookies.set("something", "important");
-   *   }
-   *
-   *   return res;
-   * };
-   * ```
+   * @see {@link isAuthenticated} for full docs and examples.
+   * @param req Incoming request used to resolve authentication from cookies and headers.
+   * @param res Optional response to update if refreshed authentication cookies or headers are required.
+   * @returns Returns `true` if a valid session exists; otherwise `false`.
    */
   public isAuthenticated(
     req: NextRequest | Request,
@@ -2325,60 +1128,10 @@ export class MonoCloudNextClient {
   ): Promise<boolean>;
 
   /**
-   * ## Pages Router (Node.js Runtime)
-   *
-   * Checks if the current user is authenticated.
-   *
-   * @param req NextApiRequest
-   * @param res NextApiResponse
-   *
-   * @returns `true` if the user is authenticated, otherwise `false`.
-   *
-   * @example API Handler
-   *
-   * ```typescript
-   * import { monoCloud } from "@/lib/monocloud";
-   * import type { NextApiRequest, NextApiResponse } from "next";
-   *
-   * type Data = {
-   *   authenticated: boolean;
-   * };
-   *
-   * export default async function handler(
-   *   req: NextApiRequest,
-   *   res: NextApiResponse<Data>
-   * ) {
-   *   const authenticated = await monoCloud.isAuthenticated(req, res);
-   *
-   *   res.status(200).json({ authenticated });
-   * }
-   * ```
-   *
-   * @example SSR Component
-   *
-   * ```typescript
-   * import { monoCloud } from "@/lib/monocloud";
-   * import type { GetServerSideProps, InferGetServerSidePropsType } from "next";
-   *
-   * type HomeProps = InferGetServerSidePropsType<typeof getServerSideProps>;
-   *
-   * export default function Home({ authenticated }: HomeProps) {
-   *   return <pre>User is {authenticated ? "logged in" : "guest"}</pre>;
-   * }
-   *
-   * export const getServerSideProps: GetServerSideProps = async (context) => {
-   *   const authenticated = await monoCloud.isAuthenticated(
-   *     context.req,
-   *     context.res
-   *   );
-   *
-   *   return {
-   *     props: {
-   *       authenticated,
-   *     },
-   *   };
-   * };
-   * ```
+   * @see {@link isAuthenticated} for full docs and examples.
+   * @param req Incoming Node.js request used to resolve authentication from cookies.
+   * @param res Outgoing Node.js response used to apply refreshed authentication cookies when required.
+   * @returns Returns `true` if a valid session exists; otherwise `false`.
    */
   public isAuthenticated(
     req: NextApiRequest | IncomingMessage,
@@ -2407,52 +1160,9 @@ export class MonoCloudNextClient {
   }
 
   /**
-   * Redirects the user to the sign-in flow if they are not authenticated.
-   *
-   * **This helper is App Router only and is designed for server environments (server components, route handlers, and server actions).**
-   *
-   * @param options Options to customize the sign-in.
-   *
-   * @returns
-   *
-   * @example React Server Component
-   *
-   * ```tsx
-   * import { monoCloud } from "@/lib/monocloud";
-   *
-   * export default async function Home() {
-   *   await monoCloud.protect();
-   *
-   *   return <>You are signed in.</>;
-   * }
-   * ```
-   *
-   * @example API Handler
-   *
-   * ```typescript
-   * import { NextResponse } from "next/server";
-   * import { monoCloud } from "@/lib/monocloud";
-   *
-   * export const GET = async () => {
-   *   await monoCloud.protect();
-   *
-   *   return NextResponse.json({ secret: "ssshhhh!!!" });
-   * };
-   * ```
-   *
-   * @example Server Action
-   *
-   * ```typescript
-   * "use server";
-   *
-   * import { monoCloud } from "@/lib/monocloud";
-   *
-   * export async function getMessage() {
-   *   await monoCloud.protect();
-   *
-   *   return { secret: "sssshhhhh!!!" };
-   * }
-   * ```
+   * @see {@link protect} for full docs and examples.
+   * @param options Optional configuration for redirect behavior (for example, return URL or sign-in parameters).
+   * @returns Resolves if the user is authenticated; otherwise triggers a redirect.
    */
   public async protect(options?: ProtectOptions): Promise<void> {
     const { routes, appUrl } = this.coreClient.getOptions();
@@ -2466,9 +1176,8 @@ export class MonoCloudNextClient {
 
       if (
         session &&
-        options &&
-        options.groups &&
-        isUserInGroup(
+        options?.groups &&
+        isUserInGroupCore(
           session.user,
           options.groups,
           options.groupsClaim ?? process.env.MONOCLOUD_AUTH_GROUPS_CLAIM,
@@ -2544,94 +1253,10 @@ export class MonoCloudNextClient {
   }
 
   /**
-   * ## SSR Components, Actions, Middleware or API Handlers
-   *
-   * Checks if the currently authenticated user is a member of any of the specified groups.
-   *
-   * **Use Case:**
-   * - App Router Server Components (RSC).
-   * - Server Actions
-   * - Route Handlers (App Router only).
-   * - Middleware (App Router and Pages Router).
-   *
-   * @param groups A list of group names or IDs to check against the user's group memberships.
-   * @param options Configuration options.
-   *
-   * @returns
-   *
-   * @example Middleware/Proxy
-   *
-   * ```typescript
-   * import { monoCloud } from "@/lib/monocloud";
-   * import { NextResponse } from "next/server";
-   *
-   * export default async function middleware() {
-   *   const isAdmin = await monoCloud.isUserInGroup(["admin"]);
-   *
-   *   if (!isAdmin) {
-   *     return new NextResponse("User is not admin", { status: 403 });
-   *   }
-   *
-   *   return NextResponse.next();
-   * }
-   *
-   * export const config = {
-   *   matcher: [
-   *     "/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)",
-   *   ],
-   * };
-   * ```
-   *
-   * @example App Router API Handler
-   *
-   * ```typescript
-   * import { NextResponse } from "next/server";
-   * import { monoCloud } from "@/lib/monocloud";
-   *
-   * export const GET = async () => {
-   *   const allowed = await monoCloud.isUserInGroup(["admin", "editor"]);
-   *
-   *   if (!allowed) {
-   *     return new NextResponse("Forbidden", { status: 403 });
-   *   }
-   *
-   *   return NextResponse.json({ status: "success" });
-   * };
-   * ```
-   *
-   * @example React Server Components
-   *
-   * ```tsx
-   * import { monoCloud } from "@/lib/monocloud";
-   *
-   * export default async function AdminPanel() {
-   *   const isAdmin = await monoCloud.isUserInGroup(["admin"]);
-   *
-   *   if (!isAdmin) {
-   *     return <div>Access Denied</div>;
-   *   }
-   *
-   *   return <div>Admin Control Panel</div>;
-   * }
-   * ```
-   *
-   * @example Server Action
-   *
-   * ```typescript
-   * "use server";
-   *
-   * import { monoCloud } from "@/lib/monocloud";
-   *
-   * export async function deletePostAction() {
-   *   const canDelete = await monoCloud.isUserInGroup(["admin", "editor"]);
-   *
-   *   if (!canDelete) {
-   *     return { success: false };
-   *   }
-   *
-   *   return { success: true };
-   * }
-   * ```
+   * @see {@link isUserInGroup} for full docs and examples.
+   * @param groups Group IDs or names to check against the user's group memberships.
+   * @param options Optional configuration controlling how group membership is evaluated.
+   * @returns Returns `true` if the user belongs to at least one specified group; otherwise `false`.
    */
   isUserInGroup(
     groups: string[],
@@ -2639,56 +1264,11 @@ export class MonoCloudNextClient {
   ): Promise<boolean>;
 
   /**
-   * ## Middleware/Proxy or Route Handlers
-   *
-   * Checks if the currently authenticated user is a member of any of the specified groups.
-   *
-   * **Use Case:**
-   * - Middleware (for both App and Pages Router).
-   * - App Router Route Handlers (API routes).
-   * - Edge functions.
-   *
-   * @param req NextRequest
-   * @param groups A list of group names or IDs to check against the user's group memberships.
-   * @param options Configuration options.
-   *
-   * @returns
-   *
-   * @example Middleware/Proxy
-   *
-   * ```typescript
-   * import { monoCloud } from "@/lib/monocloud";
-   * import { NextRequest, NextResponse } from "next/server";
-   *
-   * export default async function middleware(req: NextRequest) {
-   *   const isAdmin = await monoCloud.isUserInGroup(req, ["admin"]);
-   *
-   *   if (!isAdmin) {
-   *     return new NextResponse("User is not admin", { status: 403 });
-   *   }
-   *
-   *   return NextResponse.next();
-   * }
-   *
-   * export const config = {
-   *   matcher: [
-   *     "/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)",
-   *   ],
-   * };
-   * ```
-   *
-   * @example App Router API Handler
-   *
-   * ```typescript
-   * import { NextRequest, NextResponse } from "next/server";
-   * import { monoCloud } from "@/lib/monocloud";
-   *
-   * export const GET = async (req: NextRequest) => {
-   *   const isMember = await monoCloud.isUserInGroup(req, ["admin", "editor"]);
-   *
-   *   return NextResponse.json({ isMember });
-   * };
-   * ```
+   * @see {@link isUserInGroup} for full docs and examples.
+   * @param req Incoming request used to resolve authentication from cookies and headers.
+   * @param groups Group IDs or names to check against the user's group memberships.
+   * @param options Optional configuration controlling how group membership is evaluated.
+   * @returns Returns `true` if the user belongs to at least one specified group; otherwise `false`.
    */
   isUserInGroup(
     req: NextRequest | Request,
@@ -2697,66 +1277,12 @@ export class MonoCloudNextClient {
   ): Promise<boolean>;
 
   /**
-   * ## Middleware/Proxy or Route Handlers (Custom Response)
-   *
-   * Checks if the currently authenticated user is a member of any of the specified groups.
-   *
-   * **Use Case:**
-   * - Middleware (when modifying the response).
-   * - App Router Route Handlers (when a NextResponse is already initialized).
-   *
-   * @param req NextRequest
-   * @param res An optional `NextResponse` instance. Pass this if you have already initialized a response and want token updates to be applied to it.
-   * @param groups A list of group names or IDs to check against the user's group memberships.
-   * @param options Configuration options.
-   *
-   * @returns
-   *
-   * @example Middleware/Proxy
-   *
-   * ```typescript
-   * import { monoCloud } from "@/lib/monocloud";
-   * import { NextRequest, NextResponse } from "next/server";
-   *
-   * export default async function middleware(req: NextRequest) {
-   *   const res = NextResponse.next();
-   *
-   *   const isAdmin = await monoCloud.isUserInGroup(req, res, ["admin"]);
-   *
-   *   if (!isAdmin) {
-   *     return new NextResponse("User is not admin", { status: 403 });
-   *   }
-   *
-   *   res.headers.set("x-user", "admin");
-   *
-   *   return res;
-   * }
-   *
-   * export const config = {
-   *   matcher: [
-   *     "/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)",
-   *   ],
-   * };
-   * ```
-   *
-   * @example API Handler with NextResponse
-   *
-   * ```typescript
-   * import { NextRequest, NextResponse } from "next/server";
-   * import { monoCloud } from "@/lib/monocloud";
-   *
-   * export const GET = async (req: NextRequest) => {
-   *   const res = new NextResponse("Restricted Content");
-   *
-   *   const allowed = await monoCloud.isUserInGroup(req, res, ["admin"]);
-   *
-   *   if (!allowed) {
-   *     return new NextResponse("Not Allowed", res);
-   *   }
-   *
-   *   return res;
-   * };
-   * ```
+   * @see {@link isUserInGroup} for full docs and examples.
+   * @param req Incoming request used to resolve authentication from cookies and headers.
+   * @param res Existing response to update with refreshed authentication cookies or headers when required.
+   * @param groups Group IDs or names to check against the user's group memberships.
+   * @param options Optional configuration controlling how group membership is evaluated.
+   * @returns Returns `true` if the user belongs to at least one specified group; otherwise `false`.
    */
   isUserInGroup(
     req: NextRequest | Request,
@@ -2766,61 +1292,12 @@ export class MonoCloudNextClient {
   ): Promise<boolean>;
 
   /**
-   * ## Pages Router (Node.js Runtime)
-   *
-   * Checks if the currently authenticated user is a member of any of the specified groups.
-   *
-   * @param req The `NextApiRequest` or `IncomingMessage`.
-   * @param res The `NextApiResponse` or `ServerResponse`.
-   * @param groups A list of group names or IDs to check against the user's group memberships.
-   * @param options Configuration options.
-   *
-   * @returns
-   *
-   * @example API Route
-   *
-   * ```typescript
-   * import { monoCloud } from "@/lib/monocloud";
-   * import type { NextApiRequest, NextApiResponse } from "next";
-   *
-   * export default async function handler(
-   *   req: NextApiRequest,
-   *   res: NextApiResponse
-   * ) {
-   *   const isAdmin = await monoCloud.isUserInGroup(req, res, ["admin"]);
-   *
-   *   if (!isAdmin) {
-   *     return res.status(403).json({ error: "Forbidden" });
-   *   }
-   *
-   *   res.status(200).json({ message: "Welcome Admin" });
-   * }
-   * ```
-   *
-   * @example SSR Component
-   *
-   * ```typescript
-   * import { monoCloud } from "@/lib/monocloud";
-   * import type { GetServerSideProps, InferGetServerSidePropsType } from "next";
-   *
-   * type HomeProps = InferGetServerSidePropsType<typeof getServerSideProps>;
-   *
-   * export default function Home({ isAdmin }: HomeProps) {
-   *   return <div>User is admin: {isAdmin.toString()}</div>;
-   * }
-   *
-   * export const getServerSideProps: GetServerSideProps = async (context) => {
-   *   const isAdmin = await monoCloud.isUserInGroup(context.req, context.res, [
-   *     "admin",
-   *   ]);
-   *
-   *   return {
-   *     props: {
-   *       isAdmin,
-   *     },
-   *   };
-   * };
-   * ```
+   * @see {@link isUserInGroup} for full docs and examples.
+   * @param req Incoming Node.js request used to resolve authentication from cookies.
+   * @param res Outgoing Node.js response used to apply refreshed authentication cookies when required.
+   * @param groups Group IDs or names to check against the user's group memberships.
+   * @param options Optional configuration controlling how group membership is evaluated.
+   * @returns Returns `true` if the user belongs to at least one specified group; otherwise `false`.
    */
   isUserInGroup(
     req: NextApiRequest | IncomingMessage,
@@ -2908,66 +1385,9 @@ export class MonoCloudNextClient {
   }
 
   /**
-   * Redirects the user to the sign-in flow.
-   *
-   * **This helper is App Router only and is designed for server environments (server components, route handlers, and server actions).**
-   *
-   * @param options Options to customize the sign-in.
-   *
-   * @returns
-   *
-   * @example React Server Component
-   *
-   * ```tsx
-   * import { monoCloud } from "@/lib/monocloud";
-   *
-   * export default async function Home() {
-   *   const allowed = await monoCloud.isUserInGroup(["admin"]);
-   *
-   *   if (!allowed) {
-   *     await monoCloud.redirectToSignIn({ returnUrl: "/home" });
-   *   }
-   *
-   *   return <>You are signed in.</>;
-   * }
-   * ```
-   *
-   * @example Server Action
-   *
-   * ```typescript
-   * "use server";
-   *
-   * import { monoCloud } from "@/lib/monocloud";
-   *
-   * export async function protectedAction() {
-   *   const session = await monoCloud.getSession();
-   *
-   *   if (!session) {
-   *     await monoCloud.redirectToSignIn();
-   *   }
-   *
-   *   return { data: "Sensitive Data" };
-   * }
-   * ```
-   *
-   * @example API Handler
-   *
-   * ```typescript
-   * import { NextResponse } from "next/server";
-   * import { monoCloud } from "@/lib/monocloud";
-   *
-   * export const GET = async () => {
-   *   const session = await monoCloud.getSession();
-   *
-   *   if (!session) {
-   *     await monoCloud.redirectToSignIn({
-   *       returnUrl: "/dashboard",
-   *     });
-   *   }
-   *
-   *   return NextResponse.json({ data: "Protected content" });
-   * };
-   * ```
+   * @see {@link redirectToSignIn} for full docs and examples.
+   * @param options Optional configuration for the redirect, such as `returnUrl` or additional sign-in parameters.
+   * @returns Never resolves. Triggers a redirect to the sign-in flow.
    */
   public async redirectToSignIn(
     options?: RedirectToSignInOptions
@@ -3037,65 +1457,9 @@ export class MonoCloudNextClient {
   }
 
   /**
-   * Redirects the user to the sign-out flow.
-   *
-   * **This helper is App Router only and is designed for server environments (server components, route handlers, and server actions).**
-   *
-   * @param options Options to customize the sign out.
-   *
-   * @returns
-   *
-   * @example React Server Component
-   *
-   * ```tsx
-   * import { monoCloud } from "@/lib/monocloud";
-   *
-   * export default async function Page() {
-   *   const session = await monoCloud.getSession();
-   *
-   *   // Example: Force sign-out if a specific condition is met (e.g., account suspended)
-   *   if (session?.user.isSuspended) {
-   *     await monoCloud.redirectToSignOut();
-   *   }
-   *
-   *   return <>Welcome User</>;
-   * }
-   * ```
-   *
-   * @example Server Action
-   *
-   * ```typescript
-   * "use server";
-   *
-   * import { monoCloud } from "@/lib/monocloud";
-   *
-   * export async function signOutAction() {
-   *   const session = await monoCloud.getSession();
-   *
-   *   if (session) {
-   *     await monoCloud.redirectToSignOut();
-   *   }
-   * }
-   * ```
-   *
-   * @example API Handler
-   *
-   * ```typescript
-   * import { monoCloud } from "@/lib/monocloud";
-   * import { NextResponse } from "next/server";
-   *
-   * export const GET = async () => {
-   *   const session = await monoCloud.getSession();
-   *
-   *   if (session) {
-   *     await monoCloud.redirectToSignOut({
-   *       postLogoutRedirectUri: "/goodbye",
-   *     });
-   *   }
-   *
-   *   return NextResponse.json({ status: "already_signed_out" });
-   * };
-   * ```
+   * @see {@link redirectToSignOut} for full docs and examples.
+   * @param options Optional configuration for the redirect, such as `postLogoutRedirectUri` or additional sign-out parameters.
+   * @returns Never resolves. Triggers a redirect to the sign-out flow.
    */
   public async redirectToSignOut(
     options?: RedirectToSignOutOptions

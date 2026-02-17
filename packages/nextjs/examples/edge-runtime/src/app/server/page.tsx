@@ -1,6 +1,6 @@
-import { monoCloud } from '@/monocloud';
+import { protectPage } from '@monocloud/auth-nextjs';
 
-export default monoCloud.protectPage(function ServerSide({ user }) {
+export default protectPage(function ServerSide({ user }) {
   return (
     <div className="mt-5 ml-5">
       <h1 className="text-2xl font-bold mb-4">Server</h1>

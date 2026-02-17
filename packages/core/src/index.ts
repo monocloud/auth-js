@@ -13,7 +13,7 @@ export type {
   Group,
   IdTokenClaims,
   IssuerMetadata,
-  JWSAlgorithm,
+  SecurityAlgorithms,
   Jwk,
   Jwks,
   MonoCloudSession,

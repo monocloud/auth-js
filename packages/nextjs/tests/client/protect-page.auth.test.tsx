@@ -3,9 +3,9 @@ import { render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { describe, it, expect, beforeAll, vi } from 'vitest';
 import { Component, fetchNoContent, wrapper } from '../client-helper';
-import { protectPage } from '../../src/client';
+import { protectClientPage } from '../../src/client';
 
-describe('protectPage() - CSR - NEXT_PUBLIC_MONOCLOUD_AUTH_SIGNIN_URL', () => {
+describe('protectClientPage() - CSR - NEXT_PUBLIC_MONOCLOUD_AUTH_SIGNIN_URL', () => {
   beforeAll(() => {
     Object.defineProperty(window, 'location', {
       writable: true,
@@ -21,7 +21,7 @@ describe('protectPage() - CSR - NEXT_PUBLIC_MONOCLOUD_AUTH_SIGNIN_URL', () => {
 
     fetchNoContent();
 
-    const ProtectedComponent = protectPage(Component());
+    const ProtectedComponent = protectClientPage(Component());
 
     const { container } = render(<ProtectedComponent />, { wrapper });
 

@@ -1,8 +1,8 @@
-import { monoCloud } from '@/monocloud';
+import { protectPage, getSession, getTokens } from '@monocloud/auth-nextjs';
 
-export default monoCloud.protectPage(async function ServerSide() {
-  const session = await monoCloud.getSession();
-  const tokens = await monoCloud.getTokens();
+export default protectPage(async function ServerSide() {
+  const session = await getSession();
+  const tokens = await getTokens();
 
   return (
     <div className="mt-5 ml-5 px-10">

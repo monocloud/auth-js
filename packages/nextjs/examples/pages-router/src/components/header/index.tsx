@@ -14,7 +14,7 @@ export const Header = () => {
       {user ? <h1>Hello {user.email}</h1> : <h1>Welcome</h1>}
       <div className="flex gap-4">
         <Link href="/">Home</Link>
-        <Link href="/client">Client</Link>
+        <Link href="/client">Protect Client Page</Link>
         <Link href="/use-monocloud-auth">useAuth() Hook</Link>
         <Link href="/server">Server</Link>
         <Link href="/api-profile">Api</Link>

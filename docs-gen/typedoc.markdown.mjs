@@ -1,0 +1,79 @@
+/** @type {import("typedoc-plugin-markdown").PluginOptions} */
+const typedocPluginMarkdownOptions = {
+  hideBreadcrumbs: true,
+  hidePageHeader: true,
+  parametersFormat: 'table',
+  hidePageTitle: true,
+  interfacePropertiesFormat: 'table',
+  classPropertiesFormat: 'table',
+  enumMembersFormat: 'table',
+  propertyMembersFormat: 'table',
+  typeDeclarationFormat: 'table',
+  typeDeclarationVisibility: 'compact',
+  typeAliasPropertiesFormat: 'table',
+  useHTMLAnchors: false,
+  tableColumnSettings: {
+    hideSources: true,
+    hideModifiers: true,
+    hideDefaults: true,
+    hideInherited: true,
+    hideOverrides: true,
+  },
+  excludeScopesInPaths: true,
+  expandObjects: true,
+  formatWithPrettier: true,
+  expandParameters: true,
+};
+
+/** @type {import("typedoc").TypeDocOptions} */
+const config = {
+  plugin: ['typedoc-plugin-markdown', './hook.mjs'],
+  router: 'category',
+  packageOptions: {
+    gitRevision: 'main',
+    includeVersion: false,
+    excludeExternals: true,
+    excludeInternal: true,
+    excludePrivate: true,
+    excludeNotDocumented: false,
+    sortEntryPoints: true,
+    disableGit: true,
+    disableSources: true,
+    sort: 'alphabetical',
+  },
+  entryPoints: [
+    '../packages/core',
+    '../packages/node-core',
+    '../packages/nextjs',
+  ],
+  exclude: [
+    '**/dist/**',
+    '**/node_modules/**',
+    '**/tests/**',
+    '**/examples/**',
+    '**/packages/test-utils',
+  ],
+  visibilityFilters: [],
+  includeHierarchySummary: false,
+  headings: true,
+  sortEntryPoints: false,
+  entryPointStrategy: 'packages',
+  out: '../docs/markdown',
+  name: 'MonoCloud Authentication SDK',
+  readme: '../README.md',
+  hideGenerator: true,
+  disableSources: false,
+  categorizeByGroup: false,
+  navigation: {
+    includeCategories: true,
+  },
+  theme: 'default',
+  validation: {
+    notExported: true,
+    invalidLink: true,
+    notDocumented: false,
+  },
+  ...typedocPluginMarkdownOptions,
+};
+
+export default config;

@@ -58,7 +58,7 @@ npm install @monocloud/auth-nextjs
 
 Create a `.env.local` file in your project root. The SDK automatically reads variables prefixed with `MONOCLOUD_AUTH__`.
 
-```env
+```bash
 MONOCLOUD_AUTH_TENANT_DOMAIN=https://<your-tenant-domain>
 MONOCLOUD_AUTH_CLIENT_ID=<your-client-id>
 MONOCLOUD_AUTH_CLIENT_SECRET=<your-client-secret>

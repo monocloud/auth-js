@@ -9,11 +9,13 @@ import {
   MonoCloudOptions,
   MonoCloudOptionsBase,
   SameSiteValues,
-  SecurityAlgorithms,
 } from '../types';
 import { DEFAULT_OPTIONS } from './defaults';
 import { optionsSchema } from './validation';
-import { MonoCloudValidationError } from '@monocloud/auth-core';
+import {
+  MonoCloudValidationError,
+  SecurityAlgorithms,
+} from '@monocloud/auth-core';
 
 export const getOptions = (
   options?: MonoCloudOptions,
@@ -280,7 +282,7 @@ export const getOptions = (
       if (detail.context?.key && requiredEnv[detail.context.key]) {
         // eslint-disable-next-line no-console
         console.warn(
-          `Missing: ${detail.context.key} - Set ${requiredEnv[detail.context.key]} enviornment variable in your .env file.`
+          `Missing: ${detail.context.key} - Set ${requiredEnv[detail.context.key]} environment variable in your .env file.`
         );
       }
     });

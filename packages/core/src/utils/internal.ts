@@ -1,7 +1,7 @@
 import type {
   AccessToken,
   Jwk,
-  JWSAlgorithm,
+  SecurityAlgorithms,
   JwsHeaderParameters,
 } from '../types';
 
@@ -224,7 +224,7 @@ export const arrayBufferToBase64 = (buffer: Uint8Array): string => {
  */
 export const now = (): number => Math.ceil(Date.now() / 1000);
 
-const SUPPORTED_JWS_ALGS: JWSAlgorithm[] = [
+const SUPPORTED_JWS_ALGS: SecurityAlgorithms[] = [
   'RS256',
   'RS384',
   'RS512',
@@ -442,11 +442,11 @@ export const parseSpaceSeparatedSet = (s?: string): Set<string> => {
  * @ignore
  * Compares two Sets for equality.
  *
- * @param a - The first Set
- * @param b - The second Set
- * @param strict - If `true`, requires both sets to be the same size. @defaultValue true
+ * @param a - The first Set.
+ * @param b - The second Set.
+ * @param strict - If `true`, requires both sets to be the same size. Defaults to `true`.
  *
- * @returns `true` if the sets are equal
+ * @returns `true` if the sets are equal.
  */
 export const setsEqual = (
   a: Set<string>,

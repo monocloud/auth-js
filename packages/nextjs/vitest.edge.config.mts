@@ -9,6 +9,7 @@ export default defineConfig({
     ],
     include: [
       'tests/middleware.test.ts',
+      'tests/initialize.test.ts',
       'tests/server-functions/**/*.app-router.test.ts',
       'tests/monocloud-auth/**/*.app-router.test.ts',
       'tests/config.test.ts',
