@@ -265,10 +265,9 @@ export interface CallbackParams {
    * Human-readable description providing additional information about the authorization error.
    */
   errorDescription?: string;
-
-  /**
-   * Authorization code returned when using the Authorization Code Flow.
-   */
+  /** Access token scopes (Implicit Flow) */
+  scope?: string;
+  /** Authorization code received from the callback */
   code?: string;
 
   /**

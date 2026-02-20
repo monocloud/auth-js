@@ -11,6 +11,8 @@ export class MockWindow {
 
   private href = 'http://localhost:3000/';
 
+  private hrefSetCalled = false;
+
   private hrefSet = vi.fn();
 
   private expectedHrefValue?: string;
@@ -29,6 +31,8 @@ export class MockWindow {
 
   public mockedPostMessage: typeof window.postMessage = vi.fn();
 
+  public parentPostMessage: typeof window.postMessage = vi.fn();
+
   constructor() {
     this.location = window.location;
     this.history = window.history;
@@ -38,6 +42,23 @@ export class MockWindow {
     this.ogPostMessage = postMessage;
 
     window.postMessage = this.mockedPostMessage;
+    return this;
+  }
+
+  mockParentSide(mode: string): MockWindow {
+    if (mode === 'popup') {
+      vi.spyOn(window, 'opener', 'get').mockReturnValue({
+        postMessage: this.parentPostMessage,
+      });
+    }
+
+    if (mode === 'silent') {
+      vi.spyOn(window, 'parent', 'get').mockReturnValue({
+        postMessage: this.parentPostMessage,
+      } as unknown as Window);
+
+      vi.spyOn(window, 'top', 'get').mockReturnValue({} as unknown as Window);
+    }
 
     return this;
   }
@@ -119,16 +140,46 @@ export class MockWindow {
         search: this.search,
         pathname: this.pathname,
         get href() {
-          return mockWindowInstance.href;
+          const href =
+            (mockWindowInstance.href.endsWith('/')
+              ? mockWindowInstance.href.substring(
+                  0,
+                  mockWindowInstance.href.length - 1
+                )
+              : mockWindowInstance.href) ?? '';
+
+          const path =
+            (mockWindowInstance.pathname.startsWith('/')
+              ? mockWindowInstance.pathname
+              : `/${mockWindowInstance.pathname}`) ?? '/';
+
+          let query = '';
+          if (mockWindowInstance.search !== '') {
+            query = mockWindowInstance.search.startsWith('?')
+              ? mockWindowInstance.search
+              : `?${mockWindowInstance.search}`;
+          }
+
+          let fragment = '';
+          if (mockWindowInstance.hash !== '') {
+            fragment = mockWindowInstance.hash.startsWith('#')
+              ? mockWindowInstance.hash
+              : `#${mockWindowInstance.hash}`;
+          }
+
+          return mockWindowInstance.hrefSetCalled
+            ? mockWindowInstance.href
+            : `${href}${path}${query}${fragment}`;
         },
         set href(href) {
+          mockWindowInstance.hrefSetCalled = true;
           mockWindowInstance.hrefSet(href);
           mockWindowInstance.href = href;
         },
       },
     });
 
-    Object.defineProperty(window, 'histroy', {
+    Object.defineProperty(window, 'history', {
       writable: true,
       value: {
         replaceState: vi.fn(),

@@ -1,0 +1,148 @@
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { expect } from 'vitest';
+import { MockStorage } from '@monocloud/auth-test-utils';
+import type {
+  CallbackState,
+  IStorage,
+  InteractionMode,
+  PostCallback,
+  MonoCloudJSCoreClientOptions,
+  OnSessionCreating,
+} from '../src';
+import { AUTH_CONSTANTS } from '../src/constants';
+import { MonoCloudJSCoreClient } from '../src';
+
+export const testInstance = (
+  options?: Partial<MonoCloudJSCoreClientOptions> & {
+    storage?: IStorage;
+    postCallback?: PostCallback;
+    onSessionCreating?: OnSessionCreating;
+  }
+): MonoCloudJSCoreClient => {
+  const deafultOptions = {
+    appUrl: 'http://localhost:3000',
+    tenantDomain: 'https://example.com',
+    callbackPath: '/callback',
+    signOutCallbackPath: '/signout',
+    clientId: 'clientId',
+  };
+
+  // eslint-disable-next-line no-param-reassign
+  options = options
+    ? {
+        ...deafultOptions,
+        ...options,
+      }
+    : deafultOptions;
+
+  const instance = new MonoCloudJSCoreClient(
+    options as MonoCloudJSCoreClientOptions,
+    options.storage,
+    options.postCallback,
+    options.onSessionCreating
+  );
+
+  return instance;
+};
+
+export const callbackStateKey = (): string =>
+  // @ts-expect-error We are accessing the custom key from window
+  `${AUTH_CONSTANTS.CALLBACK_KEY}.clientId${window.callbackStateKey ? `.${window.callbackStateKey}` : ''}`;
+
+export const sessionKey = (): string =>
+  // @ts-expect-error We are accessing the custom key from window
+  `${AUTH_CONSTANTS.SESSION_KEY}.clientId${window.sessionKey ? `.${window.sessionKey}` : ''}`;
+
+export class VanillaJsMockStorage extends MockStorage implements IStorage {
+  setCallbackState(state: unknown): void {
+    window.sessionStorage.setItem(callbackStateKey(), JSON.stringify(state));
+  }
+
+  expectSession(session?: unknown): VanillaJsMockStorage {
+    expect(this.store[sessionKey()]).toBeTypeOf('string');
+    if (session) {
+      expect(JSON.parse(this.store[sessionKey()] ?? '')).toEqual(session);
+    }
+    return this;
+  }
+
+  expectCallbackState(): VanillaJsMockStorage {
+    expect(window.sessionStorage.getItem(callbackStateKey())).toBeTypeOf(
+      'string'
+    );
+    return this;
+  }
+
+  expectNoSession(): VanillaJsMockStorage {
+    expect(this.store[sessionKey()]).toBeUndefined();
+    return this;
+  }
+
+  expectCallbackStateRemoved(): VanillaJsMockStorage {
+    expect(window.sessionStorage.getItem(callbackStateKey())).toBe(null);
+    return this;
+  }
+
+  expectCallbackStateCodeVerifier(): VanillaJsMockStorage {
+    const state: CallbackState = JSON.parse(
+      window.sessionStorage.getItem(callbackStateKey()) ?? ''
+    );
+
+    expect(state.codeVerifier).toBeTypeOf('string');
+    return this;
+  }
+
+  expectCallbackStateState(): VanillaJsMockStorage {
+    const state: CallbackState = JSON.parse(
+      window.sessionStorage.getItem(callbackStateKey()) ?? ''
+    );
+
+    expect(state.state).toBeTypeOf('string');
+    return this;
+  }
+
+  expectCallbackStateMode(mode: InteractionMode): VanillaJsMockStorage {
+    const state: CallbackState = JSON.parse(
+      window.sessionStorage.getItem(callbackStateKey()) ?? ''
+    );
+
+    expect(state.mode).toBe(mode);
+    return this;
+  }
+
+  expectCallbackStateMaxAge(maxAge: number | undefined): VanillaJsMockStorage {
+    const state: CallbackState = JSON.parse(
+      window.sessionStorage.getItem(callbackStateKey()) ?? ''
+    );
+
+    expect(state.maxAge).toBe(maxAge);
+    return this;
+  }
+
+  expectCallbackStateNonce(): VanillaJsMockStorage {
+    const state: CallbackState = JSON.parse(
+      window.sessionStorage.getItem(callbackStateKey()) ?? ''
+    );
+
+    expect(state.nonce).toBeTypeOf('string');
+    return this;
+  }
+
+  expectCallbackStateSignOut(
+    signOut: boolean | undefined
+  ): VanillaJsMockStorage {
+    const state: CallbackState = JSON.parse(
+      window.sessionStorage.getItem(callbackStateKey()) ?? ''
+    );
+
+    expect(state.signOut).toBe(signOut);
+    return this;
+  }
+}
+
+export const setSession = async (
+  storage: IStorage,
+  session: unknown
+): Promise<void> => {
+  await storage.setItem(sessionKey(), JSON.stringify(session));
+};
