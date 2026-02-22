@@ -11,7 +11,7 @@ import { ExtraAuthParams } from '../../types';
  */
 export interface RedirectToSignInProps extends ExtraAuthParams {
   /**
-   * URL to redirect the user to after sign-in.
+   * The URL to return to after successful authentication. If not provided, the current URL is used.
    */
   returnUrl?: string;
 }

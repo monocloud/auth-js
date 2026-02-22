@@ -192,7 +192,7 @@ export function monoCloudAuth(
  * ```
  *
  * @param options Optional configuration that controls how authentication is enforced (for example, redirect behavior, route matching, or custom handling of unauthenticated requests).
- * @returns Returns a Next.js middleware result, such as a NextResponse, redirect, or undefined to continue processing.
+ * @returns Returns a Next.js middleware result, such as a `NextResponse`, `redirect`, or `undefined` to continue processing.
  *
  * @category Functions
  */
@@ -1127,7 +1127,7 @@ export function protectPage(
  * ```
  *
  * @param options Optional configuration for authentication, authorization, and custom access handling (`onAccessDenied`, `onGroupAccessDenied`).
- * @typeParam P - Props returned from getServerSideProps.
+ * @typeParam P - Props returned from `getServerSideProps`.
  * @typeParam Q - Query parameters parsed from the URL.
  * @returns A getServerSideProps wrapper that enforces authentication before executing the page logic.
  *

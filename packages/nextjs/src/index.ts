@@ -77,6 +77,8 @@ export type {
   AppRouterApiOnGroupAccessDeniedHandler,
   PageRouterApiOnGroupAccessDeniedHandler,
   ProtectPagePageOnGroupAccessDeniedType,
+  ProtectPageGetServerSidePropsContext,
+  ProtectedAppServerComponentProps,
 } from './types';
 
 export { MonoCloudNextClient } from './monocloud-next-client';

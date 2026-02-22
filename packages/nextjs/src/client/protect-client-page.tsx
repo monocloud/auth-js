@@ -181,6 +181,7 @@ const handlePageError = (
  * ```
  *
  * @param Component - The page component to protect
+ * @typeParam P - Props of the protected component (excluding `user`).
  * @param options - Optional configuration
  * @returns A protected React component.
  *

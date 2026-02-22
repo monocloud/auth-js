@@ -293,7 +293,7 @@ export class MonoCloudNextClient {
   /**
    * @see {@link protectPage} for full docs and examples.
    * @param options Optional configuration for authentication, authorization, and custom access handling (`onAccessDenied`, `onGroupAccessDenied`).
-   * @typeParam P - Props returned from getServerSideProps.
+   * @typeParam P - Props returned from `getServerSideProps`.
    * @typeParam Q - Query parameters parsed from the URL.
    * @returns A getServerSideProps wrapper that enforces authentication before executing the page logic.
    */
