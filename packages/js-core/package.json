@@ -64,6 +64,6 @@
   },
   "devDependencies": {
     "@monocloud/auth-test-utils": "workspace:*",
-    "eslint": "9.39.2"
+    "eslint": "10.0.0"
   }
 }

@@ -45,6 +45,7 @@ const config = {
     '../packages/core',
     '../packages/node-core',
     '../packages/nextjs',
+    '../packages/js-core',
   ],
   exclude: [
     '**/dist/**',

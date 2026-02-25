@@ -7,6 +7,7 @@ const SDK_SLUGS = {
   '_monocloud_auth-nextjs': 'nextjs',
   '_monocloud_auth-node-core': 'nodejs-core',
   '_monocloud_auth-core': 'nodejs',
+  '_monocloud_auth-js-core': 'js-core',
 };
 
 const CATEGORY_MAP = {

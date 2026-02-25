@@ -5,6 +5,7 @@ const ROOT_SDK_NAME_REPLACEMENTS = [
   ['@monocloud/auth-nextjs', 'Next.js'],
   ['@monocloud/auth-node-core', 'Node.js Core'],
   ['@monocloud/auth-core', 'Node.js'],
+  ['@monocloud/auth-js-core', 'js-core'],
 ];
 
 const Type = {

@@ -3,7 +3,7 @@ import { describe, it, expect, afterEach } from 'vitest';
 import type { MonoCloudSession } from '@monocloud/auth-core';
 import { now } from '@monocloud/auth-core/internal';
 import { setSession, testInstance } from './utils';
-import { localStorage } from '../src';
+import { LocalStorage } from '../src';
 
 describe('Session Tests', () => {
   afterEach(() => {
@@ -26,7 +26,7 @@ describe('Session Tests', () => {
       user: { sub: 'sub' },
     };
 
-    await setSession(localStorage(), validSession);
+    await setSession(new LocalStorage(), validSession);
 
     const instance = testInstance();
 
@@ -52,7 +52,7 @@ describe('Session Tests', () => {
     // @ts-expect-error set custom key
     window.sessionKey = 'custom';
 
-    await setSession(localStorage(), validSession);
+    await setSession(new LocalStorage(), validSession);
 
     const instance = testInstance({ sessionKey: 'custom' });
 

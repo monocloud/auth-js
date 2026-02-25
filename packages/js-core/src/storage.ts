@@ -1,6 +1,13 @@
 import { IStorage } from './types';
 
-class MemoryStorage implements IStorage {
+/**
+ * In-memory implementation of {@link IStorage}.
+ *
+ * Useful for testing or for sessions that should not persist across page reloads.
+ *
+ * @category Classes
+ */
+export class MemoryStorage implements IStorage {
   private store: Record<string, string> = {};
 
   getItem(key: string): Promise<string | null> {
@@ -19,7 +26,14 @@ class MemoryStorage implements IStorage {
   }
 }
 
-class LocalStorage implements IStorage {
+/**
+ * `window.localStorage`-backed implementation of {@link IStorage}.
+ *
+ * This is the default storage used by `MonoCloudJSCoreClient`.
+ *
+ * @category Classes
+ */
+export class LocalStorage implements IStorage {
   getItem(key: string): Promise<string | null> {
     return Promise.resolve(window.localStorage.getItem(key));
   }
@@ -35,7 +49,14 @@ class LocalStorage implements IStorage {
   }
 }
 
-class SessionStorage implements IStorage {
+/**
+ * `window.sessionStorage`-backed implementation of {@link IStorage}.
+ *
+ * Data persists for the lifetime of the current browser tab.
+ *
+ * @category Classes
+ */
+export class SessionStorage implements IStorage {
   getItem(key: string): Promise<string | null> {
     return Promise.resolve(window.sessionStorage.getItem(key));
   }
@@ -50,31 +71,3 @@ class SessionStorage implements IStorage {
     return Promise.resolve();
   }
 }
-
-/**
- * In memory storage for `MonoCloudJsClient`
- *
- * @example
- *
- * const monoCloudClient = new MonoCloudJsClient(options, memoryStorage());
- */
-export const memoryStorage = (): IStorage => new MemoryStorage();
-
-/**
- * LocalStorage for `MonoCloudJsClient`. This is the default storage.
- * Same as `window.localStorage`.
- *
- * @example
- *
- * const monoCloudClient = new MonoCloudJsClient(options, localStorage());
- */
-export const localStorage = (): IStorage => new LocalStorage();
-
-/**
- * SessionStorage for `MonoCloudJsClient`. Same as `window.sessionStorage`.
- *
- * @example
- *
- * const monoCloudClient = new MonoCloudJsClient(options, sessionStorage());
- */
-export const sessionStorage = (): IStorage => new SessionStorage();

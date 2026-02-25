@@ -43,7 +43,7 @@ export { MonoCloudOidcClient } from '@monocloud/auth-core';
 
 export { MonoCloudJSCoreClient } from './monocloud-js-core-client';
 export { MonoCloudJsError } from './monocloud-js-error';
-export { localStorage, memoryStorage, sessionStorage } from './storage';
+export { LocalStorage, MemoryStorage, SessionStorage } from './storage';
 
 export type {
   MonoCloudJSCoreClientOptions,

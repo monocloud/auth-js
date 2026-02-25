@@ -104,7 +104,7 @@ export const removeTrailingSlash = (val?: string): string => {
  *
  * @returns `true` if the value is present, `false` otherwise.
  */
-export const isPresent = (value?: string | number | boolean): boolean => {
+export const isPresent = (value?: string | number | boolean): value is string | number | boolean => {
   if (typeof value === 'boolean' || typeof value === 'number') {
     return true;
   }

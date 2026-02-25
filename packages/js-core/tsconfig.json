@@ -3,7 +3,6 @@
   "display": "Default",
   "compilerOptions": {
     "declarationMap": false,
-    "downlevelIteration": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "incremental": true,

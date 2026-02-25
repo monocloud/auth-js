@@ -357,6 +357,105 @@ describe('instance.refreshSession() Tests', () => {
     }
   );
 
+  it('Popup Mode - should refresh session through popup and resolve when a session message is received - implicit', async () => {
+    const fetchSpy = fetchBuilder().configureMetadata().createSpy();
+
+    mockWindow.assert();
+
+    const mockPopup = {
+      close: vi.fn(),
+      closed: false,
+      location: { href: '' },
+    } as unknown as Window;
+
+    vi.spyOn(window, 'open').mockReturnValue(mockPopup);
+
+    const existingSession: MonoCloudSession = {
+      user: { sub: 'sub' },
+      accessTokens: [
+        {
+          accessToken: 'at',
+          accessTokenExpiration: now() + 1000,
+          scopes: 'api',
+          requestedScopes: 'api',
+        },
+      ],
+      authorizedScopes: 'api',
+    };
+
+    setSession(mockStorage, existingSession);
+
+    const instance = testInstance({
+      storage: mockStorage,
+      responseType: 'token',
+      fetchUserinfo: false,
+      defaultAuthParams: { scopes: 'api' },
+    });
+
+    expect(await instance.getSession()).toEqual(
+      expect.objectContaining({
+        user: { sub: 'sub' },
+        authorizedScopes: 'api',
+        accessTokens: [
+          expect.objectContaining({
+            accessToken: 'at',
+            accessTokenExpiration: expect.any(Number),
+            scopes: 'api',
+            requestedScopes: 'api',
+          }),
+        ],
+      })
+    );
+
+    const refreshPromise = instance.refreshSession({ mode: 'popup' });
+
+    await vi.waitFor(() => {
+      expect(mockPopup.location.href).toMatch(urlRegex);
+    });
+
+    const authorizeUrl = new URL(mockPopup.location.href);
+    const generatedState = authorizeUrl.searchParams.get('state');
+
+    window.dispatchEvent(
+      new MessageEvent('message', {
+        data: {
+          source: 'monocloud-auth-js-core',
+          url: `http://localhost:3000/callback#state=${encodeURIComponent(
+            generatedState ?? ''
+          )}&access_token=newAt&expires_in=600&scope=api`,
+        },
+        source: mockPopup,
+        origin: 'http://localhost:3000',
+      })
+    );
+
+    await expect(refreshPromise).resolves.toBeUndefined();
+
+    await vi.waitFor(async () => {
+      expect(mockPopup.close).toHaveBeenCalled();
+
+      const session = await instance.getSession();
+      expect(session).toEqual(
+        expect.objectContaining({
+          accessTokens: [
+            {
+              accessToken: 'newAt',
+              scopes: 'api',
+              accessTokenExpiration: expect.any(Number),
+              requestedScopes: 'api',
+            },
+          ],
+          authorizedScopes: 'api',
+          user: {},
+        })
+      );
+
+      mockStorage.expectCallbackStateRemoved();
+    });
+
+    fetchSpy.assert();
+  });
+
   it('Popup Mode - should reject when redirect has error', async () => {
     const fetchSpy = fetchBuilder().configureMetadata().createSpy();
 
@@ -705,6 +804,114 @@ describe('instance.refreshSession() Tests', () => {
             sub: 'sub',
             email: 'test@example.com',
           }),
+        })
+      );
+
+      fetchSpy.assert();
+    });
+  });
+
+  it('Silent Mode - should refresh session through popup and resolve when a session message is received - implicit', async () => {
+    const fetchSpy = fetchBuilder().configureMetadata().createSpy();
+
+    mockWindow.assert();
+
+    const iframe = window.document.createElement('iframe');
+
+    vi.spyOn(window.document, 'createElement').mockReturnValue(iframe);
+
+    vi.spyOn(iframe, 'contentWindow', 'get').mockReturnValue(
+      window as unknown as Window
+    );
+
+    const appendChildSpy = vi.spyOn(window.document.body, 'appendChild');
+
+    let iframeSrc = '';
+
+    vi.spyOn(iframe, 'setAttribute').mockImplementation(
+      (name: string, value: string) => {
+        if (name === 'src') iframeSrc = value;
+      }
+    );
+
+    const existingSession: MonoCloudSession = {
+      user: { sub: 'sub' },
+      accessTokens: [
+        {
+          accessToken: 'at',
+          accessTokenExpiration: now() + 1000,
+          scopes: 'api',
+          requestedScopes: 'api',
+        },
+      ],
+      authorizedScopes: 'api',
+    };
+
+    setSession(mockStorage, existingSession);
+
+    const instance = testInstance({
+      storage: mockStorage,
+      responseType: 'token',
+      fetchUserinfo: false,
+      defaultAuthParams: { scopes: 'api' },
+    });
+
+    expect(await instance.getSession()).toEqual(
+      expect.objectContaining({
+        user: { sub: 'sub' },
+        authorizedScopes: 'api',
+        accessTokens: [
+          expect.objectContaining({
+            accessToken: 'at',
+            accessTokenExpiration: expect.any(Number),
+            scopes: 'api',
+            requestedScopes: 'api',
+          }),
+        ],
+      })
+    );
+
+    const refreshPromise = instance.refreshSession();
+
+    await vi.waitFor(() => {
+      expect(appendChildSpy).toHaveBeenCalledWith(iframe);
+      expect(iframeSrc).toMatch(urlRegex);
+    });
+
+    const authorizeUrl = new URL(iframeSrc);
+    const generatedState = authorizeUrl.searchParams.get('state');
+
+    window.dispatchEvent(
+      new MessageEvent('message', {
+        data: {
+          source: 'monocloud-auth-js-core',
+          url: `http://localhost:3000/callback#access_token=newAt&scope=api&expires_in=600&state=${encodeURIComponent(
+            generatedState ?? ''
+          )}`,
+        },
+        source: window,
+        origin: 'http://localhost:3000',
+      })
+    );
+
+    await expect(refreshPromise).resolves.toBeUndefined();
+
+    await vi.waitFor(async () => {
+      expect(document.body.contains(iframe)).toBe(false);
+
+      const saved = await instance.getSession();
+      expect(saved).toEqual(
+        expect.objectContaining({
+          authorizedScopes: 'api',
+          accessTokens: [
+            {
+              accessToken: 'newAt',
+              accessTokenExpiration: expect.any(Number),
+              scopes: 'api',
+              requestedScopes: 'api',
+            },
+          ],
+          user: {},
         })
       );
 

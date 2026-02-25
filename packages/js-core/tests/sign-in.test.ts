@@ -21,7 +21,7 @@ describe('signIn() Tests', () => {
   let mockStorage: VanillaJsMockStorage;
 
   const urlRegex =
-    /^https:\/\/example\.com\/connect\/authorize\?client_id=clientId&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fcallback&scope=[a-zA-Z0-9+_% -]+&response_type=[a-zA-Z0-9_]+&nonce=[a-zA-Z0-9_-]+&code_challenge=[a-zA-Z0-9_-]+&code_challenge_method=S256&state=[a-zA-Z0-9_-]+$/;
+    /^https:\/\/example\.com\/connect\/authorize\?client_id=clientId&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fcallback&scope=[a-zA-Z0-9+_% -]+&response_type=[a-zA-Z0-9_ ]+&nonce=[a-zA-Z0-9_-]+&code_challenge=[a-zA-Z0-9_-]+&code_challenge_method=S256&state=[a-zA-Z0-9_-]+$/;
 
   beforeEach(() => {
     mockStorage = new VanillaJsMockStorage();
@@ -196,6 +196,7 @@ describe('signIn() Tests', () => {
       state: 'state',
       mode: 'redirect',
       scopes: 'openid offline_access',
+      responseType: 'code',
     };
 
     mockStorage.setCallbackState(state);
@@ -248,6 +249,7 @@ describe('signIn() Tests', () => {
       state: 'state',
       mode: 'redirect',
       scopes: 'openid offline_access',
+      responseType: 'code',
     };
 
     mockStorage.setCallbackState(state);
@@ -309,6 +311,7 @@ describe('signIn() Tests', () => {
       state: 'state',
       mode: 'redirect',
       scopes: 'openid offline_access',
+      responseType: 'code',
     };
 
     mockStorage.setCallbackState(state);
@@ -352,6 +355,7 @@ describe('signIn() Tests', () => {
       mode: 'redirect',
       scopes: 'openid offline_access',
       returnUrl: '/test',
+      responseType: 'code',
     };
 
     mockStorage.setCallbackState(state);
@@ -387,6 +391,7 @@ describe('signIn() Tests', () => {
       state: 'state',
       mode: 'redirect',
       scopes: 'openid offline_access',
+      responseType: 'code',
     };
 
     mockStorage.setCallbackState(state);
@@ -433,6 +438,7 @@ describe('signIn() Tests', () => {
       codeVerifier: 'codeVerifier',
       nonce: 'nonce',
       scopes: 'openid offline_access',
+      responseType: 'code id_token token',
     };
 
     mockStorage.setCallbackState(state);
@@ -461,6 +467,54 @@ describe('signIn() Tests', () => {
     fetchSpy.assert();
   });
 
+  it("Redirect Mode - should process a redirect callback (Hybrid - 'code token' response type)", async () => {
+    const idToken = await generateIdToken({ nonce: 'nonce' });
+
+    const fetchSpy = fetchBuilder()
+      .configureMetadata()
+      .configureJwks()
+      .configureTokenEndpoint({
+        idToken,
+        body: 'grant_type=authorization_code&code=code&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fcallback&code_verifier=codeVerifier',
+      })
+      .configureUserinfo()
+      .createSpy();
+
+    mockWindow
+      .setHash('#state=state&code=code&access_token=at&expires_in=600')
+      .setPathname('/callback')
+      .assert();
+
+    const state: CallbackState = {
+      state: 'state',
+      mode: 'redirect',
+      codeVerifier: 'codeVerifier',
+      nonce: 'nonce',
+      scopes: 'openid offline_access',
+      responseType: 'code token',
+    };
+
+    mockStorage.setCallbackState(state);
+
+    const instance = testInstance({
+      storage: mockStorage,
+      responseType: 'code token',
+    });
+
+    await instance.processCallback();
+
+    mockStorage.expectCallbackStateRemoved();
+    const session = await instance.getSession();
+
+    expect(session).toBeDefined();
+    expect(session?.user.sub).toBe('sub');
+
+    expect(session?.accessTokens).toBeDefined();
+    expect(session?.accessTokens?.[0].accessToken).toBeDefined();
+
+    fetchSpy.assert();
+  });
+
   it("Redirect Mode - should process a redirect callback (Implicit - 'token' response type)", async () => {
     const fetchSpy = fetchBuilder()
       .configureMetadata()
@@ -476,6 +530,7 @@ describe('signIn() Tests', () => {
       state: 'state',
       mode: 'redirect',
       scopes: 'openid offline_access',
+      responseType: 'token',
     };
 
     mockStorage.setCallbackState(state);
@@ -525,6 +580,7 @@ describe('signIn() Tests', () => {
       state: 'state',
       mode: 'redirect',
       scopes: 'openid',
+      responseType: 'id_token',
     };
 
     mockStorage.setCallbackState(state);
@@ -543,7 +599,7 @@ describe('signIn() Tests', () => {
     expect(session?.idToken).toBe(idToken);
 
     expect(session?.refreshToken).toBeUndefined();
-    expect(session?.authorizedScopes).toBeUndefined();
+    expect(session?.authorizedScopes).toBe('openid');
 
     expect(session?.accessTokens?.[0]?.accessToken).toBeUndefined();
     expect(session?.accessTokens?.[0]?.accessTokenExpiration).toBeUndefined();
@@ -575,6 +631,7 @@ describe('signIn() Tests', () => {
       state: 'state',
       mode: 'redirect',
       scopes: 'openid',
+      responseType: 'id_token token',
     };
 
     mockStorage.setCallbackState(state);
@@ -603,6 +660,51 @@ describe('signIn() Tests', () => {
     fetchSpy.assert();
   });
 
+  it('Redirect Mode - should set the scope in access token as requested scope if scope is not present', async () => {
+    const idToken = await generateIdToken({
+      nonce: 'nonce',
+      claims: { sub: 'some' },
+    });
+
+    const fetchSpy = fetchBuilder()
+      .configureMetadata()
+      .configureJwks()
+      .createSpy();
+
+    mockWindow
+      .setSearch(
+        `?state=state&id_token=${idToken}&access_token=at&expires_in=600`
+      )
+      .setPathname('/callback')
+      .assert();
+
+    const state: CallbackState = {
+      nonce: 'nonce',
+      state: 'state',
+      mode: 'redirect',
+      scopes: 'openid other',
+      responseType: 'id_token token',
+    };
+
+    mockStorage.setCallbackState(state);
+
+    const instance = testInstance({
+      storage: mockStorage,
+      fetchUserinfo: false,
+    });
+
+    await instance.processCallback();
+
+    mockStorage.expectCallbackStateRemoved();
+
+    const session = await instance.getSession();
+
+    expect(session?.accessTokens).toHaveLength(1);
+    expect(session?.accessTokens?.[0].scopes).toBe('openid other');
+    expect(session?.accessTokens?.[0].requestedScopes).toBe('openid other');
+    fetchSpy.assert();
+  });
+
   it('Redirect Mode - should throw an error if states mismatch', async () => {
     mockWindow
       .setSearch('?state=states&code=code')
@@ -615,6 +717,7 @@ describe('signIn() Tests', () => {
       state: 'state',
       mode: 'redirect',
       scopes: 'openid',
+      responseType: 'code',
     };
 
     mockStorage.setCallbackState(state);
@@ -643,6 +746,7 @@ describe('signIn() Tests', () => {
       state: 'state',
       mode: 'redirect',
       scopes: 'openid',
+      responseType: 'code',
     };
 
     mockStorage.setCallbackState(state);
@@ -678,6 +782,7 @@ describe('signIn() Tests', () => {
       state: 'state',
       mode: 'redirect',
       scopes: 'openid',
+      responseType: 'id_token',
     };
 
     mockStorage.setCallbackState(state);
@@ -689,6 +794,96 @@ describe('signIn() Tests', () => {
     );
 
     mockStorage.expectCallbackStateRemoved();
+    fetchSpy.assert();
+  });
+
+  it('Redirect Mode - should throw an error if fetchUserinfo is true and scope does not have openid', async () => {
+    const idToken = await generateIdToken({
+      nonce: 'nonce',
+      claims: { sub: 'some' },
+    });
+
+    const fetchSpy = fetchBuilder()
+      .configureMetadata()
+      .configureJwks()
+      .createSpy();
+
+    mockWindow
+      .setSearch(
+        `?state=state&id_token=${idToken}&access_token=at&scope=token&expires_in=600`
+      )
+      .setPathname('/callback')
+      .assert();
+
+    const state: CallbackState = {
+      nonce: 'nonce',
+      state: 'state',
+      mode: 'redirect',
+      scopes: 'token',
+      responseType: 'id_token token',
+    };
+
+    mockStorage.setCallbackState(state);
+
+    const instance = testInstance({ storage: mockStorage });
+
+    const processCallbackPromise = instance.processCallback();
+
+    await expect(processCallbackPromise).rejects.toBeInstanceOf(
+      MonoCloudValidationError
+    );
+
+    await expect(processCallbackPromise).rejects.toThrow(
+      'Fetching userinfo requires the openid scope'
+    );
+
+    mockStorage.expectCallbackStateRemoved();
+
+    fetchSpy.assert();
+  });
+
+  it('Redirect Mode - should throw an error if expires_in is not present in implicit flow', async () => {
+    const idToken = await generateIdToken({
+      nonce: 'nonce',
+      claims: { sub: 'some' },
+    });
+
+    const fetchSpy = fetchBuilder()
+      .configureMetadata()
+      .configureJwks()
+      .createSpy();
+
+    mockWindow
+      .setSearch(
+        `?state=state&id_token=${idToken}&access_token=at&scope=openid`
+      )
+      .setPathname('/callback')
+      .assert();
+
+    const state: CallbackState = {
+      nonce: 'nonce',
+      state: 'state',
+      mode: 'redirect',
+      scopes: 'openid',
+      responseType: 'id_token token',
+    };
+
+    mockStorage.setCallbackState(state);
+
+    const instance = testInstance({ storage: mockStorage });
+
+    const processCallbackPromise = instance.processCallback();
+
+    await expect(processCallbackPromise).rejects.toBeInstanceOf(
+      MonoCloudValidationError
+    );
+
+    await expect(processCallbackPromise).rejects.toThrow(
+      "The 'expires_in' parameter is missing from the callback"
+    );
+
+    mockStorage.expectCallbackStateRemoved();
+
     fetchSpy.assert();
   });
 
@@ -705,6 +900,7 @@ describe('signIn() Tests', () => {
       state: 'state',
       mode: 'redirect',
       scopes: 'openid',
+      responseType: 'id_token',
     };
 
     mockStorage.setCallbackState(state);
@@ -739,6 +935,7 @@ describe('signIn() Tests', () => {
       state: 'state',
       mode: 'redirect',
       scopes: 'openid',
+      responseType: 'id_token',
     };
 
     mockStorage.setCallbackState(state);
@@ -777,6 +974,7 @@ describe('signIn() Tests', () => {
       state: 'state',
       mode: 'redirect',
       scopes: 'openid',
+      responseType: 'id_token',
     };
 
     mockStorage.setCallbackState(state);
@@ -801,7 +999,7 @@ describe('signIn() Tests', () => {
       .createSpy();
 
     mockWindow
-      .setSearch('?state=state&access_token=at&scope=openid')
+      .setSearch('?state=state&access_token=at&scope=openid&expires_in=600')
       .setPathname('/callback')
       .assert();
 
@@ -810,6 +1008,7 @@ describe('signIn() Tests', () => {
       state: 'state',
       mode: 'redirect',
       scopes: 'openid',
+      responseType: 'token',
     };
 
     mockStorage.setCallbackState(state);
@@ -850,6 +1049,7 @@ describe('signIn() Tests', () => {
       state: 'state',
       mode: 'redirect',
       scopes: 'openid',
+      responseType: 'code',
     };
 
     mockStorage.setCallbackState(state);
@@ -1004,6 +1204,7 @@ describe('signIn() Tests', () => {
 
     const instance = testInstance({
       storage: mockStorage,
+      responseType: 'id_token',
     });
 
     const signInPromise = instance.signIn({ mode: 'popup' });
@@ -1019,7 +1220,7 @@ describe('signIn() Tests', () => {
       new MessageEvent('message', {
         data: {
           source: 'monocloud-auth-js-core',
-          url: `http://localhost:3000/callback?state=${generatedState}&id_token=${idToken}`,
+          url: `http://localhost:3000/callback#state=${generatedState}&id_token=${idToken}`,
         },
         source: mockPopup,
         origin: 'http://localhost:3000',
@@ -1050,6 +1251,7 @@ describe('signIn() Tests', () => {
 
     const instance = testInstance({
       storage: mockStorage,
+      responseType: 'id_token',
     });
 
     const signInPromise = instance.signIn({ mode: 'popup' });
@@ -1065,7 +1267,7 @@ describe('signIn() Tests', () => {
       new MessageEvent('message', {
         data: {
           source: 'monocloud-auth-js-core',
-          url: `http://localhost:3000/callback?state=${generatedState}&id_token=malformed_token_string`,
+          url: `http://localhost:3000/callback#state=${generatedState}&id_token=malformed_token_string`,
         },
         source: mockPopup,
         origin: 'http://localhost:3000',
@@ -1104,6 +1306,7 @@ describe('signIn() Tests', () => {
     const instance = testInstance({
       storage: mockStorage,
       validateIdToken: false,
+      responseType: 'id_token',
     });
 
     const signInPromise = instance.signIn({ mode: 'popup' });
@@ -1119,7 +1322,7 @@ describe('signIn() Tests', () => {
       new MessageEvent('message', {
         data: {
           source: 'monocloud-auth-js-core',
-          url: `http://localhost:3000/callback?state=${generatedState}&id_token=${idToken}`,
+          url: `http://localhost:3000/callback#state=${generatedState}&id_token=${idToken}`,
         },
         source: mockPopup,
         origin: 'http://localhost:3000',
@@ -1163,6 +1366,7 @@ describe('signIn() Tests', () => {
     const instance = testInstance({
       storage: mockStorage,
       validateIdToken: false,
+      responseType: 'id_token',
     });
 
     const signInPromise = instance.signIn({ mode: 'popup' });
@@ -1178,7 +1382,7 @@ describe('signIn() Tests', () => {
       new MessageEvent('message', {
         data: {
           source: 'monocloud-auth-js-core',
-          url: `http://localhost:3000/callback?state=${generatedState}&id_token=malformed_token_string`,
+          url: `http://localhost:3000/callback#state=${generatedState}&id_token=malformed_token_string`,
         },
         source: mockPopup,
         origin: 'http://localhost:3000',
@@ -1826,6 +2030,7 @@ describe('signIn() Tests', () => {
       mode: 'popup',
       state: 'state',
       scopes: 'openid',
+      responseType: 'code',
     };
 
     const badCallbackUrl =
@@ -1847,6 +2052,7 @@ describe('signIn() Tests', () => {
       state: 'state',
       scopes: 'openid',
       signOut: true,
+      responseType: 'code',
     };
 
     const callbackUrl = 'http://localhost:3000/callback?code=code&state=state';
@@ -1877,13 +2083,14 @@ describe('signIn() Tests', () => {
     expect(error.message).toBe('Scopes missing from callback state');
   });
 
-  it('should throw error when callback contains no code/token/error', async () => {
+  it('should throw error when callback is missing the required code/token based on response type', async () => {
     const instance = testInstance({ storage: mockStorage });
 
     const callbackState: CallbackState = {
       mode: 'popup',
       state: 'state',
       scopes: 'openid',
+      responseType: 'code',
     };
 
     const callbackUrl = 'http://localhost:3000/callback?state=state';
@@ -1893,7 +2100,7 @@ describe('signIn() Tests', () => {
       .catch((e: any) => e);
 
     expect(error).toBeInstanceOf(MonoCloudValidationError);
-    expect(error.message).toBe('No parameters found in callback');
+    expect(error.message).toBe("Response is missing 'code'");
   });
 
   it('should combine multiple resources and scopes from options.resources', async () => {

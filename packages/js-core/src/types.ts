@@ -16,7 +16,7 @@ import type {
 } from '@monocloud/auth-core';
 
 /**
- * Storage interface for storing session data.
+ * Defines a storage adapter used to persist session data.
  *
  * @category Types
  */
@@ -24,58 +24,59 @@ export interface IStorage {
   /**
    * Retrieves the value associated with the given key.
    *
-   * @param key - The unique identifier for the stored item
-   * @returns The stored value as a string, or `null` if the key does not exist
+   * @param key The unique identifier for the stored item.
+   * @returns The stored value as a string, or `null` if the key does not exist.
    */
   getItem(key: string): Promise<string | null>;
 
   /**
    * Removes the item associated with the specified key from storage.
    *
-   * @param key - The unique identifier of the item to be removed
+   * @param key The unique identifier of the item to remove.
    */
   removeItem(key: string): Promise<void>;
 
   /**
    * Stores a key-value pair in the storage.
    *
-   * @param key - The unique identifier for the item
-   * @param value - The string value to be stored
+   * @param key The unique identifier for the item.
+   * @param value The string value to store.
    */
   setItem(key: string, value: string): Promise<void>;
 }
 
 /**
- * Represents an indicator for additional resources that can be requested.
+ * Represents an additional resource indicator that can be requested when acquiring tokens.
  *
  * @category Types
  */
 export interface Indicator {
   /**
-   * Space separated list of resources to scope the access token to
+   * Space-separated list of resources to scope the access token to.
    */
   resource: string;
+
   /**
-   * Optional: Space separated list of scopes to request
+   * Optional space-separated list of scopes to request.
    */
   scopes?: string;
 }
 
 /**
- * Configuration options for initializing a MonoCloudJSCoreClient.
+ * Configuration options for initializing `MonoCloudJSCoreClient`.
  *
  * @category Types
  */
 export interface MonoCloudJSCoreClientOptions {
   /**
-   * Tenant domain.
+   * MonoCloud tenant domain.
    *
    * @example "https://your-domain.as.monocloud.com"
    */
   tenantDomain: string;
 
   /**
-   * ID of the client.
+   * Client identifier of the application registered in MonoCloud.
    */
   clientId: string;
 
@@ -87,11 +88,12 @@ export interface MonoCloudJSCoreClientOptions {
   appUrl: string;
 
   /**
-   * The relative path where MonoCloud redirects the user after sign in.
-   * This url should be registered in the client's callback urls settings. If callback path is not set
-   * the callback url is set to `appUrl` with path `/`.
+   * Relative callback path where MonoCloud redirects the user after sign-in.
    *
-   * @example "/callback"
+   * This URL must be registered in the application's callback URL settings.
+   * If omitted, the callback URL defaults to `appUrl` with path `/`.
+   *
+   * @example /callback
    */
   callbackPath?: string;
 
@@ -103,28 +105,26 @@ export interface MonoCloudJSCoreClientOptions {
   validateIdToken?: boolean;
 
   /**
-   * Determines whether to fetch from userinfo after authentication.
+   * Determines whether to fetch UserInfo after authentication.
    *
    * @defaultValue true
    */
   fetchUserinfo?: boolean;
 
   /**
-   * When set to `true`, signs user out from the app and MonoCloud globally.
+   * When `true`, signs the user out from both the app and MonoCloud.
    *
    * @defaultValue true
    */
   federatedSignOut?: boolean;
 
-  /**
-   * Array of strings representing the filtered ID token claims.
-   */
+  /** List of ID token claims to exclude when constructing the final user object. */
   filteredIdTokenClaims?: string[];
 
   /**
    * Timeout duration (in seconds) for popups and iframes.
    *
-   * @defaultValue 600
+   * @defaultValue 600 (seconds)
    */
   authWindowTimeout?: number;
 
@@ -151,28 +151,28 @@ export interface MonoCloudJSCoreClientOptions {
   /**
    * The maximum allowed clock skew (in seconds) for token validation.
    *
-   * @defaultValue 60
+   * @defaultValue 60 (seconds)
    */
   clockSkew?: number;
 
   /**
-   * The maximum allowed clock tolerance (in seconds) for date time based claims.
+   * The maximum allowed clock tolerance for date-time-based claims.
    *
-   * @defaultValue 60
+   * @defaultValue 60 (seconds)
    */
   clockTolerance?: number;
 
   /**
-   * Specifies the OpenId response type for the authentication flow.
+   * Specifies the OpenID Connect response type for the authentication flow.
    *
-   * @defaultValue "code"
+   * @defaultValue 'code'
    */
   responseType?: ResponseTypes;
 
   /**
-   * Path where MonoCloud redirects after the user signs out.
+   * Relative path where MonoCloud redirects the user after sign-out.
    *
-   * @example "/signout"
+   * @example /signout
    */
   signOutCallbackPath?: string | null;
 
@@ -189,64 +189,59 @@ export interface MonoCloudJSCoreClientOptions {
   /**
    * Algorithm used for verifying ID token signature.
    *
-   * @defaultValue "RS256"
+   * @defaultValue 'RS256'
    */
   idTokenSigningAlgorithm?: SecurityAlgorithms;
 
   /**
    * A unique identifier that differentiates sessions when multiple clients are used within the same application.
-   * This key is concatenated with internal session key to prevent conflicts.
+   *
+   * This key is appended to the internal session key to prevent conflicts.
    */
   sessionKey?: string;
 
   /**
    * Default authorization parameters to include in authentication requests.
-   *
-   * @defaultValue { scope: 'openid', response_type: 'code' }
    */
   defaultAuthParams?: AuthorizationParams;
 
   /**
-   * Additional resources that can be requested via `getTokens()`.
+   * Additional resources that can be requested in `getTokens()`.
    */
   resources?: Indicator[];
 
   /**
    * The duration in seconds to cache the JWKS document after it is fetched.
    *
-   * @defaultValue 60
+   * @defaultValue 300 (seconds)
    */
   jwksCacheDuration?: number;
 
   /**
    * Time in seconds to cache the metadata document after it is fetched.
    *
-   * @defaultValue 60
+   * @defaultValue 300 (seconds)
    */
   metadataCacheDuration?: number;
 }
 
 /**
- * The custom application state used for preserving context during redirection.
+ * Custom application state passed through authentication flows.
  *
  * @category Types
  */
 export type ApplicationState = Record<string, any>;
 
 /**
- * Defines a callback function to be executed when a new session is being created or updated.
- *
- * This function receives parameters related to the session being created,
- * including the session object itself, optional ID token and user information claims,
- * and the application state.
+ * Callback invoked when a session is being created or updated.
  *
  * @category Types (Handler)
  *
- * @param session - The Session object being created.
- * @param idToken - Optional. Claims from the ID token received during authentication.
- * @param userInfo - Optional. Claims from the user information received during authentication.
- * @param state - Optional. The application state associated with the session.
- * @returns A Promise that resolves when the operation is completed, or void.
+ * @param session The session object being created.
+ * @param idToken Optional claims from the ID token received during authentication.
+ * @param userInfo Optional claims from the UserInfo response.
+ * @param state Optional application state associated with the session.
+ * @returns Returns `void` or a `Promise<void>`.
  */
 export type OnSessionCreating = (
   session: MonoCloudSession,
@@ -256,14 +251,14 @@ export type OnSessionCreating = (
 ) => Promise<void> | void;
 
 /**
- * Defines the interaction modes supported by the client for sign in and sign out.
+ * Interaction modes supported for sign-in and sign-out flows.
  *
- * @category Types
+ * @category Types (Enums)
  */
 export type InteractionMode = 'popup' | 'redirect';
 
 /**
- * Parameters for the post callback function after handling a redirect or popup flow.
+ * Metadata passed to `PostCallback` after callback processing.
  *
  * @category Types
  */
@@ -276,27 +271,29 @@ export type PostCallbackParams =
   | { type: 'signOut'; mode: InteractionMode; returnUrl?: string };
 
 /**
- * A function that is executed after a sign in or sign out callback.
- *
- * Use this function to navigate to another route or execute business logic instead of triggering a full page reload.
+ * Callback executed after sign-in or sign-out callback processing.
  *
  * @category Types (Handler)
+ *
+ * @param state Metadata describing the completed flow.
+ * @returns Returns `void` or a `Promise<void>`.
  */
 export type PostCallback = (state: PostCallbackParams) => Promise<void> | void;
 
 /**
- * Options for configuring the `signIn()` method.
+ * Options for `signIn()`.
  *
  * @category Types
  */
 export interface SignInOptions {
   /**
-   * Specifies the preferred authenticator for sign in.
+   * Specifies the preferred authenticator for sign-in.
    */
   authenticatorHint?: Authenticators;
 
   /**
    * Maximum allowed time (in seconds) since the user's last authentication.
+   *
    * Used to force re-authentication if the last login exceeds this time.
    */
   maxAge?: number;
@@ -309,94 +306,85 @@ export interface SignInOptions {
   loginHint?: string;
 
   /**
-   * Specifies preferred locales for the login pages.
+   * Specifies preferred locales for the sign-in page.
    *
    * @example "en-US"
    */
   uiLocales?: string;
 
   /**
-   * Redirects to the sign up page if set to `true`.
+   * When `true`, starts the sign-up flow.
    */
   signUp?: boolean;
 
   /**
-   * The desired authentication behaviour.
+   * The desired authentication behavior.
    */
   prompt?: Prompt;
 
-  /**
-   * An array of authentication context class references (ACRs).
-   */
+  /** An array of authentication context class references (ACRs). */
   acrValues?: string[];
 
-  /**
-   * The desired user interface mode.
-   */
+  /** The desired user interface mode. */
   display?: DisplayOptions;
 
   /**
-   * Determines the interaction mode for the sign in.
+   * Determines the interaction mode for sign-in.
    *
-   * @defaultValue "redirect"
+   * @defaultValue 'redirect'
    */
   mode?: InteractionMode;
 
   /**
-   * The relative path to return to after sign in.
+   * Relative path to return to after sign-in.
    */
   returnUrl?: string;
 
-  /**
-   * Space-separated scopes requested from the authorization server.
-   */
+  /** Space-separated scopes requested from the authorization server. */
   scopes?: string;
 
-  /**
-   * Space-separated resources the access token should be scoped to.
-   */
+  /** Space-separated resources the access token should be scoped to. */
   resource?: string;
 
-  /**
-   * Additional custom application specific state information.
-   */
+  /** Additional custom application-specific state information. */
   appState?: ApplicationState;
 }
 
 /**
- * Options for configuring the `signOut()` method.
+ * Options for `signOut()`.
  *
  * @category Types
  */
 export interface SignOutOptions {
   /**
-   * Specifies the URI to redirect to after successful sign out. The URI should be saved in the client's
-   * sign out uri section.
+   * URI to redirect to after successful sign-out.
+   *
+   * This URI must be configured in the application's allowed sign-out callback URLs.
    */
   postLogoutRedirectUri?: string;
 
   /**
    * Determines the interaction mode for the sign-out process.
    *
-   * @defaultValue "redirect"
+   * @defaultValue 'redirect'
    */
   mode?: InteractionMode;
 
   /**
-   * The relative path to return to after sign out.
+   * Relative path to return to after sign-out.
    */
   returnUrl?: string;
 }
 
 /**
- * Defines the modes of interaction for refreshing session.
+ * Interaction modes supported by `refreshSession()`.
  *
- * @category Types
+ * @category Types (Enums)
  */
 export type RefreshMode = 'popup' | 'refresh_token' | 'silent';
 
 /**
- * Options for configuring the `refreshSession()` method.
+ * Options for `refreshSession()`.
  *
  * @category Types
  */
@@ -404,25 +392,21 @@ export interface RefreshOptions {
   /**
    * Determines the interaction mode for the session refresh process.
    *
-   * > **WARNING**: Using `popup` or `silent` will overwrite the current session since it initiates a fresh authorization request.
+   * Using `popup` or `silent` starts a new authorization request and replaces the current session.
    *
-   * @defaultValue "silent"
+   * @defaultValue 'silent'
    */
   mode?: RefreshMode;
 
-  /**
-   * Configuration specifically for the Refresh Token Grant flow.
-   */
+  /** Configuration specific to the Refresh Token Grant flow. */
   refreshGrantOptions?: RefreshGrantOptions;
 
-  /**
-   * Additional custom application specific state information.
-   */
+  /** Additional custom application-specific state information. */
   appState?: ApplicationState;
 }
 
 /**
- * Internal interface used for storing the authentication request state.
+ * Internal state persisted between authorization start and callback processing.
  *
  * @category Types
  */
@@ -431,10 +415,11 @@ export interface CallbackState extends Partial<AuthState> {
   mode: 'popup' | 'redirect' | 'silent';
   returnUrl?: string;
   appState?: ApplicationState;
+  responseType?: ResponseTypes;
 }
 
 /**
- * Result structure emitted by the popup or iframe after successfully authenticating.
+ * Message payload posted by popup or iframe callback windows.
  *
  * @category Types
  */
@@ -444,24 +429,24 @@ export interface PostMessageResult {
 }
 
 /**
- * Represents options for the `getTokens()` handler.
+ * Options for `getTokens()`.
  *
  * @category Types
  */
 export interface GetTokensOptions extends RefreshGrantOptions {
   /**
-   * Specifies whether to force the refresh of the access token, bypassing expiration checks.
+   * Specifies whether to force the refresh of the access token.
    */
   forceRefresh?: boolean;
 
   /**
-   * Determines whether to refetch the user information from the OpenID Provider.
+   * Determines whether to refetch the user information.
    */
   refetchUserInfo?: boolean;
 }
 
 /**
- * Represents the tokens obtained during authentication that are available in the session.
+ * Tokens available in the current session.
  *
  * @category Types
  */

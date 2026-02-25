@@ -6,6 +6,7 @@ import {
   parseCallbackParams,
 } from '@monocloud/auth-core/utils';
 import type {
+  AccessToken,
   AuthorizationParams,
   IdTokenClaims,
   MonoCloudSession,
@@ -38,7 +39,7 @@ import type {
 } from './types';
 import { AUTH_CONSTANTS } from './constants';
 import { Ref } from './ref';
-import { localStorage } from './storage';
+import { LocalStorage } from './storage';
 import {
   MonoCloudOidcClient,
   MonoCloudOPError,
@@ -48,13 +49,13 @@ import { MonoCloudJsError } from './monocloud-js-error';
 import { withLock } from './lock';
 
 /**
- * `MonoCloudJSCoreClient` is the core SDK entry point for integrating MonoCloud authentication into browser-based applications (SPAs) or vanilla JavaScript environments.
+ * `MonoCloudJSCoreClient` is the core SDK entry point for integrating MonoCloud authentication into single-page applications (SPAs) and other browser-based JavaScript environments.
  *
  * It provides:
- * - Redirection and popup-based sign-in and sign-out
- * - Session and token management
- * - Automatic PKCE and state validation
- * - Silent and explicit token refreshing
+ * - Redirection and popup-based sign-in and sign-out.
+ * - Session and token management.
+ * - Automatic PKCE and state validation.
+ * - Silent and explicit token refreshing.
  *
  * ## Initialization
  *
@@ -76,9 +77,7 @@ export class MonoCloudJSCoreClient {
   private storage: IStorage;
 
   /**
-   * This is intended for advanced scenarios requiring direct control over the authorization or token flow.
-   *
-   * @returns Returns the underlying **OIDC client** used for OpenID Connect operations.
+   * Underlying OpenID Connect client used for advanced authorization and token operations.
    */
   oidcClient: MonoCloudOidcClient;
 
@@ -86,10 +85,10 @@ export class MonoCloudJSCoreClient {
 
   /**
    * Default post-callback behavior:
-   * - If `returnUrl` is not set: remove query params from the current URL (no navigation).
-   * - If `returnUrl` is set: navigate to `returnUrl` (full page reload).
+   * - If `returnUrl` is not set, remove query parameters from the current URL (no navigation).
+   * - If `returnUrl` is set, navigate to `returnUrl` with a full page reload.
    *
-   * If you use a client-side router, provide a custom `postCallbackFn` to avoid full reload.
+   * If you use a client-side router, provide a custom `postCallbackFn` to avoid full reloads.
    */
   private postCallbackFn: PostCallback = state => {
     if (!state.returnUrl) {
@@ -99,7 +98,7 @@ export class MonoCloudJSCoreClient {
     } else {
       // eslint-disable-next-line no-console
       console.warn(
-        'Warning: The default behavior for return url is to perform a full page reload, which will reset all data if you are using memoryStorage. To integrate with a client-side router, pass a custom postCallback() function during client initialization.'
+        'Warning: The default behavior for return URL is to perform a full page reload, which resets all data when using MemoryStorage. To integrate with a client-side router, pass a custom postCallback() function during client initialization.'
       );
       window.location.href = state.returnUrl;
     }
@@ -177,7 +176,8 @@ export class MonoCloudJSCoreClient {
   }
 
   /**
-   * Persist the callback state in `sessionStorage` for redirect-based flows.
+   * Persists callback state in `sessionStorage` for redirect-based flows.
+   *
    * This state is consumed by `processCallback()` and then cleared.
    */
   private set redirectCallbackState(state: CallbackState | undefined) {
@@ -218,6 +218,7 @@ export class MonoCloudJSCoreClient {
 
   /**
    * Storage key used for persisting the current session.
+   *
    * Includes `clientId` and optional `sessionKey` suffix to avoid collisions.
    */
   private get sessionKey(): string {
@@ -269,27 +270,27 @@ export class MonoCloudJSCoreClient {
    * @example Custom Storage & Router
    * ```typescript:src/auth.ts tab="Custom Storage & Router" tab-group="constructor"
    * import { MonoCloudJSCoreClient } from '@monocloud/auth-js-core';
-   * import { InMemoryStorage } from './storage';
+   * import { MemoryStorage } from './storage';
    * import { router } from './router';
    *
    * const client = new MonoCloudJSCoreClient(
    * options,
-   * new InMemoryStorage(),
+   * new MemoryStorage(),
    * (state) => {
-   * // Use router to navigate instead of full page reload
-   * router.push(state.returnUrl || '/dashboard');
+   *   // Use router to navigate instead of full page reload.
+   *   router.push(state.returnUrl || '/dashboard');
    * }
    * );
    * ```
    *
    * @param options Configuration options for the client.
-   * @param storage Custom storage implementation for session persistence. Defaults to `localStorage`.
+   * @param storage Custom storage implementation for session persistence. Defaults to `new LocalStorage()`.
    * @param postCallbackFn A callback function executed after a successful sign-in or sign-out. Useful for client-side routing integration.
-   * @param onSessionCreating A hook to modify or validate the session during creation.
+   * @param onSessionCreating A hook used to modify or validate the session during creation.
    */
   constructor(
     options: MonoCloudJSCoreClientOptions,
-    storage: IStorage = localStorage(),
+    storage: IStorage = new LocalStorage(),
     postCallbackFn?: PostCallback,
     onSessionCreating?: OnSessionCreating
   ) {
@@ -331,11 +332,11 @@ export class MonoCloudJSCoreClient {
    * import { client } from './auth';
    *
    * async function init() {
-   * // Process any pending redirect callbacks before rendering
-   * await client.processCallback();
+   *   // Process any pending redirect callbacks before rendering.
+   *   await client.processCallback();
    *
-   * // Continue mounting the app
-   * renderApp();
+   *   // Continue mounting the app.
+   *   renderApp();
    * }
    *
    * init();
@@ -356,6 +357,7 @@ export class MonoCloudJSCoreClient {
       this.redirectCallbackState = undefined;
 
       if (callbackState) {
+        /* v8 ignore else -- @preserve */
         if (isSignInPath && !callbackState.signOut) {
           await this.processSignInCallback(window.location.href, callbackState);
         } else if (isSignOutPath && callbackState.signOut) {
@@ -386,25 +388,25 @@ export class MonoCloudJSCoreClient {
    * @example Redirect Flow
    * ```typescript:src/app.ts tab="Redirect Flow" tab-group="signIn"
    * document.getElementById('login-btn').addEventListener('click', async () => {
-   * // Standard top-level redirect to the authorization server
-   * await client.signIn();
+   *   // Standard top-level redirect to the authorization server.
+   *   await client.signIn();
    * });
    * ```
    *
    * @example Popup Flow
    * ```typescript:src/app.ts tab="Popup Flow" tab-group="signIn"
    * document.getElementById('login-popup-btn').addEventListener('click', async () => {
-   * // Opens a centered popup for authentication
-   * await client.signIn({ mode: 'popup' });
-   * console.log("User finished popup flow!");
+   *   // Opens a centered popup for authentication.
+   *   await client.signIn({ mode: 'popup' });
+   *   console.log('User finished popup flow!');
    * });
    * ```
    *
    * @example Sign Up
    * ```typescript:src/app.ts tab="Sign Up" tab-group="signIn"
    * document.getElementById('register-btn').addEventListener('click', async () => {
-   * // Forces the identity provider to show the registration/sign-up screen
-   * await client.signIn({ signUp: true });
+   *   // Forces the identity provider to show the registration/sign-up screen.
+   *   await client.signIn({ signUp: true });
    * });
    * ```
    *
@@ -440,13 +442,13 @@ export class MonoCloudJSCoreClient {
           parseSpaceSeparated(signInOptions?.scopes),
           parseSpaceSeparated(this.options.defaultAuthParams?.scopes),
           parseSpaceSeparated(indicatorScopes)
-        ) ?? AUTH_CONSTANTS.DEFAULT_SCOPES.split(' ');
+        )?.join(' ') ?? AUTH_CONSTANTS.DEFAULT_SCOPES;
 
       const mergedResources = mergeArrays(
         parseSpaceSeparated(signInOptions?.resource),
         parseSpaceSeparated(this.options.defaultAuthParams?.resource),
         parseSpaceSeparated(indicatorResource)
-      );
+      )?.join(' ');
 
       const params: AuthorizationParams = {
         uiLocales: signInOptions?.uiLocales,
@@ -454,13 +456,13 @@ export class MonoCloudJSCoreClient {
         loginHint: signInOptions?.loginHint,
         maxAge: signInOptions?.maxAge,
         responseType: this.responseType,
-        scopes: mergedScopes.join(' '),
+        scopes: mergedScopes,
         codeChallenge,
         codeChallengeMethod: 'S256',
         redirectUri: this.redirectUri,
         state,
         nonce,
-        resource: mergedResources?.join(' '),
+        resource: mergedResources,
         prompt: signInOptions?.prompt,
         display: signInOptions?.display,
         acrValues: signInOptions?.acrValues,
@@ -472,6 +474,15 @@ export class MonoCloudJSCoreClient {
 
       const url = await this.oidcClient.authorizationUrl(params);
 
+      let resource = this.options.defaultAuthParams?.resource;
+
+      if (
+        params.responseType === 'token' ||
+        params.responseType === 'id_token token'
+      ) {
+        resource = mergedResources;
+      }
+
       const callbackState: CallbackState = {
         state,
         codeVerifier,
@@ -481,7 +492,8 @@ export class MonoCloudJSCoreClient {
         returnUrl: signInOptions?.returnUrl,
         appState: signInOptions?.appState,
         scopes: params.scopes,
-        resource: this.options.defaultAuthParams?.resource,
+        responseType: this.responseType,
+        resource,
       };
 
       if (mode === 'redirect') {
@@ -511,15 +523,15 @@ export class MonoCloudJSCoreClient {
    * @example Standard Sign Out
    * ```typescript:src/app.ts tab="Redirect Flow" tab-group="signOut"
    * document.getElementById('logout-btn').addEventListener('click', async () => {
-   * await client.signOut();
+   *   await client.signOut();
    * });
    * ```
    *
    * @example Popup Sign Out
    * ```typescript:src/app.ts tab="Popup Flow" tab-group="signOut"
    * document.getElementById('logout-popup-btn').addEventListener('click', async () => {
-   * // Opens a popup to perform the federated sign-out, keeping the user on the current page
-   * await client.signOut({ mode: 'popup' });
+   *   // Opens a popup to perform federated sign-out and keep the user on the current page.
+   *   await client.signOut({ mode: 'popup' });
    * });
    * ```
    *
@@ -567,7 +579,7 @@ export class MonoCloudJSCoreClient {
         state,
       });
 
-      const callbackState = {
+      const callbackState: CallbackState = {
         mode,
         state: new URL(url).searchParams.get('state') ?? undefined,
         signOut: true,
@@ -598,7 +610,7 @@ export class MonoCloudJSCoreClient {
    * Refreshes the user's session.
    *
    * This method can be used to explicitly refresh tokens using various methods:
-   * - `silent`: Uses a hidden iframe (requires 3rd party cookies).
+   * - `silent`: Uses a hidden iframe (requires third-party cookies).
    * - `refresh_token`: Uses the Refresh Token Grant (requires `offline_access` scope).
    * - `popup`: Opens a transient popup to refresh the session interactively.
    *
@@ -677,24 +689,26 @@ export class MonoCloudJSCoreClient {
             mergeArrays(
               parseSpaceSeparated(this.options.defaultAuthParams?.scopes),
               parseSpaceSeparated(indicatorScopes)
-            ) ?? AUTH_CONSTANTS.DEFAULT_SCOPES.split(' ');
+            )?.join(' ') ?? AUTH_CONSTANTS.DEFAULT_SCOPES;
 
           const mergedResources = mergeArrays(
             parseSpaceSeparated(this.options.defaultAuthParams?.resource),
             parseSpaceSeparated(indicatorResource)
-          );
+          )?.join(' ');
 
-          const url = await this.oidcClient.authorizationUrl({
+          const params: AuthorizationParams = {
             prompt: 'none',
             responseType: this.responseType,
-            scopes: mergedScopes.join(' '),
+            scopes: mergedScopes,
             codeChallenge,
             codeChallengeMethod: 'S256',
             redirectUri: this.redirectUri,
-            resource: mergedResources?.join(' '),
+            resource: mergedResources,
             state,
             nonce,
-          });
+          };
+
+          const url = await this.oidcClient.authorizationUrl(params);
 
           /* v8 ignore if -- @preserve */
           if (!ref) {
@@ -703,14 +717,24 @@ export class MonoCloudJSCoreClient {
 
           const callbackUrl = await this.authWindow(url, ref);
 
+          let resource = this.options.defaultAuthParams?.resource;
+
+          if (
+            params.responseType === 'token' ||
+            params.responseType === 'id_token token'
+          ) {
+            resource = mergedResources;
+          }
+
           const callbackState: CallbackState = {
             state,
             codeVerifier,
             nonce,
             mode,
             appState: refreshOptions?.appState,
-            scopes: mergedScopes.join(' '),
-            resource: this.options.defaultAuthParams?.resource,
+            scopes: params.scopes,
+            resource,
+            responseType: this.responseType,
           };
 
           return await this.processSignInCallback(callbackUrl, callbackState);
@@ -722,7 +746,7 @@ export class MonoCloudJSCoreClient {
   }
 
   /**
-   * Refetches the user information from the userinfo endpoint and updates the local session.
+   * Refetches user information from the UserInfo endpoint and updates the local session.
    *
    * @example Usage
    * ```typescript:src/app.ts
@@ -778,8 +802,8 @@ export class MonoCloudJSCoreClient {
    * @example Specific Resource
    * ```typescript:src/app.ts tab="Specific Resource" tab-group="getTokens"
    * const tokens = await client.getTokens({
-   * resource: '[https://api.example.com](https://api.example.com)',
-   * scopes: 'read:data'
+   *   resource: 'https://api.example.com',
+   *   scopes: 'read:data'
    * });
    * ```
    *
@@ -838,8 +862,8 @@ export class MonoCloudJSCoreClient {
       if (options?.forceRefresh || !token || tokenExpired) {
         const updatedSession = await this.oidcClient.refreshSession(session, {
           fetchUserInfo: options?.refetchUserInfo,
-          validateIdToken: true,
-          idTokenClockSkew: this.options.clockSkew,
+          validateIdToken: this.validateIdToken,
+          idTokenClockSkew: this.clockSkew,
           idTokenClockTolerance: this.clockTolerance,
           refreshGrantOptions: {
             resource,
@@ -876,13 +900,13 @@ export class MonoCloudJSCoreClient {
   }
 
   /**
-   * Retrieves the current session object from local storage.
+   * Retrieves the current session object from configured storage.
    *
    * @example Usage
    * ```typescript:src/app.ts
    * const session = await client.getSession();
    * if (session) {
-   * console.log('User is logged in:', session.user);
+   *   console.log('User is logged in:', session.user);
    * }
    * ```
    *
@@ -898,7 +922,7 @@ export class MonoCloudJSCoreClient {
   }
 
   /**
-   * Persist or clear the session in storage.
+   * Persists or clears the session in storage.
    *
    * @param session When provided, the session is serialized to storage. When omitted, the session is removed.
    */
@@ -912,7 +936,7 @@ export class MonoCloudJSCoreClient {
   }
 
   /**
-   * Complete a sign-in flow using a callback URL and the saved callback state.
+   * Completes a sign-in flow using a callback URL and the saved callback state.
    *
    * Validates:
    * - Callback URL matches configured `redirectUri`
@@ -920,7 +944,7 @@ export class MonoCloudJSCoreClient {
    * - Authorization response parameters (success or error)
    * - ID token (optional, depending on configuration and flow)
    *
-   * On success, creates/updates the session and invokes the configured post-callback handler.
+   * On success, creates or updates the session and invokes the configured post-callback handler.
    *
    * @param callbackUrl Full callback URL received from the OP.
    * @param callbackState State captured when initiating the flow.
@@ -946,18 +970,15 @@ export class MonoCloudJSCoreClient {
       throw new MonoCloudValidationError('Scopes missing from callback state');
     }
 
+    if (!isPresent(callbackState.responseType)) {
+      throw new MonoCloudValidationError(
+        'Response type missing from callback state'
+      );
+    }
+
     const callbackParams = parseCallbackParams(
       this.responseType === 'code' ? url.search : url.hash
     );
-
-    if (
-      !callbackParams.accessToken &&
-      !callbackParams.code &&
-      !callbackParams.idToken &&
-      !callbackParams.error
-    ) {
-      throw new MonoCloudValidationError('No parameters found in callback');
-    }
 
     if (callbackState.state && callbackParams.state !== callbackState.state) {
       throw new MonoCloudValidationError('Sign in callback states mismatch');
@@ -970,17 +991,89 @@ export class MonoCloudJSCoreClient {
       );
     }
 
-    // Implicit/Hybrid
-    if (
-      !callbackParams.code &&
-      (callbackParams.idToken || callbackParams.accessToken)
-    ) {
+    const { accessToken, idToken, code } = callbackParams;
+
+    switch (callbackState.responseType) {
+      case 'code':
+        if (!isPresent(code))
+          throw new MonoCloudValidationError("Response is missing 'code'");
+        break;
+
+      case 'token':
+        if (!isPresent(accessToken))
+          throw new MonoCloudValidationError(
+            "Response is missing 'access_token'"
+          );
+        break;
+
+      case 'id_token':
+        if (!isPresent(idToken))
+          throw new MonoCloudValidationError("Response is missing 'id_token'");
+        break;
+
+      case 'id_token token':
+        if (!isPresent(idToken) || !isPresent(accessToken)) {
+          throw new MonoCloudValidationError(
+            "Response is missing 'id_token' or 'access_token'"
+          );
+        }
+        break;
+
+      case 'code id_token':
+        if (!isPresent(code) || !isPresent(idToken)) {
+          throw new MonoCloudValidationError(
+            "Response is missing 'code' or 'id_token'"
+          );
+        }
+        break;
+
+      case 'code token':
+        if (!isPresent(code) || !isPresent(accessToken)) {
+          throw new MonoCloudValidationError(
+            "Response is missing 'code' or 'access_token'"
+          );
+        }
+        break;
+
+      case 'code id_token token':
+        if (
+          !isPresent(code) ||
+          !isPresent(idToken) ||
+          !isPresent(accessToken)
+        ) {
+          throw new MonoCloudValidationError(
+            "Response is missing 'code', 'id_token', or 'access_token'"
+          );
+        }
+        break;
+
+      default:
+        throw new MonoCloudValidationError(
+          `Unsupported response_type: ${callbackState.responseType}`
+        );
+    }
+
+    const isImplicit =
+      callbackState.responseType === 'token' ||
+      callbackState.responseType === 'id_token token' ||
+      callbackState.responseType === 'id_token';
+
+    const isCodeOrHybrid =
+      callbackState.responseType === 'code' ||
+      callbackState.responseType === 'code id_token' ||
+      callbackState.responseType === 'code token' ||
+      callbackState.responseType === 'code id_token token';
+
+    if (isImplicit) {
       let idTokenClaims = {} as IdTokenClaims;
-      if (callbackParams.idToken) {
+      if (
+        callbackState.responseType === 'id_token' ||
+        callbackState.responseType === 'id_token token'
+      ) {
         if (this.validateIdToken) {
           const jwks = await this.oidcClient.getJwks();
           idTokenClaims = await this.oidcClient.validateIdToken(
-            callbackParams.idToken,
+            idToken!,
             jwks.keys,
             this.clockSkew,
             this.clockTolerance,
@@ -988,18 +1081,42 @@ export class MonoCloudJSCoreClient {
             callbackState.nonce
           );
         } else {
-          idTokenClaims = MonoCloudOidcClient.decodeJwt(callbackParams.idToken);
+          idTokenClaims = MonoCloudOidcClient.decodeJwt(idToken!);
         }
       }
 
       let userinfo = {} as unknown as UserinfoResponse;
 
+      const accessTokens: AccessToken[] = [];
+
       if (
-        callbackParams.accessToken &&
-        this.fetchUserinfo &&
-        callbackParams.scope?.includes('openid')
+        callbackState.responseType === 'token' ||
+        callbackState.responseType === 'id_token token'
       ) {
-        userinfo = await this.oidcClient.userinfo(callbackParams.accessToken);
+        if (!isPresent(callbackParams.expiresIn)) {
+          throw new MonoCloudValidationError(
+            "The 'expires_in' parameter is missing from the callback"
+          );
+        }
+
+        const scopes = callbackParams.scope ?? callbackState.scopes;
+
+        if (this.fetchUserinfo) {
+          if (!scopes.includes('openid')) {
+            throw new MonoCloudValidationError(
+              'Fetching userinfo requires the openid scope'
+            );
+          }
+          userinfo = await this.oidcClient.userinfo(accessToken!);
+        }
+
+        accessTokens.push({
+          accessToken: accessToken!,
+          scopes,
+          requestedScopes: callbackState.scopes,
+          resource: callbackState.resource,
+          accessTokenExpiration: now() + callbackParams.expiresIn,
+        });
       }
 
       const session: MonoCloudSession = {
@@ -1008,20 +1125,17 @@ export class MonoCloudJSCoreClient {
           ...userinfo,
         },
         idToken: callbackParams.idToken,
-        accessTokenExpiration: callbackParams.expiresIn
-          ? now() + callbackParams.expiresIn
-          : undefined,
+        accessTokens,
+        refreshToken: callbackParams.refreshToken,
+        authorizedScopes: callbackState.scopes,
       };
 
-      if (callbackParams.accessToken) {
-        session.accessTokens = [
-          {
-            accessToken: callbackParams.accessToken,
-            scopes: callbackParams.scope ?? '',
-            accessTokenExpiration: 1,
-          },
-        ];
-      }
+      await this.onSessionCreating?.(
+        session,
+        idTokenClaims,
+        userinfo,
+        callbackState.appState
+      );
 
       await this.setSession(session);
 
@@ -1033,13 +1147,13 @@ export class MonoCloudJSCoreClient {
       return;
     }
 
-    // Authorization Code
-    if (callbackParams.code) {
+    // Authorization Code/Hybrid
+    /* v8 ignore else -- @preserve */
+    if (isCodeOrHybrid) {
       const session = await this.oidcClient.authenticate(
-        callbackParams.code,
+        code!,
         this.redirectUri,
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        callbackState.scopes!,
+        callbackState.scopes,
         this.options.defaultAuthParams?.resource,
         {
           fetchUserInfo: this.fetchUserinfo,
@@ -1072,7 +1186,7 @@ export class MonoCloudJSCoreClient {
   }
 
   /**
-   * Complete a sign-out callback.
+   * Completes a sign-out callback.
    *
    * Clears the local session and validates that the callback `state` matches the
    * stored callback state for the initiated sign-out flow.
@@ -1111,12 +1225,12 @@ export class MonoCloudJSCoreClient {
   }
 
   /**
-   * Run an auth request inside a popup window or hidden iframe and wait for the callback URL.
+   * Runs an auth request inside a popup window or hidden iframe and waits for the callback URL.
    *
    * This method:
-   * - navigates the popup/iframe to the provided authorization URL
-   * - waits for a `postMessage` from the popup/iframe containing the callback URL
-   * - rejects on timeout or if the user closes the popup
+   * - Navigates the popup/iframe to the provided authorization URL.
+   * - Waits for a `postMessage` from the popup/iframe containing the callback URL.
+   * - Rejects on timeout or if the user closes the popup.
    *
    * It does not parse or validate the callback parameters; the caller does that.
    *
@@ -1160,6 +1274,7 @@ export class MonoCloudJSCoreClient {
           return;
         }
 
+        /* v8 ignore else -- @preserve */
         if (e.data.url) {
           abort();
           resolve(e.data.url);
@@ -1186,11 +1301,11 @@ export class MonoCloudJSCoreClient {
   }
 
   /**
-   * Create a window reference appropriate for the interaction mode.
+   * Creates a window reference appropriate for the interaction mode.
    *
-   * - `popup`  -> opens a popup window
-   * - `silent` -> creates a hidden iframe
-   * - other modes do not require a window reference
+   * - `popup`: Opens a popup window.
+   * - `silent`: Creates a hidden iframe.
+   * - Other modes do not require a window reference.
    */
   private createRef(
     mode: 'popup' | 'silent' | 'redirect' | 'refresh_token'
@@ -1208,7 +1323,7 @@ export class MonoCloudJSCoreClient {
   }
 
   /**
-   * Open a centered popup window for interactive authentication.
+   * Opens a centered popup window for interactive authentication.
    *
    * @returns A `Ref` bound to the popup window.
    * @throws {@link MonoCloudJsError} If the browser blocks the popup.
@@ -1249,7 +1364,7 @@ export class MonoCloudJSCoreClient {
   }
 
   /**
-   * Create a hidden iframe for silent authentication (`prompt=none`).
+   * Creates a hidden iframe for silent authentication (`prompt=none`).
    *
    * @returns A `Ref` bound to the iframe element.
    * @throws {@link MonoCloudJsError} If the environment is cross-origin isolated.

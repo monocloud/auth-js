@@ -1,7 +1,5 @@
-// eslint-disable-next-line import/no-extraneous-dependencies
 /* eslint-disable import/no-extraneous-dependencies */
 /* eslint-disable no-param-reassign */
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { fetchBuilder, generateIdToken } from '@monocloud/auth-test-utils';
@@ -13,7 +11,7 @@ import {
   type MonoCloudUser,
 } from '@monocloud/auth-core';
 import { setSession, testInstance, VanillaJsMockStorage } from './utils';
-import { freeze, travel } from 'timekeeper';
+import { freeze, travel, reset } from 'timekeeper';
 
 describe('getTokens() Tests', () => {
   let mockStorage: VanillaJsMockStorage;
@@ -29,6 +27,7 @@ describe('getTokens() Tests', () => {
   });
 
   afterEach(() => {
+    reset();
     window.localStorage.clear();
     window.sessionStorage.clear();
   });
@@ -258,7 +257,7 @@ describe('getTokens() Tests', () => {
     fetchSpy.assert();
   });
 
-  it('should not save the new access token in the cookie if RefreshGrantOptions.scopes or RefreshGrantOptions.resource was passed in', async () => {
+  it('should refresh using authorizedScopes when forceRefresh is true and no resource/scopes are provided', async () => {
     const frozenTimeMs = 1330688329321;
     freeze(frozenTimeMs);
 
@@ -578,7 +577,7 @@ describe('getTokens() Tests', () => {
 
     const instance = testInstance({
       storage: mockStorage,
-      onSessionCreating: async (session, idtoken, userinfo, appState) => {
+      onSessionCreating: (session, idtoken, userinfo, appState) => {
         expect(appState).toBeUndefined();
         expect(userinfo).toBeUndefined();
         expect(idtoken).toBeDefined();
