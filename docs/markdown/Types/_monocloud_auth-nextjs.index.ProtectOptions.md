@@ -6,7 +6,7 @@ category: Types
 
 # Type: ProtectOptions
 
-Options for configuring the `protect()` helper.
+Options for configuring [protect()](/sdks/nextjs/api-reference/functions/protect).
 
 ## Extends
 

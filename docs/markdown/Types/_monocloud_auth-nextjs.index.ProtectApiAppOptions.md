@@ -6,7 +6,7 @@ category: Types
 
 # Type: ProtectApiAppOptions
 
-Options for configuring `protectApi()` in the App Router.
+Options for configuring [protectApi()](/sdks/nextjs/api-reference/functions/protectapi) in the App Router.
 
 ## Extends
 

@@ -6,9 +6,9 @@ category: Handler Types
 
 # Handler Type: ProtectPagePageOnGroupAccessDeniedType
 
-> **ProtectPagePageOnGroupAccessDeniedType**\<`P`, `Q`\> = (`context`: `GetServerSidePropsContext`\<`Q`\> & \{ `user`: [`MonoCloudUser`](/sdks/nextjs/api-reference/types/monoclouduser); \}) => `Promise`\<`GetServerSidePropsResult`\<`P`\>\> \| `GetServerSidePropsResult`\<`P`\>
+> **ProtectPagePageOnGroupAccessDeniedType**\<`P`, `Q`\> = (`context`: [`ProtectPageGetServerSidePropsContext`](/sdks/nextjs/api-reference/handler-types/protectpagegetserversidepropscontext)\<`Q`\>) => `Promise`\<`GetServerSidePropsResult`\<`P`\>\> \| `GetServerSidePropsResult`\<`P`\>
 
-Handler invoked when an authenticated user does not satisfy the required group restrictions while running a Pages Router `getServerSideProps` protected by `protectPage()`.
+Handler invoked when an authenticated user does not satisfy the required group restrictions while running a Pages Router `getServerSideProps` protected by [protectPage()](/sdks/nextjs/api-reference/functions/protectpage).
 
 ## Type Parameters
 
@@ -19,9 +19,9 @@ Handler invoked when an authenticated user does not satisfy the required group r
 
 ## Parameters
 
-| Parameter | Type                                                                                                                          | Description                               |
-| --------- | ----------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------- |
-| `context` | `GetServerSidePropsContext`\<`Q`\> & \{ `user`: [`MonoCloudUser`](/sdks/nextjs/api-reference/types/monoclouduser); \} | The Next.js `getServerSideProps` context. |
+| Parameter | Type                                                                                                                  | Description                               |
+| --------- | --------------------------------------------------------------------------------------------------------------------- | ----------------------------------------- |
+| `context` | [`ProtectPageGetServerSidePropsContext`](/sdks/nextjs/api-reference/handler-types/protectpagegetserversidepropscontext)\<`Q`\> | The Next.js `getServerSideProps` context. |
 
 ## Returns
 

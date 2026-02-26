@@ -16,7 +16,7 @@ Response types determine which artifacts are returned from the authorization end
 
 ## Type Declaration
 
-- `code` - Authorization Code Flow (recommended). Returns an authorization code that is exchanged for tokens server-side.
+- `code` - Authorization Code Flow (recommended). Returns an authorization code that is exchanged for tokens on the server-side.
 - `token` - Implicit Flow returning an access token directly from the authorization endpoint.
 - `id_token` - Implicit Flow returning an ID token.
 - `id_token token` - Implicit Flow returning both an ID token and an access token.

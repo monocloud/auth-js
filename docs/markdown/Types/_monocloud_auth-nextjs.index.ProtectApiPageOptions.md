@@ -6,7 +6,7 @@ category: Types
 
 # Type: ProtectApiPageOptions
 
-Options for configuring `protectApi()` in the Pages Router.
+Options for configuring [protectApi()](/sdks/nextjs/api-reference/functions/protectapi) in the Pages Router.
 
 ## Extends
 

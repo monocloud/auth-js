@@ -22,11 +22,11 @@ Sets a cookie on the response.
 
 #### Parameters
 
-| Parameter    | Type                                                                |
-| ------------ | ------------------------------------------------------------------- |
-| `cookieName` | `string`                                                            |
-| `value`      | `string`                                                            |
-| `options`    | [`CookieOptions`](/sdks/nodejs-core/api-reference/types/cookieoptions) |
+| Parameter    | Type                                                                | Description                           |
+| ------------ | ------------------------------------------------------------------- | ------------------------------------- |
+| `cookieName` | `string`                                                            | The name of the cookie to set.        |
+| `value`      | `string`                                                            | The value to assign to the cookie.    |
+| `options`    | [`CookieOptions`](/sdks/nodejs-core/api-reference/types/cookieoptions) | Serialization options for the cookie. |
 
 #### Returns
 

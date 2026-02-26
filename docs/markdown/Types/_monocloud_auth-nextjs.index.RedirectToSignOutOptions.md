@@ -6,7 +6,7 @@ category: Types
 
 # Type: RedirectToSignOutOptions
 
-Options for `redirectToSignOut()`
+Options for [redirectToSignOut()](/sdks/nextjs/api-reference/functions/redirecttosignout).
 
 ## Properties
 
