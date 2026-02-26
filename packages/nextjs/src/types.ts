@@ -1,9 +1,6 @@
 import type {
-  Authenticators,
   AuthorizationParams,
-  DisplayOptions,
   MonoCloudUser,
-  Prompt,
 } from '@monocloud/auth-node-core';
 import type { NextFetchEvent, NextRequest, NextResponse } from 'next/server';
 import type {
@@ -642,56 +639,11 @@ export interface GroupOptions extends IsUserInGroupOptions {
  *
  * @category Types
  */
-export interface RedirectToSignInOptions {
+export interface RedirectToSignInOptions extends ExtraAuthParams {
   /**
    * URL to return the user to after successful authentication. Must be a relative application URL.
    */
   returnUrl?: string;
-
-  /**
-   * Maximum allowed time (in seconds) since the user's last authentication.
-   */
-  maxAge?: number;
-
-  /**
-   * Hint to the authorization server indicating which authenticator should be used during sign-in.
-   */
-  authenticatorHint?: Authenticators;
-
-  /**
-   * Scopes to request during authentication.
-   */
-  scopes?: string[];
-
-  /**
-   * Resource indicators the access token should be issued for.
-   */
-  resource?: string[];
-
-  /**
-   * Preferred UI language(s) for the authentication experience.
-   */
-  uiLocales?: string;
-
-  /**
-   * Preferred display mode for the authentication UI.
-   */
-  display?: DisplayOptions;
-
-  /**
-   * Authentication Context Class Reference (ACR) values requesting specific authentication methods or assurance levels.
-   */
-  acrValues?: string[];
-
-  /**
-   * Hint about the user's identifier (for example, email or username).
-   */
-  loginHint?: string;
-
-  /**
-   * Controls whether the authorization server should force specific user interactions during authentication
-   */
-  prompt?: Prompt;
 }
 
 /**

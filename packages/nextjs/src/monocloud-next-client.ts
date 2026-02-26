@@ -1422,12 +1422,12 @@ export class MonoCloudNextClient {
       );
     }
 
-    if (Array.isArray(options?.scopes)) {
-      signInRoute.searchParams.set('scope', options.scopes.join(' '));
+    if (options?.scopes) {
+      signInRoute.searchParams.set('scope', options.scopes);
     }
 
-    if (Array.isArray(options?.resource)) {
-      signInRoute.searchParams.set('resource', options.resource.join(' '));
+    if (options?.resource) {
+      signInRoute.searchParams.set('resource', options.resource);
     }
 
     if (options?.display) {
