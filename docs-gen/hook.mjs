@@ -114,17 +114,21 @@ export const load = app => {
     if (type === Type.Types_Enums) {
       const typesLen = page.model.type.types.length;
       const items = [];
-      for (let i = 0; i < typesLen; i++) {
-        const item = {
-          value: page.model.type.types[i].value,
-          type: page.model.type.types[i].type,
-          description: page.model.type.elementSummaries[i][0].text.replace(
-            /\n\n/g,
-            ' '
-          ),
-        };
 
-        items.push(item);
+      for (let i = 0; i < typesLen; i++) {
+        const summary = page.model.type.elementSummaries?.[i];
+
+        if (summary) {
+          const text = summary.map(x => x.text).join('');
+
+          const item = {
+            value: page.model.type.types[i].value,
+            type: page.model.type.types[i].type,
+            description: text.replace(/\n\n/g, ' '),
+          };
+
+          items.push(item);
+        }
       }
 
       const str = items

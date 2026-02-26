@@ -1,0 +1,20 @@
+---
+rootSdk: js-core
+title: "DisplayOptions"
+category: Enums
+---
+
+# Enum: DisplayOptions
+
+> **DisplayOptions** = `"page"` \| `"popup"` \| `"touch"` \| `"wap"`
+
+Supported OpenID Connect `display` parameter values.
+
+The display parameter hints to the authorization server how the authentication or consent UI should be presented to the user.
+
+## Type Declaration
+
+- `page` - Full-page authentication experience in the browser.
+- `popup` - Authentication optimized for popup windows.
+- `touch` - Authentication optimized for touch-based devices.
+- `wap` - Authentication optimized for legacy mobile or constrained browsers.

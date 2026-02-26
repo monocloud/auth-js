@@ -19,5 +19,6 @@ Parameters returned to the application after the authorization server redirects 
 | `expiresIn?`               | `number` | Lifetime of the access token in seconds.                                                                                   |
 | `idToken?`                   | `string` | ID token issued by the authorization server.                                                                               |
 | `refreshToken?`         | `string` | Refresh token issued during authorization (if enabled).                                                                    |
+| `scope?`                       | `string` | Access token scopes (Implicit Flow)                                                                                        |
 | `sessionState?`         | `string` | OIDC session state value used for session monitoring and front-channel session management.                                 |
 | `state?`                       | `string` | The state value originally sent in the authorization request. Used to validate request integrity and prevent CSRF attacks. |
