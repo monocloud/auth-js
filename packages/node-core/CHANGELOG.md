@@ -1,5 +1,13 @@
 # @monocloud/auth-node-core
 
+## 0.1.7
+
+### Patch Changes
+
+- 7a24686: Improve comments and descriptions
+- Updated dependencies [7a24686]
+  - @monocloud/auth-core@0.1.6
+
 ## 0.1.6
 
 ### Patch Changes

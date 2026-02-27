@@ -1,5 +1,11 @@
 # @monocloud/auth-core
 
+## 0.1.6
+
+### Patch Changes
+
+- 7a24686: Improve comments and descriptions
+
 ## 0.1.5
 
 ### Patch Changes
