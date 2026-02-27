@@ -38,9 +38,9 @@ Retrieves a single cookie value by name.
 
 #### Parameters
 
-| Parameter | Type     |
-| --------- | -------- |
-| `name`    | `string` |
+| Parameter | Type     | Description                         |
+| --------- | -------- | ----------------------------------- |
+| `name`    | `string` | The name of the cookie to retrieve. |
 
 #### Returns
 
@@ -60,9 +60,9 @@ Retrieves a query parameter value by name.
 
 #### Parameters
 
-| Parameter   | Type     |
-| ----------- | -------- |
-| `parameter` | `string` |
+| Parameter   | Type     | Description                                  |
+| ----------- | -------- | -------------------------------------------- |
+| `parameter` | `string` | The name of the query parameter to retrieve. |
 
 #### Returns
 

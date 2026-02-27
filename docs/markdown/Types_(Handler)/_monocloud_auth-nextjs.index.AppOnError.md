@@ -14,9 +14,9 @@ Allows custom error handling such as logging, transforming the response, or retu
 
 ## Type Parameters
 
-| Type Parameter |
-| -------------- |
-| `T`            |
+| Type Parameter | Description                                               |
+| -------------- | --------------------------------------------------------- |
+| `T`            | The type of the App Router context passed to the handler. |
 
 ## Parameters
 

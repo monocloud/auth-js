@@ -14,6 +14,7 @@ A subset of authorization parameters supported by client-side helpers.
 
 ## Extended by
 
+- [`RedirectToSignInOptions`](/sdks/nextjs/api-reference/types/redirecttosigninoptions)
 - [`SignInProps`](/sdks/nextjs/api-reference/types/signinprops)
 - [`RedirectToSignInProps`](/sdks/nextjs/api-reference/types/redirecttosigninprops)
 

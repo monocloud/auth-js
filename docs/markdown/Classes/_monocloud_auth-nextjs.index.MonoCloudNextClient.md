@@ -647,10 +647,10 @@ A wrapped page component that enforces authentication before rendering.
 
 ##### Type Parameters
 
-| Type Parameter                            | Description                             |
-| ----------------------------------------- | --------------------------------------- |
-| `P` _extends_ `Record`\<`string`, `any`\> | Props returned from getServerSideProps. |
-| `Q` _extends_ `ParsedUrlQuery`            | Query parameters parsed from the URL.   |
+| Type Parameter                            | Description                               |
+| ----------------------------------------- | ----------------------------------------- |
+| `P` _extends_ `Record`\<`string`, `any`\> | Props returned from `getServerSideProps`. |
+| `Q` _extends_ `ParsedUrlQuery`            | Query parameters parsed from the URL.     |
 
 ##### Parameters
 

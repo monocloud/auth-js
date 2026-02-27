@@ -1,9 +1,6 @@
 import type {
-  Authenticators,
   AuthorizationParams,
-  DisplayOptions,
   MonoCloudUser,
-  Prompt,
 } from '@monocloud/auth-node-core';
 import type { NextFetchEvent, NextRequest, NextResponse } from 'next/server';
 import type {
@@ -15,6 +12,17 @@ import type {
 } from 'next/types';
 import type { ParsedUrlQuery } from 'node:querystring';
 import { JSX } from 'react';
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore TS6192: Imported only to resolve TypeDoc `{@link ...}` references in this file.
+import type {
+  authMiddleware,
+  monoCloudAuth,
+  protect,
+  protectApi,
+  protectPage,
+  redirectToSignIn,
+  redirectToSignOut,
+} from './initialize';
 
 /**
  * Context object provided to App Router route handlers.
@@ -35,7 +43,7 @@ export interface AppRouterContext {
 }
 
 /**
- * Handler function returned by `monoCloudAuth()`.
+ * Handler function returned by {@link monoCloudAuth | monoCloudAuth()}.
  *
  * This handler processes authentication routes such as sign-in, callback, sign-out, and userinfo across supported Next.js runtimes (App Router, Pages Router, and API routes).
  *
@@ -111,15 +119,14 @@ export type NextMiddlewareOnGroupAccessDenied = (
  *
  */
 export type ProtectedRouteMatcher =
+  /** A single relative route path to protect. */
   | string
+  /** A regular expression used to match routes to protect. */
   | RegExp
+  /** An object with fine-grained control over routes and group-based access. */
   | {
       /**
-       * Route patterns that should be protected.
-       *
-       * Each entry may be:
-       * - A relative route path
-       * - A regular expression used to match routes
+       * Route patterns that should be protected. Each entry may be a relative route path or a regular expression used to match routes.
        */
       routes: (string | RegExp)[];
 
@@ -152,6 +159,7 @@ export type CustomProtectedRouteMatcher = (
  *
  * @param req The incoming Next.js request.
  * @param ctx The App Router context containing dynamic route parameters.
+ * @typeParam T The type of the App Router context passed to the handler.
  * @param error The error thrown during endpoint execution.
  * @returns Returns a `NextResponse` or `void`.
  */
@@ -190,7 +198,7 @@ export type PageOnError = (
 export type OnError = AppOnError | PageOnError;
 
 /**
- * Options for `monoCloudAuth()`.
+ * Options for {@link monoCloudAuth | monoCloudAuth()}.
  *
  * @category Types
  */
@@ -216,7 +224,7 @@ export type ProtectedRoutes =
   | CustomProtectedRouteMatcher;
 
 /**
- * Options for configuring the MonoCloud authentication middleware.
+ * Options for configuring {@link authMiddleware | authMiddleware()}.
  *
  * These options control which routes are protected and how authentication and authorization failures are handled during request processing.
  *
@@ -241,9 +249,8 @@ export interface MonoCloudMiddlewareOptions {
    * Defines which routes require authentication.
    *
    * Accepts either an array of {@link ProtectedRouteMatcher} or a {@link CustomProtectedRouteMatcher}.
-   *
-   * - If omitted, all routes matched by the middleware config are protected.
-   * - If an empty array is provided, no routes are protected.
+   * If omitted, all routes matched by the middleware config are protected.
+   * If an empty array is provided, no routes are protected.
    */
   protectedRoutes?: ProtectedRoutes;
 
@@ -326,7 +333,7 @@ export type AppRouterApiHandlerFn = (
 ) => Promise<Response | NextResponse> | Response | NextResponse;
 
 /**
- * Options for configuring `protectPage()` in the App Router.
+ * Options for configuring {@link protectPage | protectPage()} in the App Router.
  *
  * @category Types
  */
@@ -366,7 +373,7 @@ export interface ProtectAppPageOptions extends GroupOptions {
 }
 
 /**
- * Options for configuring `protectPage()` in the Pages Router.
+ * Options for configuring {@link protectPage | protectPage()} in the Pages Router.
  *
  * @category Types
  *
@@ -410,7 +417,7 @@ export interface ProtectPagePageOptions<
 }
 
 /**
- * Handler invoked when no valid session exists while running a Pages Router `getServerSideProps` protected by `protectPage()`.
+ * Handler invoked when no valid session exists while running a Pages Router `getServerSideProps` protected by {@link protectPage | protectPage()}.
  *
  * @category Types (Handler)
  *
@@ -427,7 +434,22 @@ export type ProtectPagePageOnAccessDeniedType<
 ) => Promise<GetServerSidePropsResult<P>> | GetServerSidePropsResult<P>;
 
 /**
- * Handler invoked when an authenticated user does not satisfy the required group restrictions while running a Pages Router `getServerSideProps` protected by `protectPage()`.
+ * Next.js `getServerSideProps` context extended with the authenticated user when using {@link protectPage | protectPage()}.
+ *
+ * @category Types (Handler)
+ *
+ */
+export interface ProtectPageGetServerSidePropsContext<
+  Q extends ParsedUrlQuery = ParsedUrlQuery,
+> extends GetServerSidePropsContext<Q> {
+  /**
+   * The authenticated user resolved from the current session.
+   */
+  user: MonoCloudUser;
+}
+
+/**
+ * Handler invoked when an authenticated user does not satisfy the required group restrictions while running a Pages Router `getServerSideProps` protected by {@link protectPage | protectPage()}.
  *
  * @category Types (Handler)
  *
@@ -440,11 +462,11 @@ export type ProtectPagePageOnGroupAccessDeniedType<
   P,
   Q extends ParsedUrlQuery = ParsedUrlQuery,
 > = (
-  context: GetServerSidePropsContext<Q> & { user: MonoCloudUser }
+  context: ProtectPageGetServerSidePropsContext<Q>
 ) => Promise<GetServerSidePropsResult<P>> | GetServerSidePropsResult<P>;
 
 /**
- * Return type produced by the `protectPage()` wrapper for the Pages Router.
+ * Return type produced by the {@link protectPage | protectPage()} wrapper for the Pages Router.
  *
  * Represents a `getServerSideProps` compatible function that resolves authentication before executing page logic and injects the authenticated `user` into the returned props.
  *
@@ -463,13 +485,13 @@ export type ProtectPagePageReturnType<
 >;
 
 /**
- * App Router Server Component wrapped by `protectPage()`.
+ * Props injected into an App Router Server Component wrapped by {@link protectPage | protectPage()}.
  *
- * This component is only executed after authentication (and optional authorization) succeeds. The authenticated `user` is injected into the component props automatically.
+ * Includes the authenticated `user` and optional route/search parameters provided by Next.js.
  *
  * @category Types (Handler)
  */
-export type ProtectedAppServerComponent = (props: {
+export interface ProtectedAppServerComponentProps {
   /**
    * The authenticated user resolved from the current session.
    */
@@ -484,7 +506,20 @@ export type ProtectedAppServerComponent = (props: {
    * URL search parameters provided by the App Router.
    */
   searchParams?: Record<string, string | string[] | undefined>;
-}) => Promise<JSX.Element> | JSX.Element;
+}
+
+/**
+ * App Router Server Component wrapped by {@link protectPage | protectPage()}.
+ *
+ * This component is only executed after authentication (and optional authorization) succeeds. The authenticated `user` is injected into the component props automatically.
+ *
+ * @param props - The component props, including the authenticated user and any additional page props.
+ *
+ * @category Types (Handler)
+ */
+export type ProtectedAppServerComponent = (
+  props: ProtectedAppServerComponentProps
+) => Promise<JSX.Element> | JSX.Element;
 
 /**
  * Handler invoked when a request is denied because the user is not authenticated in an App Router API route.
@@ -519,7 +554,7 @@ export type AppRouterApiOnGroupAccessDeniedHandler = (
 ) => Promise<Response> | Response;
 
 /**
- * Options for configuring `protectApi()` in the App Router.
+ * Options for configuring {@link protectApi | protectApi()} in the App Router.
  *
  * @category Types
  */
@@ -567,7 +602,7 @@ export type PageRouterApiOnGroupAccessDeniedHandler = (
 ) => Promise<unknown> | unknown;
 
 /**
- * Options for configuring `protectApi()` in the Pages Router.
+ * Options for configuring {@link protectApi | protectApi()} in the Pages Router.
  *
  * @category Types
  */
@@ -584,7 +619,7 @@ export interface ProtectApiPageOptions extends GroupOptions {
 }
 
 /**
- * Options for configuring the `protect()` helper.
+ * Options for configuring {@link protect | protect()}.
  *
  * @category Types
  */
@@ -638,64 +673,19 @@ export interface GroupOptions extends IsUserInGroupOptions {
 }
 
 /**
- * Options for `redirectToSignIn()`
+ * Options for {@link redirectToSignIn | redirectToSignIn()}.
  *
  * @category Types
  */
-export interface RedirectToSignInOptions {
+export interface RedirectToSignInOptions extends ExtraAuthParams {
   /**
    * URL to return the user to after successful authentication. Must be a relative application URL.
    */
   returnUrl?: string;
-
-  /**
-   * Maximum allowed time (in seconds) since the user's last authentication.
-   */
-  maxAge?: number;
-
-  /**
-   * Hint to the authorization server indicating which authenticator should be used during sign-in.
-   */
-  authenticatorHint?: Authenticators;
-
-  /**
-   * Scopes to request during authentication.
-   */
-  scopes?: string[];
-
-  /**
-   * Resource indicators the access token should be issued for.
-   */
-  resource?: string[];
-
-  /**
-   * Preferred UI language(s) for the authentication experience.
-   */
-  uiLocales?: string;
-
-  /**
-   * Preferred display mode for the authentication UI.
-   */
-  display?: DisplayOptions;
-
-  /**
-   * Authentication Context Class Reference (ACR) values requesting specific authentication methods or assurance levels.
-   */
-  acrValues?: string[];
-
-  /**
-   * Hint about the user's identifier (for example, email or username).
-   */
-  loginHint?: string;
-
-  /**
-   * Controls whether the authorization server should force specific user interactions during authentication
-   */
-  prompt?: Prompt;
 }
 
 /**
- * Options for `redirectToSignOut()`
+ * Options for {@link redirectToSignOut | redirectToSignOut()}.
  *
  * @category Types
  */

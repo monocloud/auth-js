@@ -9,7 +9,7 @@
  */
 export type ResponseTypes =
   /**
-   * Authorization Code Flow (recommended). Returns an authorization code that is exchanged for tokens server-side.
+   * Authorization Code Flow (recommended). Returns an authorization code that is exchanged for tokens on the server-side.
    */
   | 'code'
 
@@ -611,7 +611,12 @@ export type Group =
   /**
    * Structured group representation.
    */
-  | { id: string; name: string }
+  | {
+      /**  Group identifier. */
+      id: string;
+      /** Group name. */
+      name: string;
+    }
 
   /**
    * Group identifier or group name.

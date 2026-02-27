@@ -14,10 +14,10 @@ Represents a user group included in the authenticated session.
 
 \{ `id`: `string`; `name`: `string`; \}
 
-| Name   | Type     |
-| ------ | -------- |
-| `id`   | `string` |
-| `name` | `string` |
+| Name   | Type     | Description       |
+| ------ | -------- | ----------------- |
+| `id`   | `string` | Group identifier. |
+| `name` | `string` | Group name.       |
 
 Structured group representation.
 

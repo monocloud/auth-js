@@ -104,6 +104,8 @@ category: Other
 - [PageRouterApiOnAccessDeniedHandler](/sdks/nextjs/api-reference/handler-types/pagerouterapionaccessdeniedhandler)
 - [PageRouterApiOnGroupAccessDeniedHandler](/sdks/nextjs/api-reference/handler-types/pagerouterapiongroupaccessdeniedhandler)
 - [ProtectedAppServerComponent](/sdks/nextjs/api-reference/handler-types/protectedappservercomponent)
+- [ProtectedAppServerComponentProps](/sdks/nextjs/api-reference/handler-types/protectedappservercomponentprops)
+- [ProtectPageGetServerSidePropsContext](/sdks/nextjs/api-reference/handler-types/protectpagegetserversidepropscontext)
 - [ProtectPagePageOnAccessDeniedType](/sdks/nextjs/api-reference/handler-types/protectpagepageonaccessdeniedtype)
 - [ProtectPagePageOnGroupAccessDeniedType](/sdks/nextjs/api-reference/handler-types/protectpagepageongroupaccessdeniedtype)
 - [ProtectPagePageReturnType](/sdks/nextjs/api-reference/handler-types/protectpagepagereturntype)

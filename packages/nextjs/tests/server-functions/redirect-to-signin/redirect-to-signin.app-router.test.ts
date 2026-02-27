@@ -62,8 +62,8 @@ describe('redirectToSignIn() - App Router', () => {
       display: 'page',
       loginHint: 'username',
       maxAge: 3600,
-      resource: ['https://api.example.org'],
-      scopes: ['openid', 'profile'],
+      resource: 'https://api.example.org',
+      scopes: 'openid profile',
       uiLocales: 'en',
       returnUrl: '/overrides',
     });

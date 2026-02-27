@@ -71,8 +71,8 @@ const fetchUser = async (url: string): Promise<MonoCloudUser | undefined> => {
  *
  * @example Refetch user
  *
- * Calling `refetch(true)` forces a refresh of the user profile from the UserInfo endpoint.
- * Calling `refetch()` refreshes authentication state without forcing a UserInfo request.
+ * Calling `refetch(true)` forces a refresh of the user profile from the `UserInfo` endpoint.
+ * Calling `refetch()` refreshes authentication state without forcing a `UserInfo` request.
  *
  * ```tsx title="Refetch User"
  * "use client";

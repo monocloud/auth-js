@@ -6,7 +6,7 @@ category: Types
 
 # Type: ProtectPagePageOptions
 
-Options for configuring `protectPage()` in the Pages Router.
+Options for configuring [protectPage()](/sdks/nextjs/api-reference/functions/protectpage) in the Pages Router.
 
 ## Extends
 

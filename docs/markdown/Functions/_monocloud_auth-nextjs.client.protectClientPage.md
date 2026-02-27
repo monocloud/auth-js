@@ -17,9 +17,9 @@ If the user is authenticated, the wrapped component receives a `user` prop.
 
 ## Type Parameters
 
-| Type Parameter         |
-| ---------------------- |
-| `P` _extends_ `object` |
+| Type Parameter         | Description                                          |
+| ---------------------- | ---------------------------------------------------- |
+| `P` _extends_ `object` | Props of the protected component (excluding `user`). |
 
 ## Parameters
 

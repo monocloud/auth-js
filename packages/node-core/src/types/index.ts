@@ -143,10 +143,7 @@ export interface MonoCloudSessionStore {
  */
 export interface MonoCloudCookieOptions {
   /**
-   * The cookie name.
-   *
-   * - Session cookie default: `"session"`
-   * - State cookie default: `"state"`
+   * The cookie name. Defaults to `"session"` for session cookies and `"state"` for state cookies.
    */
   name: string;
 
@@ -165,7 +162,7 @@ export interface MonoCloudCookieOptions {
   /**
    * Indicates whether the cookie is accessible only via HTTP requests. Helps mitigate XSS attacks by preventing client-side JavaScript access.
    *
-   * > Always enforced as `true` for state cookies.
+   * Always enforced as `true` for state cookies.
    *
    * @defaultValue true
    */
@@ -187,9 +184,7 @@ export interface MonoCloudCookieOptions {
 
   /**
    * Determines whether the cookie persists across browser restarts.
-   *
-   * - Session cookies default to `true`
-   * - State cookies default to `false`
+   * Defaults to `true` for session cookies and `false` for state cookies.
    */
   persistent: boolean;
 }
@@ -221,8 +216,8 @@ export interface MonoCloudSessionOptionsBase {
   /**
    * The session lifetime in seconds.
    *
-   * - With **absolute sessions** (`sliding = false`), this defines the total session lifetime.
-   * - With **sliding sessions**, this defines the idle timeout before the session expires.
+   * With **absolute sessions** (`sliding = false`), this defines the total session lifetime.
+   * With **sliding sessions**, this defines the idle timeout before the session expires.
    *
    * @defaultValue 86400 (1 Day)
    */

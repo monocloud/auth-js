@@ -16,7 +16,11 @@ export interface CookieOptions extends SerializeOptions {}
  * @category Types
  */
 export interface IMonoCloudCookieRequest {
-  /** Retrieves a single cookie value by name. */
+  /**
+   * Retrieves a single cookie value by name.
+   *
+   * @param name - The name of the cookie to retrieve.
+   */
   getCookie(name: string): Promise<string | undefined>;
   /** Retrieves all cookies from the request. */
   getAllCookies(): Promise<Map<string, string>>;
@@ -28,7 +32,11 @@ export interface IMonoCloudCookieRequest {
  * @category Types
  */
 export interface MonoCloudRequest extends IMonoCloudCookieRequest {
-  /** Retrieves a query parameter value by name. */
+  /**
+   * Retrieves a query parameter value by name.
+   *
+   * @param parameter - The name of the query parameter to retrieve.
+   */
   getQuery(parameter: string): string | string[] | undefined;
   /** Returns the raw request details including method, URL, and body. */
   getRawRequest(): Promise<{
@@ -44,7 +52,13 @@ export interface MonoCloudRequest extends IMonoCloudCookieRequest {
  * @category Types
  */
 export interface IMonoCloudCookieResponse {
-  /** Sets a cookie on the response. */
+  /**
+   * Sets a cookie on the response.
+   *
+   * @param cookieName - The name of the cookie to set.
+   * @param value - The value to assign to the cookie.
+   * @param options - Serialization options for the cookie.
+   */
   setCookie(
     cookieName: string,
     value: string,
@@ -58,9 +72,19 @@ export interface IMonoCloudCookieResponse {
  * @category Types
  */
 export interface MonoCloudResponse extends IMonoCloudCookieResponse {
-  /** Redirects the client to the specified URL. */
+  /**
+   * Redirects the client to the specified URL.
+   *
+   * @param url - The URL to redirect to.
+   * @param statusCode - The HTTP status code to use for the redirect.
+   */
   redirect(url: string, statusCode?: number): void;
-  /** Sends a JSON response with an optional status code. */
+  /**
+   * Sends a JSON response with an optional status code.
+   *
+   * @param data - The data to serialize and send as JSON.
+   * @param statusCode - The HTTP status code for the response.
+   */
   sendJson(data: any, statusCode?: number): void;
   /** Sends a 404 Not Found response. */
   notFound(): void;

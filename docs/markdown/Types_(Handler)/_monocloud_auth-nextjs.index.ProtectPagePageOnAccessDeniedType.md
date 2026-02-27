@@ -8,7 +8,7 @@ category: Handler Types
 
 > **ProtectPagePageOnAccessDeniedType**\<`P`, `Q`\> = (`context`: `GetServerSidePropsContext`\<`Q`\>) => `Promise`\<`GetServerSidePropsResult`\<`P`\>\> \| `GetServerSidePropsResult`\<`P`\>
 
-Handler invoked when no valid session exists while running a Pages Router `getServerSideProps` protected by `protectPage()`.
+Handler invoked when no valid session exists while running a Pages Router `getServerSideProps` protected by [protectPage()](/sdks/nextjs/api-reference/functions/protectpage).
 
 ## Type Parameters
 

@@ -6,7 +6,7 @@ category: Types
 
 # Type: MonoCloudAuthOptions
 
-Options for `monoCloudAuth()`.
+Options for [monoCloudAuth()](/sdks/nextjs/api-reference/functions/monocloudauth).
 
 ## Properties
 

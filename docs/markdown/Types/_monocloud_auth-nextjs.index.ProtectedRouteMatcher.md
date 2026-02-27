@@ -14,11 +14,17 @@ Defines how routes are matched and protected by authentication and optional grou
 
 `string`
 
+A single relative route path to protect.
+
 `RegExp`
+
+A regular expression used to match routes to protect.
 
 \{ `groups`: `string`[]; `routes`: (`string` \| `RegExp`)[]; \}
 
 | Name     | Type                     | Description                                                                                                                                          |
 | -------- | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `groups` | `string`[]               | Optional group-based access control. When provided, only users belonging to **at least one** of the specified group IDs or names are allowed access. |
-| `routes` | (`string` \| `RegExp`)[] | Route patterns that should be protected. Each entry may be: - A relative route path - A regular expression used to match routes                      |
+| `routes` | (`string` \| `RegExp`)[] | Route patterns that should be protected. Each entry may be a relative route path or a regular expression used to match routes.                       |
+
+An object with fine-grained control over routes and group-based access.

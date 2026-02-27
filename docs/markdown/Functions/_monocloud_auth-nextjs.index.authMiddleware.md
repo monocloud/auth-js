@@ -24,7 +24,7 @@ By default, all routes matched by `config.matcher` are protected unless configur
 
 `NextMiddleware`
 
-Returns a Next.js middleware result, such as a NextResponse, redirect, or undefined to continue processing.
+Returns a Next.js middleware result, such as a `NextResponse`, `redirect`, or `undefined` to continue processing.
 
 ### Examples
 

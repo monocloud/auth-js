@@ -82,10 +82,10 @@ Redirects the client to the specified URL.
 
 #### Parameters
 
-| Parameter     | Type     |
-| ------------- | -------- |
-| `url`         | `string` |
-| `statusCode?` | `number` |
+| Parameter     | Type     | Description                                   |
+| ------------- | -------- | --------------------------------------------- |
+| `url`         | `string` | The URL to redirect to.                       |
+| `statusCode?` | `number` | The HTTP status code to use for the redirect. |
 
 #### Returns
 
@@ -101,10 +101,10 @@ Sends a JSON response with an optional status code.
 
 #### Parameters
 
-| Parameter     | Type     |
-| ------------- | -------- |
-| `data`        | `any`    |
-| `statusCode?` | `number` |
+| Parameter     | Type     | Description                             |
+| ------------- | -------- | --------------------------------------- |
+| `data`        | `any`    | The data to serialize and send as JSON. |
+| `statusCode?` | `number` | The HTTP status code for the response.  |
 
 #### Returns
 
@@ -120,11 +120,11 @@ Sets a cookie on the response.
 
 #### Parameters
 
-| Parameter    | Type                                                                |
-| ------------ | ------------------------------------------------------------------- |
-| `cookieName` | `string`                                                            |
-| `value`      | `string`                                                            |
-| `options`    | [`CookieOptions`](/sdks/nodejs-core/api-reference/types/cookieoptions) |
+| Parameter    | Type                                                                | Description                           |
+| ------------ | ------------------------------------------------------------------- | ------------------------------------- |
+| `cookieName` | `string`                                                            | The name of the cookie to set.        |
+| `value`      | `string`                                                            | The value to assign to the cookie.    |
+| `options`    | [`CookieOptions`](/sdks/nodejs-core/api-reference/types/cookieoptions) | Serialization options for the cookie. |
 
 #### Returns
 
