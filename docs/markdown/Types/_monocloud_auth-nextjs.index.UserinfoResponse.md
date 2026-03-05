@@ -8,11 +8,6 @@ category: Types
 
 Represents the OpenID Connect **UserInfo** response.
 
-## Extended by
-
-- [`MonoCloudUser`](/sdks/nextjs/api-reference/types/monoclouduser)
-- [`IdTokenClaims`](/sdks/nextjs/api-reference/types/idtokenclaims)
-
 ## Type Parameters
 
 | Type Parameter                                                            | Description                                                                                       |

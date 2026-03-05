@@ -8,10 +8,6 @@ category: Types
 
 Interface for setting cookies on an outgoing response.
 
-## Extended by
-
-- [`MonoCloudResponse`](/sdks/nodejs-core/api-reference/types/monocloudresponse)
-
 ## Methods
 
 ### setCookie()

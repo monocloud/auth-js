@@ -12,15 +12,6 @@ Configuration options that require the user to belong to specific groups.
 
 - [`IsUserInGroupOptions`](/sdks/nextjs/api-reference/types/isuseringroupoptions)
 
-## Extended by
-
-- [`ProtectOptions`](/sdks/nextjs/api-reference/types/protectoptions)
-- [`ProtectApiAppOptions`](/sdks/nextjs/api-reference/types/protectapiappoptions)
-- [`ProtectApiPageOptions`](/sdks/nextjs/api-reference/types/protectapipageoptions)
-- [`ProtectAppPageOptions`](/sdks/nextjs/api-reference/types/protectapppageoptions)
-- [`ProtectPagePageOptions`](/sdks/nextjs/api-reference/types/protectpagepageoptions)
-- [`ProtectClientPageOptions`](/sdks/nextjs/api-reference/types/protectclientpageoptions)
-
 ## Properties
 
 | Property                                | Type       | Description                                                                                                                                                                                     |

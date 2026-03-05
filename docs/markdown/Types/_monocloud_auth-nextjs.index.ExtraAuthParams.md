@@ -12,12 +12,6 @@ A subset of authorization parameters supported by client-side helpers.
 
 - `Pick`\<[`AuthorizationParams`](/sdks/nextjs/api-reference/types/authorizationparams), `"scopes"` \| `"resource"` \| `"prompt"` \| `"display"` \| `"uiLocales"` \| `"acrValues"` \| `"authenticatorHint"` \| `"maxAge"` \| `"loginHint"`\>
 
-## Extended by
-
-- [`RedirectToSignInOptions`](/sdks/nextjs/api-reference/types/redirecttosigninoptions)
-- [`SignInProps`](/sdks/nextjs/api-reference/types/signinprops)
-- [`RedirectToSignInProps`](/sdks/nextjs/api-reference/types/redirecttosigninprops)
-
 ## Properties
 
 | Property                                            | Type                                                                                  | Description                                                                                                                     |

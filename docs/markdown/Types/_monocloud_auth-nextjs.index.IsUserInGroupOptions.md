@@ -8,10 +8,6 @@ category: Types
 
 Configuration options for evaluating user group membership.
 
-## Extended by
-
-- [`GroupOptions`](/sdks/nextjs/api-reference/types/groupoptions)
-
 ## Properties
 
 | Property                                | Type      | Description                                                                                                                                                                                     |
