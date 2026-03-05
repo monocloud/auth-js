@@ -1,4 +1,4 @@
-import { Converter, PageEvent } from 'typedoc';
+import { Converter } from 'typedoc';
 
 const CODE_FENCE_OPENING_LINE_REGEX = /(^|\n)(\s*`{3,}\s*)([^\s`\n]+)([^\n]*)/g;
 
@@ -45,42 +45,18 @@ const normalizeReflectionContent = reflection => {
   }
 };
 
-const BASE_ERROR_HTML_PAGE_REGEX = /MonoCloudAuthBaseError\.html$/;
-
-const stripMonoCloudAuthBaseErrorConstructorFromHtml = page => {
-  if (!page?.url || !page?.contents || !BASE_ERROR_HTML_PAGE_REGEX.test(page.url))
-    return;
-
-  page.contents = page.contents
-    .replace(
-      /<section class="tsd-index-section"><h3 class="tsd-index-heading">Constructors<\/h3><div class="tsd-index-list">[\s\S]*?<\/div><\/section>/g,
-      ''
-    )
-    .replace(
-      /<details class="tsd-panel-group tsd-member-group tsd-accordion" open><summary class="tsd-accordion-summary" data-key="section-Constructors">[\s\S]*?<\/details>/g,
-      ''
-    )
-    .replace(
-      /<details open class="tsd-accordion tsd-page-navigation-section"><summary class="tsd-accordion-summary" data-key="section-Constructors">[\s\S]*?<\/details>/g,
-      ''
-    )
-    .replace(
-      /<section class="tsd-panel-group tsd-index-group">[\s\S]*?<div class="tsd-accordion-details"><\/div><\/details><\/section><\/section>/g,
-      ''
-    )
-    .replace(
-      /<details open class="tsd-accordion tsd-page-navigation">[\s\S]*?<div class="tsd-accordion-details"><\/div><\/details>/g,
-      ''
-    );
-};
-
 /** @param {import('typedoc').Application} app */
 export const load = app => {
-  app.converter.on(Converter.EVENT_RESOLVE, (_context, reflection) => {
+  app.converter.on(Converter.EVENT_RESOLVE, (context, reflection) => {
     normalizeReflectionContent(reflection);
-  });
 
-  app.renderer.on(PageEvent.END, page => {
-    stripMonoCloudAuthBaseErrorConstructorFromHtml(page);
+    // Skip inherited Error constructor
+    if (
+      reflection.name === 'constructor' &&
+      reflection.inheritedFrom &&
+      reflection.inheritedFrom.name.includes('Error')
+    ) {
+      context.project.removeReflection(reflection);
+    }
   });
 };
