@@ -134,6 +134,14 @@ export const load = app => {
       page.contents += `\n\n## Type Declaration\n\n${str}`;
     }
 
+    if (type === Type.Class || type === Type.Types) {
+      // Remove Extended By
+      page.contents = page.contents.replace(
+        /(?:^|\n)## Extended by[\s\S]*?(?=\n## |$)/g,
+        ''
+      );
+    }
+
     if (type === Type.Components) {
       const signatureRegex = /> \*\*.*?\*\*[\s\S]*?(\n\n|$)/;
       page.contents = page.contents.replace(signatureRegex, '');

@@ -8,11 +8,6 @@ category: Types
 
 Interface for reading cookies from an incoming request.
 
-## Extended by
-
-- [`MonoCloudRequest`](/sdks/nodejs-core/api-reference/types/monocloudrequest)
-- [`MonoCloudRequest`](/sdks/nextjs/api-reference/types/monocloudrequest)
-
 ## Methods
 
 ### getAllCookies()

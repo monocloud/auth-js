@@ -8,10 +8,6 @@ category: Types
 
 Parameters used to construct an OpenID Connect end-session (sign-out) request.
 
-## Extended by
-
-- [`SignOutOptions`](/sdks/nodejs-core/api-reference/types/signoutoptions)
-
 ## Properties
 
 | Property                                                    | Type     | Description                                                                                                                                                          |

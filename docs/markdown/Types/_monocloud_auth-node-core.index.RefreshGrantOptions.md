@@ -10,10 +10,6 @@ Options used when exchanging a refresh token for a new access token.
 
 These parameters allow requesting an access token scoped to specific resources or scopes that were previously authorized by the user.
 
-## Extended by
-
-- [`GetTokensOptions`](/sdks/nodejs-core/api-reference/types/gettokensoptions)
-
 ## Properties
 
 | Property                          | Type     | Description                                                                                                                                                                                   |

@@ -8,10 +8,6 @@ category: Types
 
 Represents an OAuth 2.0 access token and its associated metadata.
 
-## Extended by
-
-- [`MonoCloudTokens`](/sdks/nodejs-core/api-reference/types/monocloudtokens)
-
 ## Properties
 
 | Property                                                   | Type     | Description                                                                                                                                 |
