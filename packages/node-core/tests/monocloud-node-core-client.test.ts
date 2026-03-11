@@ -12,6 +12,7 @@ import type {
 } from '@monocloud/auth-core';
 import {
   MonoCloudOPError,
+  MonoCloudTokenError,
   MonoCloudValidationError,
 } from '@monocloud/auth-core';
 import { decrypt, encrypt } from '@monocloud/auth-core/utils';
@@ -4013,6 +4014,46 @@ describe('MonoCloud Base Instance', () => {
           },
           lifetime: { c: oldTime, e: oldTime + 86400, u: now() },
         });
+      });
+
+      it('should throw token error if token is expired and refresh token is absent', async () => {
+        const frozenTimeMs = 1330688329321;
+        freeze(frozenTimeMs);
+
+        const cookies = {};
+
+        const oldTime = now();
+
+        await setSessionCookieValue(cookies, {
+          session: {
+            user: { sub: 'sub' },
+            authorizedScopes: 'something',
+            accessTokens: [
+              {
+                requestedScopes: 'something',
+                scopes: 'something',
+                accessToken: 'at',
+                accessTokenExpiration: oldTime + 100,
+              },
+            ],
+            idToken: 'idtoken',
+          },
+          lifetime: { u: oldTime, e: oldTime + 86400, c: oldTime },
+        });
+
+        const req = new TestReq({ cookies });
+        const res = new TestRes(cookies);
+
+        const instance = getConfiguredInstance({ idTokenSigningAlg: 'ES256' });
+
+        const newFrozenTime = frozenTimeMs + 86500;
+        travel(newFrozenTime);
+
+        await expect(instance.getTokens(req, res)).rejects.toThrowError(
+          new MonoCloudTokenError(
+            'No refresh token available to refresh the expired access token'
+          )
+        );
       });
 
       it('should not save the new access token in the cookie if RefreshGrantOptions.scopes or RefreshGrantOptions.resource was passed in', async () => {

@@ -30,6 +30,7 @@ import type {
 import {
   MonoCloudOidcClient,
   MonoCloudOPError,
+  MonoCloudTokenError,
   MonoCloudValidationError,
 } from '@monocloud/auth-core';
 import { MonoCloudSessionService } from './monocloud-session-service';
@@ -979,6 +980,12 @@ export class MonoCloudCoreClient {
     let { refreshToken } = session;
 
     if (options?.forceRefresh || !token || tokenExpired) {
+      if (!refreshToken && token && tokenExpired) {
+        throw new MonoCloudTokenError(
+          'No refresh token available to refresh the expired access token'
+        );
+      }
+
       const updatedSession = await this.oidcClient.refreshSession(session, {
         fetchUserInfo: options?.refetchUserInfo ?? this.options.refetchUserInfo,
         validateIdToken: true,
