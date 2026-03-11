@@ -1,5 +1,11 @@
 # @monocloud/auth-node-core
 
+## 0.1.8
+
+### Patch Changes
+
+- 1d4ba47: Handle missing refresh token error when access token is expired
+
 ## 0.1.7
 
 ### Patch Changes
