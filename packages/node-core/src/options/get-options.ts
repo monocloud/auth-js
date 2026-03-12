@@ -42,7 +42,8 @@ export const getOptions = (
     process.env.MONOCLOUD_AUTH_POST_LOGOUT_REDIRECT_URI;
   const MONOCLOUD_AUTH_FEDERATED_SIGNOUT =
     process.env.MONOCLOUD_AUTH_FEDERATED_SIGNOUT;
-  const MONOCLOUD_AUTH_USER_INFO = process.env.MONOCLOUD_AUTH_USER_INFO;
+  const MONOCLOUD_AUTH_FETCH_USER_INFO =
+    process.env.MONOCLOUD_AUTH_FETCH_USER_INFO;
   const MONOCLOUD_AUTH_REFETCH_USER_INFO =
     process.env.MONOCLOUD_AUTH_REFETCH_USER_INFO;
   const MONOCLOUD_AUTH_ALLOW_QUERY_PARAM_OVERRIDES =
@@ -153,10 +154,10 @@ export const getOptions = (
       options?.federatedSignOut ??
       getBoolean(MONOCLOUD_AUTH_FEDERATED_SIGNOUT) ??
       DEFAULT_OPTIONS.federatedSignOut,
-    userInfo:
-      options?.userInfo ??
-      getBoolean(MONOCLOUD_AUTH_USER_INFO) ??
-      DEFAULT_OPTIONS.userInfo,
+    fetchUserInfo:
+      options?.fetchUserInfo ??
+      getBoolean(MONOCLOUD_AUTH_FETCH_USER_INFO) ??
+      DEFAULT_OPTIONS.fetchUserInfo,
     refetchUserInfo:
       options?.refetchUserInfo ??
       getBoolean(MONOCLOUD_AUTH_REFETCH_USER_INFO) ??

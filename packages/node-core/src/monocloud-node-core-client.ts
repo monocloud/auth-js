@@ -478,7 +478,8 @@ export class MonoCloudCoreClient {
           idTokenNonce: monoCloudState.nonce,
           idTokenMaxAge: monoCloudState.maxAge,
           idTokenClockTolerance: 5,
-          fetchUserInfo: callbackOptions?.userInfo ?? this.options.userInfo,
+          fetchUserInfo:
+            callbackOptions?.fetchUserInfo ?? this.options.fetchUserInfo,
           filteredIdTokenClaims: this.options.filteredIdTokenClaims,
           onSessionCreating: async (s, i, u) =>
             await this.options.onSessionCreating?.(s, i, u, appState),

@@ -1615,7 +1615,7 @@ describe('MonoCloud Base Instance', () => {
 
         const instance = getConfiguredInstance({
           idTokenSigningAlg: 'ES256',
-          userInfo: true,
+          fetchUserInfo: true,
           onSessionCreating: (session, idToken, userInfo, state) => {
             expect(state).toEqual({ test: 1 });
             expect(idToken).toBeDefined();
@@ -1874,7 +1874,7 @@ describe('MonoCloud Base Instance', () => {
         });
         const res = new TestRes(cookies);
 
-        await instance.callback(req, res, { userInfo: false });
+        await instance.callback(req, res, { fetchUserInfo: false });
 
         expect(res.res.redirectedUrl).toBe('https://example.org');
 
@@ -4369,7 +4369,7 @@ describe('MonoCloud Base Instance', () => {
 
         const instance = getConfiguredInstance({
           idTokenSigningAlg: 'ES256',
-          userInfo: false,
+          fetchUserInfo: false,
         });
 
         const newFrozenTime = frozenTimeMs + 2000;
@@ -4477,7 +4477,7 @@ describe('MonoCloud Base Instance', () => {
           },
           idTokenSigningAlg: 'ES256',
           refetchUserInfo: false,
-          userInfo: false,
+          fetchUserInfo: false,
         });
 
         const newFrozenTime = frozenTimeMs + 2000;

@@ -421,7 +421,7 @@ export interface MonoCloudOptionsBase {
    *
    * @defaultValue true
    */
-  userInfo: boolean;
+  fetchUserInfo: boolean;
 
   /**
    * Refetch user profile data whenever the application's `UserInfo` endpoint is invoked.
@@ -574,7 +574,7 @@ export interface MonoCloudSessionOptions extends Partial<
  * | `MONOCLOUD_AUTH_RESPONSE_TIMEOUT` | Maximum time (in milliseconds) to wait for responses from the authentication service. |
  * | `MONOCLOUD_AUTH_ALLOW_QUERY_PARAM_OVERRIDES` | Allows authorization parameters (such as `scope`, `resource`, or `prompt`) to be overridden via URL query parameters. |
  * | `MONOCLOUD_AUTH_POST_LOGOUT_REDIRECT_URI` | URL users are redirected to after a successful logout. |
- * | `MONOCLOUD_AUTH_USER_INFO` | Determines whether user profile data is fetched from the `UserInfo` endpoint after authorization. |
+ * | `MONOCLOUD_AUTH_FETCH_USER_INFO` | Determines whether user profile data is fetched from the `UserInfo` endpoint after authorization. |
  * | `MONOCLOUD_AUTH_REFETCH_USER_INFO` | If `true`, user information is re-fetched on each userinfo request. |
  * | `MONOCLOUD_AUTH_ID_TOKEN_SIGNING_ALG` | Expected signing algorithm for ID tokens (for example, `RS256`). |
  * | `MONOCLOUD_AUTH_FILTERED_ID_TOKEN_CLAIMS` | Space-separated list of ID token claims excluded from the session object. |
@@ -825,7 +825,7 @@ export interface CallbackOptions {
   /**
    * When `true`, fetches user profile data from the `UserInfo` endpoint after the authorization code exchange completes.
    */
-  userInfo?: boolean;
+  fetchUserInfo?: boolean;
 
   /**
    * Redirect URI sent to the token endpoint during the authorization code exchange.
