@@ -185,7 +185,7 @@ export const defaultConfig: Partial<MonoCloudOptions> = {
   clientSecret: '__test_client_secret__',
   tenantDomain: 'https://example.com',
   appUrl: 'https://example.org',
-  userInfo: false,
+  fetchUserInfo: false,
   allowQueryParamOverrides: true,
   defaultAuthParams: {
     responseType: 'code',

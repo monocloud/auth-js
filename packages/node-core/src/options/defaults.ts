@@ -9,7 +9,7 @@ export const DEFAULT_OPTIONS = {
   clockSkew: 60,
   responseTimeout: 10000,
   usePar: false,
-  userInfo: true,
+  fetchUserInfo: true,
   refetchUserInfo: false,
   federatedSignOut: true,
   defaultAuthParams: {

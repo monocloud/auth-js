@@ -179,7 +179,7 @@ export const optionsSchema: Joi.ObjectSchema<MonoCloudOptionsBase> = Joi.object(
     usePar: boolRequired,
     postLogoutRedirectUri: stringOptional.uri({ allowRelative: true }),
     federatedSignOut: boolRequired,
-    userInfo: boolRequired,
+    fetchUserInfo: boolRequired,
     refetchUserInfo: boolRequired,
     allowQueryParamOverrides: boolRequired,
     defaultAuthParams: authParamSchema,
@@ -217,7 +217,7 @@ export const signInOptionsSchema: Joi.ObjectSchema<SignInOptions> = Joi.object({
 
 export const callbackOptionsSchema: Joi.ObjectSchema<CallbackOptions> =
   Joi.object({
-    userInfo: boolOptional,
+    fetchUserInfo: boolOptional,
     redirectUri: stringOptional.uri(),
     onError: funcOptional,
   });
