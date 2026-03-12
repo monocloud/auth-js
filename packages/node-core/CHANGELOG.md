@@ -1,5 +1,11 @@
 # @monocloud/auth-node-core
 
+## 0.1.9
+
+### Patch Changes
+
+- 855e1b9: - Rename userInfo to fetchUserInfo across the codebase
+
 ## 0.1.8
 
 ### Patch Changes
