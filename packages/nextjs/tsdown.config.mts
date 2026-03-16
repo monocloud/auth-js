@@ -9,6 +9,7 @@ const common = {
     'src/components/index.tsx',
     'src/components/client/index.tsx',
   ],
+  unbundle: true,
   clean: true,
   sourcemap: true,
   define: {

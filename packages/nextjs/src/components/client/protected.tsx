@@ -1,3 +1,5 @@
+'use client';
+
 import { isUserInGroup } from '@monocloud/auth-node-core/utils';
 import React from 'react';
 import { useAuth } from '../../client';
