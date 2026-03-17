@@ -1,6 +1,7 @@
 import {
   decodeBase64Url,
   findToken,
+  profileSync,
   getPublicSigKeyFromIssuerJwks,
   now,
   parseSpaceSeparated,
@@ -809,10 +810,7 @@ export class MonoCloudOidcClient {
     });
 
     const session: MonoCloudSession = {
-      user: {
-        ...idTokenClaims,
-        ...(userinfo ?? {}),
-      } as MonoCloudUser,
+      user: profileSync(undefined, idTokenClaims, userinfo, true),
       idToken: tokens.id_token,
       refreshToken: tokens.refresh_token,
       authorizedScopes: requestedScopes,
@@ -834,7 +832,7 @@ export class MonoCloudOidcClient {
 
   /**
    * Refetches user information for an existing session using the userinfo endpoint.
-   * Updates the session's user object with the latest user information while preserving existing properties.
+   * Updates the session's user object with the latest user information.
    *
    * @param accessToken - Access token used to fetch the userinfo.
    * @param session - The current MonoCloudSession.
@@ -866,8 +864,18 @@ export class MonoCloudOidcClient {
 
     const userinfo = await this.userinfo(accessToken.accessToken);
 
+    const idTokenClaims =
+      session.idToken && options?.strictProfileSync
+        ? MonoCloudOidcClient.decodeJwt(session.idToken)
+        : undefined;
+
     // eslint-disable-next-line no-param-reassign
-    session.user = { ...session.user, ...userinfo };
+    session.user = profileSync(
+      session.user,
+      idTokenClaims,
+      userinfo,
+      options?.strictProfileSync
+    );
 
     await options?.onSessionCreating?.(session, undefined, userinfo);
 
@@ -944,6 +952,8 @@ export class MonoCloudOidcClient {
       } else {
         idTokenClaims = MonoCloudOidcClient.decodeJwt(tokens.id_token);
       }
+    } else if (session.idToken) {
+      idTokenClaims = MonoCloudOidcClient.decodeJwt(session.idToken);
     }
 
     (options?.filteredIdTokenClaims ?? FILTER_ID_TOKEN_CLAIMS).forEach(x => {
@@ -960,14 +970,12 @@ export class MonoCloudOidcClient {
 
     const accessToken = findToken(session.accessTokens, resource, scopes);
 
-    const user =
-      Object.keys(idTokenClaims).length === 0 && !userinfo
-        ? session.user
-        : ({
-            ...session.user,
-            ...idTokenClaims,
-            ...(userinfo ?? {}),
-          } as MonoCloudUser);
+    const user = profileSync(
+      session.user,
+      idTokenClaims,
+      userinfo,
+      options?.strictProfileSync
+    );
 
     const newTokens =
       session.accessTokens?.filter(t => t !== accessToken) ?? [];

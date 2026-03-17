@@ -183,6 +183,7 @@ export const optionsSchema: Joi.ObjectSchema<MonoCloudOptionsBase> = Joi.object(
     fetchUserInfo: boolRequired,
     refetchUserInfo: boolRequired,
     allowQueryParamOverrides: boolRequired,
+    strictProfileSync: boolRequired,
     defaultAuthParams: authParamSchema,
     resources: Joi.array<Indicator>().items(indicatorOptionsSchema).optional(),
     session: sessionSchema,

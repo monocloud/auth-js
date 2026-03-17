@@ -608,6 +608,7 @@ export class MonoCloudCoreClient {
         session,
         {
           onSessionCreating: this.options.onSessionCreating?.bind(this),
+          strictProfileSync: this.options.strictProfileSync,
         }
       );
 
@@ -898,6 +899,7 @@ export class MonoCloudCoreClient {
       session,
       {
         onSessionCreating: this.options.onSessionCreating?.bind(this),
+        strictProfileSync: this.options.strictProfileSync,
       }
     );
 
@@ -1038,6 +1040,7 @@ export class MonoCloudCoreClient {
         },
         filteredIdTokenClaims: this.options.filteredIdTokenClaims,
         onSessionCreating: this.options.onSessionCreating?.bind(this),
+        strictProfileSync: this.options.strictProfileSync,
       });
 
       await this.sessionService.updateSession(

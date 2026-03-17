@@ -17,6 +17,7 @@ export const DEFAULT_OPTIONS = {
     responseType: 'code',
   },
   allowQueryParamOverrides: true,
+  strictProfileSync: false,
   session: {
     cookie: {
       httpOnly: true,
