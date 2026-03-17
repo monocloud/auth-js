@@ -214,7 +214,13 @@ Returns a Next.js middleware result (`NextResponse`, redirect, or `undefined` to
 
 #### Call Signature
 
-> **getSession**(): `Promise`\<[`MonoCloudSession`](/sdks/nextjs/api-reference/types/monocloudsession) \| `undefined`\>
+> **getSession**(`options?`: [`GetSessionOptions`](/sdks/nextjs/api-reference/types/getsessionoptions)): `Promise`\<[`MonoCloudSession`](/sdks/nextjs/api-reference/types/monocloudsession) \| `undefined`\>
+
+##### Parameters
+
+| Parameter  | Type                                                                              | Description                                                    |
+| ---------- | --------------------------------------------------------------------------------- | -------------------------------------------------------------- |
+| `options?` | [`GetSessionOptions`](/sdks/nextjs/api-reference/types/getsessionoptions) | Optional configuration controlling session retrieval behavior. |
 
 ##### Returns
 
@@ -228,14 +234,14 @@ Returns the resolved session, or `undefined` if none exists.
 
 #### Call Signature
 
-> **getSession**(`req`: `Request` \| `NextRequest`, `res?`: `Response` \| `NextResponse`\<`unknown`\>): `Promise`\<[`MonoCloudSession`](/sdks/nextjs/api-reference/types/monocloudsession) \| `undefined`\>
+> **getSession**(`req`: `Request` \| `NextRequest`, `options?`: [`GetSessionOptions`](/sdks/nextjs/api-reference/types/getsessionoptions)): `Promise`\<[`MonoCloudSession`](/sdks/nextjs/api-reference/types/monocloudsession) \| `undefined`\>
 
 ##### Parameters
 
-| Parameter | Type                                      | Description                                                                                             |
-| --------- | ----------------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| `req`     | `Request` \| `NextRequest`                | Incoming request used to read authentication cookies and headers to resolve the current user's session. |
-| `res?`    | `Response` \| `NextResponse`\<`unknown`\> | Optional response to update if session resolution requires refreshed authentication cookies or headers. |
+| Parameter  | Type                                                                              | Description                                                                                             |
+| ---------- | --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| `req`      | `Request` \| `NextRequest`                                                        | Incoming request used to read authentication cookies and headers to resolve the current user's session. |
+| `options?` | [`GetSessionOptions`](/sdks/nextjs/api-reference/types/getsessionoptions) | Optional configuration controlling session retrieval behavior.                                          |
 
 ##### Returns
 
@@ -249,14 +255,37 @@ Returns the resolved session, or `undefined` if none exists.
 
 #### Call Signature
 
-> **getSession**(`req`: `NextApiRequest` \| `IncomingMessage`, `res`: `NextApiResponse` \| `ServerResponse`\<`IncomingMessage`\>): `Promise`\<[`MonoCloudSession`](/sdks/nextjs/api-reference/types/monocloudsession) \| `undefined`\>
+> **getSession**(`req`: `Request` \| `NextRequest`, `res`: `Response` \| `NextResponse`\<`unknown`\>, `options?`: [`GetSessionOptions`](/sdks/nextjs/api-reference/types/getsessionoptions)): `Promise`\<[`MonoCloudSession`](/sdks/nextjs/api-reference/types/monocloudsession) \| `undefined`\>
 
 ##### Parameters
 
-| Parameter | Type                                                       | Description                                                                                          |
-| --------- | ---------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
-| `req`     | `NextApiRequest` \| `IncomingMessage`                      | Incoming Node.js request used to read authentication cookies and resolve the current user's session. |
-| `res`     | `NextApiResponse` \| `ServerResponse`\<`IncomingMessage`\> | Outgoing Node.js response used to apply refreshed authentication cookies when required.              |
+| Parameter  | Type                                                                              | Description                                                                                             |
+| ---------- | --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| `req`      | `Request` \| `NextRequest`                                                        | Incoming request used to read authentication cookies and headers to resolve the current user's session. |
+| `res`      | `Response` \| `NextResponse`\<`unknown`\>                                         | Optional response to update if session resolution requires refreshed authentication cookies or headers. |
+| `options?` | [`GetSessionOptions`](/sdks/nextjs/api-reference/types/getsessionoptions) | Optional configuration controlling session retrieval behavior.                                          |
+
+##### Returns
+
+`Promise`\<[`MonoCloudSession`](/sdks/nextjs/api-reference/types/monocloudsession) \| `undefined`\>
+
+Returns the resolved session, or `undefined` if none exists.
+
+##### See
+
+[getSession](/sdks/nextjs/api-reference/functions/getsession) for full docs and examples.
+
+#### Call Signature
+
+> **getSession**(`req`: `NextApiRequest` \| `IncomingMessage`, `res`: `NextApiResponse` \| `ServerResponse`\<`IncomingMessage`\>, `options?`: [`GetSessionOptions`](/sdks/nextjs/api-reference/types/getsessionoptions)): `Promise`\<[`MonoCloudSession`](/sdks/nextjs/api-reference/types/monocloudsession) \| `undefined`\>
+
+##### Parameters
+
+| Parameter  | Type                                                                              | Description                                                                                          |
+| ---------- | --------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `req`      | `NextApiRequest` \| `IncomingMessage`                                             | Incoming Node.js request used to read authentication cookies and resolve the current user's session. |
+| `res`      | `NextApiResponse` \| `ServerResponse`\<`IncomingMessage`\>                        | Outgoing Node.js response used to apply refreshed authentication cookies when required.              |
+| `options?` | [`GetSessionOptions`](/sdks/nextjs/api-reference/types/getsessionoptions) | Optional configuration controlling session retrieval behavior.                                       |
 
 ##### Returns
 

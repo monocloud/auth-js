@@ -268,7 +268,7 @@ unexpected status code during the request or a serialization error while process
 > **refetchUserInfo**(`accessToken`: [`AccessToken`](/sdks/nodejs/api-reference/types/accesstoken), `session`: [`MonoCloudSession`](/sdks/nodejs/api-reference/types/monocloudsession), `options?`: [`RefetchUserInfoOptions`](/sdks/nodejs/api-reference/types/refetchuserinfooptions)): `Promise`\<[`MonoCloudSession`](/sdks/nodejs/api-reference/types/monocloudsession)\>
 
 Refetches user information for an existing session using the userinfo endpoint.
-Updates the session's user object with the latest user information while preserving existing properties.
+Updates the session's user object with the latest user information.
 
 #### Parameters
 

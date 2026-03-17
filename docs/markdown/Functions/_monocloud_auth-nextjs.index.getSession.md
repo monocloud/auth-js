@@ -8,11 +8,17 @@ category: Functions
 
 ## Call Signature
 
-> **getSession**(): `Promise`\<[`MonoCloudSession`](/sdks/nextjs/api-reference/types/monocloudsession) \| `undefined`\>
+> **getSession**(`options?`: [`GetSessionOptions`](/sdks/nextjs/api-reference/types/getsessionoptions)): `Promise`\<[`MonoCloudSession`](/sdks/nextjs/api-reference/types/monocloudsession) \| `undefined`\>
 
 Retrieves the current user's session using the active server request context.
 
 Intended for Server Components, Server Actions, Route Handlers, and Middleware where the request is implicitly available.
+
+### Parameters
+
+| Parameter  | Type                                                                              | Description                                                   |
+| ---------- | --------------------------------------------------------------------------------- | ------------------------------------------------------------- |
+| `options?` | [`GetSessionOptions`](/sdks/nextjs/api-reference/types/getsessionoptions) | Optional configuration to control session retrieval behavior. |
 
 ### Returns
 
@@ -72,7 +78,7 @@ export default async function proxy() {
 
 ## Call Signature
 
-> **getSession**(`req`: `Request` \| `NextRequest`, `res?`: `Response` \| `NextResponse`\<`unknown`\>): `Promise`\<[`MonoCloudSession`](/sdks/nextjs/api-reference/types/monocloudsession) \| `undefined`\>
+> **getSession**(`req`: `Request` \| `NextRequest`, `options?`: [`GetSessionOptions`](/sdks/nextjs/api-reference/types/getsessionoptions)): `Promise`\<[`MonoCloudSession`](/sdks/nextjs/api-reference/types/monocloudsession) \| `undefined`\>
 
 Retrieves the current user's session using an explicit Web or Next.js request.
 
@@ -80,10 +86,10 @@ Use this overload when you already have access to a `Request` or `NextRequest` (
 
 ### Parameters
 
-| Parameter | Type                                      | Description                                                                                             |
-| --------- | ----------------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| `req`     | `Request` \| `NextRequest`                | Incoming request used to read authentication cookies and headers to resolve the current user's session. |
-| `res?`    | `Response` \| `NextResponse`\<`unknown`\> | Optional response to update if session resolution requires refreshed authentication cookies or headers. |
+| Parameter  | Type                                                                              | Description                                                                                             |
+| ---------- | --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| `req`      | `Request` \| `NextRequest`                                                        | Incoming request used to read authentication cookies and headers to resolve the current user's session. |
+| `options?` | [`GetSessionOptions`](/sdks/nextjs/api-reference/types/getsessionoptions) | Optional configuration to control session retrieval behavior.                                           |
 
 ### Returns
 
@@ -108,6 +114,41 @@ export default async function proxy(req: NextRequest) {
 }
 ```
 
+```tsx:src/app/api/user/route.ts tab="API Handler (Request)" tab-group="session-route-handler"
+import { getSession } from "@monocloud/auth-nextjs";
+import { NextRequest, NextResponse } from "next/server";
+
+export const GET = async (req: NextRequest) => {
+  const session = await getSession(req);
+
+  return NextResponse.json({ name: session?.user.name });
+};
+```
+
+## Call Signature
+
+> **getSession**(`req`: `Request` \| `NextRequest`, `res`: `Response` \| `NextResponse`\<`unknown`\>, `options?`: [`GetSessionOptions`](/sdks/nextjs/api-reference/types/getsessionoptions)): `Promise`\<[`MonoCloudSession`](/sdks/nextjs/api-reference/types/monocloudsession) \| `undefined`\>
+
+Retrieves the current user's session using explicit request and response objects.
+
+Use this overload when you have already created a response and want refreshed authentication cookies or headers applied to it.
+
+### Parameters
+
+| Parameter  | Type                                                                              | Description                                                                                             |
+| ---------- | --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| `req`      | `Request` \| `NextRequest`                                                        | Incoming request used to read authentication cookies and headers to resolve the current user's session. |
+| `res`      | `Response` \| `NextResponse`\<`unknown`\>                                         | Response object to update when session resolution requires refreshed authentication cookies or headers. |
+| `options?` | [`GetSessionOptions`](/sdks/nextjs/api-reference/types/getsessionoptions) | Optional configuration to control session retrieval behavior.                                           |
+
+### Returns
+
+`Promise`\<[`MonoCloudSession`](/sdks/nextjs/api-reference/types/monocloudsession) \| `undefined`\>
+
+Returns the resolved session, or `undefined` if none exists.
+
+### Examples
+
 ```tsx:src/proxy.ts tab="Middleware (Response)" tab-group="session-route-handler"
 import { getSession } from "@monocloud/auth-nextjs";
 import { NextRequest, NextResponse } from "next/server";
@@ -125,17 +166,6 @@ export default async function proxy(req: NextRequest) {
 
   return res;
 }
-```
-
-```tsx:src/app/api/user/route.ts tab="API Handler (Request)" tab-group="session-route-handler"
-import { getSession } from "@monocloud/auth-nextjs";
-import { NextRequest, NextResponse } from "next/server";
-
-export const GET = async (req: NextRequest) => {
-  const session = await getSession(req);
-
-  return NextResponse.json({ name: session?.user.name });
-};
 ```
 
 ```tsx:src/app/api/user/route.ts tab="API Handler (Response)" tab-group="session-route-handler"
@@ -157,7 +187,7 @@ export const GET = async (req: NextRequest) => {
 
 ## Call Signature
 
-> **getSession**(`req`: `NextApiRequest` \| `IncomingMessage`, `res`: `NextApiResponse` \| `ServerResponse`\<`IncomingMessage`\>): `Promise`\<[`MonoCloudSession`](/sdks/nextjs/api-reference/types/monocloudsession) \| `undefined`\>
+> **getSession**(`req`: `NextApiRequest` \| `IncomingMessage`, `res`: `NextApiResponse` \| `ServerResponse`\<`IncomingMessage`\>, `options?`: [`GetSessionOptions`](/sdks/nextjs/api-reference/types/getsessionoptions)): `Promise`\<[`MonoCloudSession`](/sdks/nextjs/api-reference/types/monocloudsession) \| `undefined`\>
 
 Retrieves the current user's session in the Pages Router or Node.js runtime.
 
@@ -165,10 +195,11 @@ Use this overload in API routes or `getServerSideProps`, where Node.js request a
 
 ### Parameters
 
-| Parameter | Type                                                       | Description                                                                                          |
-| --------- | ---------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
-| `req`     | `NextApiRequest` \| `IncomingMessage`                      | Incoming Node.js request used to read authentication cookies and resolve the current user's session. |
-| `res`     | `NextApiResponse` \| `ServerResponse`\<`IncomingMessage`\> | Outgoing Node.js response used to apply refreshed authentication cookies when required.              |
+| Parameter  | Type                                                                              | Description                                                                                          |
+| ---------- | --------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `req`      | `NextApiRequest` \| `IncomingMessage`                                             | Incoming Node.js request used to read authentication cookies and resolve the current user's session. |
+| `res`      | `NextApiResponse` \| `ServerResponse`\<`IncomingMessage`\>                        | Outgoing Node.js response used to apply refreshed authentication cookies when required.              |
+| `options?` | [`GetSessionOptions`](/sdks/nextjs/api-reference/types/getsessionoptions) | Optional configuration to control session retrieval behavior.                                        |
 
 ### Returns
 
