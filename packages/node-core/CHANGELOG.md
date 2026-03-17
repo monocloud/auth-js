@@ -1,5 +1,14 @@
 # @monocloud/auth-node-core
 
+## 0.1.10
+
+### Patch Changes
+
+- f20edaa: - Added `refetchUserInfo` option to `getSession()` which will fetch the user profile from userinfo endpoint and update the session.
+- f20edaa: - Implement `strictProfileSync` option for syncing the user profile during session refresh.
+- Updated dependencies [f20edaa]
+  - @monocloud/auth-core@0.1.7
+
 ## 0.1.9
 
 ### Patch Changes
