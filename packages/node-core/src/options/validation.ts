@@ -2,6 +2,7 @@ import Joi from 'joi';
 import type { AuthorizationParams } from '@monocloud/auth-core';
 import {
   CallbackOptions,
+  GetSessionOptions,
   GetTokensOptions,
   Indicator,
   MonoCloudOptionsBase,
@@ -182,6 +183,7 @@ export const optionsSchema: Joi.ObjectSchema<MonoCloudOptionsBase> = Joi.object(
     fetchUserInfo: boolRequired,
     refetchUserInfo: boolRequired,
     allowQueryParamOverrides: boolRequired,
+    strictProfileSync: boolRequired,
     defaultAuthParams: authParamSchema,
     resources: Joi.array<Indicator>().items(indicatorOptionsSchema).optional(),
     session: sessionSchema,
@@ -243,4 +245,9 @@ export const getTokensOptionsSchema: Joi.ObjectSchema<GetTokensOptions> =
     refetchUserInfo: boolOptional,
     resource: resourceValidationSchema.optional(),
     scopes: scopesValidationSchema.optional(),
+  });
+
+export const getSessionOptionsSchema: Joi.ObjectSchema<GetSessionOptions> =
+  Joi.object({
+    refetchUserInfo: boolOptional,
   });

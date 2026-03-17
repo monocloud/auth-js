@@ -40,6 +40,7 @@ category: Other
 - [AppRouterContext](/sdks/nextjs/api-reference/types/approutercontext)
 - [AuthorizationParams](/sdks/nextjs/api-reference/types/authorizationparams)
 - [ExtraAuthParams](/sdks/nextjs/api-reference/types/extraauthparams)
+- [GetSessionOptions](/sdks/nextjs/api-reference/types/getsessionoptions)
 - [GetTokensOptions](/sdks/nextjs/api-reference/types/gettokensoptions)
 - [Group](/sdks/nextjs/api-reference/types/group)
 - [GroupOptions](/sdks/nextjs/api-reference/types/groupoptions)

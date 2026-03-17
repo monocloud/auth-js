@@ -25,6 +25,7 @@ import {
 import {
   arrayBufferToBase64,
   arrayBufferToString,
+  profileSync,
   decodeBase64Url,
   encodeBase64Url,
   ensureLeadingSlash,
@@ -1224,5 +1225,58 @@ describe('findToken', () => {
     const tokens = [token];
     const result = findToken(tokens, 'resource1', 'scope1 scope2 scope3');
     expect(result).toBeUndefined();
+  });
+});
+
+describe('profileSync', () => {
+  const existingUser = { sub: 'existing-sub', stale: 'stale-claim' } as any;
+  const idToken = { sub: 'idtoken-sub', role: 'admin' };
+  const userInfo = { username: 'new-user' };
+
+  it('should merge new claims with existing claims when strictProfileSync is false', () => {
+    const result = profileSync(existingUser, idToken, userInfo, false);
+    expect(result).toEqual({
+      sub: 'idtoken-sub',
+      stale: 'stale-claim',
+      role: 'admin',
+      username: 'new-user',
+    });
+  });
+
+  it('should sync claims from new claims only when strict is true', () => {
+    const result = profileSync(existingUser, idToken, userInfo, true);
+    expect(result).toEqual({
+      sub: 'idtoken-sub',
+      role: 'admin',
+      username: 'new-user',
+    });
+    expect(result).not.toHaveProperty('stale');
+  });
+
+  it('should return existingUser when new claims are empty objects', () => {
+    const result = profileSync(existingUser, {}, {});
+    expect(result).toBe(existingUser);
+  });
+
+  it('should return a new empty object when all inputs are undefined', () => {
+    const result = profileSync(undefined, undefined, undefined);
+    expect(result).toEqual({});
+  });
+
+  it('should handle undefined claims when syncing', () => {
+    const result = profileSync(existingUser, idToken, undefined, true);
+    expect(result).toEqual(idToken);
+  });
+
+  [false, true].forEach(strict => {
+    it('should handle undefined existingUser and partial claims', () => {
+      const result = profileSync(undefined, undefined, userInfo, strict);
+      expect(result).toEqual(userInfo);
+    });
+  });
+
+  it('should use default strictProfileSync (false) when omitted', () => {
+    const result = profileSync(existingUser, idToken);
+    expect(result.stale).toBe('stale-claim');
   });
 });

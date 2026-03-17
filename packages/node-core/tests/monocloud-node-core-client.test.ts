@@ -3678,6 +3678,135 @@ describe('MonoCloud Base Instance', () => {
       });
     });
 
+    it('getSession should throw an error if options validation fails', async () => {
+      const instance = getConfiguredInstance();
+
+      await expect(
+        instance.getSession(new TestReq(), new TestRes(), {
+          refetchUserInfo: 'invalid' as unknown as boolean,
+        })
+      ).rejects.toThrow('"refetchUserInfo" must be a boolean');
+    });
+
+    it('getSession should return session with refreshed userinfo when refetchUserinfo is true', async () => {
+      nock('https://example.com')
+        .get('/.well-known/openid-configuration')
+        .reply(200, defaultMetadata);
+
+      nock('https://example.com')
+        .matchHeader('authorization', 'Bearer at')
+        .get('/connect/userinfo')
+        .reply(200, {
+          sub: 'sub',
+          username: 'updated',
+        });
+
+      const cookies = {};
+      const oldTime = now();
+
+      await setSessionCookieValue(cookies, {
+        session: {
+          user: { sub: 'sub' },
+          authorizedScopes: 'openid profile',
+          accessTokens: [
+            {
+              scopes: 'openid profile',
+              requestedScopes: 'openid profile',
+              accessToken: 'at',
+              accessTokenExpiration: oldTime + 100,
+            },
+          ],
+          idToken: 'idtoken',
+          refreshToken: 'rt',
+        },
+        lifetime: { u: oldTime, e: oldTime + 86400, c: oldTime },
+      });
+
+      const req = new TestReq({ cookies });
+      const res = new TestRes(cookies);
+
+      const instance = getConfiguredInstance();
+
+      const session = await instance.getSession(req, res, {
+        refetchUserInfo: true,
+      });
+
+      expect(session).toEqual({
+        user: {
+          sub: 'sub',
+          username: 'updated',
+        },
+        authorizedScopes: 'openid profile',
+        accessTokens: [
+          {
+            scopes: 'openid profile',
+            requestedScopes: 'openid profile',
+            accessToken: 'at',
+            accessTokenExpiration: oldTime + 100,
+          },
+        ],
+        idToken: 'idtoken',
+        refreshToken: 'rt',
+      });
+
+      await assertSessionCookieValue(cookies, {
+        session: {
+          user: {
+            sub: 'sub',
+            username: 'updated',
+          },
+          authorizedScopes: 'openid profile',
+          accessTokens: [
+            {
+              scopes: 'openid profile',
+              requestedScopes: 'openid profile',
+              accessToken: 'at',
+              accessTokenExpiration: oldTime + 100,
+            },
+          ],
+          idToken: 'idtoken',
+          refreshToken: 'rt',
+        },
+      });
+    });
+
+    it('getSession should return undefined if session does not exist and refetchUserinfo is true', async () => {
+      const cookies = {};
+
+      const req = new TestReq({ cookies });
+      const res = new TestRes(cookies);
+
+      const instance = getConfiguredInstance();
+
+      await expect(
+        instance.getSession(req, res, { refetchUserInfo: true })
+      ).resolves.toBeUndefined();
+    });
+
+    it('getSession should throw if default token is not found when refetchUserinfo is true', async () => {
+      const cookies = {};
+
+      await setSessionCookieValue(cookies, {
+        session: {
+          user: { sub: 'sub' },
+          authorizedScopes: 'openid profile',
+          accessTokens: [],
+          idToken: 'idtoken',
+          refreshToken: 'rt',
+        },
+        lifetime: { u: now(), e: now() + 86400, c: now() },
+      });
+
+      const req = new TestReq({ cookies });
+      const res = new TestRes(cookies);
+
+      const instance = getConfiguredInstance();
+
+      await expect(
+        instance.getSession(req, res, { refetchUserInfo: true })
+      ).rejects.toThrow('Access token not found');
+    });
+
     it('updateSession should update the session', async () => {
       const frozenTimeMs = 1330688329321;
 

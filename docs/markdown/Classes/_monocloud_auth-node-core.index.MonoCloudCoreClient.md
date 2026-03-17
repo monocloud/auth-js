@@ -125,16 +125,17 @@ A copy of the initialized configuration.
 
 ### getSession()
 
-> **getSession**(`request`: [`IMonoCloudCookieRequest`](/sdks/nodejs-core/api-reference/types/imonocloudcookierequest), `response`: [`IMonoCloudCookieResponse`](/sdks/nodejs-core/api-reference/types/imonocloudcookieresponse)): `Promise`\<[`MonoCloudSession`](/sdks/nodejs-core/api-reference/types/monocloudsession) \| `undefined`\>
+> **getSession**(`request`: [`IMonoCloudCookieRequest`](/sdks/nodejs-core/api-reference/types/imonocloudcookierequest), `response`: [`IMonoCloudCookieResponse`](/sdks/nodejs-core/api-reference/types/imonocloudcookieresponse), `options?`: [`GetSessionOptions`](/sdks/nodejs-core/api-reference/types/getsessionoptions)): `Promise`\<[`MonoCloudSession`](/sdks/nodejs-core/api-reference/types/monocloudsession) \| `undefined`\>
 
 Retrieves the current user's session data.
 
 #### Parameters
 
-| Parameter  | Type                                                                                               | Description                       |
-| ---------- | -------------------------------------------------------------------------------------------------- | --------------------------------- |
-| `request`  | [`IMonoCloudCookieRequest`](/sdks/nodejs-core/api-reference/types/imonocloudcookierequest)   | MonoCloud cookie request object.  |
-| `response` | [`IMonoCloudCookieResponse`](/sdks/nodejs-core/api-reference/types/imonocloudcookieresponse) | MonoCloud cookie response object. |
+| Parameter  | Type                                                                                               | Description                                                   |
+| ---------- | -------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
+| `request`  | [`IMonoCloudCookieRequest`](/sdks/nodejs-core/api-reference/types/imonocloudcookierequest)   | MonoCloud cookie request object.                              |
+| `response` | [`IMonoCloudCookieResponse`](/sdks/nodejs-core/api-reference/types/imonocloudcookieresponse) | MonoCloud cookie response object.                             |
+| `options?` | [`GetSessionOptions`](/sdks/nodejs-core/api-reference/types/getsessionoptions)               | Optional configuration to control session retrieval behavior. |
 
 #### Returns
 

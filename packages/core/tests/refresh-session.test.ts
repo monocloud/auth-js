@@ -96,7 +96,7 @@ describe('MonoCloudOidcClient.refreshSession()', () => {
         },
       ],
       refreshToken: 'rt_old',
-      idToken: idToken,
+      idToken,
     };
 
     const result = await client.refreshSession(session, options);
@@ -118,6 +118,197 @@ describe('MonoCloudOidcClient.refreshSession()', () => {
         refreshToken: 'rt',
       })
     );
+  });
+
+  it('should sync the session when strictProfileSync is true', async () => {
+    const fetchSpy = fetchBuilder()
+      .configureMetadata()
+      .configureRefreshToken({
+        skipIdToken: true,
+        body: 'grant_type=refresh_token&refresh_token=rt_old',
+      })
+      .configureUserinfo({
+        claims: {
+          sub: 'new-subject',
+          username: 'new-username',
+        },
+      })
+      .createSpy();
+
+    const client = new MonoCloudOidcClient('example.com', 'clientId');
+
+    const options: RefreshSessionOptions = {
+      fetchUserInfo: true,
+      strictProfileSync: true,
+    };
+
+    const session: MonoCloudSession = {
+      user: { sub: 'old-subject', stale: 'old-claim', from_id_token: true },
+      accessTokens: [
+        {
+          accessToken: 'at_old',
+          scopes: 'openid profile',
+          requestedScopes: 'openid profile',
+          accessTokenExpiration: 9999999999,
+        },
+      ],
+      refreshToken: 'rt_old',
+      idToken: '.eyJmcm9tX2lkX3Rva2VuIjp0cnVlfQ.',
+      authorizedScopes: 'openid profile',
+      custom: 'should-be-preserved',
+    };
+
+    const result = await client.refreshSession(session, options);
+
+    fetchSpy.assert();
+    expect(result).toEqual({
+      user: {
+        sub: 'new-subject',
+        username: 'new-username',
+        from_id_token: true,
+      },
+      accessTokens: [
+        {
+          accessToken: 'at',
+          scopes: 'openid offline_access',
+          requestedScopes: 'openid profile',
+          accessTokenExpiration: expect.any(Number),
+          resource: undefined,
+        },
+      ],
+      refreshToken: 'rt',
+      idToken: '.eyJmcm9tX2lkX3Rva2VuIjp0cnVlfQ.',
+      authorizedScopes: 'openid profile',
+      custom: 'should-be-preserved',
+    });
+  });
+
+  it('should use the old id token when syncing without new id token claims and userinfo', async () => {
+    const fetchSpy = fetchBuilder()
+      .configureMetadata()
+      .configureRefreshToken({
+        skipIdToken: true,
+        body: 'grant_type=refresh_token&refresh_token=rt_old',
+      })
+      .createSpy();
+
+    const client = new MonoCloudOidcClient('example.com', 'clientId');
+
+    const options: RefreshSessionOptions = {
+      strictProfileSync: true,
+      fetchUserInfo: false,
+    };
+
+    const session: MonoCloudSession = {
+      user: {
+        sub: 'existing-subject',
+        stale: 'existing-claim',
+        from_id_token: true,
+      },
+      accessTokens: [
+        {
+          accessToken: 'at_old',
+          scopes: 'openid profile',
+          requestedScopes: 'openid profile',
+          accessTokenExpiration: 9999999999,
+        },
+      ],
+      refreshToken: 'rt_old',
+      idToken: '.eyJmcm9tX2lkX3Rva2VuIjp0cnVlfQ.',
+      authorizedScopes: 'openid profile',
+      custom: 'should-be-preserved',
+    };
+
+    const result = await client.refreshSession(session, options);
+
+    fetchSpy.assert();
+    expect(result).toEqual({
+      user: {
+        from_id_token: true,
+      },
+      accessTokens: [
+        {
+          accessToken: 'at',
+          scopes: 'openid offline_access',
+          requestedScopes: 'openid profile',
+          accessTokenExpiration: expect.any(Number),
+          resource: undefined,
+        },
+      ],
+      refreshToken: 'rt',
+      idToken: '.eyJmcm9tX2lkX3Rva2VuIjp0cnVlfQ.',
+      authorizedScopes: 'openid profile',
+      custom: 'should-be-preserved',
+    });
+  });
+
+  it('should sync from id token claims and keep existing refresh token when token response does not include one', async () => {
+    const idToken = await generateIdToken({
+      claims: { role: 'rebuilt-role' },
+    });
+
+    const fetchSpy = fetchBuilder()
+      .configureMetadata()
+      .configureRefreshToken({
+        idToken,
+        skipRefreshToken: true,
+        body: 'grant_type=refresh_token&refresh_token=rt_old',
+      })
+      .createSpy();
+
+    const client = new MonoCloudOidcClient('example.com', 'clientId');
+
+    const options: RefreshSessionOptions = {
+      strictProfileSync: true,
+      validateIdToken: false,
+      fetchUserInfo: false,
+    };
+
+    const session: MonoCloudSession = {
+      user: {
+        sub: 'existing-subject',
+        stale: 'existing-claim',
+        from_id_token: true,
+      },
+      accessTokens: [
+        {
+          accessToken: 'at_old',
+          scopes: 'openid profile',
+          requestedScopes: 'openid profile',
+          accessTokenExpiration: 9999999999,
+        },
+      ],
+      refreshToken: 'rt_old',
+      idToken: '.eyJmcm9tX2lkX3Rva2VuIjp0cnVlfQ.',
+      authorizedScopes: 'openid profile',
+      custom: 'should-be-preserved',
+    };
+
+    const result = await client.refreshSession(session, options);
+
+    fetchSpy.assert();
+    expect(result).toEqual(
+      expect.objectContaining({
+        user: expect.objectContaining({
+          sub: 'sub',
+          role: 'rebuilt-role',
+        }),
+        accessTokens: [
+          {
+            accessToken: 'at',
+            scopes: 'openid offline_access',
+            requestedScopes: 'openid profile',
+            accessTokenExpiration: expect.any(Number),
+            resource: undefined,
+          },
+        ],
+        refreshToken: 'rt_old',
+        idToken,
+        authorizedScopes: 'openid profile',
+        custom: 'should-be-preserved',
+      })
+    );
+    expect(result.user).not.toHaveProperty('stale');
   });
 
   it('should refresh a session specific token if matching resource and scope is specified', async () => {

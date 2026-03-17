@@ -502,6 +502,16 @@ export interface MonoCloudOptionsBase {
   allowQueryParamOverrides?: boolean;
 
   /**
+   * Determines how user profile is updated when the session is updated.
+   *
+   * When enabled, the session user profile is fully replaced with a newly constructed profile
+   * derived from the latest ID token and, if applicable, the UserInfo response.
+   *
+   * @defaultValue false
+   */
+  strictProfileSync?: boolean;
+
+  /**
    * Invoked when a back-channel logout request is received.
    */
   onBackChannelLogout?: OnBackChannelLogout;
@@ -887,6 +897,18 @@ export interface GetTokensOptions extends RefreshGrantOptions {
 
   /**
    * When enabled, refetches user information from the `UserInfo` endpoint after tokens are refreshed.
+   */
+  refetchUserInfo?: boolean;
+}
+
+/**
+ * Options used to control session retrieval behavior when calling `getSession()`.
+ *
+ * @category Types
+ */
+export interface GetSessionOptions {
+  /**
+   * When enabled, re-fetches user information from the `UserInfo` endpoint and updates the current session.
    */
   refetchUserInfo?: boolean;
 }

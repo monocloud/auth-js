@@ -1334,6 +1334,14 @@ export interface RefreshSessionOptions {
   filteredIdTokenClaims?: string[];
 
   /**
+   * When enabled, replaces the existing session user profile with a freshly constructed profile
+   * derived from the latest ID token and/or UserInfo response.
+   *
+   * @defaultValue false
+   */
+  strictProfileSync?: boolean;
+
+  /**
    * Callback invoked before a session is created or updated. Allows customization or enrichment of the session.
    */
   onSessionCreating?: OnSessionCreating;
@@ -1345,6 +1353,14 @@ export interface RefreshSessionOptions {
  * @category Types
  */
 export interface RefetchUserInfoOptions {
+  /**
+   * When enabled, replaces the existing session user profile with a new profile
+   * constructed from the latest UserInfo response.
+   *
+   * @defaultValue false
+   */
+  strictProfileSync?: boolean;
+
   /**
    * Callback invoked before a session is created or updated. Allows customization or enrichment of the session.
 

@@ -30,6 +30,7 @@ category: Other
 - [CallbackParams](/sdks/nodejs-core/api-reference/types/callbackparams)
 - [CookieOptions](/sdks/nodejs-core/api-reference/types/cookieoptions)
 - [EndSessionParameters](/sdks/nodejs-core/api-reference/types/endsessionparameters)
+- [GetSessionOptions](/sdks/nodejs-core/api-reference/types/getsessionoptions)
 - [GetTokensOptions](/sdks/nodejs-core/api-reference/types/gettokensoptions)
 - [Group](/sdks/nodejs-core/api-reference/types/group)
 - [IdTokenClaims](/sdks/nodejs-core/api-reference/types/idtokenclaims)

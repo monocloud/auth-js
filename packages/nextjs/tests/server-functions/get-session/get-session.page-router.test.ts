@@ -5,7 +5,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { MonoCloudNextClient, MonoCloudValidationError } from '../../../src';
 import {
   defaultDiscovery,
-  noTokenAndUserInfo,
+  noTokenAndUserInfoEnabled,
   setupOp,
 } from '../../op-helpers.js';
 import {
@@ -18,10 +18,20 @@ import {
   stopNodeServer,
 } from '../../page-router-helpers';
 
+const sessionWithOpenIdScope = {
+  ...defaultSessionCookieValue,
+  accessTokens: [
+    {
+      ...defaultSessionCookieValue.accessTokens[0],
+      scopes: 'openid profile email read:customer',
+    },
+  ],
+};
+
 describe('MonoCloud.getSession() - Page Router', () => {
   let monoCloud: MonoCloudNextClient;
-  beforeEach(() => {
-    setupOp(defaultDiscovery, noTokenAndUserInfo);
+  beforeEach(async () => {
+    await setupOp(defaultDiscovery, noTokenAndUserInfoEnabled);
 
     monoCloud = new MonoCloudNextClient();
   });
@@ -90,6 +100,36 @@ describe('MonoCloud.getSession() - Page Router', () => {
     const cookieJar = new CookieJar();
 
     await setSessionCookie(cookieJar, `${baseUrl}/`);
+
+    await get(baseUrl, '/', cookieJar);
+  });
+
+  it('should return session with refreshed userinfo when refetchUserinfo is true', async () => {
+    const handler = async (
+      req: NextApiRequest,
+      res: NextApiResponse
+    ): Promise<void> => {
+      const session = await monoCloud.getSession(req, res, {
+        refetchUserInfo: true,
+      });
+
+      res.end();
+
+      expect(session).toEqual({
+        ...sessionWithOpenIdScope,
+        user: {
+          ...sessionWithOpenIdScope.user,
+          username: 'username',
+          updated: 'false',
+        },
+      });
+    };
+
+    const baseUrl = await startNodeServer(handler);
+
+    const cookieJar = new CookieJar();
+
+    await setSessionCookie(cookieJar, `${baseUrl}/`, sessionWithOpenIdScope);
 
     await get(baseUrl, '/', cookieJar);
   });

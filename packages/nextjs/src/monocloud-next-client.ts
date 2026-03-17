@@ -30,6 +30,7 @@ import {
 } from '@monocloud/auth-node-core/internal';
 import { isUserInGroup as isUserInGroupCore } from '@monocloud/auth-node-core/utils';
 import type {
+  GetSessionOptions,
   GetTokensOptions,
   IMonoCloudCookieRequest,
   IMonoCloudCookieResponse,
@@ -966,51 +967,97 @@ export class MonoCloudNextClient {
 
   /**
    * @see {@link getSession} for full docs and examples.
+   * @param options Optional configuration controlling session retrieval behavior.
    * @returns Returns the resolved session, or `undefined` if none exists.
    */
-  public getSession(): Promise<MonoCloudSession | undefined>;
+  public getSession(
+    options?: GetSessionOptions
+  ): Promise<MonoCloudSession | undefined>;
+
+  /**
+   * @see {@link getSession} for full docs and examples.
+   * @param req Incoming request used to read authentication cookies and headers to resolve the current user's session.
+   * @param options Optional configuration controlling session retrieval behavior.
+   * @returns Returns the resolved session, or `undefined` if none exists.
+   */
+  public getSession(
+    req: NextRequest | Request,
+    options?: GetSessionOptions
+  ): Promise<MonoCloudSession | undefined>;
 
   /**
    * @see {@link getSession} for full docs and examples.
    * @param req Incoming request used to read authentication cookies and headers to resolve the current user's session.
    * @param res Optional response to update if session resolution requires refreshed authentication cookies or headers.
+   * @param options Optional configuration controlling session retrieval behavior.
    * @returns Returns the resolved session, or `undefined` if none exists.
    */
   public getSession(
     req: NextRequest | Request,
-    res?: NextResponse | Response
+    res: NextResponse | Response,
+    options?: GetSessionOptions
   ): Promise<MonoCloudSession | undefined>;
 
   /**
    * @see {@link getSession} for full docs and examples.
    * @param req Incoming Node.js request used to read authentication cookies and resolve the current user's session.
    * @param res Outgoing Node.js response used to apply refreshed authentication cookies when required.
+   * @param options Optional configuration controlling session retrieval behavior.
    * @returns Returns the resolved session, or `undefined` if none exists.
    */
   public getSession(
     req: NextApiRequest | IncomingMessage,
-    res: NextApiResponse | ServerResponse<IncomingMessage>
+    res: NextApiResponse | ServerResponse<IncomingMessage>,
+    options?: GetSessionOptions
   ): Promise<MonoCloudSession | undefined>;
 
   async getSession(...args: any[]): Promise<MonoCloudSession | undefined> {
     let request: IMonoCloudCookieRequest;
     let response: IMonoCloudCookieResponse;
+    let options: GetSessionOptions | undefined;
 
     if (args.length === 0) {
       request = new MonoCloudCookieRequest();
       response = new MonoCloudCookieResponse();
+    } else if (args.length === 1) {
+      if (args[0] instanceof Request) {
+        ({ request, response } = getMonoCloudCookieReqRes(args[0], undefined));
+      } else {
+        request = new MonoCloudCookieRequest();
+        response = new MonoCloudCookieResponse();
+        options = args[0];
+      }
+    } else if (args.length === 2 && args[0] instanceof Request) {
+      if (args[1] instanceof Response) {
+        ({ request, response } = getMonoCloudCookieReqRes(args[0], args[1]));
+      } else {
+        ({ request, response } = getMonoCloudCookieReqRes(args[0], undefined));
+
+        options = args[1] as GetSessionOptions;
+      }
+    } else if (
+      args.length === 2 &&
+      isNodeRequest(args[0]) &&
+      isNodeResponse(args[1])
+    ) {
+      ({ request, response } = getMonoCloudCookieReqRes(args[0], args[1]));
     } else {
       ({ request, response } = getMonoCloudCookieReqRes(args[0], args[1]));
+
+      options = args[2] as GetSessionOptions;
     }
 
-    /* v8 ignore next -- @preserve */
-    if (!isMonoCloudRequest(request) || !isMonoCloudResponse(response)) {
+    if (
+      !isMonoCloudRequest(request) ||
+      !isMonoCloudResponse(response) ||
+      (options && typeof options !== 'object')
+    ) {
       throw new MonoCloudValidationError(
         'Invalid parameters passed to getSession()'
       );
     }
 
-    return await this.coreClient.getSession(request, response);
+    return await this.coreClient.getSession(request, response, options);
   }
 
   /**

@@ -50,6 +50,63 @@ describe('MonoCloudOidcClient.refetchUserInfo()', () => {
     });
   });
 
+  it('should sync session when strictProfileSync is true', async () => {
+    const fetchSpy = fetchBuilder()
+      .configureMetadata()
+      .configureUserinfo({ claims: { sub: 'subject', name: 'new-user' } })
+      .createSpy();
+
+    const client = new MonoCloudOidcClient('example.com', 'clientId');
+
+    const result = await client.refetchUserInfo(
+      {
+        accessToken: 'at',
+        scopes: 'openid',
+        accessTokenExpiration: 9999999999,
+      },
+      {
+        user: {
+          sub: 'old-subject',
+          stale: 'old-claim',
+        },
+        accessTokens: [
+          {
+            accessToken: 'at',
+            scopes: 'openid',
+            accessTokenExpiration: 9999999999,
+          },
+        ],
+        idToken: '.eyJmcm9tX2lkX3Rva2VuIjp0cnVlfQ.',
+        refreshToken: 'refresh-token',
+        authorizedScopes: 'openid profile',
+        custom: 'should-be-preserved',
+      },
+      {
+        strictProfileSync: true,
+      }
+    );
+
+    fetchSpy.assert();
+    expect(result).toEqual({
+      user: {
+        sub: 'subject',
+        name: 'new-user',
+        from_id_token: true,
+      },
+      accessTokens: [
+        {
+          accessToken: 'at',
+          scopes: 'openid',
+          accessTokenExpiration: 9999999999,
+        },
+      ],
+      idToken: '.eyJmcm9tX2lkX3Rva2VuIjp0cnVlfQ.',
+      refreshToken: 'refresh-token',
+      authorizedScopes: 'openid profile',
+      custom: 'should-be-preserved',
+    });
+  });
+
   it('should give a failed response when the session does not contain scope openid', async () => {
     const client = new MonoCloudOidcClient('example.com', 'clientId');
 

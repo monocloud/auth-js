@@ -29,6 +29,7 @@ import type { MonoCloudSession } from '@monocloud/auth-core';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import type { NextApiHandler, NextApiRequest, NextApiResponse } from 'next';
 import type {
+  GetSessionOptions,
   GetTokensOptions,
   MonoCloudTokens,
 } from '@monocloud/auth-node-core';
@@ -303,12 +304,14 @@ export function authMiddleware(
  *   return NextResponse.next();
  * }
  * ```
- *
+ * @param options Optional configuration to control session retrieval behavior.
  * @returns Returns the resolved session, or `undefined` if none exists.
  *
  * @category Functions
  */
-export function getSession(): Promise<MonoCloudSession | undefined>;
+export function getSession(
+  options?: GetSessionOptions
+): Promise<MonoCloudSession | undefined>;
 
 /**
  * Retrieves the current user's session using an explicit Web or Next.js request.
@@ -331,6 +334,34 @@ export function getSession(): Promise<MonoCloudSession | undefined>;
  * }
  * ```
  *
+ * @example API Handler (Request)
+ * ```tsx:src/app/api/user/route.ts tab="API Handler (Request)" tab-group="session-route-handler"
+ * import { getSession } from "@monocloud/auth-nextjs";
+ * import { NextRequest, NextResponse } from "next/server";
+ *
+ * export const GET = async (req: NextRequest) => {
+ *   const session = await getSession(req);
+ *
+ *   return NextResponse.json({ name: session?.user.name });
+ * };
+ * ```
+ *
+ * @param req Incoming request used to read authentication cookies and headers to resolve the current user's session.
+ * @param options Optional configuration to control session retrieval behavior.
+ * @returns Returns the resolved session, or `undefined` if none exists.
+ *
+ * @category Functions
+ */
+export function getSession(
+  req: NextRequest | Request,
+  options?: GetSessionOptions
+): Promise<MonoCloudSession | undefined>;
+
+/**
+ * Retrieves the current user's session using explicit request and response objects.
+ *
+ * Use this overload when you have already created a response and want refreshed authentication cookies or headers applied to it.
+ *
  * @example Middleware (Response)
  * ```tsx:src/proxy.ts tab="Middleware (Response)" tab-group="session-route-handler"
  * import { getSession } from "@monocloud/auth-nextjs";
@@ -349,18 +380,6 @@ export function getSession(): Promise<MonoCloudSession | undefined>;
  *
  *   return res;
  * }
- * ```
- *
- * @example API Handler (Request)
- * ```tsx:src/app/api/user/route.ts tab="API Handler (Request)" tab-group="session-route-handler"
- * import { getSession } from "@monocloud/auth-nextjs";
- * import { NextRequest, NextResponse } from "next/server";
- *
- * export const GET = async (req: NextRequest) => {
- *   const session = await getSession(req);
- *
- *   return NextResponse.json({ name: session?.user.name });
- * };
  * ```
  *
  * @example API Handler (Response)
@@ -382,14 +401,16 @@ export function getSession(): Promise<MonoCloudSession | undefined>;
  * ```
  *
  * @param req Incoming request used to read authentication cookies and headers to resolve the current user's session.
- * @param res Optional response to update if session resolution requires refreshed authentication cookies or headers.
+ * @param res Response object to update when session resolution requires refreshed authentication cookies or headers.
+ * @param options Optional configuration to control session retrieval behavior.
  * @returns Returns the resolved session, or `undefined` if none exists.
  *
  * @category Functions
  */
 export function getSession(
   req: NextRequest | Request,
-  res?: NextResponse | Response
+  res: NextResponse | Response,
+  options?: GetSessionOptions
 ): Promise<MonoCloudSession | undefined>;
 
 /**
@@ -437,13 +458,15 @@ export function getSession(
  *
  * @param req Incoming Node.js request used to read authentication cookies and resolve the current user's session.
  * @param res Outgoing Node.js response used to apply refreshed authentication cookies when required.
+ * @param options Optional configuration to control session retrieval behavior.
  * @returns Returns the resolved session, or `undefined` if none exists.
  *
  * @category Functions
  */
 export function getSession(
   req: NextApiRequest | IncomingMessage,
-  res: NextApiResponse | ServerResponse<IncomingMessage>
+  res: NextApiResponse | ServerResponse<IncomingMessage>,
+  options?: GetSessionOptions
 ): Promise<MonoCloudSession | undefined>;
 
 export function getSession(

@@ -1,6 +1,8 @@
 import type {
   AccessToken,
+  IdTokenClaims,
   Jwk,
+  MonoCloudUser,
   SecurityAlgorithms,
   JwsHeaderParameters,
 } from '../types';
@@ -492,4 +494,44 @@ export const findToken = (
       setsEqual(desiredResource, parseSpaceSeparatedSet(t.resource)) &&
       setsEqual(desiredScopes, parseSpaceSeparatedSet(t.requestedScopes))
   );
+};
+
+/**
+ * @ignore
+ * Builds the session user claims from existing claims and newly fetched claims.
+ *
+ * @param existingUser - Existing session user claims.
+ * @param idTokenClaims - Claims extracted from ID token.
+ * @param userinfoClaims - Claims fetched from UserInfo endpoint.
+ * @param strict - If `true`, creates claims from new inputs only (falls back to existing when none). If `false`, merges into existing claims.
+ *
+ * @returns Updated user claims for the session.
+ */
+export const profileSync = (
+  existingUser?: MonoCloudUser,
+  idTokenClaims?: Partial<IdTokenClaims>,
+  userinfoClaims?: Partial<MonoCloudUser>,
+  strict = false
+): MonoCloudUser => {
+  const hasIdTokenClaims =
+    !!idTokenClaims && Object.keys(idTokenClaims).length > 0;
+  const hasUserinfoClaims =
+    !!userinfoClaims && Object.keys(userinfoClaims).length > 0;
+
+  if (!hasIdTokenClaims && !hasUserinfoClaims) {
+    return existingUser ?? ({} as MonoCloudUser);
+  }
+
+  if (strict) {
+    return {
+      ...(idTokenClaims ?? {}),
+      ...(userinfoClaims ?? {}),
+    } as MonoCloudUser;
+  }
+
+  return {
+    ...(existingUser ?? {}),
+    ...(idTokenClaims ?? {}),
+    ...(userinfoClaims ?? {}),
+  } as MonoCloudUser;
 };

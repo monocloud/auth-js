@@ -4,6 +4,7 @@ export type {
   CallbackOptions,
   UserInfoOptions,
   MonoCloudTokens,
+  GetSessionOptions,
   GetTokensOptions,
   MonoCloudOptions,
   OnError,
