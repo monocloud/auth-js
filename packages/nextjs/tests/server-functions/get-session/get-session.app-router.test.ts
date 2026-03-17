@@ -4,7 +4,7 @@ import { beforeEach, it, describe, expect, vi } from 'vitest';
 import { MonoCloudNextClient } from '../../../src';
 import {
   defaultDiscovery,
-  noTokenAndUserInfo,
+  noTokenAndUserInfoEnabled,
   setupOp,
 } from '../../op-helpers.js';
 import {
@@ -13,6 +13,16 @@ import {
 } from '../../common-helper';
 
 let req: NextRequest;
+
+const sessionWithOpenIdScope = {
+  ...defaultSessionCookieValue,
+  accessTokens: [
+    {
+      ...defaultSessionCookieValue.accessTokens[0],
+      scopes: 'openid profile email read:customer',
+    },
+  ],
+};
 
 vi.mock('next/headers', () => {
   return {
@@ -25,8 +35,8 @@ vi.mock('next/headers', () => {
 
 describe('MonoCloud.getSession() - App Router', () => {
   let monoCloud: MonoCloudNextClient;
-  beforeEach(() => {
-    setupOp(defaultDiscovery, noTokenAndUserInfo);
+  beforeEach(async () => {
+    await setupOp(defaultDiscovery, noTokenAndUserInfoEnabled);
 
     req = new NextRequest('http://localhost:3000/');
 
@@ -88,5 +98,61 @@ describe('MonoCloud.getSession() - App Router', () => {
     const session = await monoCloud.getSession();
 
     expect(session).toEqual(defaultSessionCookieValue);
+  });
+
+  it('should return session with refreshed userinfo when refetchUserInfo is true (<From Cookies>)', async () => {
+    await setSessionCookie(req, '', sessionWithOpenIdScope);
+
+    const session = await monoCloud.getSession({ refetchUserInfo: true });
+
+    expect(session).toEqual({
+      ...sessionWithOpenIdScope,
+      user: {
+        ...sessionWithOpenIdScope.user,
+        username: 'username',
+        updated: 'false',
+      },
+    });
+  });
+
+  it('should return session with refreshed userinfo when refetchUserInfo is true (req, res)', async () => {
+    await setSessionCookie(req, '', sessionWithOpenIdScope);
+
+    const nextRes = new NextResponse();
+    const session = await monoCloud.getSession(req, nextRes, {
+      refetchUserInfo: true,
+    });
+
+    expect(session).toEqual({
+      ...sessionWithOpenIdScope,
+      user: {
+        ...sessionWithOpenIdScope.user,
+        username: 'username',
+        updated: 'false',
+      },
+    });
+  });
+
+  it('should return session with refreshed userinfo when refetchUserInfo is true (req, options)', async () => {
+    await setSessionCookie(req, '', sessionWithOpenIdScope);
+
+    const session = await monoCloud.getSession(req, {
+      refetchUserInfo: true,
+    });
+
+    expect(session).toEqual({
+      ...sessionWithOpenIdScope,
+      user: {
+        ...sessionWithOpenIdScope.user,
+        username: 'username',
+        updated: 'false',
+      },
+    });
+  });
+
+  it('should throw on invalid getSession arguments', async () => {
+    await expect(
+      monoCloud.getSession(1 as unknown as Request)
+    ).rejects.toThrowError('Invalid parameters passed to getSession()');
   });
 });

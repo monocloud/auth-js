@@ -890,3 +890,15 @@ export interface GetTokensOptions extends RefreshGrantOptions {
    */
   refetchUserInfo?: boolean;
 }
+
+/**
+ * Options used to control session retrieval behavior when calling `getSession()`.
+ *
+ * @category Types
+ */
+export interface GetSessionOptions {
+  /**
+   * When enabled, re-fetches user information from the `UserInfo` endpoint and updates the current session.
+   */
+  refetchUserInfo?: boolean;
+}

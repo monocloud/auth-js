@@ -2,6 +2,7 @@ import Joi from 'joi';
 import type { AuthorizationParams } from '@monocloud/auth-core';
 import {
   CallbackOptions,
+  GetSessionOptions,
   GetTokensOptions,
   Indicator,
   MonoCloudOptionsBase,
@@ -243,4 +244,9 @@ export const getTokensOptionsSchema: Joi.ObjectSchema<GetTokensOptions> =
     refetchUserInfo: boolOptional,
     resource: resourceValidationSchema.optional(),
     scopes: scopesValidationSchema.optional(),
+  });
+
+export const getSessionOptionsSchema: Joi.ObjectSchema<GetSessionOptions> =
+  Joi.object({
+    refetchUserInfo: boolOptional,
   });

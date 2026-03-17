@@ -16,6 +16,7 @@ export type {
   MonoCloudUser,
   MonoCloudTokens,
   AccessToken,
+  GetSessionOptions,
   GetTokensOptions,
   ApplicationState,
   MonoCloudRequest,

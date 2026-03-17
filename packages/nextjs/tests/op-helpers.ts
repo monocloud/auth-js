@@ -163,4 +163,5 @@ export const defaultDiscovery = {};
 export const noBodyDiscoverySuccess = { body: {} };
 
 export const noTokenAndUserInfo = { token: false, userinfo: false };
+export const noTokenAndUserInfoEnabled = { token: false, userinfo: true };
 export const tokenAndUserInfoEnabled = { token: true, userinfo: true };

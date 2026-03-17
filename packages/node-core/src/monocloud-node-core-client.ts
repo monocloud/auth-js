@@ -39,6 +39,7 @@ import { getOptions } from './options/get-options';
 import {
   ApplicationState,
   CallbackOptions,
+  GetSessionOptions,
   GetTokensOptions,
   MonoCloudOptions,
   MonoCloudOptionsBase,
@@ -56,6 +57,7 @@ import {
 } from './types/internal';
 import {
   callbackOptionsSchema,
+  getSessionOptionsSchema,
   getTokensOptionsSchema,
   resourceValidationSchema,
   scopesValidationSchema,
@@ -856,14 +858,52 @@ export class MonoCloudCoreClient {
    *
    * @param request - MonoCloud cookie request object.
    * @param response - MonoCloud cookie response object.
+   * @param options - Optional configuration to control session retrieval behavior.
    *
    * @returns Session or `undefined`.
    */
-  getSession(
+  async getSession(
     request: IMonoCloudCookieRequest,
-    response: IMonoCloudCookieResponse
+    response: IMonoCloudCookieResponse,
+    options?: GetSessionOptions
   ): Promise<MonoCloudSession | undefined> {
-    return this.sessionService.getSession(request, response);
+    if (options) {
+      const { error } = getSessionOptionsSchema.validate(options, {
+        abortEarly: true,
+      });
+
+      if (error) {
+        throw new MonoCloudValidationError(error.details[0].message);
+      }
+    }
+
+    const session = await this.sessionService.getSession(request, response);
+
+    if (!options?.refetchUserInfo || !session) {
+      return session;
+    }
+
+    const defaultToken = findToken(
+      session.accessTokens,
+      this.options.defaultAuthParams.resource,
+      session.authorizedScopes
+    );
+
+    if (!defaultToken) {
+      throw new MonoCloudValidationError('Access token not found');
+    }
+
+    const newSession = await this.oidcClient.refetchUserInfo(
+      defaultToken,
+      session,
+      {
+        onSessionCreating: this.options.onSessionCreating?.bind(this),
+      }
+    );
+
+    await this.sessionService.updateSession(request, response, newSession);
+
+    return newSession;
   }
 
   /**
