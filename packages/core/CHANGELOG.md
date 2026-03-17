@@ -1,5 +1,11 @@
 # @monocloud/auth-core
 
+## 0.1.7
+
+### Patch Changes
+
+- f20edaa: - Implement `strictProfileSync` option for syncing the user profile during session refresh.
+
 ## 0.1.6
 
 ### Patch Changes

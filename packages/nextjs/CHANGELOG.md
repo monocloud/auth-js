@@ -1,5 +1,18 @@
 # @monocloud/auth-nextjs
 
+## 0.1.11
+
+### Patch Changes
+
+- f20edaa: - Update SDK Reference link in README.md
+  - Added `"use client";` to Next.js <Protected/> component
+- f20edaa: - Added `refetchUserInfo` option to `getSession()` which will fetch the user profile from userinfo endpoint and update the session.
+- f20edaa: - Implement `strictProfileSync` option for syncing the user profile during session refresh.
+- Updated dependencies [f20edaa]
+- Updated dependencies [f20edaa]
+  - @monocloud/auth-node-core@0.1.10
+  - @monocloud/auth-core@0.1.7
+
 ## 0.1.10
 
 ### Patch Changes
