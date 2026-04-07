@@ -1,0 +1,30 @@
+import { defineConfig } from 'vitest/config';
+
+export default defineConfig({
+  test: {
+    name: 'api-core-js',
+    include: ['tests/**.test.ts'],
+    reporters: [
+      'default',
+      ['junit', { outputFile: 'coverage/junit.node.xml' }],
+    ],
+    coverage: {
+      reportsDirectory: 'coverage/node',
+      reporter: 'json',
+      provider: 'v8',
+      include: ['src'],
+      exclude: [
+        'node_modules',
+        'src/errors',
+        'src/types',
+        'tests',
+        'src/index.ts',
+      ],
+      enabled: true,
+      reportOnFailure: true,
+    },
+    environment: 'node',
+    setupFiles: ['@monocloud/auth-test-utils/setup'],
+    watch: false,
+  },
+});
