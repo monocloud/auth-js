@@ -59,6 +59,7 @@ jobs:
           '@monocloud/auth-core': patch
           '@monocloud/auth-node-core': patch
           '@monocloud/auth-nextjs': patch
+          '@monocloud/node-backend': patch
           ---
 
           Snapshot release.
