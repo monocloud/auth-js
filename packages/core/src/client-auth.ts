@@ -285,6 +285,13 @@ export const clientAuth = async (
       break;
     }
 
+    case (method === 'tls_client_auth' ||
+      method === 'self_signed_tls_client_auth') &&
+      !!body: {
+      body.set('client_id', clientId);
+      break;
+    }
+
     default:
       throw new Error('Invalid Client Authentication Method');
   }

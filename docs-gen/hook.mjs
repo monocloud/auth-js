@@ -1,10 +1,12 @@
 import { MarkdownPageEvent } from 'typedoc-plugin-markdown';
 import { ReflectionKind } from 'typedoc';
+import { registerInlineReferences } from './inline-references.mjs';
 
 const ROOT_SDK_NAME_REPLACEMENTS = [
   ['@monocloud/auth-nextjs', 'Next.js'],
   ['@monocloud/auth-node-core', 'Node.js Core'],
   ['@monocloud/auth-core', 'Node.js'],
+  ['@monocloud/backend-node', 'Node.js Backend'],
 ];
 
 const Type = {
@@ -30,6 +32,12 @@ const getType = url => {
   if (url.includes(Type.Types)) return Type.Types;
   return Type.Other;
 };
+
+const getFramework = url => {
+  if (url.includes("frameworks_express")) return "Express";
+  if (url.includes("frameworks_fastify")) return "Fastify";
+  return undefined;
+}
 
 function getRootPackageName(reflection) {
   if (!reflection) return 'Docs';
@@ -60,6 +68,8 @@ function getRootPackageName(reflection) {
 
 /** @param {import('typedoc').Application} app */
 export const load = app => {
+  registerInlineReferences(app);
+
   app.renderer.on(MarkdownPageEvent.END, page => {
     if (!page.contents) return;
 
@@ -95,6 +105,8 @@ export const load = app => {
     const rootSdk = `rootSdk: ${rootPackage}`;
     const title = `title: "${page.model.name}"`;
     const category = `category: ${type === Type.Types_Enums ? 'Enums' : type === Type.Types_Handler ? 'Handler Types' : type === Type.Error_Classes ? 'Error Classes' : type}`;
+    const framework = getFramework(page.url);
+    const frameWorkName = framework ? `framework: ${framework}` : undefined;
 
     const h1Title = `# ${titleText}\n\n`;
 
@@ -104,10 +116,10 @@ export const load = app => {
         const frontmatterContent = page.contents.slice(0, endOfFrontmatter);
         const restOfFile = page.contents.slice(endOfFrontmatter);
 
-        page.contents = `${frontmatterContent}${rootSdk}\n${title}\n${category}\n---\n\n${h1Title}${restOfFile.trimStart()}`;
+        page.contents = `${frontmatterContent}${rootSdk}\n${title}\n${category}${frameWorkName ? `\n${frameWorkName}` : ''}\n---\n\n${h1Title}${restOfFile.trimStart()}`;
       }
     } else {
-      page.contents = `---\n${rootSdk}\n${title}\n${category}\n---\n\n${h1Title}${page.contents}`;
+      page.contents = `---\n${rootSdk}\n${title}\n${category}${frameWorkName ? `\n${frameWorkName}` : ''}\n---\n\n${h1Title}${page.contents}`;
     }
 
     if (type === Type.Types_Enums) {

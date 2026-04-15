@@ -1,0 +1,111 @@
+{
+  "name": "@monocloud/backend-node",
+  "version": "0.1.0",
+  "description": "MonoCloud NodeJS Backend SDK",
+  "keywords": [
+    "monocloud",
+    "api",
+    "introspection",
+    "sdk",
+    "backend",
+    "node",
+    "express",
+    "fastify"
+  ],
+  "homepage": "https://www.monocloud.com",
+  "bugs": {
+    "url": "https://github.com/monocloud/auth-js/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/monocloud/auth-js.git",
+    "directory": "packages/node-backend"
+  },
+  "license": "MIT",
+  "author": {
+    "name": "MonoCloud",
+    "email": "support@monocloud.com"
+  },
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./express": "./src/frameworks/express/index.ts",
+    "./fastify": "./src/frameworks/fastify/index.ts",
+    "./utils": "./src/utils/index.ts",
+    "./internal": "./src/utils/internal.ts"
+  },
+  "publishConfig": {
+    "main": "./dist/index.cjs",
+    "module": "./dist/index.mjs",
+    "types": "./dist/index.d.mts",
+    "exports": {
+      ".": {
+        "types": "./dist/index.d.mts",
+        "import": "./dist/index.mjs",
+        "require": "./dist/index.cjs",
+        "default": "./dist/index.mjs"
+      },
+      "./express": {
+        "types": "./dist/express.d.mts",
+        "import": "./dist/express.mjs",
+        "require": "./dist/express.cjs",
+        "default": "./dist/express.mjs"
+      },
+      "./fastify": {
+        "types": "./dist/fastify.d.mts",
+        "import": "./dist/fastify.mjs",
+        "require": "./dist/fastify.cjs",
+        "default": "./dist/fastify.mjs"
+      },
+      "./utils": {
+        "types": "./dist/utils/index.d.mts",
+        "import": "./dist/utils/index.mjs",
+        "require": "./dist/utils/index.cjs",
+        "default": "./dist/utils/index.mjs"
+      },
+      "./internal": {
+        "types": "./dist/utils/internal.d.mts",
+        "import": "./dist/utils/internal.mjs",
+        "require": "./dist/utils/internal.cjs",
+        "default": "./dist/utils/internal.mjs"
+      }
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsdown",
+    "lint:es": "eslint src",
+    "lint:ts": "tsc",
+    "lint": "pnpm run lint:es && pnpm run lint:ts"
+  },
+  "dependencies": {
+    "@monocloud/auth-core": "workspace:*",
+    "joi": "18.0.2"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "fastify": "^5.8.5"
+  },
+  "peerDependencies": {
+    "express": "^4.17.0 || ^5.0.0",
+    "@types/express": "^4.17.0 || ^5.0.0",
+    "fastify": "^4.0.0 || ^5.0.0"
+  },
+  "peerDependenciesMeta": {
+    "express": {
+      "optional": true
+    },
+    "@types/express": {
+      "optional": true
+    },
+    "fastify": {
+      "optional": true
+    }
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

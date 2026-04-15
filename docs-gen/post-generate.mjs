@@ -7,6 +7,7 @@ const SDK_SLUGS = {
   '_monocloud_auth-nextjs': 'nextjs',
   '_monocloud_auth-node-core': 'nodejs-core',
   '_monocloud_auth-core': 'nodejs',
+  '_monocloud_backend-node': 'nodejs-backend',
 };
 
 const CATEGORY_MAP = {
@@ -18,6 +19,11 @@ const CATEGORY_MAP = {
   Components: 'components',
   Hooks: 'hooks',
   'Error Classes': 'error-classes',
+};
+
+const FRAMEWORK_SLUGS = {
+  express: 'express-backend',
+  fastify: 'fastify-backend',
 };
 
 const DOCS_DIR = './docs/markdown';
@@ -34,22 +40,39 @@ async function main() {
 
     const sdkMatch = content.match(/^rootSdk:\s*(.*)/m);
     const catMatch = content.match(/^category:\s*(.*)/m);
+    const fwMatch = content.match(/^framework:\s*(.*)/m);
 
     const rootSdk = sdkMatch ? sdkMatch[1].trim() : 'default';
     const category = catMatch ? catMatch[1].trim() : 'other';
+    const framework = fwMatch ? fwMatch[1].trim() : null;
 
-    fileIndex.set(path.resolve(filePath), { rootSdk, category });
+    fileIndex.set(path.resolve(filePath), { rootSdk, category, framework });
+  }
+
+  // Build framework lookup: (category, className, framework) → filePath
+  const frameworkIndex = new Map();
+  for (const [absPath, meta] of fileIndex.entries()) {
+    if (!meta.framework) continue;
+    const className = path
+      .basename(absPath, path.extname(absPath))
+      .toLowerCase()
+      .split('.')
+      .at(-1);
+    frameworkIndex.set(
+      `${meta.category}|${className}|${meta.framework}`,
+      absPath
+    );
   }
 
   console.log('   Processing links and tables...');
   for (const filePath of files) {
-    await processFile(filePath, fileIndex);
+    await processFile(filePath, fileIndex, frameworkIndex);
   }
 
   console.log('✅ Post-processing complete.');
 }
 
-function rewriteLinks(content, sourceFileDir, fileIndex) {
+function rewriteLinks(content, sourceFileDir, fileIndex, sourceFramework, frameworkIndex) {
   const linkRegex = /\[([^\]]+)\]\((?:<([^>]+)>|([^)]+))\)/g;
 
   return content.replace(
@@ -91,19 +114,39 @@ function rewriteLinks(content, sourceFileDir, fileIndex) {
         .toLowerCase()
         .split('.');
 
-      const finalSdkSlug = SDK_SLUGS[typeName[0]] || SDK_SLUGS['default'];
+      const targetClassName = typeName.at(-1);
 
-      const newUrl = `/sdks/${finalSdkSlug}/api-reference/${CATEGORY_MAP[category]}/${typeName.at(-1)}`;
+      // Determine effective framework for URL construction
+      let effectiveFramework = targetMeta.framework;
+
+      // If source is framework-specific and target is NOT, check for sibling
+      if (sourceFramework && !effectiveFramework) {
+        const key = `${category}|${targetClassName}|${sourceFramework}`;
+        if (frameworkIndex.has(key)) {
+          effectiveFramework = sourceFramework;
+        }
+      }
+
+      // Use framework slug if applicable, otherwise standard SDK slug
+      const finalSdkSlug = effectiveFramework
+        ? FRAMEWORK_SLUGS[effectiveFramework.toLowerCase()] ||
+          SDK_SLUGS[typeName[0]] ||
+          SDK_SLUGS['default']
+        : SDK_SLUGS[typeName[0]] || SDK_SLUGS['default'];
+
+      const newUrl = `/sdks/${finalSdkSlug}/api-reference/${CATEGORY_MAP[category]}/${targetClassName}`;
 
       return `[${linkText}](${newUrl}${urlHash})`;
     }
   );
 }
 
-async function processFile(filePath, fileIndex) {
+async function processFile(filePath, fileIndex, frameworkIndex) {
   let content = fs.readFileSync(filePath, 'utf-8');
   let hasChanges = false;
   const fileDir = path.dirname(filePath);
+  const sourceMeta = fileIndex.get(path.resolve(filePath));
+  const sourceFramework = sourceMeta?.framework || null;
 
   if (content.includes('<a id=')) {
     content = content.replace(/<a id="[^"]*"><\/a>\s*/g, '');
@@ -123,7 +166,7 @@ async function processFile(filePath, fileIndex) {
       let typeFileContent = fs.readFileSync(typeFilePath, 'utf-8');
 
       const typeFileDir = path.dirname(typeFilePath);
-      typeFileContent = rewriteLinks(typeFileContent, typeFileDir, fileIndex);
+      typeFileContent = rewriteLinks(typeFileContent, typeFileDir, fileIndex, sourceFramework, frameworkIndex);
 
       typeFileContent = typeFileContent.replace(/<a id="[^"]*"><\/a>\s*/g, '');
 
@@ -142,7 +185,7 @@ async function processFile(filePath, fileIndex) {
     }
   }
 
-  const newContent = rewriteLinks(content, fileDir, fileIndex);
+  const newContent = rewriteLinks(content, fileDir, fileIndex, sourceFramework, frameworkIndex);
 
   if (newContent !== content) {
     content = newContent;

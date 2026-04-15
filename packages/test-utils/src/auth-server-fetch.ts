@@ -369,6 +369,46 @@ export class AuthorizationServerFetchBuilder {
     return this;
   }
 
+  configureIntrospection(options?: {
+    responseCode?: number;
+    responseBody?: Record<string, unknown>;
+    body?: string;
+    accessToken?: string;
+    tokenTypeHint?: string;
+    headers?: Record<string, string>;
+  }): AuthorizationServerFetchBuilder {
+    this.expectations.push({
+      url: `${this.authServerUrl}/connect/introspect`,
+      headers: {
+        accept: 'application/json',
+        'content-type': 'application/x-www-form-urlencoded',
+        authorization: 'Basic Y2xpZW50SWQ6',
+        ...(options?.headers ?? {}),
+      },
+      body:
+        options?.body ??
+        `token=${options?.accessToken ?? 'some-token'}&token_type_hint=${options?.tokenTypeHint ?? 'access_token'}`,
+      method: 'POST',
+      response: {
+        status: options?.responseCode ?? 200,
+        headers: {
+          'content-type': 'application/json',
+        },
+        body: JSON.stringify(
+          options?.responseBody ?? {
+            active: true,
+            iss: 'https://example.com',
+            aud: 'https://api.example.com',
+            sub: 'sub',
+            exp: 9999999999,
+          }
+        ),
+      },
+    });
+
+    return this;
+  }
+
   configureUserinfo(options?: {
     accessToken?: string;
     claims?: Record<string, unknown>;

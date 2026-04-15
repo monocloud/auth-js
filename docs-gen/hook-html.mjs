@@ -1,4 +1,5 @@
 import { Converter } from 'typedoc';
+import { registerInlineReferences } from './inline-references.mjs';
 
 const CODE_FENCE_OPENING_LINE_REGEX = /(^|\n)(\s*`{3,}\s*)([^\s`\n]+)([^\n]*)/g;
 
@@ -59,4 +60,6 @@ export const load = app => {
       context.project.removeReflection(reflection);
     }
   });
+
+  registerInlineReferences(app);
 };

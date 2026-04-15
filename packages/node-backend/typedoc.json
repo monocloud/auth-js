@@ -1,0 +1,9 @@
+{
+  "entryPoints": [
+    "src/index.ts",
+    "src/frameworks/express/index.ts",
+    "src/frameworks/fastify/index.ts",
+    "src/utils/index.ts",
+    "src/utils/internal.ts"
+  ]
+}

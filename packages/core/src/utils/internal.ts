@@ -385,6 +385,22 @@ export const encodeBase64Url = (input: Uint8Array | ArrayBuffer): string => {
 
 /**
  * @ignore
+ * Computes a SHA-256 hash of the input string and returns it as a Base64URL encoded string.
+ *
+ * @param input - The string to hash.
+ *
+ * @returns The Base64URL encoded SHA-256 hash.
+ */
+export const sha256 = async (input: string): Promise<string> =>
+  encodeBase64Url(
+    await crypto.subtle.digest(
+      'SHA-256',
+      stringToArrayBuffer(input) as BufferSource
+    )
+  );
+
+/**
+ * @ignore
  * Generates a random Base64URL encoded string.
  *
  * @param length - The number of random bytes to generate.

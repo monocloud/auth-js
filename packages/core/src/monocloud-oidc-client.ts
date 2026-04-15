@@ -15,12 +15,10 @@ import {
   ClientAuthMethod,
   EndSessionParameters,
   IdTokenClaims,
-  IssuerMetadata,
   Jwk,
-  Jwks,
   SecurityAlgorithms,
   JwsHeaderParameters,
-  MonoCloudClientOptions,
+  MonoCloudOidcClientOptions,
   MonoCloudSession,
   MonoCloudUser,
   ParResponse,
@@ -35,9 +33,13 @@ import { MonoCloudOPError } from './errors/monocloud-op-error';
 import { MonoCloudHttpError } from './errors/monocloud-http-error';
 import { MonoCloudValidationError } from './errors/monocloud-validation-error';
 import { MonoCloudTokenError } from './errors/monocloud-token-error';
-import { MonoCloudAuthBaseError } from './errors/monocloud-auth-base-error';
-
-const JWT_ASSERTION_CLOCK_SKEW = 5;
+import { MonoCloudOidcClientBase } from './monocloud-oidc-client-base';
+import {
+  assertMetadataProperty,
+  deserializeJson,
+  innerFetch,
+  JWT_ASSERTION_CLOCK_SKEW,
+} from './helper';
 
 const FILTER_ID_TOKEN_CLAIMS = [
   'iss',
@@ -52,48 +54,10 @@ const FILTER_ID_TOKEN_CLAIMS = [
   's_hash',
 ];
 
-function assertMetadataProperty<K extends keyof IssuerMetadata>(
-  metadata: IssuerMetadata,
-  property: K
-): asserts metadata is IssuerMetadata & Required<Pick<IssuerMetadata, K>> {
-  if (metadata[property] === undefined || metadata[property] === null) {
-    throw new MonoCloudValidationError(
-      `${property as string} endpoint is required but not available in the issuer metadata`
-    );
-  }
-}
-
-const innerFetch = async (
-  input: string,
-  reqInit: RequestInit = {}
-): Promise<Response> => {
-  try {
-    return await fetch(input, reqInit);
-  } catch (e) {
-    /* v8 ignore next -- @preserve */
-    throw new MonoCloudHttpError(
-      (e as any).message ?? 'Unexpected Network Error'
-    );
-  }
-};
-
-const deserializeJson = async <T = any>(res: Response): Promise<T> => {
-  try {
-    return await res.json();
-  } catch (e) {
-    throw new MonoCloudHttpError(
-      /* v8 ignore next -- @preserve */
-      `Failed to parse response body as JSON ${(e as any).message ? `: ${(e as any).message}` : ''}`
-    );
-  }
-};
-
 /**
  * @category Classes
  */
-export class MonoCloudOidcClient {
-  private readonly tenantDomain: string;
-
+export class MonoCloudOidcClient extends MonoCloudOidcClientBase {
   private readonly clientId: string;
 
   private readonly clientSecret?: string | Jwk;
@@ -102,39 +66,28 @@ export class MonoCloudOidcClient {
 
   private readonly idTokenSigningAlgorithm: SecurityAlgorithms;
 
-  private jwks?: Jwks;
-
-  private jwksCacheExpiry = 0;
-
-  private jwksCacheDuration = 300;
-
-  private metadata?: IssuerMetadata;
-
-  private metadataCacheExpiry = 0;
-
-  private metadataCacheDuration = 300;
-
+  /**
+   * Creates a new instance of MonoCloudOidcClient.
+   *
+   * @param tenantDomain - The tenant domain URL.
+   * @param clientId - Client id of the application registered in MonoCloud.
+   * @param options - Additional client configuration options.
+   */
   constructor(
     tenantDomain: string,
     clientId: string,
-    options?: MonoCloudClientOptions
+    options?: MonoCloudOidcClientOptions
   ) {
-    // eslint-disable-next-line no-param-reassign
-    tenantDomain ??= '';
-    /* v8 ignore next -- @preserve */
-    this.tenantDomain = `${!tenantDomain.startsWith('https://') ? 'https://' : ''}${tenantDomain.endsWith('/') ? tenantDomain.slice(0, -1) : tenantDomain}`;
+    super(
+      tenantDomain,
+      options?.metadataCacheDuration,
+      options?.jwksCacheDuration,
+      options?.fetcher
+    );
     this.clientId = clientId;
     this.clientSecret = options?.clientSecret;
     this.authMethod = options?.clientAuthMethod ?? 'client_secret_basic';
     this.idTokenSigningAlgorithm = options?.idTokenSigningAlgorithm ?? 'RS256';
-
-    if (options?.jwksCacheDuration) {
-      this.jwksCacheDuration = options.jwksCacheDuration;
-    }
-
-    if (options?.metadataCacheDuration) {
-      this.metadataCacheDuration = options.metadataCacheDuration;
-    }
   }
 
   /**
@@ -245,81 +198,6 @@ export class MonoCloudOidcClient {
     assertMetadataProperty(metadata, 'authorization_endpoint');
 
     return `${metadata.authorization_endpoint}?${queryParams.toString()}`;
-  }
-
-  /**
-   * Fetches the authorization server metadata from the .well-known endpoint.
-   * The metadata is cached for 1 minute.
-   *
-   * @param forceRefresh - If `true`, bypasses the cache and fetches fresh metadata from the server.
-   *
-   * @returns The issuer metadata for the tenant, retrieved from the OpenID Connect discovery endpoint.
-   *
-   * @throws {@link MonoCloudHttpError} - Thrown if there is a network error during the request or
-   * unexpected status code during the request or a serialization error while processing the response.
-   *
-   */
-  async getMetadata(forceRefresh = false): Promise<IssuerMetadata> {
-    if (!forceRefresh && this.metadata && this.metadataCacheExpiry > now()) {
-      return this.metadata;
-    }
-
-    this.metadata = undefined;
-
-    const response = await innerFetch(
-      `${this.tenantDomain}/.well-known/openid-configuration`
-    );
-
-    if (response.status !== 200) {
-      throw new MonoCloudHttpError(
-        `Error while fetching metadata. Unexpected status code: ${response.status}`
-      );
-    }
-
-    const metadata = await deserializeJson<IssuerMetadata>(response);
-
-    this.metadata = metadata;
-    this.metadataCacheExpiry = now() + this.metadataCacheDuration;
-
-    return metadata;
-  }
-
-  /**
-   * Fetches the JSON Web Keys used to sign the ID token.
-   * The JWKS is cached for 1 minute.
-   *
-   * @param forceRefresh - If `true`, bypasses the cache and fetches fresh set of JWKS from the server.
-   *
-   * @returns The JSON Web Key Set containing the public keys for token verification.
-   *
-   * @throws {@link MonoCloudHttpError} - Thrown if there is a network error during the request or
-   * unexpected status code during the request or a serialization error while processing the response.
-   *
-   */
-  async getJwks(forceRefresh = false): Promise<Jwks> {
-    if (!forceRefresh && this.jwks && this.jwksCacheExpiry > now()) {
-      return this.jwks;
-    }
-
-    this.jwks = undefined;
-
-    const metadata = await this.getMetadata();
-
-    assertMetadataProperty(metadata, 'jwks_uri');
-
-    const response = await innerFetch(metadata.jwks_uri);
-
-    if (response.status !== 200) {
-      throw new MonoCloudHttpError(
-        `Error while fetching JWKS. Unexpected status code: ${response.status}`
-      );
-    }
-    const jwks = await deserializeJson<Jwks>(response);
-
-    this.jwks = jwks;
-    this.jwksCacheExpiry = now() + this.jwksCacheDuration;
-
-    return jwks;
   }
 
   /**
@@ -440,7 +318,8 @@ export class MonoCloudOidcClient {
         body: body.toString(),
         method: 'POST',
         headers,
-      }
+      },
+      this.fetcher
     );
 
     if (response.status === 400) {
@@ -490,12 +369,16 @@ export class MonoCloudOidcClient {
 
     assertMetadataProperty(metadata, 'userinfo_endpoint');
 
-    const response = await innerFetch(metadata.userinfo_endpoint, {
-      method: 'GET',
-      headers: {
-        authorization: `Bearer ${accessToken}`,
+    const response = await innerFetch(
+      metadata.userinfo_endpoint,
+      {
+        method: 'GET',
+        headers: {
+          authorization: `Bearer ${accessToken}`,
+        },
       },
-    });
+      this.fetcher
+    );
 
     if (response.status === 401) {
       const authenticateError = response.headers.get('WWW-Authenticate');
@@ -622,11 +505,15 @@ export class MonoCloudOidcClient {
 
     assertMetadataProperty(metadata, 'token_endpoint');
 
-    const response = await innerFetch(metadata.token_endpoint, {
-      method: 'POST',
-      body: body.toString(),
-      headers,
-    });
+    const response = await innerFetch(
+      metadata.token_endpoint,
+      {
+        method: 'POST',
+        body: body.toString(),
+        headers,
+      },
+      this.fetcher
+    );
 
     if (response.status === 400) {
       const standardBodyError = await deserializeJson(response);
@@ -703,11 +590,15 @@ export class MonoCloudOidcClient {
 
     assertMetadataProperty(metadata, 'token_endpoint');
 
-    const response = await innerFetch(metadata.token_endpoint, {
-      method: 'POST',
-      body: body.toString(),
-      headers,
-    });
+    const response = await innerFetch(
+      metadata.token_endpoint,
+      {
+        method: 'POST',
+        body: body.toString(),
+        headers,
+      },
+      this.fetcher
+    );
 
     if (response.status === 400) {
       const standardBodyError = await deserializeJson(response);
@@ -1056,11 +947,15 @@ export class MonoCloudOidcClient {
 
     assertMetadataProperty(metadata, 'revocation_endpoint');
 
-    const response = await innerFetch(metadata.revocation_endpoint, {
-      method: 'POST',
-      body: body.toString(),
-      headers,
-    });
+    const response = await innerFetch(
+      metadata.revocation_endpoint,
+      {
+        method: 'POST',
+        body: body.toString(),
+        headers,
+      },
+      this.fetcher
+    );
 
     if (response.status === 400) {
       const standardBodyError = await deserializeJson(response);
@@ -1247,43 +1142,5 @@ export class MonoCloudOidcClient {
     }
 
     return claims;
-  }
-
-  /**
-   * Decodes the payload of a JSON Web Token (JWT) and returns it as an object.
-   *
-   * >Note: THIS METHOD DOES NOT VERIFY JWT TOKENS.
-   *
-   * @param jwt - JWT to decode.
-   *
-   * @returns Decoded payload.
-   *
-   * @throws {@link MonoCloudTokenError} - If decoding fails
-   *
-   */
-  static decodeJwt(jwt: string): IdTokenClaims {
-    try {
-      const [, payload] = jwt.split('.');
-
-      if (!payload?.trim()) {
-        throw new MonoCloudTokenError('JWT does not contain payload');
-      }
-
-      const decoded = decodeBase64Url(payload);
-
-      if (!decoded.startsWith('{')) {
-        throw new MonoCloudTokenError('Payload is not an object');
-      }
-
-      return JSON.parse(decoded) as IdTokenClaims;
-    } catch (e) {
-      if (e instanceof MonoCloudAuthBaseError) {
-        throw e;
-      }
-
-      throw new MonoCloudTokenError(
-        'Could not parse payload. Malformed payload'
-      );
-    }
   }
 }
