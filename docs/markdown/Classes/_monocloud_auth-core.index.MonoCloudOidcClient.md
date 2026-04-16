@@ -6,23 +6,46 @@ category: Classes
 
 # Class: MonoCloudOidcClient
 
+## Extends
+
+- [`MonoCloudOidcClientBase`](/sdks/nodejs/api-reference/classes/monocloudoidcclientbase)
+
 ## Constructors
 
 ### Constructor
 
-> **new MonoCloudOidcClient**(`tenantDomain`: `string`, `clientId`: `string`, `options?`: [`MonoCloudClientOptions`](/sdks/nodejs/api-reference/types/monocloudclientoptions)): `MonoCloudOidcClient`
+> **new MonoCloudOidcClient**(`tenantDomain`: `string`, `clientId`: `string`, `options?`: [`MonoCloudOidcClientOptions`](/sdks/nodejs/api-reference/types/monocloudoidcclientoptions)): `MonoCloudOidcClient`
+
+Creates a new instance of MonoCloudOidcClient.
 
 #### Parameters
 
-| Parameter      | Type                                                                                      |
-| -------------- | ----------------------------------------------------------------------------------------- |
-| `tenantDomain` | `string`                                                                                  |
-| `clientId`     | `string`                                                                                  |
-| `options?`     | [`MonoCloudClientOptions`](/sdks/nodejs/api-reference/types/monocloudclientoptions) |
+| Parameter      | Type                                                                                              | Description                                           |
+| -------------- | ------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
+| `tenantDomain` | `string`                                                                                          | The tenant domain URL.                                |
+| `clientId`     | `string`                                                                                          | Client id of the application registered in MonoCloud. |
+| `options?`     | [`MonoCloudOidcClientOptions`](/sdks/nodejs/api-reference/types/monocloudoidcclientoptions) | Additional client configuration options.              |
 
 #### Returns
 
 `MonoCloudOidcClient`
+
+#### Overrides
+
+[`MonoCloudOidcClientBase`](/sdks/nodejs/api-reference/classes/monocloudoidcclientbase).[`constructor`](/sdks/nodejs/api-reference/classes/monocloudoidcclientbase#constructor)
+
+## Properties
+
+| Property                                                   | Type                                                                                                                                                                                 | Description                                                                                                  |
+| ---------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------ |
+| `fetcher?`                            | \{(`input`: `URL` \| `RequestInfo`, `init?`: `RequestInit`): `Promise`\<`Response`\>; (`input`: `string` \| `URL` \| `Request`, `init?`: `RequestInit`): `Promise`\<`Response`\>; \} | Custom fetch implementation used for making HTTP requests. Falls back to the global `fetch` if not provided. |
+| `jwks?`                                  | [`Jwks`](/sdks/nodejs/api-reference/types/jwks)                                                                                                                                | Cached JSON Web Key Set retrieved from the issuer's JWKS endpoint.                                           |
+| `jwksCacheDuration`         | `number`                                                                                                                                                                             | Duration (in seconds) for which the JWKS is cached. Defaults to 300 (5 minutes).                             |
+| `jwksCacheExpiry`             | `number`                                                                                                                                                                             | Timestamp (in seconds) when the cached JWKS expires.                                                         |
+| `metadata?`                          | [`IssuerMetadata`](/sdks/nodejs/api-reference/types/issuermetadata)                                                                                                            | Cached issuer metadata retrieved from the OpenID Connect discovery endpoint.                                 |
+| `metadataCacheDuration` | `number`                                                                                                                                                                             | Duration (in seconds) for which the metadata is cached. Defaults to 300 (5 minutes).                         |
+| `metadataCacheExpiry`     | `number`                                                                                                                                                                             | Timestamp (in seconds) when the cached metadata expires.                                                     |
+| `tenantDomain`                   | `string`                                                                                                                                                                             | The normalized tenant domain URL used as the base for discovery endpoints.                                   |
 
 ## Methods
 
@@ -98,7 +121,7 @@ unexpected status code during the request or a serialization error while process
 
 ### decodeJwt()
 
-> `static` **decodeJwt**(`jwt`: `string`): [`IdTokenClaims`](/sdks/nodejs/api-reference/types/idtokenclaims)
+> `static` **decodeJwt**(`jwt`: `string`): [`JwtClaims`](/sdks/nodejs/api-reference/types/jwtclaims)
 
 Decodes the payload of a JSON Web Token (JWT) and returns it as an object.
 
@@ -112,13 +135,17 @@ Decodes the payload of a JSON Web Token (JWT) and returns it as an object.
 
 #### Returns
 
-[`IdTokenClaims`](/sdks/nodejs/api-reference/types/idtokenclaims)
+[`JwtClaims`](/sdks/nodejs/api-reference/types/jwtclaims)
 
 Decoded payload.
 
 #### Throws
 
 [MonoCloudTokenError](/sdks/nodejs/api-reference/error-classes/monocloudtokenerror) - If decoding fails
+
+#### Inherited from
+
+[`MonoCloudOidcClientBase`](/sdks/nodejs/api-reference/classes/monocloudoidcclientbase).[`decodeJwt`](/sdks/nodejs/api-reference/classes/monocloudoidcclientbase#decodejwt)
 
 ---
 
@@ -187,7 +214,7 @@ unexpected status code during the request or a serialization error while process
 > **getJwks**(`forceRefresh`: `boolean`): `Promise`\<[`Jwks`](/sdks/nodejs/api-reference/types/jwks)\>
 
 Fetches the JSON Web Keys used to sign the ID token.
-The JWKS is cached for 1 minute.
+The JWKS is cached for 5 minutes by default.
 
 #### Parameters
 
@@ -206,6 +233,10 @@ The JSON Web Key Set containing the public keys for token verification.
 [MonoCloudHttpError](/sdks/nodejs/api-reference/error-classes/monocloudhttperror) - Thrown if there is a network error during the request or
 unexpected status code during the request or a serialization error while processing the response.
 
+#### Inherited from
+
+[`MonoCloudOidcClientBase`](/sdks/nodejs/api-reference/classes/monocloudoidcclientbase).[`getJwks`](/sdks/nodejs/api-reference/classes/monocloudoidcclientbase#getjwks)
+
 ---
 
 ### getMetadata()
@@ -213,7 +244,7 @@ unexpected status code during the request or a serialization error while process
 > **getMetadata**(`forceRefresh`: `boolean`): `Promise`\<[`IssuerMetadata`](/sdks/nodejs/api-reference/types/issuermetadata)\>
 
 Fetches the authorization server metadata from the .well-known endpoint.
-The metadata is cached for 1 minute.
+The metadata is cached for 5 minutes by default.
 
 #### Parameters
 
@@ -231,6 +262,10 @@ The issuer metadata for the tenant, retrieved from the OpenID Connect discovery 
 
 [MonoCloudHttpError](/sdks/nodejs/api-reference/error-classes/monocloudhttperror) - Thrown if there is a network error during the request or
 unexpected status code during the request or a serialization error while processing the response.
+
+#### Inherited from
+
+[`MonoCloudOidcClientBase`](/sdks/nodejs/api-reference/classes/monocloudoidcclientbase).[`getMetadata`](/sdks/nodejs/api-reference/classes/monocloudoidcclientbase#getmetadata)
 
 ---
 

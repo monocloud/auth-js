@@ -8,7 +8,9 @@ category: Other
 
 ## Classes
 
+- [MonoCloudOidcBackendClient](/sdks/nodejs/api-reference/classes/monocloudoidcbackendclient)
 - [MonoCloudOidcClient](/sdks/nodejs/api-reference/classes/monocloudoidcclient)
+- [MonoCloudOidcClientBase](/sdks/nodejs/api-reference/classes/monocloudoidcclientbase)
 
 ## Error Classes
 
@@ -21,6 +23,7 @@ category: Other
 ## Types
 
 - [AccessToken](/sdks/nodejs/api-reference/types/accesstoken)
+- [AccessTokenClaims](/sdks/nodejs/api-reference/types/accesstokenclaims)
 - [Address](/sdks/nodejs/api-reference/types/address)
 - [AuthenticateOptions](/sdks/nodejs/api-reference/types/authenticateoptions)
 - [AuthorizationParams](/sdks/nodejs/api-reference/types/authorizationparams)
@@ -29,11 +32,16 @@ category: Other
 - [EndSessionParameters](/sdks/nodejs/api-reference/types/endsessionparameters)
 - [Group](/sdks/nodejs/api-reference/types/group)
 - [IdTokenClaims](/sdks/nodejs/api-reference/types/idtokenclaims)
+- [IntrospectOptions](/sdks/nodejs/api-reference/types/introspectoptions)
 - [IssuerMetadata](/sdks/nodejs/api-reference/types/issuermetadata)
+- [IsUserInGroupOptions](/sdks/nodejs/api-reference/types/isuseringroupoptions)
 - [Jwk](/sdks/nodejs/api-reference/types/jwk)
 - [Jwks](/sdks/nodejs/api-reference/types/jwks)
 - [JwsHeaderParameters](/sdks/nodejs/api-reference/types/jwsheaderparameters)
-- [MonoCloudClientOptions](/sdks/nodejs/api-reference/types/monocloudclientoptions)
+- [JwtClaims](/sdks/nodejs/api-reference/types/jwtclaims)
+- [MonoCloudClientOptionsBase](/sdks/nodejs/api-reference/types/monocloudclientoptionsbase)
+- [MonoCloudOidcBackendClientOptions](/sdks/nodejs/api-reference/types/monocloudoidcbackendclientoptions)
+- [MonoCloudOidcClientOptions](/sdks/nodejs/api-reference/types/monocloudoidcclientoptions)
 - [MonoCloudSession](/sdks/nodejs/api-reference/types/monocloudsession)
 - [MonoCloudUser](/sdks/nodejs/api-reference/types/monoclouduser)
 - [ParResponse](/sdks/nodejs/api-reference/types/parresponse)
@@ -42,7 +50,9 @@ category: Other
 - [RefreshGrantOptions](/sdks/nodejs/api-reference/types/refreshgrantoptions)
 - [RefreshSessionOptions](/sdks/nodejs/api-reference/types/refreshsessionoptions)
 - [Tokens](/sdks/nodejs/api-reference/types/tokens)
+- [TokenValidationOptionsBase](/sdks/nodejs/api-reference/types/tokenvalidationoptionsbase)
 - [UserinfoResponse](/sdks/nodejs/api-reference/types/userinforesponse)
+- [ValidateJwtAccessTokenOptions](/sdks/nodejs/api-reference/types/validatejwtaccesstokenoptions)
 
 ## Types (Enums)
 
