@@ -1,5 +1,13 @@
 # @monocloud/auth-nextjs
 
+## 0.1.13
+
+### Patch Changes
+
+- 353048d: Use 307 redirect and no-cache for auth endpoints
+- Updated dependencies [353048d]
+  - @monocloud/auth-node-core@0.1.12
+
 ## 0.1.12
 
 ### Patch Changes
