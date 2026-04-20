@@ -1,5 +1,13 @@
 # @monocloud/auth-nextjs
 
+## 0.1.12
+
+### Patch Changes
+
+- Updated dependencies [f3f475a]
+  - @monocloud/auth-core@0.1.8
+  - @monocloud/auth-node-core@0.1.11
+
 ## 0.1.11
 
 ### Patch Changes
