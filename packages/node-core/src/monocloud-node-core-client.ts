@@ -127,6 +127,8 @@ export class MonoCloudCoreClient {
     try {
       this.validateOptions();
 
+      response.setNoCache();
+
       const { method } = await request.getRawRequest();
 
       if (method.toLowerCase() !== 'get') {
@@ -362,7 +364,7 @@ export class MonoCloudCoreClient {
         params.responseMode === 'form_post' ? 'none' : undefined
       );
       // Redirect to authorize url
-      response.redirect(authUrl, 302);
+      response.redirect(authUrl);
     } catch (error) {
       if (typeof signInOptions?.onError === 'function') {
         return signInOptions.onError(error as Error);
@@ -396,6 +398,8 @@ export class MonoCloudCoreClient {
 
     try {
       this.validateOptions();
+
+      response.setNoCache();
 
       const { method, url, body } = await request.getRawRequest();
 
@@ -657,6 +661,8 @@ export class MonoCloudCoreClient {
 
     try {
       this.validateOptions();
+
+      response.setNoCache();
 
       const { method } = await request.getRawRequest();
 

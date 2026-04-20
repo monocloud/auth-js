@@ -612,7 +612,7 @@ describe('MonoCloud Middleware', () => {
 
     const res = new TestAppRes(serverResponse);
 
-    expect(res.status).toBe(302);
+    expect(res.status).toBe(307);
     expect(res.locationHeaderPathOnly).toBe(
       'https://op.example.com/connect/authorize'
     );
@@ -630,7 +630,7 @@ describe('MonoCloud Middleware', () => {
 
     const res = new TestAppRes(serverResponse);
 
-    expect(res.status).toBe(302);
+    expect(res.status).toBe(307);
     expect(res.locationHeaderPathOnly).toBe(
       'https://op.example.com/connect/authorize'
     );
@@ -660,7 +660,7 @@ describe('MonoCloud Middleware', () => {
 
     const res = new TestAppRes(serverResponse);
 
-    expect(res.status).toBe(302);
+    expect(res.status).toBe(307);
     expect(res.locationHeaderPathOnly).toBe(
       'https://op.example.com/connect/authorize'
     );
@@ -681,7 +681,7 @@ describe('MonoCloud Middleware', () => {
 
     const res = new TestAppRes(serverResponse);
 
-    expect(res.status).toBe(302);
+    expect(res.status).toBe(307);
     expect(res.locationHeaderPathOnly).toBe(
       'https://op.example.com/connect/authorize'
     );
@@ -704,7 +704,7 @@ describe('MonoCloud Middleware', () => {
 
     const res = new TestAppRes(serverResponse);
 
-    expect(res.status).toBe(302);
+    expect(res.status).toBe(307);
     expect(res.locationHeaderPathOnly).toBe(
       'https://op.example.com/connect/authorize'
     );
