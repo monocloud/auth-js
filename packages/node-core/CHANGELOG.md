@@ -1,5 +1,11 @@
 # @monocloud/auth-node-core
 
+## 0.1.12
+
+### Patch Changes
+
+- 353048d: Use 307 redirect and no-cache for auth endpoints
+
 ## 0.1.11
 
 ### Patch Changes
