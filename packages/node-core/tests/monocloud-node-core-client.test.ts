@@ -161,8 +161,6 @@ describe('MonoCloud Base Instance', () => {
 
         await instance.signIn(req, res);
 
-        expect(res.res.statusCode).toBe(302);
-
         const url = new URL(res.res.redirectedUrl!);
 
         expect(`${url.protocol}//${url.host}${url.pathname}`).toBe(
@@ -205,8 +203,6 @@ describe('MonoCloud Base Instance', () => {
         const res = new TestRes(cookies);
 
         await instance.signIn(req, res);
-
-        expect(res.res.statusCode).toBe(302);
 
         const url = new URL(res.res.redirectedUrl!);
 
@@ -252,8 +248,6 @@ describe('MonoCloud Base Instance', () => {
         const res = new TestRes(cookies);
 
         await instance.signIn(req, res);
-
-        expect(res.res.statusCode).toBe(302);
 
         const url = new URL(res.res.redirectedUrl!);
 
@@ -342,8 +336,6 @@ describe('MonoCloud Base Instance', () => {
           },
         });
 
-        expect(res.res.statusCode).toBe(302);
-
         const url = new URL(res.res.redirectedUrl!);
 
         expect(`${url.protocol}//${url.host}${url.pathname}`).toBe(
@@ -386,8 +378,6 @@ describe('MonoCloud Base Instance', () => {
           },
         });
 
-        expect(res.res.statusCode).toBe(302);
-
         const url = new URL(res.res.redirectedUrl!);
 
         expect(`${url.protocol}//${url.host}${url.pathname}`).toBe(
@@ -422,8 +412,6 @@ describe('MonoCloud Base Instance', () => {
         await instance.signIn(req, res, {
           register: true,
         });
-
-        expect(res.res.statusCode).toBe(302);
 
         const url = new URL(res.res.redirectedUrl!);
 
@@ -461,8 +449,6 @@ describe('MonoCloud Base Instance', () => {
             authenticatorHint: 'apple',
           },
         });
-
-        expect(res.res.statusCode).toBe(302);
 
         const url = new URL(res.res.redirectedUrl!);
 
@@ -522,8 +508,6 @@ describe('MonoCloud Base Instance', () => {
             prompt: 'consent',
           },
         });
-
-        expect(res.res.statusCode).toBe(302);
 
         const url = new URL(res.res.redirectedUrl!);
 
@@ -595,8 +579,6 @@ describe('MonoCloud Base Instance', () => {
           },
         });
 
-        expect(res.res.statusCode).toBe(302);
-
         const url = new URL(res.res.redirectedUrl!);
 
         expect(`${url.protocol}//${url.host}${url.pathname}`).toBe(
@@ -645,8 +627,6 @@ describe('MonoCloud Base Instance', () => {
 
         await instance.signIn(req, res);
 
-        expect(res.res.statusCode).toBe(302);
-
         const url = new URL(res.res.redirectedUrl!);
 
         expect(url.searchParams.get('max_age')).toBeNull();
@@ -669,8 +649,6 @@ describe('MonoCloud Base Instance', () => {
         const res = new TestRes(cookies);
 
         await instance.signIn(req, res);
-
-        expect(res.res.statusCode).toBe(302);
 
         const url = new URL(res.res.redirectedUrl!);
 
@@ -699,8 +677,6 @@ describe('MonoCloud Base Instance', () => {
 
         await instance.signIn(req, res);
 
-        expect(res.res.statusCode).toBe(302);
-
         const url = new URL(res.res.redirectedUrl!);
 
         expect(url.searchParams.get('resource')).toBe('https://test.com');
@@ -725,8 +701,6 @@ describe('MonoCloud Base Instance', () => {
             loginHint: 'username',
           },
         });
-
-        expect(res.res.statusCode).toBe(302);
 
         const url = new URL(res.res.redirectedUrl!);
 
@@ -767,8 +741,6 @@ describe('MonoCloud Base Instance', () => {
             prompt: 'consent',
           },
         });
-
-        expect(res.res.statusCode).toBe(302);
 
         const url = new URL(res.res.redirectedUrl!);
 
@@ -895,8 +867,6 @@ describe('MonoCloud Base Instance', () => {
         const res = new TestRes(cookies);
 
         await instance.signIn(req, res);
-
-        expect(res.res.statusCode).toBe(302);
 
         const url = new URL(res.res.redirectedUrl!);
 

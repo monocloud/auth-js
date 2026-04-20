@@ -42,7 +42,7 @@ describe('Base Path', () => {
 
     const res = new TestAppRes(serverResponse);
 
-    expect(res.status).toBe(302);
+    expect(res.status).toBe(307);
     expect(res.locationHeader.query.redirect_uri).toBe(
       'https://example.org/basepath/api/auth/callback'
     );

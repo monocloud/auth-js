@@ -30,7 +30,7 @@ export default class MonoCloudPageRouterResponse implements MonoCloudResponse {
 
   /* v8 ignore next */
   redirect(url: string, statusCode?: number): void {
-    this.res.redirect(statusCode ?? 302, url);
+    this.res.redirect(statusCode ?? 307, url);
   }
 
   /* v8 ignore next */
@@ -61,8 +61,12 @@ export default class MonoCloudPageRouterResponse implements MonoCloudResponse {
 
   /* v8 ignore next */
   setNoCache(): void {
-    this.res.setHeader('Cache-Control', 'no-cache no-store');
+    this.res.setHeader(
+      'Cache-Control',
+      'private, no-cache, no-store, must-revalidate, max-age=0'
+    );
     this.res.setHeader('Pragma', 'no-cache');
+    this.res.setHeader('Expires', '0');
   }
 
   /* v8 ignore next */

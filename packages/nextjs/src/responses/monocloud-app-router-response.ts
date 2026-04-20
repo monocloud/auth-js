@@ -17,7 +17,7 @@ export default class MonoCloudAppRouterResponse implements MonoCloudResponse {
     return Promise.resolve();
   }
 
-  redirect(url: string, statusCode: number | undefined = 302): void {
+  redirect(url: string, statusCode: number | undefined = 307): void {
     const { headers } = this.res;
     this.res = NextResponse.redirect(url, { status: statusCode, headers });
   }
@@ -49,8 +49,12 @@ export default class MonoCloudAppRouterResponse implements MonoCloudResponse {
   }
 
   setNoCache(): void {
-    this.res.headers.set('Cache-Control', 'no-cache no-store');
+    this.res.headers.set(
+      'Cache-Control',
+      'private, no-cache, no-store, must-revalidate, max-age=0'
+    );
     this.res.headers.set('Pragma', 'no-cache');
+    this.res.headers.set('Expires', '0');
   }
 
   done(): any {
