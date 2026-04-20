@@ -96,7 +96,23 @@ describe('clientAuth()', () => {
     expect(body.get('client_secret')).toBe('secret');
   });
 
-  it('should throw an error for invalid authenticaiton method', async () => {
+  ['tls_client_auth', 'self_signed_tls_client_auth'].forEach(mtlsAuth => {
+    it(`should add client id to the body if auth method is mtls ${mtlsAuth}`, async () => {
+      await clientAuth(
+        'clientId',
+        undefined,
+        mtlsAuth as ClientAuthMethod,
+        undefined,
+        undefined,
+        body,
+        undefined
+      );
+
+      expect(body.get('client_id')).toBe('clientId');
+    });
+  });
+
+  it('should throw an error for invalid authentication method', async () => {
     try {
       await clientAuth(
         'client_id',

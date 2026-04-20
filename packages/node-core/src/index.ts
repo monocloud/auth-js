@@ -47,7 +47,7 @@ export type {
   AccessToken,
   AuthenticateOptions,
   ClientAuthMethod,
-  MonoCloudClientOptions,
+  MonoCloudOidcClientOptions,
   PushedAuthorizationParams,
   RefreshSessionOptions,
   AuthState,

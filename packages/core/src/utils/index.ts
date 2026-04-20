@@ -8,10 +8,10 @@ import type {
 import {
   arrayBufferToBase64,
   arrayBufferToString,
-  encodeBase64Url,
   fromB64Url,
   now,
   randomBytes,
+  sha256,
   stringToArrayBuffer,
 } from './internal';
 
@@ -354,12 +354,7 @@ export const generatePKCE = async (): Promise<{
   const codeVerifier = randomBytes(32);
   return {
     codeVerifier,
-    codeChallenge: encodeBase64Url(
-      await crypto.subtle.digest(
-        'SHA-256',
-        stringToArrayBuffer(codeVerifier) as BufferSource
-      )
-    ),
+    codeChallenge: await sha256(codeVerifier),
   };
 };
 

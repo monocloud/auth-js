@@ -716,11 +716,58 @@ export interface MonoCloudSession {
 }
 
 /**
+ * Standard JWT claims shared between ID tokens and access tokens.
+ *
+ * @category Types
+ */
+export interface JwtClaims {
+  /**
+   * Issuer identifier - the authorization server that issued the token.
+   */
+  iss: string;
+
+  /**
+   * Subject identifier — uniquely identifies the authenticated user.
+   */
+  sub: string;
+
+  /**
+   * Intended audience(s) of the token.
+   */
+  aud: string | string[];
+
+  /**
+   * Expiration time of the token (Unix epoch seconds).
+   */
+  exp: number;
+
+  /**
+   * Time at which the token was issued (Unix epoch seconds).
+   */
+  iat: number;
+
+  /**
+   * Not-before time (Unix epoch seconds).
+   */
+  nbf?: number;
+
+  /**
+   * JWT ID (unique identifier for the token).
+   */
+  jti?: string;
+
+  /**
+   * Additional custom or provider-specific claims.
+   */
+  [key: string]: unknown;
+}
+
+/**
  * Standard OpenID Connect ID Token claims.
  *
  * @category Types
  */
-export interface IdTokenClaims extends UserinfoResponse {
+export interface IdTokenClaims extends UserinfoResponse, JwtClaims {
   /**
    * Authentication Context Class Reference. Indicates the assurance level of the authentication performed.
    */
@@ -735,11 +782,6 @@ export interface IdTokenClaims extends UserinfoResponse {
    * Access token hash. Used to validate access tokens returned alongside the ID token.
    */
   at_hash?: string;
-
-  /**
-   * Intended audience(s) of the ID token.
-   */
-  aud: string | string[];
 
   /**
    * Time when the end-user authentication occurred (Unix epoch seconds).
@@ -757,21 +799,6 @@ export interface IdTokenClaims extends UserinfoResponse {
   c_hash?: string;
 
   /**
-   * Expiration time of the ID token (Unix epoch seconds).
-   */
-  exp: number;
-
-  /**
-   * Time at which the ID token was issued (Unix epoch seconds).
-   */
-  iat: number;
-
-  /**
-   * Issuer identifier - the authorization server that issued the token.
-   */
-  iss: string;
-
-  /**
    * Nonce value used to associate the authentication request with the issued ID token and prevent replay attacks.
    */
   nonce?: string;
@@ -780,16 +807,23 @@ export interface IdTokenClaims extends UserinfoResponse {
    * State hash (used in some hybrid flow validations).
    */
   s_hash?: string;
+}
+
+/**
+ * Claims contained in a validated OAuth 2.0 access token.
+ *
+ * @category Types
+ */
+export interface AccessTokenClaims extends JwtClaims {
+  /**
+   * OAuth scope associated with the token.
+   */
+  scope?: string;
 
   /**
-   * Subject identifier — uniquely identifies the authenticated user.
+   * Client ID of the application the token was issued to.
    */
-  sub: string;
-
-  /**
-   * Additional custom or provider-specific claims.
-   */
-  [key: string]: unknown;
+  client_id?: string;
 }
 
 /**
@@ -1394,7 +1428,17 @@ export type ClientAuthMethod =
   /**
    * Client authenticates using a signed JWT created with a private key.
    */
-  | 'private_key_jwt';
+  | 'private_key_jwt'
+
+  /**
+   * Client authenticates using a TLS client certificate issued by a trusted certificate authority.
+   */
+  | 'tls_client_auth'
+
+  /**
+   * Client authenticates using a self-signed TLS client certificate.
+   */
+  | 'self_signed_tls_client_auth';
 
 /**
  * Parameters used when creating a Pushed Authorization Request (PAR).
@@ -1412,13 +1456,16 @@ export interface PushedAuthorizationParams extends Omit<
 > {}
 
 /**
- * Configuration options used to initialize the MonoCloudClient.
+ * Shared configuration options for MonoCloud OIDC clients.
+ *
+ * These options are common to both {@link MonoCloudOidcClientOptions}
+ * and {@link MonoCloudOidcBackendClientOptions}.
  *
  * @category Types
  */
-export interface MonoCloudClientOptions {
+export interface MonoCloudClientOptionsBase {
   /**
-   * Client secret used for client authentication.
+   * Client secret or key material used for client authentication.
    *
    * When `clientAuthMethod` is `client_secret_jwt` and a plain-text secret is provided, the default signing algorithm is `HS256`.
    *
@@ -1428,14 +1475,9 @@ export interface MonoCloudClientOptions {
 
   /**
    * Client authentication method used when communicating with the token endpoint.
+   * @defaultValue 'client_secret_basic'
    */
   clientAuthMethod?: ClientAuthMethod;
-
-  /**
-   * Expected signing algorithm for validating ID tokens.
-   * @defaultValue 'RS256'
-   */
-  idTokenSigningAlgorithm?: SecurityAlgorithms;
 
   /**
    * Duration (in seconds) to cache the JSON Web Key Set (JWKS) retrieved from the authorization server.
@@ -1448,6 +1490,73 @@ export interface MonoCloudClientOptions {
    * @defaultValue 300
    */
   metadataCacheDuration?: number;
+
+  /**
+   * Optional custom `fetch` implementation used for network requests.
+   */
+  fetcher?: typeof fetch;
+}
+
+/**
+ * Configuration options used to initialize the MonoCloudOidcClient.
+ *
+ * @category Types
+ */
+export interface MonoCloudOidcClientOptions extends MonoCloudClientOptionsBase {
+  /**
+   * Expected signing algorithm for validating ID tokens.
+   * @defaultValue 'RS256'
+   */
+  idTokenSigningAlgorithm?: SecurityAlgorithms;
+}
+
+/**
+ * Options for configuring group membership validation on access tokens.
+ *
+ * @category Types
+ */
+export interface IsUserInGroupOptions {
+  /**
+   * The claim name in the token that contains group memberships.
+   * @defaultValue 'groups'
+   */
+  groupsClaim?: string;
+
+  /**
+   * When `true`, requires the token to contain all specified groups.
+   * When `false`, requires at least one of the specified groups.
+   * @defaultValue false
+   */
+  matchAll?: boolean;
+}
+
+/**
+ * Configuration options used to initialize the MonoCloudOidcBackendClient.
+ *
+ * @category Types
+ */
+export interface MonoCloudOidcBackendClientOptions extends MonoCloudClientOptionsBase {
+  /**
+   * Client identifier of the application registered in MonoCloud.
+   */
+  clientId?: string;
+
+  /**
+   * Number of seconds to adjust the current time to account for clock differences.
+   * @defaultValue 0
+   */
+  clockSkew?: number;
+
+  /**
+   * Additional time tolerance in seconds for time-based claim validation.
+   * @defaultValue 300
+   */
+  clockTolerance?: number;
+
+  /**
+   * Options for group membership validation applied to all token validations performed by this client.
+   */
+  groupOptions?: IsUserInGroupOptions;
 }
 
 /**
@@ -1497,3 +1606,51 @@ export type OnSessionCreating = (
    */
   userInfo?: UserinfoResponse
 ) => Promise<void> | void;
+
+/**
+ * Shared options for token validation and introspection.
+ * @category Types
+ */
+export interface TokenValidationOptionsBase {
+  /**
+   * List of scopes that must all be present in the token's `scope` claim.
+   */
+  scopes?: string[];
+
+  /**
+   * List of group names or identifiers that must be present in the token's groups claim.
+   */
+  groups?: string[];
+
+  /**
+   * PEM-encoded client certificate used for certificate-bound token validation.
+   */
+  clientCertificate?: string;
+
+  /**
+   * When `true`, validates certificate binding for certificate-bound access tokens.
+   *
+   * @defaultValue false
+   */
+  validateCertificateBinding?: boolean;
+}
+
+/**
+ * Options for validating a JWT access token.
+ *
+ * @category Types
+ */
+export interface ValidateJwtAccessTokenOptions extends TokenValidationOptionsBase {
+  /**
+   * Pre-fetched JSON Web Key Set to use for signature verification instead of fetching from the server.
+   */
+  jwks?: Jwks;
+}
+
+/**
+ * Options for introspecting an opaque access token.
+ *
+ * @category Types
+ */
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export interface IntrospectOptions extends TokenValidationOptionsBase {}

@@ -1,7 +1,12 @@
 export type {
+  AccessTokenClaims,
   AuthenticateOptions,
   ClientAuthMethod,
-  MonoCloudClientOptions,
+  IntrospectOptions,
+  JwtClaims,
+  MonoCloudClientOptionsBase,
+  MonoCloudOidcClientOptions,
+  MonoCloudOidcBackendClientOptions,
   PushedAuthorizationParams,
   RefreshSessionOptions,
   AuthState,
@@ -31,6 +36,9 @@ export type {
   OnSessionCreating,
   AccessToken,
   Address,
+  TokenValidationOptionsBase,
+  ValidateJwtAccessTokenOptions,
+  IsUserInGroupOptions,
 } from './types';
 
 export { MonoCloudAuthBaseError } from './errors/monocloud-auth-base-error';
@@ -39,4 +47,6 @@ export { MonoCloudHttpError } from './errors/monocloud-http-error';
 export { MonoCloudTokenError } from './errors/monocloud-token-error';
 export { MonoCloudValidationError } from './errors/monocloud-validation-error';
 
+export { MonoCloudOidcClientBase } from './monocloud-oidc-client-base';
 export { MonoCloudOidcClient } from './monocloud-oidc-client';
+export { MonoCloudOidcBackendClient } from './monocloud-oidc-backend-client';

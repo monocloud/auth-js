@@ -31,3 +31,8 @@ export const assertError = async (
     }
   }
 };
+
+export const assertTokenError = async (
+  promise: Promise<unknown>,
+  error: string
+): Promise<void> => await assertError(promise, MonoCloudTokenError, error);
