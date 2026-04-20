@@ -1,5 +1,11 @@
 # @monocloud/auth-core
 
+## 0.1.8
+
+### Patch Changes
+
+- f3f475a: Added Node.js backend SDK with Express and Fastify support
+
 ## 0.1.7
 
 ### Patch Changes
