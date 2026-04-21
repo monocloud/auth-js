@@ -7,12 +7,12 @@ framework: Fastify
 
 # Type: AuthenticatedFastifyRequest
 
-> **AuthenticatedFastifyRequest** = `FastifyRequest` & \{ `user`: [`AccessTokenClaims`](/sdks/fastify-backend/api-reference/types/accesstokenclaims); \}
+> **AuthenticatedFastifyRequest** = `FastifyRequest` & \{ `claims`: [`AccessTokenClaims`](/sdks/fastify-backend/api-reference/types/accesstokenclaims); \}
 
 A Fastify request augmented with validated access token claims.
 
 ## Type Declaration
 
-| Name   | Type                                                                      | Description                                                               |
-| ------ | ------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
-| `user` | [`AccessTokenClaims`](/sdks/fastify-backend/api-reference/types/accesstokenclaims) | Validated access token claims attached after successful token validation. |
+| Name     | Type                                                                      | Description                                                               |
+| -------- | ------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| `claims` | [`AccessTokenClaims`](/sdks/fastify-backend/api-reference/types/accesstokenclaims) | Validated access token claims attached after successful token validation. |

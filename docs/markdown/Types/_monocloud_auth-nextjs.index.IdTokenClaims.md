@@ -40,7 +40,6 @@ Additional provider-specific claims.
 | `groups?`                               | [`Group`](/sdks/nextjs/api-reference/types/group)[]   | Group memberships for the user.                                                                               |
 | `iat`                                      | `number`                                             | Time at which the token was issued (Unix epoch seconds).                                                      |
 | `iss`                                      | `string`                                             | Issuer identifier - the authorization server that issued the token.                                           |
-| `jti?`                                     | `string`                                             | JWT ID (unique identifier for the token).                                                                     |
 | `locale?`                               | `string`                                             | Locale.                                                                                                       |
 | `middle_name?`                     | `string`                                             | Middle name(s).                                                                                               |
 | `name?`                                   | `string`                                             | Full name of the user (e.g. "Jane Doe").                                                                      |

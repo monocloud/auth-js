@@ -6,7 +6,7 @@ category: Handler Types
 
 # Handler Type: ClientCertificateResolver
 
-> **ClientCertificateResolver**\<`T`\> = (`req`: `T`) => `Promise`\<`string`\>
+> **ClientCertificateResolver**\<`T`\> = (`req`: `T`) => `Promise`\<`string` \| `undefined`\>
 
 Callback that resolves a PEM-encoded client certificate from the incoming request.
 
@@ -27,4 +27,4 @@ The returned certificate can include or omit the `-----BEGIN CERTIFICATE-----` /
 
 ## Returns
 
-`Promise`\<`string`\>
+`Promise`\<`string` \| `undefined`\>

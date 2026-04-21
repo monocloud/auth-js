@@ -81,10 +81,6 @@ Issuer identifier - the authorization server that issued the token.
 
 JWT ID (unique identifier for the token).
 
-### Inherited from
-
-[`JwtClaims`](/sdks/express-backend/api-reference/types/jwtclaims).[`jti`](/sdks/express-backend/api-reference/types/jwtclaims#jti)
-
 ---
 
 ## nbf?
