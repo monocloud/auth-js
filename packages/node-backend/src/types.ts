@@ -19,7 +19,7 @@ export type ClientCertificateResolver<T> = (
    * The incoming request object.
    */
   req: T
-) => Promise<string>;
+) => Promise<string | undefined>;
 
 /**
  * Callback that resolves an access token from the incoming request.
@@ -35,7 +35,7 @@ export type TokenResolver<T> = (
    * The incoming request object.
    */
   req: T
-) => Promise<string>;
+) => Promise<string | undefined>;
 
 /**
  * Options for customizing how access tokens and client certificates are extracted from incoming requests.
