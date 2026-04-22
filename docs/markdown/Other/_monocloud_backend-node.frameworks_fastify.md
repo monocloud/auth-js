@@ -39,7 +39,6 @@ framework: Fastify
 - [MonoCloudBackendNodeClientOptions](/sdks/fastify-backend/api-reference/types/monocloudbackendnodeclientoptions)
 - [MonoCloudOidcBackendClientOptions](/sdks/fastify-backend/api-reference/types/monocloudoidcbackendclientoptions)
 - [ProtectApiRequestOptions](/sdks/fastify-backend/api-reference/types/protectapirequestoptions)
-- [ProtectFastifyApiOptions](/sdks/fastify-backend/api-reference/types/protectfastifyapioptions)
 - [ProtectOptions](/sdks/fastify-backend/api-reference/types/protectoptions)
 - [ValidateAccessTokenOptions](/sdks/fastify-backend/api-reference/types/validateaccesstokenoptions)
 - [ValidateJwtAccessTokenOptions](/sdks/fastify-backend/api-reference/types/validatejwtaccesstokenoptions)

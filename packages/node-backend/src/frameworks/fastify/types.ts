@@ -1,20 +1,6 @@
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import { AccessTokenClaims } from '@monocloud/auth-core';
-import {
-  MonoCloudBackendNodeClientOptions,
-  ProtectApiRequestOptions,
-  ProtectOptions,
-} from '../../types';
-
-/**
- * Combined options for initializing the Fastify hook with client configuration and request options.
- *
- * @category Types
- */
-export interface ProtectFastifyApiOptions
-  extends
-    MonoCloudBackendNodeClientOptions,
-    ProtectApiRequestOptions<FastifyRequest> {}
+import { ProtectOptions } from '../../types';
 
 /**
  * Factory function that returns a Fastify `onRequest` hook for protecting API routes.

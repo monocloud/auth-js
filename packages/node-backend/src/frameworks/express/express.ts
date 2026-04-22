@@ -8,42 +8,38 @@ import type {
 } from '../../types';
 import { MonoCloudBackendNodeClient } from '../../monocloud-backend-node-client';
 import { getBearerToken } from '../../get-bearer-token';
-import {
-  AuthenticatedExpressRequest,
-  ProtectExpressApiOptions,
-  ProtectMiddleware,
-} from './types';
+import { AuthenticatedExpressRequest, ProtectMiddleware } from './types';
 
 /**
  * Creates an Express middleware factory for protecting API routes using a pre-configured client.
  *
  * @param client - A pre-configured {@link MonoCloudBackendNodeClient} instance.
- * @param requestOptions - Options for extracting tokens and certificates from the request.
+ * @param options - Options for extracting tokens and certificates from the request.
  *
  * @category Functions
  */
 export function protectApi(
   client: MonoCloudBackendNodeClient,
-  requestOptions?: ProtectApiRequestOptions<Request>
+  options?: ProtectApiRequestOptions<Request>
 ): ProtectMiddleware;
 
 /**
  * Creates an Express middleware factory for protecting API routes.
  *
  * A new {@link MonoCloudBackendNodeClient} is created from the provided options,
- * or from environment variables if no options are specified.
+ * or from environment variables.
  *
- * @param options - Client configuration and request options.
+ * @param options - Options for extracting tokens and certificates from the request.
  *
  * @category Functions
  */
 export function protectApi(
-  options?: Partial<ProtectExpressApiOptions>
+  options?: ProtectApiRequestOptions<Request>
 ): ProtectMiddleware;
 
 export function protectApi(
   clientOrOptions?:
-    | Partial<ProtectExpressApiOptions>
+    | ProtectApiRequestOptions<Request>
     | MonoCloudBackendNodeClient,
   requestOptions?: ProtectApiRequestOptions<Request>
 ) {
@@ -58,8 +54,7 @@ export function protectApi(
   } else {
     certificateResolver = clientOrOptions?.certificateResolver;
     tokenResolver = clientOrOptions?.tokenResolver;
-    const { ...opt } = clientOrOptions ?? {};
-    client = new MonoCloudBackendNodeClient(opt);
+    client = new MonoCloudBackendNodeClient();
   }
 
   return (validateOptions?: ProtectOptions): RequestHandler => {

@@ -8,42 +8,38 @@ import type {
 } from '../../types';
 import { MonoCloudBackendNodeClient } from '../../monocloud-backend-node-client';
 import { getBearerToken } from '../../get-bearer-token';
-import {
-  AuthenticatedFastifyRequest,
-  ProtectFastifyApiOptions,
-  ProtectHook,
-} from './types';
+import { AuthenticatedFastifyRequest, ProtectHook } from './types';
 
 /**
  * Creates a Fastify `onRequest` hook factory for protecting API routes using a pre-configured client.
  *
  * @param client - A pre-configured {@link MonoCloudBackendNodeClient} instance.
- * @param requestOptions - Options for extracting tokens and certificates from the request.
+ * @param options - Options for extracting tokens and certificates from the request.
  *
  * @category Functions
  */
 export function protectApi(
   client: MonoCloudBackendNodeClient,
-  requestOptions?: ProtectApiRequestOptions<FastifyRequest>
+  options?: ProtectApiRequestOptions<FastifyRequest>
 ): ProtectHook;
 
 /**
  * Creates a Fastify `onRequest` hook factory for protecting API routes.
  *
  * A new {@link MonoCloudBackendNodeClient} is created from the provided options,
- * or from environment variables if no options are specified.
+ * or from environment variables.
  *
- * @param options - Client configuration and request options.
+ * @param options - Options for extracting tokens and certificates from the request.
  *
  * @category Functions
  */
 export function protectApi(
-  options?: Partial<ProtectFastifyApiOptions>
+  options?: ProtectApiRequestOptions<FastifyRequest>
 ): ProtectHook;
 
 export function protectApi(
   clientOrOptions?:
-    | Partial<ProtectFastifyApiOptions>
+    | ProtectApiRequestOptions<FastifyRequest>
     | MonoCloudBackendNodeClient,
   requestOptions?: ProtectApiRequestOptions<FastifyRequest>
 ) {
@@ -60,8 +56,7 @@ export function protectApi(
   } else {
     certificateResolver = clientOrOptions?.certificateResolver;
     tokenResolver = clientOrOptions?.tokenResolver;
-    const { ...opt } = clientOrOptions ?? {};
-    client = new MonoCloudBackendNodeClient(opt);
+    client = new MonoCloudBackendNodeClient();
   }
 
   return (validateOptions?: ProtectOptions) => {

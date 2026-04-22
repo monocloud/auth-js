@@ -39,6 +39,10 @@ The SDK handles:
 ## 📘 Documentation
 
 - **Documentation:** [https://www.monocloud.com/docs](https://www.monocloud.com/docs?utm_source=github&utm_medium=auth_js)
+- **Express Quickstart:** [https://www.monocloud.com/docs/quickstarts/express-backend](https://www.monocloud.com/docs/quickstarts/express-backend?utm_source=github&utm_medium=auth_js)
+- **Express SDK Reference:** [https://www.monocloud.com/docs/sdks/express-backend](https://www.monocloud.com/docs/sdks/express-backend/index?utm_source=github&utm_medium=auth_js)
+- **Fastify Quickstart:** [https://www.monocloud.com/docs/quickstarts/fastify-backend](https://www.monocloud.com/docs/quickstarts/fastify-backend?utm_source=github&utm_medium=auth_js)
+- **Fastify SDK Reference:** [https://www.monocloud.com/docs/sdks/fastify-backend](https://www.monocloud.com/docs/sdks/fastify-backend/index?utm_source=github&utm_medium=auth_js)
 - **API Reference:** [https://monocloud.github.io/auth-js](https://monocloud.github.io/auth-js?utm_source=github&utm_medium=auth_js)
 
 ## Supported Platforms
@@ -90,13 +94,13 @@ const protect = protectApi();
 
 // Protect a route — validates the Bearer token automatically
 app.get('/api/protected', protect(), (req, res) => {
-  const { user } = req as AuthenticatedExpressRequest;
-  res.json({ sub: user.sub });
+  const { claims } = req as AuthenticatedExpressRequest;
+  res.json({ claims });
 });
 
 // Require specific scopes
-app.get('/api/admin', protect({ scopes: ['admin'] }), (req, res) => {
-  res.json({ message: 'admin access granted' });
+app.get('/api/data', protect({ scopes: ['data:write'] }), (req, res) => {
+  res.json({ message: 'data:write access granted' });
 });
 
 // Require specific groups
@@ -125,16 +129,16 @@ const protect = protectApi();
 
 // Protect a route
 fastify.get('/api/protected', { onRequest: protect() }, async request => {
-  const { user } = request as AuthenticatedFastifyRequest;
-  return { sub: user.sub };
+  const { claims } = request as AuthenticatedFastifyRequest;
+  return { claims };
 });
 
 // Require specific scopes
 fastify.get(
-  '/api/admin',
-  { onRequest: protect({ scopes: ['admin'] }) },
+  '/api/data',
+  { onRequest: protect({ scopes: ['data:write'] }) },
   async () => {
-    return { message: 'admin access granted' };
+    return { message: 'data:write access granted' };
   }
 );
 
@@ -148,76 +152,6 @@ fastify.get(
 );
 
 fastify.listen({ port: 3000 });
-```
-
-### Direct Client Usage
-
-For custom frameworks or advanced use cases, use the `MonoCloudBackendNodeClient` directly.
-
-```typescript
-import { MonoCloudBackendNodeClient } from '@monocloud/backend-node';
-
-const client = new MonoCloudBackendNodeClient({
-  tenantDomain: 'https://<your-tenant-domain>',
-  audience: 'https://<your-api-identifier>',
-});
-
-// Validate an access token
-const claims = await client.validateAccessToken(accessToken);
-
-console.log(claims.sub); // Subject
-console.log(claims.scope); // Scopes
-```
-
-### Pre-configured Client
-
-You can share a single client instance across your middleware.
-
-```typescript
-import { protectApi, MonoCloudBackendNodeClient } from '@monocloud/backend-node/express'; // or fastify
-
-const client = new MonoCloudBackendNodeClient();
-
-const protectApi1 = protectApi(client);
-
-const protectApi2 = protectApi(client);
-
-// protectApi1();
-
-// protectApi2({ groups: ['admin'] });
-
-```
-
-### Custom Token Extraction
-
-By default, the SDK extracts the token from the `Authorization: Bearer` header. You can override this with a custom resolver.
-
-```typescript
-const protect = protectApi({
-  tokenResolver: async req => req.headers['x-api-token'] as string,
-});
-```
-
-### Token Caching
-
-Provide a cache implementation to avoid re-validating the same token on every request.
-
-```typescript
-import { protectApi, ICache } from '@monocloud/backend-node/express'; // or fastify
-
-const cache: ICache = {
-  async set(key, claims, expiresAt) {
-    /* store in Redis, etc. */
-  },
-  async get(key) {
-    /* retrieve from cache */
-  },
-  async delete(key) {
-    /* remove from cache */
-  },
-};
-
-const protect = protectApi({ cache });
 ```
 
 ## When should I use `@monocloud/backend-node`?

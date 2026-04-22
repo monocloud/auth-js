@@ -8,7 +8,7 @@ import {
   MonoCloudBackendNodeClientOptions,
   ValidateAccessTokenOptions,
 } from './types';
-import { now, sha256 } from '@monocloud/auth-core/internal';
+import { now } from '@monocloud/auth-core/internal';
 import { getOptions } from './options/get-options';
 
 /**
@@ -79,10 +79,8 @@ export class MonoCloudBackendNodeClient extends MonoCloudOidcBackendClient {
       );
     }
 
-    const cacheKey = this.cache ? await sha256(accessToken) : undefined;
-
-    if (this.cache && cacheKey) {
-      const cached = await this.cache.get(cacheKey);
+    if (this.cache) {
+      const cached = await this.cache.get(accessToken);
       if (
         cached &&
         typeof cached.exp === 'number' &&
@@ -110,8 +108,8 @@ export class MonoCloudBackendNodeClient extends MonoCloudOidcBackendClient {
       });
     }
 
-    if (this.cache && cacheKey && typeof claims.exp === 'number') {
-      await this.cache.set(cacheKey, claims, claims.exp);
+    if (this.cache && typeof claims.exp === 'number') {
+      await this.cache.set(accessToken, claims, claims.exp);
     }
 
     return claims;

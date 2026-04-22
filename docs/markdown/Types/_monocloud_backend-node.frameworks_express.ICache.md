@@ -60,7 +60,7 @@ Stores validated claims in the cache.
 
 | Parameter   | Type                                                                      | Description                                                      |
 | ----------- | ------------------------------------------------------------------------- | ---------------------------------------------------------------- |
-| `key`       | `string`                                                                  | The cache key (a SHA-256 hash of the access token).              |
+| `key`       | `string`                                                                  | The cache key (access token).                                    |
 | `claims`    | [`AccessTokenClaims`](/sdks/express-backend/api-reference/types/accesstokenclaims) | The validated access token claims to cache.                      |
 | `expiresAt` | `number`                                                                  | The token's expiration time as a Unix epoch timestamp (seconds). |
 
