@@ -1,5 +1,14 @@
 # @monocloud/backend-node
 
+## 0.1.2
+
+### Patch Changes
+
+- fdf0a05: - Rename 'user' to 'claims' in authenticated request types
+  - Removed `jti` claim from IdTokenClaims
+- Updated dependencies [fdf0a05]
+  - @monocloud/auth-core@0.1.9
+
 ## 0.1.1
 
 ### Patch Changes
