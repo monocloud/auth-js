@@ -9,16 +9,16 @@ framework: Express
 
 ## Call Signature
 
-> **protectApi**(`client`: [`MonoCloudBackendNodeClient`](/sdks/express-backend/api-reference/classes/monocloudbackendnodeclient), `requestOptions?`: [`ProtectApiRequestOptions`](/sdks/express-backend/api-reference/types/protectapirequestoptions)\<`Request`\<`ParamsDictionary`, `any`, `any`, `ParsedQs`, `Record`\<`string`, `any`\>\>\>): [`ProtectMiddleware`](/sdks/express-backend/api-reference/handler-types/protectmiddleware)
+> **protectApi**(`client`: [`MonoCloudBackendNodeClient`](/sdks/express-backend/api-reference/classes/monocloudbackendnodeclient), `options?`: [`ProtectApiRequestOptions`](/sdks/express-backend/api-reference/types/protectapirequestoptions)\<`Request`\<`ParamsDictionary`, `any`, `any`, `ParsedQs`, `Record`\<`string`, `any`\>\>\>): [`ProtectMiddleware`](/sdks/express-backend/api-reference/handler-types/protectmiddleware)
 
 Creates an Express middleware factory for protecting API routes using a pre-configured client.
 
 ### Parameters
 
-| Parameter         | Type                                                                                                                                                                                       | Description                                                                                                                     |
-| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------- |
-| `client`          | [`MonoCloudBackendNodeClient`](/sdks/express-backend/api-reference/classes/monocloudbackendnodeclient)                                                                                     | A pre-configured [MonoCloudBackendNodeClient](/sdks/express-backend/api-reference/classes/monocloudbackendnodeclient) instance. |
-| `requestOptions?` | [`ProtectApiRequestOptions`](/sdks/express-backend/api-reference/types/protectapirequestoptions)\<`Request`\<`ParamsDictionary`, `any`, `any`, `ParsedQs`, `Record`\<`string`, `any`\>\>\> | Options for extracting tokens and certificates from the request.                                                                |
+| Parameter  | Type                                                                                                                                                                                       | Description                                                                                                                     |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------- |
+| `client`   | [`MonoCloudBackendNodeClient`](/sdks/express-backend/api-reference/classes/monocloudbackendnodeclient)                                                                                     | A pre-configured [MonoCloudBackendNodeClient](/sdks/express-backend/api-reference/classes/monocloudbackendnodeclient) instance. |
+| `options?` | [`ProtectApiRequestOptions`](/sdks/express-backend/api-reference/types/protectapirequestoptions)\<`Request`\<`ParamsDictionary`, `any`, `any`, `ParsedQs`, `Record`\<`string`, `any`\>\>\> | Options for extracting tokens and certificates from the request.                                                                |
 
 ### Returns
 
@@ -26,18 +26,18 @@ Creates an Express middleware factory for protecting API routes using a pre-conf
 
 ## Call Signature
 
-> **protectApi**(`options?`: `Partial`\<[`ProtectExpressApiOptions`](/sdks/express-backend/api-reference/types/protectexpressapioptions)\>): [`ProtectMiddleware`](/sdks/express-backend/api-reference/handler-types/protectmiddleware)
+> **protectApi**(`options?`: [`ProtectApiRequestOptions`](/sdks/express-backend/api-reference/types/protectapirequestoptions)\<`Request`\<`ParamsDictionary`, `any`, `any`, `ParsedQs`, `Record`\<`string`, `any`\>\>\>): [`ProtectMiddleware`](/sdks/express-backend/api-reference/handler-types/protectmiddleware)
 
 Creates an Express middleware factory for protecting API routes.
 
 A new [MonoCloudBackendNodeClient](/sdks/express-backend/api-reference/classes/monocloudbackendnodeclient) is created from the provided options,
-or from environment variables if no options are specified.
+or from environment variables.
 
 ### Parameters
 
-| Parameter  | Type                                                                                                                       | Description                               |
-| ---------- | -------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------- |
-| `options?` | `Partial`\<[`ProtectExpressApiOptions`](/sdks/express-backend/api-reference/types/protectexpressapioptions)\> | Client configuration and request options. |
+| Parameter  | Type                                                                                                                                                                                       | Description                                                      |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------- |
+| `options?` | [`ProtectApiRequestOptions`](/sdks/express-backend/api-reference/types/protectapirequestoptions)\<`Request`\<`ParamsDictionary`, `any`, `any`, `ParsedQs`, `Record`\<`string`, `any`\>\>\> | Options for extracting tokens and certificates from the request. |
 
 ### Returns
 
