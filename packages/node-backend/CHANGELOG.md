@@ -1,5 +1,11 @@
 # @monocloud/backend-node
 
+## 0.1.3
+
+### Patch Changes
+
+- 36e1345: Removed node backend client options from Express and Fastify middlewares.
+
 ## 0.1.2
 
 ### Patch Changes
