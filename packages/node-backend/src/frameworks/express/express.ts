@@ -86,7 +86,7 @@ export function protectApi(
         }
 
         // eslint-disable-next-line no-param-reassign
-        (request as AuthenticatedExpressRequest).user =
+        (request as AuthenticatedExpressRequest).claims =
           await client.validateAccessToken(accessToken, {
             clientCertificate,
             validateCertificateBinding:

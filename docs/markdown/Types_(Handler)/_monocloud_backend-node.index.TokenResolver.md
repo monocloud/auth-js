@@ -6,7 +6,7 @@ category: Handler Types
 
 # Handler Type: TokenResolver
 
-> **TokenResolver**\<`T`\> = (`req`: `T`) => `Promise`\<`string`\>
+> **TokenResolver**\<`T`\> = (`req`: `T`) => `Promise`\<`string` \| `undefined`\>
 
 Callback that resolves an access token from the incoming request.
 
@@ -26,4 +26,4 @@ When provided, this takes precedence over the default `Authorization: Bearer` he
 
 ## Returns
 
-`Promise`\<`string`\>
+`Promise`\<`string` \| `undefined`\>

@@ -37,5 +37,5 @@ export type AuthenticatedFastifyRequest = FastifyRequest & {
   /**
    * Validated access token claims attached after successful token validation.
    */
-  user: AccessTokenClaims;
+  claims: AccessTokenClaims;
 };

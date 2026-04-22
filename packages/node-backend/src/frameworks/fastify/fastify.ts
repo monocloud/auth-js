@@ -87,7 +87,7 @@ export function protectApi(
         }
 
         // eslint-disable-next-line no-param-reassign
-        (request as AuthenticatedFastifyRequest).user =
+        (request as AuthenticatedFastifyRequest).claims =
           await client.validateAccessToken(accessToken, {
             clientCertificate,
             validateCertificateBinding:

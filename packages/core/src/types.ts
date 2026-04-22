@@ -752,11 +752,6 @@ export interface JwtClaims {
   nbf?: number;
 
   /**
-   * JWT ID (unique identifier for the token).
-   */
-  jti?: string;
-
-  /**
    * Additional custom or provider-specific claims.
    */
   [key: string]: unknown;
@@ -824,6 +819,11 @@ export interface AccessTokenClaims extends JwtClaims {
    * Client ID of the application the token was issued to.
    */
   client_id?: string;
+
+  /**
+   * JWT ID (unique identifier for the token).
+   */
+  jti?: string;
 }
 
 /**

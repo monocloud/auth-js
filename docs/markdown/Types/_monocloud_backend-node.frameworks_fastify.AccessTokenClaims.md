@@ -81,10 +81,6 @@ Issuer identifier - the authorization server that issued the token.
 
 JWT ID (unique identifier for the token).
 
-### Inherited from
-
-[`JwtClaims`](/sdks/fastify-backend/api-reference/types/jwtclaims).[`jti`](/sdks/fastify-backend/api-reference/types/jwtclaims#jti)
-
 ---
 
 ## nbf?

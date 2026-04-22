@@ -47,14 +47,6 @@ Issuer identifier - the authorization server that issued the token.
 
 ---
 
-## jti?
-
-> `optional` **jti**: `string`
-
-JWT ID (unique identifier for the token).
-
----
-
 ## nbf?
 
 > `optional` **nbf**: `number`

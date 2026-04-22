@@ -37,5 +37,5 @@ export type AuthenticatedExpressRequest = Request & {
   /**
    * Validated access token claims attached after successful token validation.
    */
-  user: AccessTokenClaims;
+  claims: AccessTokenClaims;
 };
