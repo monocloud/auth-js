@@ -1,8 +1,4 @@
-export type {
-  ProtectFastifyApiOptions,
-  ProtectHook,
-  AuthenticatedFastifyRequest,
-} from './types';
+export type { ProtectHook, AuthenticatedFastifyRequest } from './types';
 export type {
   ProtectApiRequestOptions,
   ClientCertificateResolver,

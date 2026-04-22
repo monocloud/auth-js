@@ -1,8 +1,4 @@
-export type {
-  ProtectExpressApiOptions,
-  ProtectMiddleware,
-  AuthenticatedExpressRequest,
-} from './types';
+export type { ProtectMiddleware, AuthenticatedExpressRequest } from './types';
 export type {
   ProtectApiRequestOptions,
   ClientCertificateResolver,

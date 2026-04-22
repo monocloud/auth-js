@@ -144,7 +144,7 @@ export interface ICache {
   /**
    * Stores validated claims in the cache.
    *
-   * @param key - The cache key (a SHA-256 hash of the access token).
+   * @param key - The cache key (access token).
    * @param claims - The validated access token claims to cache.
    * @param expiresAt - The token's expiration time as a Unix epoch timestamp (seconds).
    */
