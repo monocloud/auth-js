@@ -1,6 +1,6 @@
 {
   "name": "@monocloud/auth-node-core",
-  "version": "0.1.12",
+  "version": "0.1.13",
   "description": "MonoCloud NodeJS Authentication Core SDK",
   "keywords": [
     "monocloud",
