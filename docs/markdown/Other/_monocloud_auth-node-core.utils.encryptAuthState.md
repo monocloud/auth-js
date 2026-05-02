@@ -2,6 +2,7 @@
 rootSdk: Node.js Core
 title: "encryptAuthState"
 category: Other
+description: "Encrypts an AuthState object with a secret and optional time-to-live (TTL)."
 ---
 
 # encryptAuthState

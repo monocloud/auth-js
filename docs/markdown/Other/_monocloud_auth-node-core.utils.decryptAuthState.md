@@ -2,6 +2,7 @@
 rootSdk: Node.js Core
 title: "decryptAuthState"
 category: Other
+description: "Decrypts an encrypted AuthState."
 ---
 
 # decryptAuthState

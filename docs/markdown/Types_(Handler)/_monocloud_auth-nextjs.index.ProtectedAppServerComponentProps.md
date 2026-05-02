@@ -2,6 +2,7 @@
 rootSdk: Next.js
 title: "ProtectedAppServerComponentProps"
 category: Handler Types
+description: "Props injected into an App Router Server Component wrapped by protectPage()."
 ---
 
 # Handler Type: ProtectedAppServerComponentProps

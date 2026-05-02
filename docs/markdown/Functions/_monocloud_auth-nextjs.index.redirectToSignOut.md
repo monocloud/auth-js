@@ -2,6 +2,7 @@
 rootSdk: Next.js
 title: "redirectToSignOut"
 category: Functions
+description: "Redirects the user to the sign-out flow. This helper performs a server-side redirect to the configured sign-out route."
 ---
 
 # Function: redirectToSignOut

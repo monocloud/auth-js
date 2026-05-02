@@ -2,6 +2,7 @@
 rootSdk: Node.js
 title: "IdTokenClaims"
 category: Types
+description: "Standard OpenID Connect ID Token claims."
 ---
 
 # Type: IdTokenClaims

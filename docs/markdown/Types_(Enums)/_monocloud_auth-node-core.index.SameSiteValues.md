@@ -2,6 +2,7 @@
 rootSdk: Node.js Core
 title: "SameSiteValues"
 category: Enums
+description: "Allowed values for the cookie SameSite attribute."
 ---
 
 # Enum: SameSiteValues

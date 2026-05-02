@@ -2,6 +2,7 @@
 rootSdk: Next.js
 title: "ProtectedRouteMatcher"
 category: Types
+description: "Defines how routes are matched and protected by authentication and optional group-based authorization."
 ---
 
 # Type: ProtectedRouteMatcher

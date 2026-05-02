@@ -2,6 +2,7 @@
 rootSdk: Node.js Core
 title: "SignOutOptions"
 category: Types
+description: "Options used to customize the behavior of the sign-out handler."
 ---
 
 # Type: SignOutOptions

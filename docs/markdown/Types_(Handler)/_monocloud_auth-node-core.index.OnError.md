@@ -2,6 +2,7 @@
 rootSdk: Node.js Core
 title: "OnError"
 category: Handler Types
+description: "Defines a callback invoked when an unexpected error occurs during execution of authentication endpoints such as sign-in, callback, sign-out, or userinfo."
 ---
 
 # Handler Type: OnError

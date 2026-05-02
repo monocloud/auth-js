@@ -2,6 +2,7 @@
 rootSdk: Next.js
 title: "getSession"
 category: Functions
+description: "Retrieves the current user's session using the active server request context."
 ---
 
 # Function: getSession

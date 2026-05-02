@@ -2,6 +2,7 @@
 rootSdk: Next.js
 title: "protectPage"
 category: Functions
+description: "Restricts access to App Router server-rendered pages. Both behaviors can be customized via options."
 ---
 
 # Function: protectPage

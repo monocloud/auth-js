@@ -2,6 +2,7 @@
 rootSdk: Next.js
 title: "SignInProps"
 category: Types
+description: "Props for the <SignIn /> component."
 ---
 
 # Type: SignInProps

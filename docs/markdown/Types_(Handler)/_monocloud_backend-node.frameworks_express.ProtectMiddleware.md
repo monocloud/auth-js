@@ -3,6 +3,7 @@ rootSdk: Node.js Backend
 title: "ProtectMiddleware"
 category: Handler Types
 framework: Express
+description: "Factory function that returns an Express middleware for protecting API routes."
 ---
 
 # Handler Type: ProtectMiddleware

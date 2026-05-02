@@ -2,6 +2,7 @@
 rootSdk: Node.js Core
 title: "MonoCloudOidcClientOptions"
 category: Types
+description: "Configuration options used to initialize the MonoCloudOidcClient."
 ---
 
 # Type: MonoCloudOidcClientOptions

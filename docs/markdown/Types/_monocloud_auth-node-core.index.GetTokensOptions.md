@@ -2,6 +2,7 @@
 rootSdk: Node.js Core
 title: "GetTokensOptions"
 category: Types
+description: "Options used to control token retrieval and refresh behavior when calling getTokens()."
 ---
 
 # Type: GetTokensOptions

@@ -2,6 +2,7 @@
 rootSdk: Next.js
 title: "PageOnError"
 category: Handler Types
+description: "Handler invoked when an error occurs during execution of a Pages Router API endpoint."
 ---
 
 # Handler Type: PageOnError

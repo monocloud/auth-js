@@ -2,6 +2,7 @@
 rootSdk: Next.js
 title: "getTokens"
 category: Functions
+description: "Retrieves the current user's tokens using the active server request context."
 ---
 
 # Function: getTokens

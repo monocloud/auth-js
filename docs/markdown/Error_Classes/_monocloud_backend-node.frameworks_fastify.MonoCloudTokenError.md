@@ -3,6 +3,7 @@ rootSdk: Node.js Backend
 title: "MonoCloudTokenError"
 category: Error Classes
 framework: Fastify
+description: "Error thrown when a token operation fails."
 ---
 
 # Error Class: MonoCloudTokenError

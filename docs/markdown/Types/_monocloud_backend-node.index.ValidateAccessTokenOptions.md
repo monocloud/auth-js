@@ -2,6 +2,7 @@
 rootSdk: Node.js Backend
 title: "ValidateAccessTokenOptions"
 category: Types
+description: "Options for validating access tokens."
 ---
 
 # Type: ValidateAccessTokenOptions

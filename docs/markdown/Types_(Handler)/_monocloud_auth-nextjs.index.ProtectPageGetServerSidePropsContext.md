@@ -2,6 +2,7 @@
 rootSdk: Next.js
 title: "ProtectPageGetServerSidePropsContext"
 category: Handler Types
+description: "Next.js getServerSideProps context extended with the authenticated user when using protectPage()."
 ---
 
 # Handler Type: ProtectPageGetServerSidePropsContext

@@ -2,6 +2,7 @@
 rootSdk: Next.js
 title: "DisplayOptions"
 category: Enums
+description: "Supported OpenID Connect display parameter values."
 ---
 
 # Enum: DisplayOptions

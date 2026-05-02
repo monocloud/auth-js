@@ -3,6 +3,7 @@ rootSdk: Node.js Backend
 title: "IssuerMetadata"
 category: Types
 framework: Express
+description: "OpenID Connect Discovery metadata published by the authorization server."
 ---
 
 # Type: IssuerMetadata

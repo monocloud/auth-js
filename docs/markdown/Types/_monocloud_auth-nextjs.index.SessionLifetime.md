@@ -2,6 +2,7 @@
 rootSdk: Next.js
 title: "SessionLifetime"
 category: Types
+description: "Represents the lifetime metadata associated with a user session."
 ---
 
 # Type: SessionLifetime

@@ -2,6 +2,7 @@
 rootSdk: Next.js
 title: "ProtectApiPageOptions"
 category: Types
+description: "Options for configuring protectApi() in the Pages Router."
 ---
 
 # Type: ProtectApiPageOptions

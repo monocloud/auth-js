@@ -3,6 +3,7 @@ rootSdk: Node.js Backend
 title: "MonoCloudAuthBaseError"
 category: Error Classes
 framework: Express
+description: "Base class for all MonoCloud authentication errors."
 ---
 
 # Error Class: MonoCloudAuthBaseError

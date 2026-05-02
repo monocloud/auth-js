@@ -3,6 +3,7 @@ rootSdk: Node.js Backend
 title: "JwtClaims"
 category: Types
 framework: Express
+description: "Standard JWT claims shared between ID tokens and access tokens."
 ---
 
 # Type: JwtClaims

@@ -2,6 +2,7 @@
 rootSdk: Node.js Backend
 title: "MonoCloudBackendNodeClient"
 category: Classes
+description: "Backend client for validating access tokens in Node.js server applications."
 ---
 
 # Class: MonoCloudBackendNodeClient

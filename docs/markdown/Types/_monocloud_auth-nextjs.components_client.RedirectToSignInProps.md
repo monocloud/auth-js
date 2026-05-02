@@ -2,6 +2,7 @@
 rootSdk: Next.js
 title: "RedirectToSignInProps"
 category: Types
+description: "Props for the <RedirectToSignIn /> Component"
 ---
 
 # Type: RedirectToSignInProps

@@ -2,6 +2,7 @@
 rootSdk: Node.js Core
 title: "MonoCloudStateOptions"
 category: Types
+description: "Configuration options for authentication state handling."
 ---
 
 # Type: MonoCloudStateOptions

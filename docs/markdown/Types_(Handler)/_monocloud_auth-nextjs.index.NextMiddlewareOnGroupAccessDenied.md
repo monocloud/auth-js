@@ -2,6 +2,7 @@
 rootSdk: Next.js
 title: "NextMiddlewareOnGroupAccessDenied"
 category: Handler Types
+description: "Handler invoked when an authenticated user is denied access during Next.js middleware execution due to group authorization rules."
 ---
 
 # Handler Type: NextMiddlewareOnGroupAccessDenied

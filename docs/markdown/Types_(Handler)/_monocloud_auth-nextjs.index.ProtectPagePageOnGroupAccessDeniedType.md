@@ -2,6 +2,7 @@
 rootSdk: Next.js
 title: "ProtectPagePageOnGroupAccessDeniedType"
 category: Handler Types
+description: "Handler invoked when an authenticated user does not satisfy the required group restrictions while running a Pages Router getServerSideProps protected by protectPage()."
 ---
 
 # Handler Type: ProtectPagePageOnGroupAccessDeniedType

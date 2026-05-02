@@ -2,6 +2,7 @@
 rootSdk: Next.js
 title: "useAuth"
 category: Hooks
+description: "useAuth() is a client-side hook that provides access to the current authentication state. It can only be used inside Client Components."
 ---
 
 # Hook: useAuth

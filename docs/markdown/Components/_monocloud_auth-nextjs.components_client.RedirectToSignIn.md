@@ -2,6 +2,7 @@
 rootSdk: Next.js
 title: "RedirectToSignIn"
 category: Components
+description: "<RedirectToSignIn> is a client-side component that immediately redirects the user to the MonoCloud sign-in page when it is rendered. It does not render any UI."
 ---
 
 # Component: &lt;RedirectToSignIn&gt;

@@ -2,6 +2,7 @@
 rootSdk: Next.js
 title: "protectApi"
 category: Functions
+description: "Wraps an App Router API route handler and ensures that only authenticated (and optionally authorized) requests can access the route."
 ---
 
 # Function: protectApi

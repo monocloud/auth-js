@@ -2,6 +2,7 @@
 rootSdk: Next.js
 title: "AppRouterContext"
 category: Types
+description: "Context object provided to App Router route handlers."
 ---
 
 # Type: AppRouterContext

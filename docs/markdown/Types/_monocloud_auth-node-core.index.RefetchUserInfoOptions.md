@@ -2,6 +2,7 @@
 rootSdk: Node.js Core
 title: "RefetchUserInfoOptions"
 category: Types
+description: "Options used when refetching user profile data from the UserInfo endpoint."
 ---
 
 # Type: RefetchUserInfoOptions

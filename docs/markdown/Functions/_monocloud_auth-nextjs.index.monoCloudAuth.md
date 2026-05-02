@@ -2,6 +2,7 @@
 rootSdk: Next.js
 title: "monoCloudAuth"
 category: Functions
+description: "Creates a Next.js catch-all auth route handler (Pages Router and App Router) for the built-in routes (/signin, /callback, /userinfo, /signout)."
 ---
 
 # Function: monoCloudAuth

@@ -2,6 +2,7 @@
 rootSdk: Next.js
 title: "CustomProtectedRouteMatcher"
 category: Handler Types
+description: "Function used to dynamically determine whether a request should be treated as a protected route."
 ---
 
 # Handler Type: CustomProtectedRouteMatcher

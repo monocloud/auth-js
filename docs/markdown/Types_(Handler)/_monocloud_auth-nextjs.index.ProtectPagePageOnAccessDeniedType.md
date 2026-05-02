@@ -2,6 +2,7 @@
 rootSdk: Next.js
 title: "ProtectPagePageOnAccessDeniedType"
 category: Handler Types
+description: "Handler invoked when no valid session exists while running a Pages Router getServerSideProps protected by protectPage()."
 ---
 
 # Handler Type: ProtectPagePageOnAccessDeniedType

@@ -2,6 +2,7 @@
 rootSdk: Next.js
 title: "SignIn"
 category: Components
+description: "<SignIn> renders a link that initiates the MonoCloud sign-in flow."
 ---
 
 # Component: &lt;SignIn&gt;

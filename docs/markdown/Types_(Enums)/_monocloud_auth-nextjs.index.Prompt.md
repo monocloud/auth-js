@@ -2,6 +2,7 @@
 rootSdk: Next.js
 title: "Prompt"
 category: Enums
+description: "Supported OpenID Connect prompt parameter values."
 ---
 
 # Enum: Prompt

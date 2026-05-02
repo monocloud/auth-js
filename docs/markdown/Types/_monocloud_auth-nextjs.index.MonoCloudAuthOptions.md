@@ -2,6 +2,7 @@
 rootSdk: Next.js
 title: "MonoCloudAuthOptions"
 category: Types
+description: "Options for monoCloudAuth()."
 ---
 
 # Type: MonoCloudAuthOptions

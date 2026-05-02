@@ -2,6 +2,7 @@
 rootSdk: Next.js
 title: "PageRouterApiOnGroupAccessDeniedHandler"
 category: Handler Types
+description: "Handler function invoked when an authenticated user is denied access in a Pages Router API route due to group authorization restrictions."
 ---
 
 # Handler Type: PageRouterApiOnGroupAccessDeniedHandler

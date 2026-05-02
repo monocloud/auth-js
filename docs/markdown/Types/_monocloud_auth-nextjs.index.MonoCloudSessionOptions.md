@@ -2,6 +2,7 @@
 rootSdk: Next.js
 title: "MonoCloudSessionOptions"
 category: Types
+description: "Partial configuration options for authentication sessions."
 ---
 
 # Type: MonoCloudSessionOptions

@@ -2,6 +2,7 @@
 rootSdk: Next.js
 title: "ProtectPagePageOptions"
 category: Types
+description: "Options for configuring protectPage() in the Pages Router."
 ---
 
 # Type: ProtectPagePageOptions

@@ -2,6 +2,7 @@
 rootSdk: Next.js
 title: "SignUpProps"
 category: Types
+description: "Props for the <SignUp /> component."
 ---
 
 # Type: SignUpProps

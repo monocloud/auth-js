@@ -2,6 +2,7 @@
 rootSdk: Next.js
 title: "AuthorizationParams"
 category: Types
+description: "Parameters used to construct an OAuth 2.0 / OpenID Connect authorization request."
 ---
 
 # Type: AuthorizationParams

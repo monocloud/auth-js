@@ -2,6 +2,7 @@
 rootSdk: Node.js
 title: "JwtClaims"
 category: Types
+description: "Standard JWT claims shared between ID tokens and access tokens."
 ---
 
 # Type: JwtClaims

@@ -2,6 +2,7 @@
 rootSdk: Next.js
 title: "ProtectOptions"
 category: Types
+description: "Options for configuring protect()."
 ---
 
 # Type: ProtectOptions

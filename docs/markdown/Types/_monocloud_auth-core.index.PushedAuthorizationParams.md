@@ -2,6 +2,7 @@
 rootSdk: Node.js
 title: "PushedAuthorizationParams"
 category: Types
+description: "Parameters used when creating a Pushed Authorization Request (PAR)."
 ---
 
 # Type: PushedAuthorizationParams

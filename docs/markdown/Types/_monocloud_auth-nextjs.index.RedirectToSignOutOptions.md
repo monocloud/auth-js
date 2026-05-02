@@ -2,6 +2,7 @@
 rootSdk: Next.js
 title: "RedirectToSignOutOptions"
 category: Types
+description: "Options for redirectToSignOut()."
 ---
 
 # Type: RedirectToSignOutOptions

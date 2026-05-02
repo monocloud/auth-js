@@ -2,6 +2,7 @@
 rootSdk: Node.js Core
 title: "IMonoCloudCookieResponse"
 category: Types
+description: "Interface for setting cookies on an outgoing response."
 ---
 
 # Type: IMonoCloudCookieResponse

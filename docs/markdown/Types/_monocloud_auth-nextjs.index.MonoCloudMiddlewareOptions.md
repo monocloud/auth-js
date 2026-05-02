@@ -2,6 +2,7 @@
 rootSdk: Next.js
 title: "MonoCloudMiddlewareOptions"
 category: Types
+description: "Options for configuring authMiddleware()."
 ---
 
 # Type: MonoCloudMiddlewareOptions

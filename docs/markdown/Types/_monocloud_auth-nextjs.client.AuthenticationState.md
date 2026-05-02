@@ -2,6 +2,7 @@
 rootSdk: Next.js
 title: "AuthenticationState"
 category: Types
+description: "Authentication State returned by useAuth hook."
 ---
 
 # Type: AuthenticationState

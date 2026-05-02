@@ -2,6 +2,7 @@
 rootSdk: Node.js Backend
 title: "MonoCloudValidationError"
 category: Error Classes
+description: "Error thrown when validation fails."
 ---
 
 # Error Class: MonoCloudValidationError

@@ -3,6 +3,7 @@ rootSdk: Node.js Backend
 title: "ValidateJwtAccessTokenOptions"
 category: Types
 framework: Express
+description: "Options for validating a JWT access token."
 ---
 
 # Type: ValidateJwtAccessTokenOptions

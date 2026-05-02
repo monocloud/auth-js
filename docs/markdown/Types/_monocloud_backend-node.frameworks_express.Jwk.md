@@ -3,6 +3,7 @@ rootSdk: Node.js Backend
 title: "Jwk"
 category: Types
 framework: Express
+description: "Represents a JSON Web Key (JWK) as defined by RFC 7517."
 ---
 
 # Type: Jwk

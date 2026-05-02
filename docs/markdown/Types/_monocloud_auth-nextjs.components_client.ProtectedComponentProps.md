@@ -2,6 +2,7 @@
 rootSdk: Next.js
 title: "ProtectedComponentProps"
 category: Types
+description: "Props for the <Protected /> component."
 ---
 
 # Type: ProtectedComponentProps

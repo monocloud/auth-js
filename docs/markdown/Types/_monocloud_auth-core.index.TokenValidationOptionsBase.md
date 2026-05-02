@@ -2,6 +2,7 @@
 rootSdk: Node.js
 title: "TokenValidationOptionsBase"
 category: Types
+description: "Shared options for token validation and introspection."
 ---
 
 # Type: TokenValidationOptionsBase

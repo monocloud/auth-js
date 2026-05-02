@@ -2,6 +2,7 @@
 rootSdk: Node.js
 title: "IsUserInGroupOptions"
 category: Types
+description: "Options for configuring group membership validation on access tokens."
 ---
 
 # Type: IsUserInGroupOptions

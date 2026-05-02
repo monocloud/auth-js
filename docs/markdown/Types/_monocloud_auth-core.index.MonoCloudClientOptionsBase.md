@@ -2,6 +2,7 @@
 rootSdk: Node.js
 title: "MonoCloudClientOptionsBase"
 category: Types
+description: "Shared configuration options for MonoCloud OIDC clients. These options are common to both MonoCloudOidcClientOptions and MonoCloudOidcBackendClientOptions."
 ---
 
 # Type: MonoCloudClientOptionsBase

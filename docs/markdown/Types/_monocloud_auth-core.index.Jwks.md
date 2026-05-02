@@ -2,6 +2,7 @@
 rootSdk: Node.js
 title: "Jwks"
 category: Types
+description: "Represents a JSON Web Key Set (JWKS). A JWKS is a collection of public JSON Web Keys used to verify signatures of JSON Web Tokens (JWTs)."
 ---
 
 # Type: Jwks

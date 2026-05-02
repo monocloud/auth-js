@@ -2,6 +2,7 @@
 rootSdk: Node.js Core
 title: "EndSessionParameters"
 category: Types
+description: "Parameters used to construct an OpenID Connect end-session (sign-out) request."
 ---
 
 # Type: EndSessionParameters

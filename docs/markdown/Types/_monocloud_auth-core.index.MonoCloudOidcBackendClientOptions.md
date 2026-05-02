@@ -2,6 +2,7 @@
 rootSdk: Node.js
 title: "MonoCloudOidcBackendClientOptions"
 category: Types
+description: "Configuration options used to initialize the MonoCloudOidcBackendClient."
 ---
 
 # Type: MonoCloudOidcBackendClientOptions

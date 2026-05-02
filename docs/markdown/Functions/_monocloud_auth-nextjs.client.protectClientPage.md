@@ -2,6 +2,7 @@
 rootSdk: Next.js
 title: "protectClientPage"
 category: Functions
+description: "protectClientPage() wraps a client-rendered page component and ensures that only authenticated users can access it."
 ---
 
 # Function: protectClientPage

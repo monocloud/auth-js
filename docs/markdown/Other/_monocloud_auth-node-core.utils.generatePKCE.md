@@ -2,6 +2,7 @@
 rootSdk: Node.js Core
 title: "generatePKCE"
 category: Other
+description: "Generates a PKCE (Proof Key for Code Exchange) code verifier and code challenge."
 ---
 
 # generatePKCE

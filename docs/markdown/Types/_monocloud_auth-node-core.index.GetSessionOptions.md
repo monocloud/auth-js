@@ -2,6 +2,7 @@
 rootSdk: Node.js Core
 title: "GetSessionOptions"
 category: Types
+description: "Options used to control session retrieval behavior when calling getSession()."
 ---
 
 # Type: GetSessionOptions

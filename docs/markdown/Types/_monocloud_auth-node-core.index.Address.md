@@ -2,6 +2,7 @@
 rootSdk: Node.js Core
 title: "Address"
 category: Types
+description: "Represents a postal address as defined by the OpenID Connect standard address claim."
 ---
 
 # Type: Address

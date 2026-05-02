@@ -2,6 +2,7 @@
 rootSdk: Node.js
 title: "AccessToken"
 category: Types
+description: "Represents an OAuth 2.0 access token and its associated metadata."
 ---
 
 # Type: AccessToken

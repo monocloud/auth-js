@@ -2,6 +2,7 @@
 rootSdk: Node.js Core
 title: "MonoCloudOPError"
 category: Error Classes
+description: "OAuth error returned by the authorization server during an authentication or token request."
 ---
 
 # Error Class: MonoCloudOPError

@@ -2,6 +2,7 @@
 rootSdk: Next.js
 title: "ResponseModes"
 category: Enums
+description: "Supported OAuth 2.0 / OpenID Connect response_mode values."
 ---
 
 # Enum: ResponseModes

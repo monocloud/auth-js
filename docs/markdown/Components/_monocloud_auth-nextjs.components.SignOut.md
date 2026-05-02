@@ -2,6 +2,7 @@
 rootSdk: Next.js
 title: "SignOut"
 category: Components
+description: "<SignOut> renders a link that initiates the MonoCloud sign-out flow."
 ---
 
 # Component: &lt;SignOut&gt;

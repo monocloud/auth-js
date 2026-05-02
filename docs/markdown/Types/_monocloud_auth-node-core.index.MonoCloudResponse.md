@@ -2,6 +2,7 @@
 rootSdk: Node.js Core
 title: "MonoCloudResponse"
 category: Types
+description: "Represents an outgoing HTTP response with common helper methods."
 ---
 
 # Type: MonoCloudResponse

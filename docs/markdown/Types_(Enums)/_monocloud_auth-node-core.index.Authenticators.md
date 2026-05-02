@@ -2,6 +2,7 @@
 rootSdk: Node.js Core
 title: "Authenticators"
 category: Enums
+description: "Supported authentication methods and identity providers."
 ---
 
 # Enum: Authenticators

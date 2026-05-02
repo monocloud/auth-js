@@ -3,6 +3,7 @@ rootSdk: Node.js Backend
 title: "JwsHeaderParameters"
 category: Types
 framework: Fastify
+description: "Parameters contained in a JSON Web Signature (JWS) header."
 ---
 
 # Type: JwsHeaderParameters

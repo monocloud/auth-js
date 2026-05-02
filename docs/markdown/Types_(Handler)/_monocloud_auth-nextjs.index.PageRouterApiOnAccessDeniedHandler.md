@@ -2,6 +2,7 @@
 rootSdk: Next.js
 title: "PageRouterApiOnAccessDeniedHandler"
 category: Handler Types
+description: "Handler function invoked when a request is not authenticated in a Pages Router API route."
 ---
 
 # Handler Type: PageRouterApiOnAccessDeniedHandler

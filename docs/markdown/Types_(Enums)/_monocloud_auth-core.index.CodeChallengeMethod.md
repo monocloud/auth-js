@@ -2,6 +2,7 @@
 rootSdk: Node.js
 title: "CodeChallengeMethod"
 category: Enums
+description: "Supported PKCE (Proof Key for Code Exchange) code challenge methods."
 ---
 
 # Enum: CodeChallengeMethod
