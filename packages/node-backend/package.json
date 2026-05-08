@@ -77,16 +77,20 @@
   ],
   "scripts": {
     "build": "tsdown",
-    "lint:es": "eslint src",
+    "lint:es": "eslint src tests",
     "lint:ts": "tsc",
-    "lint": "pnpm run lint:es && pnpm run lint:ts"
+    "lint": "pnpm run lint:es && pnpm run lint:ts",
+    "test": "eslint tests && rimraf coverage && vitest && pnpm report",
+    "report": "nyc report --reporter text -t ./coverage --report-dir ./coverage && npx @monocloud/auth-test-utils check-coverage -s"
   },
   "dependencies": {
     "@monocloud/auth-core": "workspace:*",
     "joi": "18.0.2"
   },
   "devDependencies": {
+    "@monocloud/auth-test-utils": "workspace:*",
     "@types/express": "^5.0.6",
+    "eslint": "10.0.0",
     "fastify": "^5.8.5"
   },
   "peerDependencies": {
