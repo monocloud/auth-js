@@ -16,6 +16,7 @@
     "local:registry": "./scripts/publish-local.sh",
     "local:clean": "./scripts/clean-local.sh",
     "delete:all": "./scripts/delete-all.sh",
+    "claude-plugin:sync": "node ./scripts/sync-claude-plugin.mjs",
     "postinstall": "chmod +x ./scripts/delete-all.sh && chmod +x ./scripts/publish-local.sh && chmod +x ./scripts/clean-local.sh"
   },
   "devDependencies": {

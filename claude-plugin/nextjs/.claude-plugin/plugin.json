@@ -1,0 +1,19 @@
+{
+  "name": "monocloud-nextjs",
+  "version": "0.1.14",
+  "description": "Claude skill for the @monocloud/auth-nextjs SDK. Generated from .claude/skills/monocloud-nextjs/ via scripts/sync-claude-plugin.mjs.",
+  "author": {
+    "name": "MonoCloud",
+    "email": "support@monocloud.com",
+    "url": "https://www.monocloud.com"
+  },
+  "homepage": "https://github.com/monocloud/auth-js/tree/main/claude-plugin/nextjs",
+  "repository": "https://github.com/monocloud/auth-js",
+  "license": "MIT",
+  "keywords": [
+    "monocloud",
+    "auth",
+    "skill",
+    "nextjs"
+  ]
+}

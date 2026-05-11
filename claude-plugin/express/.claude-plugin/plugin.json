@@ -1,0 +1,19 @@
+{
+  "name": "monocloud-express",
+  "version": "0.1.3",
+  "description": "Claude skill for the @monocloud/backend-node/express adapter. Generated from .claude/skills/monocloud-express/ via scripts/sync-claude-plugin.mjs.",
+  "author": {
+    "name": "MonoCloud",
+    "email": "support@monocloud.com",
+    "url": "https://www.monocloud.com"
+  },
+  "homepage": "https://github.com/monocloud/auth-js/tree/main/claude-plugin/express",
+  "repository": "https://github.com/monocloud/auth-js",
+  "license": "MIT",
+  "keywords": [
+    "monocloud",
+    "auth",
+    "skill",
+    "express"
+  ]
+}
