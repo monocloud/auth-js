@@ -45,6 +45,59 @@ class MonoCloudNextClient {
 
 Use the class when you need multiple configurations, dependency injection, or explicit lifecycle control. Otherwise prefer the function exports (they share a lazily-initialized singleton).
 
+### Constructor Options
+
+`MonoCloudNextClient(options?: MonoCloudOptions)` forwards configuration to `@monocloud/auth-node-core`. Env vars cover the common scalar values, but constructor-only objects such as `session.store` must be passed in code.
+
+```ts
+interface MonoCloudOptions {
+  clientId?: string;
+  clientSecret?: string;
+  tenantDomain?: string;
+  cookieSecret?: string;
+  appUrl?: string;
+  routes?: Partial<MonoCloudRoutes>;
+  defaultAuthParams?: AuthorizationParams;
+  resources?: Indicator[];
+  clockSkew?: number;
+  responseTimeout?: number;
+  usePar?: boolean;
+  postLogoutRedirectUri?: string;
+  federatedSignOut?: boolean;
+  fetchUserInfo?: boolean;
+  refetchUserInfo?: boolean;
+  allowQueryParamOverrides?: boolean;
+  strictProfileSync?: boolean;
+  idTokenSigningAlg?: SecurityAlgorithms;
+  filteredIdTokenClaims?: string[];
+  jwksCacheDuration?: number;
+  metadataCacheDuration?: number;
+  session?: MonoCloudSessionOptions;
+  state?: MonoCloudStatePartialOptions;
+  debugger?: string;
+  userAgent?: string;
+  onBackChannelLogout?: OnBackChannelLogout;
+  onSetApplicationState?: OnSetApplicationState;
+  onSessionCreating?: OnSessionCreating;
+}
+
+interface MonoCloudSessionOptions {
+  cookie?: Partial<MonoCloudCookieOptions>;
+  sliding?: boolean;
+  duration?: number;
+  maximumDuration?: number;
+  store?: MonoCloudSessionStore;
+}
+
+interface MonoCloudSessionStore {
+  get(key: string): Promise<MonoCloudSession | undefined | null>;
+  set(key: string, data: MonoCloudSession, lifetime: SessionLifetime): Promise<void>;
+  delete(key: string): Promise<void>;
+}
+```
+
+`session.store` persists session data outside cookie-only storage, for example in Redis or a database. It is constructor-only; there is no `MONOCLOUD_AUTH_*` env var for a custom store.
+
 ### Errors (re-exported from `@monocloud/auth-node-core`)
 
 - `MonoCloudAuthBaseError`

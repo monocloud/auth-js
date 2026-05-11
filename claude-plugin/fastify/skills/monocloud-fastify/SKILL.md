@@ -113,6 +113,30 @@ interface ProtectOptions {
 - **groups**: OR by default; flip with `MONOCLOUD_BACKEND_GROUPS_MATCH_ALL=true` (or per-client `groupOptions.matchAll`). Claim name comes from `MONOCLOUD_BACKEND_GROUPS_CLAIM`.
 - **validateCertificateBinding**: enforces the `cnf.x5t#S256` confirmation claim against the client's TLS cert. Requires a `certificateResolver` (see "Advanced" below).
 
+## Client constructor options
+
+`new MonoCloudBackendNodeClient(options)` accepts the backend-node option shape. Use this when you need a shared client, non-env configuration, or a custom token-claims cache:
+
+```ts
+interface MonoCloudBackendNodeClientOptions {
+  tenantDomain: string;
+  audience: string;
+  clientId?: string;
+  clientSecret?: string;
+  clientAuthMethod?: ClientAuthMethod;
+  groupOptions?: { groupsClaim?: string; matchAll?: boolean };
+  clockSkew?: number;
+  clockTolerance?: number;
+  jwksCacheDuration?: number;
+  metadataCacheDuration?: number;
+  introspectJwtTokens?: boolean;
+  cache?: ICache;
+  fetcher?: (input: RequestInfo, init?: RequestInit) => Promise<Response>;
+}
+```
+
+`cache?: ICache` is constructor-only; pass it in code to cache validated access-token claims by raw token until the token expires.
+
 ## Default responses
 
 - No `Authorization: Bearer <token>` header (and no custom `tokenResolver`): `401 { "message": "unauthorized" }`

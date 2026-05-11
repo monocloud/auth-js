@@ -54,6 +54,42 @@ Optional:
 
 If you override a route (e.g. `MONOCLOUD_AUTH_SIGNIN_URL`), also set the matching `NEXT_PUBLIC_MONOCLOUD_AUTH_SIGNIN_URL` so client-side helpers (`useAuth`, `<SignIn>`, `<SignOut>`, etc.) discover it, AND update the redirect URI in the MonoCloud dashboard.
 
+## Programmatic client options
+
+The package-level helpers (`authMiddleware`, `getSession`, `protectPage`, etc.) use a singleton configured from `MONOCLOUD_AUTH_*` env vars. For constructor-only options, create and share a `MonoCloudNextClient` instance instead.
+
+`MonoCloudNextClient(options?: MonoCloudOptions)` accepts the node-core `MonoCloudOptions` shape. Notable nested session options:
+
+```ts
+interface MonoCloudSessionOptions {
+  cookie?: Partial<MonoCloudCookieOptions>;
+  sliding?: boolean;
+  duration?: number;
+  maximumDuration?: number;
+  store?: MonoCloudSessionStore;
+}
+
+interface MonoCloudSessionStore {
+  get(key: string): Promise<MonoCloudSession | undefined | null>;
+  set(key: string, data: MonoCloudSession, lifetime: SessionLifetime): Promise<void>;
+  delete(key: string): Promise<void>;
+}
+```
+
+Use `session.store` for Redis/database-backed sessions. There is no env var for a custom store; pass it in code:
+
+```ts
+import { MonoCloudNextClient } from '@monocloud/auth-nextjs';
+
+export const monoCloud = new MonoCloudNextClient({
+  session: {
+    store: redisSessionStore,
+  },
+});
+```
+
+Then use that shared client wherever the SDK helper is needed, for example `monoCloud.authMiddleware()` in `proxy.ts`/`middleware.ts` and `monoCloud.getSession()` in server code.
+
 ## Wiring the middleware/proxy
 
 The middleware/proxy handles auth routes (`/api/auth/signin`, `/callback`, `/userinfo`, `/signout`) internally **and** enforces route protection. You do not need a `[...monocloud]` catch-all when using the middleware.

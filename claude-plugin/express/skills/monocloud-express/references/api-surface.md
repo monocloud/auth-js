@@ -97,7 +97,7 @@ interface MonoCloudBackendNodeClientOptions {
   jwksCacheDuration?: number;          // seconds
   metadataCacheDuration?: number;      // seconds
   introspectJwtTokens?: boolean;       // default false — force introspection for JWTs
-  cache?: ICache;
+  cache?: ICache;                       // constructor-only token-claims cache
   fetcher?: (input: RequestInfo, init?: RequestInit) => Promise<Response>;
 }
 
@@ -235,3 +235,5 @@ JWKS and metadata caches have no default duration — the underlying core client
 | `MONOCLOUD_BACKEND_INTROSPECT_JWT_TOKENS` | `introspectJwtTokens` | Coerced to boolean |
 
 Constructor options always win over env vars.
+
+There is no env var for `cache`; pass an `ICache` implementation to the constructor when you need Redis, in-memory, or another shared token-claims cache.
