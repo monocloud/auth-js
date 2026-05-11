@@ -1,0 +1,19 @@
+{
+  "name": "monocloud-fastify",
+  "version": "0.1.3",
+  "description": "Claude skill for the @monocloud/backend-node/fastify adapter. Generated from .claude/skills/monocloud-fastify/ via scripts/sync-claude-plugin.mjs.",
+  "author": {
+    "name": "MonoCloud",
+    "email": "support@monocloud.com",
+    "url": "https://www.monocloud.com"
+  },
+  "homepage": "https://github.com/monocloud/auth-js/tree/main/claude-plugin/fastify",
+  "repository": "https://github.com/monocloud/auth-js",
+  "license": "MIT",
+  "keywords": [
+    "monocloud",
+    "auth",
+    "skill",
+    "fastify"
+  ]
+}
