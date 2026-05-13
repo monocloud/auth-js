@@ -1,5 +1,13 @@
 # @monocloud/backend-node
 
+## 0.1.4
+
+### Patch Changes
+
+- a0e6b6d: - Add comprehensive test suite for fastify framework and related utilities
+- Updated dependencies [0bfdf86]
+  - @monocloud/auth-core@0.1.10
+
 ## 0.1.3
 
 ### Patch Changes
