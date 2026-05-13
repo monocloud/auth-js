@@ -1,5 +1,13 @@
 # @monocloud/auth-node-core
 
+## 0.1.14
+
+### Patch Changes
+
+- 0bfdf86: Floor unix timestamps, return refreshed user from userinfo, correct scopes length check
+- Updated dependencies [0bfdf86]
+  - @monocloud/auth-core@0.1.10
+
 ## 0.1.13
 
 ### Patch Changes
