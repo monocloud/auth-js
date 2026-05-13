@@ -21,7 +21,7 @@ import {
 } from './test-helpers';
 
 const frozenTimeMs = 1330688329321;
-const frozenTimeSec = 1330688330;
+const frozenTimeSec = 1330688329;
 
 const getService = (
   params: MonoCloudOptions = {}
@@ -614,7 +614,7 @@ describe('Session Service', () => {
         // Travel 9 seconds and check the expiry
 
         const newFrozenTimeMs = frozenTimeMs + 9 * 1000;
-        const newFrozenTimeSec = Math.ceil(newFrozenTimeMs / 1000);
+        const newFrozenTimeSec = Math.floor(newFrozenTimeMs / 1000);
 
         travel(newFrozenTimeMs);
 
@@ -697,7 +697,7 @@ describe('Session Service', () => {
         // Travel 5 seconds and check the expiry
 
         const newFrozenTimeMs = frozenTimeMs + 5 * 1000;
-        const newFrozenTimeSec = Math.ceil(newFrozenTimeMs / 1000);
+        const newFrozenTimeSec = Math.floor(newFrozenTimeMs / 1000);
 
         travel(newFrozenTimeMs);
 
@@ -765,7 +765,7 @@ describe('Session Service', () => {
         // Travel 1 second
 
         const newFrozenTimeMs = frozenTimeMs + 1 * 1000;
-        const newFrozenTimeSec = Math.ceil(newFrozenTimeMs / 1000);
+        const newFrozenTimeSec = Math.floor(newFrozenTimeMs / 1000);
 
         travel(newFrozenTimeMs);
 
@@ -979,7 +979,7 @@ describe('Session Service', () => {
         // Travel 9 seconds and check the expiry
 
         const newFrozenTimeMs = frozenTimeMs + 9 * 1000;
-        const newFrozenTimeSec = Math.ceil(newFrozenTimeMs / 1000);
+        const newFrozenTimeSec = Math.floor(newFrozenTimeMs / 1000);
 
         travel(newFrozenTimeMs);
 
@@ -1289,7 +1289,7 @@ describe('Session Service', () => {
         // Travel 9 seconds and check the expiry
 
         const newFrozenTimeMs = frozenTimeMs + 9 * 1000;
-        const newFrozenTimeSec = Math.ceil(newFrozenTimeMs / 1000);
+        const newFrozenTimeSec = Math.floor(newFrozenTimeMs / 1000);
 
         travel(newFrozenTimeMs);
 
@@ -1387,7 +1387,7 @@ describe('Session Service', () => {
         // Travel 5 seconds and check the expiry
 
         const newFrozenTimeMs = frozenTimeMs + 5 * 1000;
-        const newFrozenTimeSec = Math.ceil(newFrozenTimeMs / 1000);
+        const newFrozenTimeSec = Math.floor(newFrozenTimeMs / 1000);
 
         travel(newFrozenTimeMs);
 
@@ -1469,7 +1469,7 @@ describe('Session Service', () => {
         // Travel 1 second
 
         const newFrozenTimeMs = frozenTimeMs + 1 * 1000;
-        const newFrozenTimeSec = Math.ceil(newFrozenTimeMs / 1000);
+        const newFrozenTimeSec = Math.floor(newFrozenTimeMs / 1000);
 
         travel(newFrozenTimeMs);
 
@@ -1724,7 +1724,7 @@ describe('Session Service', () => {
         // Travel 9 seconds and check the expiry
 
         const newFrozenTimeMs = frozenTimeMs + 9 * 1000;
-        const newFrozenTimeSec = Math.ceil(newFrozenTimeMs / 1000);
+        const newFrozenTimeSec = Math.floor(newFrozenTimeMs / 1000);
 
         travel(newFrozenTimeMs);
 
