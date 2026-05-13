@@ -224,7 +224,7 @@ export const arrayBufferToBase64 = (buffer: Uint8Array): string => {
  *
  * @returns The current timestamp.
  */
-export const now = (): number => Math.ceil(Date.now() / 1000);
+export const now = (): number => Math.floor(Date.now() / 1000);
 
 const SUPPORTED_JWS_ALGS: SecurityAlgorithms[] = [
   'RS256',

@@ -327,7 +327,7 @@ export class MonoCloudCoreClient {
       }
 
       /* v8 ignore next -- @preserve */
-      if (!params.scopes || params.scopes.length < 0) {
+      if (!params.scopes || params.scopes.length === 0) {
         throw new MonoCloudValidationError(
           'Scopes are required for signing in'
         );
@@ -631,7 +631,7 @@ export class MonoCloudCoreClient {
       }
 
       // Return the Claims
-      response.sendJson(session.user);
+      response.sendJson(newSession.user);
     } catch (error) {
       if (typeof userinfoOptions?.onError === 'function') {
         return userinfoOptions.onError(error as Error);
