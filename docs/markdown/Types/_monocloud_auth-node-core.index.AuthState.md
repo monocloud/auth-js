@@ -2,6 +2,7 @@
 rootSdk: Node.js Core
 title: "AuthState"
 category: Types
+description: "Represents the authentication transaction state stored between the authorization request and the callback."
 ---
 
 # Type: AuthState

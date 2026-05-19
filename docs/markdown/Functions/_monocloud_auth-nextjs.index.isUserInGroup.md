@@ -2,6 +2,7 @@
 rootSdk: Next.js
 title: "isUserInGroup"
 category: Functions
+description: "Checks whether the currently authenticated user is a member of any of the specified groups. The groups parameter accepts group identifiers (IDs or names)."
 ---
 
 # Function: isUserInGroup

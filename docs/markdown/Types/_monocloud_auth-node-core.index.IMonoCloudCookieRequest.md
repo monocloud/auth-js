@@ -2,6 +2,7 @@
 rootSdk: Node.js Core
 title: "IMonoCloudCookieRequest"
 category: Types
+description: "Interface for reading cookies from an incoming request."
 ---
 
 # Type: IMonoCloudCookieRequest

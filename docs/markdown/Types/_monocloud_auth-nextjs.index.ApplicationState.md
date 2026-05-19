@@ -2,6 +2,7 @@
 rootSdk: Next.js
 title: "ApplicationState"
 category: Types
+description: "Represents custom application state associated with an authentication request."
 ---
 
 # Type: ApplicationState

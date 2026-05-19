@@ -2,6 +2,7 @@
 rootSdk: Next.js
 title: "MonoCloudSessionStore"
 category: Types
+description: "Defines a storage adapter used to persist authentication sessions."
 ---
 
 # Type: MonoCloudSessionStore

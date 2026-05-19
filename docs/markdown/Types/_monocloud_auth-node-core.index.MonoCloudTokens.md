@@ -2,6 +2,7 @@
 rootSdk: Node.js Core
 title: "MonoCloudTokens"
 category: Types
+description: "Represents the token set associated with the currently authenticated user."
 ---
 
 # Type: MonoCloudTokens

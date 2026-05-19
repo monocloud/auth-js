@@ -2,6 +2,7 @@
 rootSdk: Node.js
 title: "MonoCloudOidcClient"
 category: Classes
+description: "MonoCloudOidcClient is a class in the MonoCloud Node.js SDK."
 ---
 
 # Class: MonoCloudOidcClient

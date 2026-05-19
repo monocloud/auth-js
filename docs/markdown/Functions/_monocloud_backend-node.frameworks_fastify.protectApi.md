@@ -3,6 +3,7 @@ rootSdk: Node.js Backend
 title: "protectApi"
 category: Functions
 framework: Fastify
+description: "Creates a Fastify onRequest hook factory for protecting API routes using a pre-configured client."
 ---
 
 # Function: protectApi

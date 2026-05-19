@@ -2,6 +2,7 @@
 rootSdk: Node.js Core
 title: "RefreshSessionOptions"
 category: Types
+description: "Options used when refreshing an existing MonoCloud session."
 ---
 
 # Type: RefreshSessionOptions

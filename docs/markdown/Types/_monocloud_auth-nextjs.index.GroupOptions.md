@@ -2,6 +2,7 @@
 rootSdk: Next.js
 title: "GroupOptions"
 category: Types
+description: "Configuration options that require the user to belong to specific groups."
 ---
 
 # Type: GroupOptions

@@ -2,6 +2,7 @@
 rootSdk: Next.js
 title: "ProtectedAppServerComponent"
 category: Handler Types
+description: "App Router Server Component wrapped by protectPage(). This component is only executed after authentication (and optional authorization) succeeds."
 ---
 
 # Handler Type: ProtectedAppServerComponent

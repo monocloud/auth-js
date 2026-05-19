@@ -3,6 +3,7 @@ rootSdk: Node.js Backend
 title: "MonoCloudOidcBackendClient"
 category: Classes
 framework: Express
+description: "MonoCloudOidcBackendClient is a class in the MonoCloud Node.js Backend SDK."
 ---
 
 # Class: MonoCloudOidcBackendClient

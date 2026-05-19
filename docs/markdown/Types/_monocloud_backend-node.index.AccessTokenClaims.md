@@ -2,6 +2,7 @@
 rootSdk: Node.js Backend
 title: "AccessTokenClaims"
 category: Types
+description: "Claims contained in a validated OAuth 2.0 access token."
 ---
 
 # Type: AccessTokenClaims

@@ -2,6 +2,7 @@
 rootSdk: Next.js
 title: "ExtraAuthParams"
 category: Types
+description: "A subset of authorization parameters supported by client-side helpers."
 ---
 
 # Type: ExtraAuthParams

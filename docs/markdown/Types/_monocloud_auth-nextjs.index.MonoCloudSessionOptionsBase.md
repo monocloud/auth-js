@@ -2,6 +2,7 @@
 rootSdk: Next.js
 title: "MonoCloudSessionOptionsBase"
 category: Types
+description: "Configuration options for authentication sessions. These options control how user sessions are created, persisted, and expired."
 ---
 
 # Type: MonoCloudSessionOptionsBase

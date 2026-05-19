@@ -2,6 +2,7 @@
 rootSdk: Node.js Core
 title: "CallbackOptions"
 category: Types
+description: "Options used to customize callback processing after authentication."
 ---
 
 # Type: CallbackOptions

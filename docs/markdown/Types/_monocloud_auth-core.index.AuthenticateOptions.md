@@ -2,6 +2,7 @@
 rootSdk: Node.js
 title: "AuthenticateOptions"
 category: Types
+description: "Options used when authenticating a user via the Authorization Code flow."
 ---
 
 # Type: AuthenticateOptions

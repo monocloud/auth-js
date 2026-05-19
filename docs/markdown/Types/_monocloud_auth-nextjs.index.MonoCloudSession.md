@@ -2,6 +2,7 @@
 rootSdk: Next.js
 title: "MonoCloudSession"
 category: Types
+description: "Represents an authenticated session, containing the authenticated user profile along with the tokens and metadata issued during authentication."
 ---
 
 # Type: MonoCloudSession

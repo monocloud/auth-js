@@ -2,6 +2,7 @@
 rootSdk: Next.js
 title: "OnError"
 category: Handler Types
+description: "Error handler invoked when an exception occurs during execution of the sign-in, callback, sign-out, or userinfo endpoints."
 ---
 
 # Handler Type: OnError

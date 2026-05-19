@@ -2,6 +2,7 @@
 rootSdk: Next.js
 title: "IsUserInGroupOptions"
 category: Types
+description: "Configuration options for evaluating user group membership."
 ---
 
 # Type: IsUserInGroupOptions

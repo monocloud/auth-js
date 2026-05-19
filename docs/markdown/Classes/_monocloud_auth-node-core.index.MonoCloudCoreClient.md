@@ -2,6 +2,7 @@
 rootSdk: Node.js Core
 title: "MonoCloudCoreClient"
 category: Classes
+description: "MonoCloudCoreClient is a class in the MonoCloud Node.js Core SDK."
 ---
 
 # Class: MonoCloudCoreClient

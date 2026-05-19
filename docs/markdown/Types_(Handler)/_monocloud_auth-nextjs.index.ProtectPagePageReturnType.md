@@ -2,6 +2,7 @@
 rootSdk: Next.js
 title: "ProtectPagePageReturnType"
 category: Handler Types
+description: "Return type produced by the protectPage() wrapper for the Pages Router."
 ---
 
 # Handler Type: ProtectPagePageReturnType

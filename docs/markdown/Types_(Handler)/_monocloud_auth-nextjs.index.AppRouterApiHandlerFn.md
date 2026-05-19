@@ -2,6 +2,7 @@
 rootSdk: Next.js
 title: "AppRouterApiHandlerFn"
 category: Handler Types
+description: "Represents a Next.js App Router Route Handler function."
 ---
 
 # Handler Type: AppRouterApiHandlerFn

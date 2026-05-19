@@ -2,6 +2,7 @@
 rootSdk: Node.js Backend
 title: "ProtectApiRequestOptions"
 category: Types
+description: "Options for customizing how access tokens and client certificates are extracted from incoming requests."
 ---
 
 # Type: ProtectApiRequestOptions

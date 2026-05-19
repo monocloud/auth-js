@@ -3,6 +3,7 @@ rootSdk: Node.js Backend
 title: "IsUserInGroupOptions"
 category: Types
 framework: Fastify
+description: "Options for configuring group membership validation on access tokens."
 ---
 
 # Type: IsUserInGroupOptions

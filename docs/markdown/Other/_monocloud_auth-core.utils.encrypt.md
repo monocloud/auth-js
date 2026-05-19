@@ -2,6 +2,7 @@
 rootSdk: Node.js
 title: "encrypt"
 category: Other
+description: "Encrypts a given string using a secret with AES-GCM."
 ---
 
 # encrypt

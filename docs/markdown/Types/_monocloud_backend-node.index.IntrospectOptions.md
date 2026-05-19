@@ -2,6 +2,7 @@
 rootSdk: Node.js Backend
 title: "IntrospectOptions"
 category: Types
+description: "Options for introspecting an opaque access token."
 ---
 
 # Type: IntrospectOptions

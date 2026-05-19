@@ -2,6 +2,7 @@
 rootSdk: Node.js
 title: "findToken"
 category: Other
+description: "Finds a specific access token in an array based on resource and scopes."
 ---
 
 # findToken

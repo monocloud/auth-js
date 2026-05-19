@@ -2,6 +2,7 @@
 rootSdk: Next.js
 title: "Indicator"
 category: Types
+description: "Represents an additional resource indicator that can be requested during token acquisition."
 ---
 
 # Type: Indicator

@@ -2,6 +2,7 @@
 rootSdk: Next.js
 title: "RedirectToSignInOptions"
 category: Types
+description: "Options for redirectToSignIn()."
 ---
 
 # Type: RedirectToSignInOptions

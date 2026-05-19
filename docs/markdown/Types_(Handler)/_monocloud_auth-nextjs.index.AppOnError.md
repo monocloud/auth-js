@@ -2,6 +2,7 @@
 rootSdk: Next.js
 title: "AppOnError"
 category: Handler Types
+description: "Handler invoked when an error occurs during execution of an App Router endpoint."
 ---
 
 # Handler Type: AppOnError

@@ -2,6 +2,7 @@
 rootSdk: Node.js Core
 title: "MonoCloudStatePartialOptions"
 category: Types
+description: "Partial configuration options for authentication state handling."
 ---
 
 # Type: MonoCloudStatePartialOptions

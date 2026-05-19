@@ -3,6 +3,7 @@ rootSdk: Node.js Backend
 title: "ProtectOptions"
 category: Types
 framework: Fastify
+description: "Options for protecting APIs."
 ---
 
 # Type: ProtectOptions

@@ -2,6 +2,7 @@
 rootSdk: Node.js
 title: "decryptSession"
 category: Other
+description: "Decrypts an encrypted MonoCloud session."
 ---
 
 # decryptSession

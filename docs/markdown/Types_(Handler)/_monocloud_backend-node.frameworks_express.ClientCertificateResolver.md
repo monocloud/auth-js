@@ -3,6 +3,7 @@ rootSdk: Node.js Backend
 title: "ClientCertificateResolver"
 category: Handler Types
 framework: Express
+description: "Callback that resolves a PEM-encoded client certificate from the incoming request."
 ---
 
 # Handler Type: ClientCertificateResolver

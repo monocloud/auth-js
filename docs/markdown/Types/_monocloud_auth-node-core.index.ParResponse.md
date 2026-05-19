@@ -2,6 +2,7 @@
 rootSdk: Node.js Core
 title: "ParResponse"
 category: Types
+description: "Response returned from the Pushed Authorization Request (PAR) endpoint."
 ---
 
 # Type: ParResponse

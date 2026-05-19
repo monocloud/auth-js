@@ -2,6 +2,7 @@
 rootSdk: Next.js
 title: "MonoCloudAuthBaseError"
 category: Error Classes
+description: "Base class for all MonoCloud authentication errors."
 ---
 
 # Error Class: MonoCloudAuthBaseError

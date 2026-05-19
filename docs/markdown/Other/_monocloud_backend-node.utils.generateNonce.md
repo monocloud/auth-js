@@ -2,6 +2,7 @@
 rootSdk: Node.js Backend
 title: "generateNonce"
 category: Other
+description: "Generates a random nonce string."
 ---
 
 # generateNonce

@@ -2,6 +2,7 @@
 rootSdk: Node.js
 title: "decrypt"
 category: Other
+description: "Decrypts an encrypted string using a secret with AES-GCM."
 ---
 
 # decrypt

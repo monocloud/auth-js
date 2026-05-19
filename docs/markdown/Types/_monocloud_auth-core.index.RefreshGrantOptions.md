@@ -2,6 +2,7 @@
 rootSdk: Node.js
 title: "RefreshGrantOptions"
 category: Types
+description: "Options used when exchanging a refresh token for a new access token."
 ---
 
 # Type: RefreshGrantOptions

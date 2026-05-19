@@ -2,6 +2,7 @@
 rootSdk: Node.js Core
 title: "OnBackChannelLogout"
 category: Handler Types
+description: "Callback invoked when a back-channel logout event is received from the authorization server."
 ---
 
 # Handler Type: OnBackChannelLogout

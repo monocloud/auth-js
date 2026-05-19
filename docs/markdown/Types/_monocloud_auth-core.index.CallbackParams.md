@@ -2,6 +2,7 @@
 rootSdk: Node.js
 title: "CallbackParams"
 category: Types
+description: "Parameters returned to the application after the authorization server redirects the user back to the callback URL."
 ---
 
 # Type: CallbackParams

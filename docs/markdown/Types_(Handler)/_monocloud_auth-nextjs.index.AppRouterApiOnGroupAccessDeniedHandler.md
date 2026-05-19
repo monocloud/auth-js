@@ -2,6 +2,7 @@
 rootSdk: Next.js
 title: "AppRouterApiOnGroupAccessDeniedHandler"
 category: Handler Types
+description: "Handler invoked when a request is denied because the authenticated user does not satisfy the required group restrictions in an App Router API route."
 ---
 
 # Handler Type: AppRouterApiOnGroupAccessDeniedHandler

@@ -2,6 +2,7 @@
 rootSdk: Next.js
 title: "MonoCloudOptions"
 category: Types
+description: "Configuration options used to initialize the SDK client. When both are provided, constructor options override environment variables."
 ---
 
 # Type: MonoCloudOptions

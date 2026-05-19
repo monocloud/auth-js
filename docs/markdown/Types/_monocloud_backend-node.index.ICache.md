@@ -2,6 +2,7 @@
 rootSdk: Node.js Backend
 title: "ICache"
 category: Types
+description: "Cache adapter for storing validated access token claims."
 ---
 
 # Type: ICache

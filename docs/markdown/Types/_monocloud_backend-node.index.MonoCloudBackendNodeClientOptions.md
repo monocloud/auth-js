@@ -2,6 +2,7 @@
 rootSdk: Node.js Backend
 title: "MonoCloudBackendNodeClientOptions"
 category: Types
+description: "Configuration options for the MonoCloudBackendNodeClient. When both are provided, constructor options override environment variables."
 ---
 
 # Type: MonoCloudBackendNodeClientOptions

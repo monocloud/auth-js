@@ -2,6 +2,7 @@
 rootSdk: Next.js
 title: "AppRouterApiOnAccessDeniedHandler"
 category: Handler Types
+description: "Handler invoked when a request is denied because the user is not authenticated in an App Router API route."
 ---
 
 # Handler Type: AppRouterApiOnAccessDeniedHandler

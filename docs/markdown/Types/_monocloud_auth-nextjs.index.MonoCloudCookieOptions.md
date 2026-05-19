@@ -2,6 +2,7 @@
 rootSdk: Next.js
 title: "MonoCloudCookieOptions"
 category: Types
+description: "Configuration options for authentication cookies."
 ---
 
 # Type: MonoCloudCookieOptions

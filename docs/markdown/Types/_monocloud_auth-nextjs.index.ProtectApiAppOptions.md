@@ -2,6 +2,7 @@
 rootSdk: Next.js
 title: "ProtectApiAppOptions"
 category: Types
+description: "Options for configuring protectApi() in the App Router."
 ---
 
 # Type: ProtectApiAppOptions

@@ -2,6 +2,7 @@
 rootSdk: Node.js Core
 title: "ResponseTypes"
 category: Enums
+description: "Supported OAuth 2.0 / OpenID Connect response types."
 ---
 
 # Enum: ResponseTypes

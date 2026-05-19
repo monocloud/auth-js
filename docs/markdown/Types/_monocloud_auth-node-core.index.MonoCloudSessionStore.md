@@ -2,6 +2,7 @@
 rootSdk: Node.js Core
 title: "MonoCloudSessionStore"
 category: Types
+description: "Defines a storage adapter used to persist authentication sessions."
 ---
 
 # Type: MonoCloudSessionStore

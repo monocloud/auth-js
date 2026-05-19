@@ -2,6 +2,7 @@
 rootSdk: Next.js
 title: "isAuthenticated"
 category: Functions
+description: "Checks whether the current user is authenticated using the active server request context."
 ---
 
 # Function: isAuthenticated

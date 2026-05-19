@@ -2,6 +2,7 @@
 rootSdk: Node.js Backend
 title: "isUserInGroup"
 category: Other
+description: "Checks if a user is a member of a specified group or groups."
 ---
 
 # isUserInGroup

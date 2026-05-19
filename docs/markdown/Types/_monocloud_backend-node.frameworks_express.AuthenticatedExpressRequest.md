@@ -3,6 +3,7 @@ rootSdk: Node.js Backend
 title: "AuthenticatedExpressRequest"
 category: Types
 framework: Express
+description: "An Express request augmented with validated access token claims."
 ---
 
 # Type: AuthenticatedExpressRequest

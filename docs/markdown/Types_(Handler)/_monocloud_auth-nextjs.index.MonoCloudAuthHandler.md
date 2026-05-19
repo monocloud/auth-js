@@ -2,6 +2,7 @@
 rootSdk: Next.js
 title: "MonoCloudAuthHandler"
 category: Handler Types
+description: "Handler function returned by monoCloudAuth()."
 ---
 
 # Handler Type: MonoCloudAuthHandler

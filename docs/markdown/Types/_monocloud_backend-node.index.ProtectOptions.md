@@ -2,6 +2,7 @@
 rootSdk: Node.js Backend
 title: "ProtectOptions"
 category: Types
+description: "Options for protecting APIs."
 ---
 
 # Type: ProtectOptions

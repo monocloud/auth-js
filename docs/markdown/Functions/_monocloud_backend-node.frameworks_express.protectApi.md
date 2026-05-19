@@ -3,6 +3,7 @@ rootSdk: Node.js Backend
 title: "protectApi"
 category: Functions
 framework: Express
+description: "Creates an Express middleware factory for protecting API routes using a pre-configured client."
 ---
 
 # Function: protectApi

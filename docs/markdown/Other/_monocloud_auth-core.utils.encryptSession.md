@@ -2,6 +2,7 @@
 rootSdk: Node.js
 title: "encryptSession"
 category: Other
+description: "Encrypts a MonoCloud session object with a secret and optional time-to-live (TTL)."
 ---
 
 # encryptSession

@@ -2,6 +2,7 @@
 rootSdk: Next.js
 title: "MonoCloudValidationError"
 category: Error Classes
+description: "Error thrown when validation fails."
 ---
 
 # Error Class: MonoCloudValidationError

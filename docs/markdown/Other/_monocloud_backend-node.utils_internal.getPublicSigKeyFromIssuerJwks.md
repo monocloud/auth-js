@@ -2,6 +2,7 @@
 rootSdk: Node.js Backend
 title: "getPublicSigKeyFromIssuerJwks"
 category: Other
+description: "Retrieves a public CryptoKey from a JWK set based on the JWS header."
 ---
 
 # getPublicSigKeyFromIssuerJwks

@@ -2,6 +2,7 @@
 rootSdk: Node.js Core
 title: "UserinfoResponse"
 category: Types
+description: "Represents the OpenID Connect UserInfo response."
 ---
 
 # Type: UserinfoResponse

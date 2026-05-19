@@ -2,6 +2,7 @@
 rootSdk: Node.js Core
 title: "UserInfoOptions"
 category: Types
+description: "Options used to customize the behavior of the userinfo handler."
 ---
 
 # Type: UserInfoOptions

@@ -3,6 +3,7 @@ rootSdk: Node.js Backend
 title: "AuthenticatedFastifyRequest"
 category: Types
 framework: Fastify
+description: "A Fastify request augmented with validated access token claims."
 ---
 
 # Type: AuthenticatedFastifyRequest

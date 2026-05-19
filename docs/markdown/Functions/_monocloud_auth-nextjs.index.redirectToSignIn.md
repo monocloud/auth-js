@@ -2,6 +2,7 @@
 rootSdk: Next.js
 title: "redirectToSignIn"
 category: Functions
+description: "Redirects the user to the sign-in flow. This helper performs a server-side redirect to the configured sign-in route."
 ---
 
 # Function: redirectToSignIn

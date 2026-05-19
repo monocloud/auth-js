@@ -2,6 +2,7 @@
 rootSdk: Next.js
 title: "SignOutProps"
 category: Types
+description: "Props for the <SignOut /> component."
 ---
 
 # Type: SignOutProps

@@ -2,6 +2,7 @@
 rootSdk: Node.js Core
 title: "MonoCloudSessionOptions"
 category: Types
+description: "Partial configuration options for authentication sessions."
 ---
 
 # Type: MonoCloudSessionOptions

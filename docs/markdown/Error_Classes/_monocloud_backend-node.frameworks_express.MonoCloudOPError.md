@@ -3,6 +3,7 @@ rootSdk: Node.js Backend
 title: "MonoCloudOPError"
 category: Error Classes
 framework: Express
+description: "OAuth error returned by the authorization server during an authentication or token request."
 ---
 
 # Error Class: MonoCloudOPError

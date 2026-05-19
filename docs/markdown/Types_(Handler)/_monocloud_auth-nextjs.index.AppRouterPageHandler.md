@@ -2,6 +2,7 @@
 rootSdk: Next.js
 title: "AppRouterPageHandler"
 category: Handler Types
+description: "Represents a Next.js App Router page component (Server Component)."
 ---
 
 # Handler Type: AppRouterPageHandler

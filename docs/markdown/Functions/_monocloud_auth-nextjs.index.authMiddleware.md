@@ -2,6 +2,7 @@
 rootSdk: Next.js
 title: "authMiddleware"
 category: Functions
+description: "Creates a Next.js authentication middleware that protects routes. By default, all routes matched by config.matcher are protected unless configured otherwise."
 ---
 
 # Function: authMiddleware

@@ -3,6 +3,7 @@ rootSdk: Node.js Backend
 title: "MonoCloudHttpError"
 category: Error Classes
 framework: Express
+description: "Error thrown when a request to the MonoCloud authorization server fails."
 ---
 
 # Error Class: MonoCloudHttpError

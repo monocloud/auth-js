@@ -2,6 +2,7 @@
 rootSdk: Node.js Core
 title: "MonoCloudRequest"
 category: Types
+description: "Represents a request object that includes cookie handling capabilities."
 ---
 
 # Type: MonoCloudRequest

@@ -2,6 +2,7 @@
 rootSdk: Node.js Backend
 title: "TokenResolver"
 category: Handler Types
+description: "Callback that resolves an access token from the incoming request. Bearer header extraction."
 ---
 
 # Handler Type: TokenResolver

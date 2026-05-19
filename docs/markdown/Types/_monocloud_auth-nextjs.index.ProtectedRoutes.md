@@ -2,6 +2,7 @@
 rootSdk: Next.js
 title: "ProtectedRoutes"
 category: Types
+description: "Configuration used to determine which routes require authentication."
 ---
 
 # Type: ProtectedRoutes

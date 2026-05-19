@@ -2,6 +2,7 @@
 rootSdk: Node.js Core
 title: "OnSetApplicationState"
 category: Handler Types
+description: "Callback invoked when the authentication state is being created before redirecting the user to the authorization server."
 ---
 
 # Handler Type: OnSetApplicationState

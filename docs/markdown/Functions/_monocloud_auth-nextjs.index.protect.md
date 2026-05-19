@@ -2,6 +2,7 @@
 rootSdk: Next.js
 title: "protect"
 category: Functions
+description: "Ensures the current user is authenticated. If not, redirects to the sign-in flow."
 ---
 
 # Function: protect

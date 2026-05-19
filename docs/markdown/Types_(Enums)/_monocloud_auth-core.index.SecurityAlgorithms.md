@@ -2,6 +2,7 @@
 rootSdk: Node.js
 title: "SecurityAlgorithms"
 category: Enums
+description: "Supported JSON Web Signature (JWS) algorithms used to sign tokens."
 ---
 
 # Enum: SecurityAlgorithms

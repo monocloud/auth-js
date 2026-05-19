@@ -3,6 +3,7 @@ rootSdk: Node.js Backend
 title: "ProtectHook"
 category: Handler Types
 framework: Fastify
+description: "Factory function that returns a Fastify onRequest hook for protecting API routes."
 ---
 
 # Handler Type: ProtectHook

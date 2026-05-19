@@ -2,6 +2,7 @@
 rootSdk: Node.js Core
 title: "parseCallbackParams"
 category: Other
+description: "Parses callback parameters from a URL, a URLSearchParams object, or a query string."
 ---
 
 # parseCallbackParams

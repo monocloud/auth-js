@@ -3,6 +3,7 @@ rootSdk: Node.js Backend
 title: "IntrospectOptions"
 category: Types
 framework: Fastify
+description: "Options for introspecting an opaque access token."
 ---
 
 # Type: IntrospectOptions

@@ -2,6 +2,7 @@
 rootSdk: Node.js Core
 title: "MonoCloudOptionsBase"
 category: Types
+description: "Core configuration options for the SDK."
 ---
 
 # Type: MonoCloudOptionsBase

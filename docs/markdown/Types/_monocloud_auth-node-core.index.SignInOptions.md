@@ -2,6 +2,7 @@
 rootSdk: Node.js Core
 title: "SignInOptions"
 category: Types
+description: "Options used to customize the sign-in flow."
 ---
 
 # Type: SignInOptions

@@ -3,6 +3,7 @@ rootSdk: Node.js Backend
 title: "MonoCloudOidcBackendClientOptions"
 category: Types
 framework: Fastify
+description: "Configuration options used to initialize the MonoCloudOidcBackendClient."
 ---
 
 # Type: MonoCloudOidcBackendClientOptions

@@ -2,6 +2,7 @@
 rootSdk: Next.js
 title: "MonoCloudNextClient"
 category: Classes
+description: "MonoCloudNextClient is the core SDK entry point for integrating MonoCloud authentication into a Next.js application."
 ---
 
 # Class: MonoCloudNextClient

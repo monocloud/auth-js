@@ -2,6 +2,7 @@
 rootSdk: Next.js
 title: "MonoCloudRoutes"
 category: Types
+description: "Route configuration for MonoCloud authentication handlers."
 ---
 
 # Type: MonoCloudRoutes

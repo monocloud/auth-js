@@ -2,6 +2,7 @@
 rootSdk: Node.js
 title: "Tokens"
 category: Types
+description: "OAuth 2.0 / OpenID Connect token endpoint response."
 ---
 
 # Type: Tokens

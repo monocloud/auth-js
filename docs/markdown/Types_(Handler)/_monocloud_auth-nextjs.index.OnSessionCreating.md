@@ -2,6 +2,7 @@
 rootSdk: Next.js
 title: "OnSessionCreating"
 category: Handler Types
+description: "Callback invoked before a session is created or updated. Use this hook to modify or enrich the session before it is persisted."
 ---
 
 # Handler Type: OnSessionCreating

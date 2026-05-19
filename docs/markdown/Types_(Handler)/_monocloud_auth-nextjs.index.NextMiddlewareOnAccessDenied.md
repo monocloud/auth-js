@@ -2,6 +2,7 @@
 rootSdk: Next.js
 title: "NextMiddlewareOnAccessDenied"
 category: Handler Types
+description: "Handler invoked when access is denied during Next.js middleware execution."
 ---
 
 # Handler Type: NextMiddlewareOnAccessDenied

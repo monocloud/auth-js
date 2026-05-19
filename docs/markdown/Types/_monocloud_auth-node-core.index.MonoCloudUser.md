@@ -2,6 +2,7 @@
 rootSdk: Node.js Core
 title: "MonoCloudUser"
 category: Types
+description: "Represents the authenticated user stored in a MonoCloud session."
 ---
 
 # Type: MonoCloudUser

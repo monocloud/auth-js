@@ -2,6 +2,7 @@
 rootSdk: Node.js
 title: "OnSessionCreating"
 category: Handler Types
+description: "Callback invoked before a session is created or updated."
 ---
 
 # Handler Type: OnSessionCreating

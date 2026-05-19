@@ -3,6 +3,7 @@ rootSdk: Node.js Backend
 title: "IssuerMetadata"
 category: Types
 framework: Fastify
+description: "OpenID Connect Discovery metadata published by the authorization server."
 ---
 
 # Type: IssuerMetadata
