@@ -11,12 +11,13 @@ jobs:
     deploy:
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v4
+            - uses: actions/checkout@v5
 
             - name: Upload Pages
-              uses: actions/upload-pages-artifact@v3
+              uses: actions/upload-pages-artifact@v5
               with:
                   path: "./docs/html"
+                  include-hidden-files: true
 
             - name: Deploy to GitHub Pages
-              uses: actions/deploy-pages@v4
+              uses: actions/deploy-pages@v5
