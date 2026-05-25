@@ -1,5 +1,11 @@
 # @monocloud/auth-core
 
+## 0.1.11
+
+### Patch Changes
+
+- d4a07a0: Update dependency package versions
+
 ## 0.1.10
 
 ### Patch Changes
