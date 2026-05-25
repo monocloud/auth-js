@@ -2,8 +2,8 @@ name: Release
 run-name: >-
   ${{
     github.event_name == 'issue_comment'
-      && format('[Snapshot] Release by {0}', github.actor)
-    || format('[Production] Release from {0}', github.ref_name)
+      && format('[Snapshot] {0}', github.event.issue.title)
+    || format('[Release] {0}', github.event.head_commit.message)
   }}
 
 on:
