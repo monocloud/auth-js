@@ -11,7 +11,7 @@ on:
     branches:
       - main
     paths:
-      - '.changeset/**'
+      - ".changeset/**"
   issue_comment:
     types: [created]
 
@@ -55,8 +55,8 @@ jobs:
       - name: Create Release PR
         uses: changesets/action@v1
         with:
-          commit: 'Version Packages'
-          title: 'Version Packages'
+          commit: "Version Packages"
+          title: "Version Packages"
           version: pnpm changeset:version
           publish: pnpm changeset:publish
         env:
@@ -74,21 +74,21 @@ jobs:
       issues: write
 
     steps:
-      - name: Limit to MonoCloud org members
+      - name: Limit to users with write access
         uses: actions/github-script@v8
         with:
-          github-token: ${{ secrets.BOT_TOKEN }}
           script: |
             try {
-              const { data } = await github.rest.orgs.getMembershipForUser({
-                org: 'monocloud',
+              const { data } = await github.rest.repos.getCollaboratorPermissionLevel({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
                 username: context.actor,
               });
-              if (data.state !== 'active') {
-                core.setFailed(`@${context.actor} is not an active member of the monocloud organization`);
+              if (!['admin', 'write', 'maintain'].includes(data.permission)) {
+                core.setFailed(`@${context.actor} lacks write access to this repository`);
               }
             } catch (e) {
-              core.setFailed(`@${context.actor} is not a member of the monocloud organization`);
+              core.setFailed(`@${context.actor} lacks write access to this repository`);
             }
 
       - name: Get PR Info
