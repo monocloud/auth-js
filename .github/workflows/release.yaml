@@ -72,6 +72,7 @@ jobs:
       contents: read
       id-token: write
       issues: write
+      pull-requests: write
 
     steps:
       - name: Limit to users with write access
