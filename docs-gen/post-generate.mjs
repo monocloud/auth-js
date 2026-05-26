@@ -72,7 +72,13 @@ async function main() {
   console.log('✅ Post-processing complete.');
 }
 
-function rewriteLinks(content, sourceFileDir, fileIndex, sourceFramework, frameworkIndex) {
+function rewriteLinks(
+  content,
+  sourceFileDir,
+  fileIndex,
+  sourceFramework,
+  frameworkIndex
+) {
   const linkRegex = /\[([^\]]+)\]\((?:<([^>]+)>|([^)]+))\)/g;
 
   return content.replace(
@@ -153,6 +159,30 @@ async function processFile(filePath, fileIndex, frameworkIndex) {
     hasChanges = true;
   }
 
+  const stripped = content
+    .replace(/^(#{1,6}\s+\S+)\?\s*$/gm, '$1')
+    .replace(/\*\*([^*\s]+)\?\*\*(?=:)/g, '**$1**');
+  if (stripped !== content) {
+    content = stripped;
+    hasChanges = true;
+  }
+
+  const unionTransformed = content.replace(
+    /\n(#{2,6})\s+Union Members\b([\s\S]*?)(?=\n##\s|$)/g,
+    (_, hashes, body) => {
+      const transformed = body
+        .replace(/\n#{3,6}\s+Type Literal\s*\n/g, '\n')
+        .replace(/\n---\n/g, '\n')
+        .replace(/^(\\\{[^\n]*\\\})\s*$/gm, '> $1\n')
+        .replace(/^(`[^`\n]+`)\s*$/gm, '> $1\n');
+      return `\n${hashes} Type Declaration${transformed}`;
+    }
+  );
+  if (unionTransformed !== content) {
+    content = unionTransformed;
+    hasChanges = true;
+  }
+
   const propsLinkRegex =
     /(#{2,})\s+Parameters[\s\S]*?\|\s*`props`\s*\|\s*\[.*?\]\((.*?)\)/;
   const match = content.match(propsLinkRegex);
@@ -166,7 +196,13 @@ async function processFile(filePath, fileIndex, frameworkIndex) {
       let typeFileContent = fs.readFileSync(typeFilePath, 'utf-8');
 
       const typeFileDir = path.dirname(typeFilePath);
-      typeFileContent = rewriteLinks(typeFileContent, typeFileDir, fileIndex, sourceFramework, frameworkIndex);
+      typeFileContent = rewriteLinks(
+        typeFileContent,
+        typeFileDir,
+        fileIndex,
+        sourceFramework,
+        frameworkIndex
+      );
 
       typeFileContent = typeFileContent.replace(/<a id="[^"]*"><\/a>\s*/g, '');
 
@@ -185,7 +221,13 @@ async function processFile(filePath, fileIndex, frameworkIndex) {
     }
   }
 
-  const newContent = rewriteLinks(content, fileDir, fileIndex, sourceFramework, frameworkIndex);
+  const newContent = rewriteLinks(
+    content,
+    fileDir,
+    fileIndex,
+    sourceFramework,
+    frameworkIndex
+  );
 
   if (newContent !== content) {
     content = newContent;

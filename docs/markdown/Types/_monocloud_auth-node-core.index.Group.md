@@ -13,15 +13,16 @@ Represents a user group included in the authenticated session.
 
 ## Type Declaration
 
-\{ `id`: `string`; `name`: `string`; \}
+> \{ `id`: `string`; `name`: `string`; \}
+
+Structured group representation.
 
 | Name   | Type     | Description       |
 | ------ | -------- | ----------------- |
 | `id`   | `string` | Group identifier. |
 | `name` | `string` | Group name.       |
 
-Structured group representation.
 
-`string`
+> `string`
 
 Group identifier or group name.

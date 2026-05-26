@@ -16,7 +16,7 @@ Claims contained in a validated OAuth 2.0 access token.
 
 ## Indexable
 
-\[`key`: `string`\]: `unknown`
+> \[`key`: `string`\]: `unknown`
 
 Additional custom or provider-specific claims.
 
@@ -32,8 +32,7 @@ Intended audience(s) of the token.
 
 ---
 
-## client_id?
-
+## client_id
 > `optional` **client_id**: `string`
 
 Client ID of the application the token was issued to.
@@ -76,16 +75,14 @@ Issuer identifier - the authorization server that issued the token.
 
 ---
 
-## jti?
-
+## jti
 > `optional` **jti**: `string`
 
 JWT ID (unique identifier for the token).
 
 ---
 
-## nbf?
-
+## nbf
 > `optional` **nbf**: `number`
 
 Not-before time (Unix epoch seconds).
@@ -96,8 +93,7 @@ Not-before time (Unix epoch seconds).
 
 ---
 
-## scope?
-
+## scope
 > `optional` **scope**: `string`
 
 OAuth scope associated with the token.

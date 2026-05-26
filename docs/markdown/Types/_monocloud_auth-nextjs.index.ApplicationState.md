@@ -17,4 +17,4 @@ This object is populated via `onSetApplicationState` and is persisted through th
 
 ## Indexable
 
-\[`key`: `string`\]: `any`
+> \[`key`: `string`\]: `any`

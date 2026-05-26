@@ -11,7 +11,7 @@ Standard JWT claims shared between ID tokens and access tokens.
 
 ## Indexable
 
-\[`key`: `string`\]: `unknown`
+> \[`key`: `string`\]: `unknown`
 
 Additional custom or provider-specific claims.
 

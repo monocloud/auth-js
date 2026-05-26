@@ -11,7 +11,7 @@ Represents a postal address as defined by the OpenID Connect standard `address` 
 
 ## Indexable
 
-\[`key`: `string`\]: `unknown`
+> \[`key`: `string`\]: `unknown`
 
 Additional provider-specific address fields.
 

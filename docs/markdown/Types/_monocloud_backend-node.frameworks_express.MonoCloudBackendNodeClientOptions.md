@@ -70,16 +70,14 @@ The expected audience URI for access token validation (e.g. `https://api.example
 
 ---
 
-## cache?
-
+## cache
 > `optional` **cache**: [`ICache`](/sdks/express-backend/api-reference/types/icache)
 
 Optional cache implementation for storing validated access token claims.
 
 ---
 
-## clientAuthMethod?
-
+## clientAuthMethod
 > `optional` **clientAuthMethod**: [`ClientAuthMethod`](/sdks/express-backend/api-reference/enums/clientauthmethod)
 
 Client authentication method used when communicating with the token endpoint.
@@ -96,8 +94,7 @@ Client authentication method used when communicating with the token endpoint.
 
 ---
 
-## clientId?
-
+## clientId
 > `optional` **clientId**: `string`
 
 Client identifier of the application registered in MonoCloud.
@@ -108,8 +105,7 @@ Client identifier of the application registered in MonoCloud.
 
 ---
 
-## clientSecret?
-
+## clientSecret
 > `optional` **clientSecret**: `string` \| [`Jwk`](/sdks/express-backend/api-reference/types/jwk)
 
 Client secret or key material used for client authentication.
@@ -124,8 +120,7 @@ To use a different algorithm, provide a symmetric JSON Web Key (JWK) (`kty: "oct
 
 ---
 
-## clockSkew?
-
+## clockSkew
 > `optional` **clockSkew**: `number`
 
 Number of seconds to adjust the current time to account for clock differences.
@@ -142,8 +137,7 @@ Number of seconds to adjust the current time to account for clock differences.
 
 ---
 
-## clockTolerance?
-
+## clockTolerance
 > `optional` **clockTolerance**: `number`
 
 Additional time tolerance in seconds for time-based claim validation.
@@ -160,8 +154,7 @@ Additional time tolerance in seconds for time-based claim validation.
 
 ---
 
-## fetcher()?
-
+## fetcher
 > `optional` **fetcher**: \{(`input`: `URL` \| `RequestInfo`, `init?`: `RequestInit`): `Promise`\<`Response`\>; (`input`: `string` \| `URL` \| `Request`, `init?`: `RequestInit`): `Promise`\<`Response`\>; \}
 
 Optional custom `fetch` implementation used for network requests.
@@ -206,8 +199,7 @@ Optional custom `fetch` implementation used for network requests.
 
 ---
 
-## groupOptions?
-
+## groupOptions
 > `optional` **groupOptions**: [`IsUserInGroupOptions`](/sdks/express-backend/api-reference/types/isuseringroupoptions)
 
 Options for group membership validation applied to all token validations performed by this client.
@@ -218,8 +210,7 @@ Options for group membership validation applied to all token validations perform
 
 ---
 
-## introspectJwtTokens?
-
+## introspectJwtTokens
 > `optional` **introspectJwtTokens**: `boolean`
 
 When `true`, JWT access tokens are introspected instead of locally validated.
@@ -234,8 +225,7 @@ false;
 
 ---
 
-## jwksCacheDuration?
-
+## jwksCacheDuration
 > `optional` **jwksCacheDuration**: `number`
 
 Duration (in seconds) to cache the JSON Web Key Set (JWKS) retrieved from the authorization server.
@@ -252,8 +242,7 @@ Duration (in seconds) to cache the JSON Web Key Set (JWKS) retrieved from the au
 
 ---
 
-## metadataCacheDuration?
-
+## metadataCacheDuration
 > `optional` **metadataCacheDuration**: `number`
 
 Duration (in seconds) to cache OpenID Connect discovery metadata.

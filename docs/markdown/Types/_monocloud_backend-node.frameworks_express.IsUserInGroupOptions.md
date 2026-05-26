@@ -10,8 +10,7 @@ description: "Options for configuring group membership validation on access toke
 
 Options for configuring group membership validation on access tokens.
 
-## groupsClaim?
-
+## groupsClaim
 > `optional` **groupsClaim**: `string`
 
 The claim name in the token that contains group memberships.
@@ -24,8 +23,7 @@ The claim name in the token that contains group memberships.
 
 ---
 
-## matchAll?
-
+## matchAll
 > `optional` **matchAll**: `boolean`
 
 When `true`, requires the token to contain all specified groups.

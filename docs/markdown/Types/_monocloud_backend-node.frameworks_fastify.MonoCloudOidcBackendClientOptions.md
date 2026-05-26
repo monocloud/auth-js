@@ -14,8 +14,7 @@ Configuration options used to initialize the MonoCloudOidcBackendClient.
 
 - [`MonoCloudClientOptionsBase`](/sdks/nodejs/api-reference/types/monocloudclientoptionsbase)
 
-## clientAuthMethod?
-
+## clientAuthMethod
 > `optional` **clientAuthMethod**: [`ClientAuthMethod`](/sdks/fastify-backend/api-reference/enums/clientauthmethod)
 
 Client authentication method used when communicating with the token endpoint.
@@ -32,16 +31,14 @@ Client authentication method used when communicating with the token endpoint.
 
 ---
 
-## clientId?
-
+## clientId
 > `optional` **clientId**: `string`
 
 Client identifier of the application registered in MonoCloud.
 
 ---
 
-## clientSecret?
-
+## clientSecret
 > `optional` **clientSecret**: `string` \| [`Jwk`](/sdks/fastify-backend/api-reference/types/jwk)
 
 Client secret or key material used for client authentication.
@@ -56,8 +53,7 @@ To use a different algorithm, provide a symmetric JSON Web Key (JWK) (`kty: "oct
 
 ---
 
-## clockSkew?
-
+## clockSkew
 > `optional` **clockSkew**: `number`
 
 Number of seconds to adjust the current time to account for clock differences.
@@ -70,8 +66,7 @@ Number of seconds to adjust the current time to account for clock differences.
 
 ---
 
-## clockTolerance?
-
+## clockTolerance
 > `optional` **clockTolerance**: `number`
 
 Additional time tolerance in seconds for time-based claim validation.
@@ -84,8 +79,7 @@ Additional time tolerance in seconds for time-based claim validation.
 
 ---
 
-## fetcher()?
-
+## fetcher
 > `optional` **fetcher**: \{(`input`: `URL` \| `RequestInfo`, `init?`: `RequestInit`): `Promise`\<`Response`\>; (`input`: `string` \| `URL` \| `Request`, `init?`: `RequestInit`): `Promise`\<`Response`\>; \}
 
 Optional custom `fetch` implementation used for network requests.
@@ -130,16 +124,14 @@ Optional custom `fetch` implementation used for network requests.
 
 ---
 
-## groupOptions?
-
+## groupOptions
 > `optional` **groupOptions**: [`IsUserInGroupOptions`](/sdks/fastify-backend/api-reference/types/isuseringroupoptions)
 
 Options for group membership validation applied to all token validations performed by this client.
 
 ---
 
-## jwksCacheDuration?
-
+## jwksCacheDuration
 > `optional` **jwksCacheDuration**: `number`
 
 Duration (in seconds) to cache the JSON Web Key Set (JWKS) retrieved from the authorization server.
@@ -156,8 +148,7 @@ Duration (in seconds) to cache the JSON Web Key Set (JWKS) retrieved from the au
 
 ---
 
-## metadataCacheDuration?
-
+## metadataCacheDuration
 > `optional` **metadataCacheDuration**: `number`
 
 Duration (in seconds) to cache OpenID Connect discovery metadata.

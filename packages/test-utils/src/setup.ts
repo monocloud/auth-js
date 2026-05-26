@@ -9,4 +9,5 @@ afterEach(() => {
   vi.clearAllMocks();
   vi.restoreAllMocks();
   vi.resetModules();
+  vi.resetAllMocks();
 });

@@ -130,8 +130,7 @@ JSON Web Key Set (JWKS) endpoint used to obtain signing keys.
 
 ---
 
-## pushed_authorization_request_endpoint?
-
+## pushed_authorization_request_endpoint
 > `optional` **pushed_authorization_request_endpoint**: `string`
 
 Pushed Authorization Request (PAR) endpoint.

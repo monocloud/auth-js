@@ -15,7 +15,7 @@ Represents the authenticated user stored in a MonoCloud session.
 
 ## Indexable
 
-\[`key`: `string`\]: `unknown`
+> \[`key`: `string`\]: `unknown`
 
 Additional provider-specific claims.
 

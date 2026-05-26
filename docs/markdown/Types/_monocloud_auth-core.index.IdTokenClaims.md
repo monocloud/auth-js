@@ -15,7 +15,7 @@ Standard OpenID Connect ID Token claims.
 
 ## Indexable
 
-\[`key`: `string`\]: `unknown`
+> \[`key`: `string`\]: `unknown`
 
 Additional provider-specific claims.
 

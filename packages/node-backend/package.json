@@ -81,7 +81,7 @@
     "lint:ts": "tsc",
     "lint": "pnpm run lint:es && pnpm run lint:ts",
     "test": "eslint tests && rimraf coverage && vitest && pnpm report",
-    "report": "nyc report --reporter text -t ./coverage --report-dir ./coverage && npx @monocloud/auth-test-utils check-coverage -s"
+    "report": "nyc report --reporter json-summary --reporter html --reporter text -t ./coverage --report-dir ./coverage/summary && npx @monocloud/auth-test-utils check-coverage"
   },
   "dependencies": {
     "@monocloud/auth-core": "workspace:*",

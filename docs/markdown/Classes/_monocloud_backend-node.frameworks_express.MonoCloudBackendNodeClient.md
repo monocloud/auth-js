@@ -93,8 +93,7 @@ Decoded payload.
 
 ---
 
-## fetcher()?
-
+## fetcher
 > `protected` `optional` **fetcher**: \{(`input`: `URL` \| `RequestInfo`, `init?`: `RequestInit`): `Promise`\<`Response`\>; (`input`: `string` \| `URL` \| `Request`, `init?`: `RequestInit`): `Promise`\<`Response`\>; \}
 
 Custom fetch implementation used for making HTTP requests. Falls back to the global `fetch` if not provided.
@@ -141,7 +140,7 @@ Custom fetch implementation used for making HTTP requests. Falls back to the glo
 
 ## getJwks()
 
-> **getJwks**(`forceRefresh`: `boolean`): `Promise`\<[`Jwks`](/sdks/express-backend/api-reference/types/jwks)\>
+> **getJwks**(`forceRefresh?`: `boolean`): `Promise`\<[`Jwks`](/sdks/express-backend/api-reference/types/jwks)\>
 
 Fetches the JSON Web Keys used to sign the ID token.
 The JWKS is cached for 5 minutes by default.
@@ -171,7 +170,7 @@ unexpected status code during the request or a serialization error while process
 
 ## getMetadata()
 
-> **getMetadata**(`forceRefresh`: `boolean`): `Promise`\<[`IssuerMetadata`](/sdks/express-backend/api-reference/types/issuermetadata)\>
+> **getMetadata**(`forceRefresh?`: `boolean`): `Promise`\<[`IssuerMetadata`](/sdks/express-backend/api-reference/types/issuermetadata)\>
 
 Fetches the authorization server metadata from the .well-known endpoint.
 The metadata is cached for 5 minutes by default.
@@ -243,8 +242,7 @@ endpoint is not available in the issuer metadata or claims validation fails.
 
 ---
 
-## jwks?
-
+## jwks
 > `protected` `optional` **jwks**: [`Jwks`](/sdks/express-backend/api-reference/types/jwks)
 
 Cached JSON Web Key Set retrieved from the issuer's JWKS endpoint.
@@ -279,8 +277,7 @@ Timestamp (in seconds) when the cached JWKS expires.
 
 ---
 
-## metadata?
-
+## metadata
 > `protected` `optional` **metadata**: [`IssuerMetadata`](/sdks/express-backend/api-reference/types/issuermetadata)
 
 Cached issuer metadata retrieved from the OpenID Connect discovery endpoint.

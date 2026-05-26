@@ -45,8 +45,7 @@ OAuth error code returned by the authorization server.
 
 ---
 
-## errorDescription?
-
+## errorDescription
 > `optional` **errorDescription**: `string`
 
 Human-readable description of the error.

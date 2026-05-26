@@ -14,8 +14,7 @@ Options for protecting APIs.
 
 - `Omit`\<[`ValidateAccessTokenOptions`](/sdks/fastify-backend/api-reference/types/validateaccesstokenoptions), `"clientCertificate"`\>
 
-## groups?
-
+## groups
 > `optional` **groups**: `string`[]
 
 List of group names or identifiers that must be present in the token's groups claim.
@@ -26,8 +25,7 @@ List of group names or identifiers that must be present in the token's groups cl
 
 ---
 
-## scopes?
-
+## scopes
 > `optional` **scopes**: `string`[]
 
 List of scopes that must all be present in the token's `scope` claim.
@@ -38,8 +36,7 @@ List of scopes that must all be present in the token's `scope` claim.
 
 ---
 
-## validateCertificateBinding?
-
+## validateCertificateBinding
 > `optional` **validateCertificateBinding**: `boolean`
 
 When `true`, validates certificate binding for certificate-bound access tokens.
