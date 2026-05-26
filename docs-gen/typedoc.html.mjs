@@ -14,6 +14,7 @@ const config = {
   },
   entryPoints: [
     '../packages/core',
+    '../packages/web-js',
     '../packages/node-core',
     '../packages/nextjs',
     '../packages/node-backend',
@@ -22,6 +23,7 @@ const config = {
     '**/dist/**',
     '**/node_modules/**',
     '**/tests/**',
+    '**/example/**',
     '**/examples/**',
     '**/packages/test-utils',
   ],

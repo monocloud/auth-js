@@ -1,0 +1,5 @@
+{
+  "main": "../dist/utils/internal.cjs",
+  "module": "../dist/utils/internal.mjs",
+  "types": "../dist/utils/internal.d.mts"
+}
