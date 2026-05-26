@@ -7,7 +7,7 @@ description: "Checks if a user is a member of a specified group or groups."
 
 # isUserInGroup
 
-> **isUserInGroup**(`user`: [`MonoCloudUser`](/sdks/nodejs-core/api-reference/types/monoclouduser) \| [`IdTokenClaims`](/sdks/nodejs-core/api-reference/types/idtokenclaims), `groups`: `string`[], `groupsClaim`: `string`, `matchAll`: `boolean`): `boolean`
+> **isUserInGroup**(`user`: [`MonoCloudUser`](/sdks/nodejs-core/api-reference/types/monoclouduser) \| [`IdTokenClaims`](/sdks/nodejs-core/api-reference/types/idtokenclaims), `groups`: `string`[], `groupsClaim?`: `string`, `matchAll?`: `boolean`): `boolean`
 
 Checks if a user is a member of a specified group or groups.
 

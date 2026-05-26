@@ -502,7 +502,10 @@ export class AuthorizationServerFetchBuilder {
 
           const sameMethod = x.method === (init?.method ?? 'GET').toUpperCase();
 
-          const sameBody = x.body === init?.body?.toString();
+          const sameBody =
+            typeof x.body === 'undefined'
+              ? true
+              : x.body === init?.body?.toString();
 
           let headersPresent = true;
 

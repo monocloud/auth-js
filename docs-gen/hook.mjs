@@ -251,27 +251,35 @@ export const load = app => {
     }
 
     if (type === Type.Types_Enums) {
-      const typesLen = page.model.type.types.length;
-      const items = [];
-      for (let i = 0; i < typesLen; i++) {
-        const text = page.model.type.elementSummaries[i]
-          .map(x => x.text)
-          .join('');
+      if (page.model?.type?.types && Array.isArray(page.model.type.types)) {
+        const typesLen = page.model.type.types.length;
+        const items = [];
+        for (let i = 0; i < typesLen; i++) {
+          let text = '';
+          if (
+            page.model.type.elementSummaries &&
+            page.model.type.elementSummaries[i]
+          ) {
+            text = page.model.type.elementSummaries[i]
+              .map(x => x.text)
+              .join('');
+          }
 
-        const item = {
-          value: page.model.type.types[i].value,
-          type: page.model.type.types[i].type,
-          description: text.replace(/\n\n/g, ' '),
-        };
+          const item = {
+            value: page.model.type.types[i].value,
+            type: page.model.type.types[i].type,
+            description: text.replace(/\n\n/g, ' '),
+          };
 
-        items.push(item);
+          items.push(item);
+        }
+
+        const str = items
+          .map(item => `- \`${item.value}\` - ${item.description}`)
+          .join('\n');
+
+        page.contents += `\n\n## Type Declaration\n\n${str}`;
       }
-
-      const str = items
-        .map(item => `- \`${item.value}\` - ${item.description}`)
-        .join('\n');
-
-      page.contents += `\n\n## Type Declaration\n\n${str}`;
     }
 
     if (type === Type.Class || type === Type.Types) {

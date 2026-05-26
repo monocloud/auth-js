@@ -11,7 +11,7 @@ Represents an authenticated session, containing the authenticated user profile a
 
 ## Indexable
 
-\[`key`: `string`\]: `unknown`
+> \[`key`: `string`\]: `unknown`
 
 Additional custom properties attached to the session.
 

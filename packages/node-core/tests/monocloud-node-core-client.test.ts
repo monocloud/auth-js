@@ -3876,6 +3876,38 @@ describe('MonoCloud Base Instance', () => {
         });
       });
 
+      it('should throw MonoCloudTokenError when the access token is expired and no refresh token is available', async () => {
+        const cookies = {};
+
+        await setSessionCookieValue(cookies, {
+          session: {
+            user: {} as MonoCloudUser,
+            authorizedScopes: 'openid abc',
+            accessTokens: [
+              {
+                scopes: 'openid abc',
+                requestedScopes: 'openid abc',
+                accessToken: 'at',
+                accessTokenExpiration: now() - 100,
+              },
+            ],
+            idToken: 'idtoken',
+          },
+          lifetime: { u: now(), e: now() + 86400, c: now() },
+        });
+
+        const req = new TestReq({ cookies });
+        const res = new TestRes(cookies);
+
+        const instance = getConfiguredInstance();
+
+        await expect(instance.getTokens(req, res)).rejects.toThrow(
+          new MonoCloudTokenError(
+            'No refresh token available to refresh the expired access token'
+          )
+        );
+      });
+
       it('should find the token with the resource from session', async () => {
         const cookies = {};
 
@@ -4115,47 +4147,7 @@ describe('MonoCloud Base Instance', () => {
         });
       });
 
-      it('should throw token error if token is expired and refresh token is absent', async () => {
-        const frozenTimeMs = 1330688329321;
-        freeze(frozenTimeMs);
-
-        const cookies = {};
-
-        const oldTime = now();
-
-        await setSessionCookieValue(cookies, {
-          session: {
-            user: { sub: 'sub' },
-            authorizedScopes: 'something',
-            accessTokens: [
-              {
-                requestedScopes: 'something',
-                scopes: 'something',
-                accessToken: 'at',
-                accessTokenExpiration: oldTime + 100,
-              },
-            ],
-            idToken: 'idtoken',
-          },
-          lifetime: { u: oldTime, e: oldTime + 86400, c: oldTime },
-        });
-
-        const req = new TestReq({ cookies });
-        const res = new TestRes(cookies);
-
-        const instance = getConfiguredInstance({ idTokenSigningAlg: 'ES256' });
-
-        const newFrozenTime = frozenTimeMs + 86500;
-        travel(newFrozenTime);
-
-        await expect(instance.getTokens(req, res)).rejects.toThrowError(
-          new MonoCloudTokenError(
-            'No refresh token available to refresh the expired access token'
-          )
-        );
-      });
-
-      it('should not save the new access token in the cookie if RefreshGrantOptions.scopes or RefreshGrantOptions.resource was passed in', async () => {
+      it('should refresh using authorizedScopes when forceRefresh is true and no resource/scopes are provided', async () => {
         const frozenTimeMs = 1330688329321;
         freeze(frozenTimeMs);
 

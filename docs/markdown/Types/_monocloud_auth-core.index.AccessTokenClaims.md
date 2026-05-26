@@ -15,7 +15,7 @@ Claims contained in a validated OAuth 2.0 access token.
 
 ## Indexable
 
-\[`key`: `string`\]: `unknown`
+> \[`key`: `string`\]: `unknown`
 
 Additional custom or provider-specific claims.
 

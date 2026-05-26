@@ -20,15 +20,4 @@ Factory function that returns a Fastify `onRequest` hook for protecting API rout
 
 ## Returns
 
-> (`request`: `FastifyRequest`, `reply`: `FastifyReply`): `Promise`\<`void`\>
-
-### Parameters
-
-| Parameter | Type             |
-| --------- | ---------------- |
-| `request` | `FastifyRequest` |
-| `reply`   | `FastifyReply`   |
-
-### Returns
-
-`Promise`\<`void`\>
+(`request`: `FastifyRequest`, `reply`: `FastifyReply`) => `Promise`\<`void`\>

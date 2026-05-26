@@ -17,7 +17,7 @@ Represents the OpenID Connect **UserInfo** response.
 
 ## Indexable
 
-\[`key`: `string`\]: `unknown`
+> \[`key`: `string`\]: `unknown`
 
 Additional provider-specific claims.
 

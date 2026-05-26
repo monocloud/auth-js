@@ -18,32 +18,28 @@ The cryptographic algorithm used to sign the token.
 
 ---
 
-## crit?
-
+## crit
 > `optional` **crit**: `string`[]
 
 List of header parameters that are marked as critical and must be understood by the token processor.
 
 ---
 
-## jwk?
-
+## jwk
 > `optional` **jwk**: [`Jwk`](/sdks/express-backend/api-reference/types/jwk)
 
 An embedded JSON Web Key (JWK) containing the signing key.
 
 ---
 
-## kid?
-
+## kid
 > `optional` **kid**: `string`
 
 Identifier of the key used to sign the token.
 
 ---
 
-## typ?
-
+## typ
 > `optional` **typ**: `string`
 
 The token type.

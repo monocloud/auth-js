@@ -212,7 +212,7 @@ unexpected status code during the request or a serialization error while process
 
 ### getJwks()
 
-> **getJwks**(`forceRefresh`: `boolean`): `Promise`\<[`Jwks`](/sdks/nodejs/api-reference/types/jwks)\>
+> **getJwks**(`forceRefresh?`: `boolean`): `Promise`\<[`Jwks`](/sdks/nodejs/api-reference/types/jwks)\>
 
 Fetches the JSON Web Keys used to sign the ID token.
 The JWKS is cached for 5 minutes by default.
@@ -242,7 +242,7 @@ unexpected status code during the request or a serialization error while process
 
 ### getMetadata()
 
-> **getMetadata**(`forceRefresh`: `boolean`): `Promise`\<[`IssuerMetadata`](/sdks/nodejs/api-reference/types/issuermetadata)\>
+> **getMetadata**(`forceRefresh?`: `boolean`): `Promise`\<[`IssuerMetadata`](/sdks/nodejs/api-reference/types/issuermetadata)\>
 
 Fetches the authorization server metadata from the .well-known endpoint.
 The metadata is cached for 5 minutes by default.

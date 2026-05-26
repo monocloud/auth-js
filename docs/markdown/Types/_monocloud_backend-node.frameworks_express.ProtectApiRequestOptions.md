@@ -16,16 +16,14 @@ Options for customizing how access tokens and client certificates are extracted 
 | -------------- | ------------------- |
 | `T`            | Type of the request |
 
-## certificateResolver?
-
+## certificateResolver
 > `optional` **certificateResolver**: [`ClientCertificateResolver`](/sdks/express-backend/api-reference/handler-types/clientcertificateresolver)\<`T`\>
 
 Custom callback to resolve the PEM-encoded client certificate from the request.
 
 ---
 
-## tokenResolver?
-
+## tokenResolver
 > `optional` **tokenResolver**: [`TokenResolver`](/sdks/express-backend/api-reference/handler-types/tokenresolver)\<`T`\>
 
 Custom callback to extract the access token from the request.

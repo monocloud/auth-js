@@ -579,7 +579,7 @@ describe('encryptAuthstate and decryptAuthState', () => {
 describe('parseCallbackParams', () => {
   it('should give back callback params from a url', () => {
     const result = parseCallbackParams(
-      'https://www.example.com/callback?state=abc123&access_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9&expires_in=40&id_token=eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ&refresh_token=def456&session_state=ghi789&code=xyz789&error=invalid_url&error_description=theurlparametersareinvalid'
+      'https://www.example.com/callback?state=abc123&access_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9&expires_in=40&id_token=eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ&refresh_token=def456&session_state=ghi789&code=xyz789&error=invalid_url&error_description=theurlparametersareinvalid&scope=openid'
     );
     expect(result).toStrictEqual({
       state: 'abc123',
@@ -587,6 +587,7 @@ describe('parseCallbackParams', () => {
       idToken:
         'eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ',
       refreshToken: 'def456',
+      scope: 'openid',
       sessionState: 'ghi789',
       expiresIn: 40,
       code: 'xyz789',
@@ -606,6 +607,7 @@ describe('parseCallbackParams', () => {
       accessToken: undefined,
       idToken: undefined,
       refreshToken: undefined,
+      scope: undefined,
       sessionState: undefined,
       expiresIn: undefined,
       code: 'code',
@@ -623,6 +625,7 @@ describe('parseCallbackParams', () => {
       accessToken: 'at',
       idToken: undefined,
       refreshToken: undefined,
+      scope: undefined,
       sessionState: undefined,
       expiresIn: undefined,
       code: 'code',
@@ -638,6 +641,7 @@ describe('parseCallbackParams', () => {
       accessToken: 'token',
       idToken: undefined,
       refreshToken: undefined,
+      scope: undefined,
       expiresIn: undefined,
       sessionState: undefined,
       code: undefined,
@@ -653,6 +657,7 @@ describe('parseCallbackParams', () => {
       accessToken: undefined,
       idToken: undefined,
       refreshToken: undefined,
+      scope: undefined,
       sessionState: undefined,
       expiresIn: undefined,
       code: undefined,
@@ -669,6 +674,7 @@ describe('parseCallbackParams', () => {
       accessToken: undefined,
       idToken: undefined,
       refreshToken: undefined,
+      scope: undefined,
       expiresIn: undefined,
       sessionState: undefined,
       code: undefined,

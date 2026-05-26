@@ -14,80 +14,70 @@ A JWK describes a cryptographic key used to verify or encrypt JSON Web Tokens (J
 
 The available properties depend on the key type (`kty`).
 
-## alg?
-
+## alg
 > `optional` **alg**: `string`
 
 Intended algorithm for the key (for example: `RS256`).
 
 ---
 
-## crv?
-
+## crv
 > `optional` **crv**: `string`
 
 Elliptic curve name (for example: `P-256`).
 
 ---
 
-## d?
-
+## d
 > `optional` **d**: `string`
 
 RSA private exponent.
 
 ---
 
-## dp?
-
+## dp
 > `optional` **dp**: `string`
 
 RSA first factor CRT exponent.
 
 ---
 
-## dq?
-
+## dq
 > `optional` **dq**: `string`
 
 RSA second factor CRT exponent.
 
 ---
 
-## e?
-
+## e
 > `optional` **e**: `string`
 
 RSA public exponent.
 
 ---
 
-## ext?
-
+## ext
 > `optional` **ext**: `boolean`
 
 Indicates whether the key is extractable.
 
 ---
 
-## k?
-
+## k
 > `optional` **k**: `string`
 
 Symmetric key value (base64url encoded).
 
 ---
 
-## key_ops?
-
+## key_ops
 > `optional` **key_ops**: `string`[]
 
 Allowed operations for the key (e.g. `sign`, `verify`, `encrypt`).
 
 ---
 
-## kid?
-
+## kid
 > `optional` **kid**: `string`
 
 Key identifier used to match keys during verification.
@@ -102,16 +92,14 @@ Key type (for example: `RSA`, or `EC`).
 
 ---
 
-## n?
-
+## n
 > `optional` **n**: `string`
 
 RSA modulus.
 
 ---
 
-## oth?
-
+## oth
 > `optional` **oth**: \{ `d?`: `string`; `r?`: `string`; `t?`: `string`; \}[]
 
 Additional prime information (multi-prime RSA).
@@ -124,80 +112,70 @@ Additional prime information (multi-prime RSA).
 
 ---
 
-## p?
-
+## p
 > `optional` **p**: `string`
 
 RSA first prime factor.
 
 ---
 
-## q?
-
+## q
 > `optional` **q**: `string`
 
 RSA second prime factor.
 
 ---
 
-## qi?
-
+## qi
 > `optional` **qi**: `string`
 
 RSA CRT coefficient.
 
 ---
 
-## use?
-
+## use
 > `optional` **use**: `string`
 
 Public key use (`sig` for signature or `enc` for encryption).
 
 ---
 
-## x?
-
+## x
 > `optional` **x**: `string`
 
 X coordinate for EC public keys.
 
 ---
 
-## x5c?
-
+## x5c
 > `optional` **x5c**: `string`[]
 
 X.509 certificate chain.
 
 ---
 
-## x5t?
-
+## x5t
 > `optional` **x5t**: `string`
 
 X.509 certificate SHA-1 thumbprint.
 
 ---
 
-## x5t#S256?
-
+## x5t#S256
 > `optional` **x5t#S256**: `string`
 
 X.509 certificate SHA-256 thumbprint.
 
 ---
 
-## x5u?
-
+## x5u
 > `optional` **x5u**: `string`
 
 URL referencing the X.509 certificate.
 
 ---
 
-## y?
-
+## y
 > `optional` **y**: `string`
 
 Y coordinate for EC public keys.

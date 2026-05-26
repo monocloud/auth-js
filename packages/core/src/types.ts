@@ -267,6 +267,11 @@ export interface CallbackParams {
   errorDescription?: string;
 
   /**
+   * Access token scopes (Implicit Flow)
+   */
+  scope?: string;
+
+  /**
    * Authorization code returned when using the Authorization Code Flow.
    */
   code?: string;
