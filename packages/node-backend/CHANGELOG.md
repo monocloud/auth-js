@@ -1,5 +1,13 @@
 # @monocloud/backend-node
 
+## 0.1.6
+
+### Patch Changes
+
+- 6d595b2: Parse scope from callback params and assorted test/docs fixes
+- Updated dependencies [6d595b2]
+  - @monocloud/auth-core@0.1.12
+
 ## 0.1.5
 
 ### Patch Changes

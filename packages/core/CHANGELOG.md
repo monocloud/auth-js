@@ -1,5 +1,11 @@
 # @monocloud/auth-core
 
+## 0.1.12
+
+### Patch Changes
+
+- 6d595b2: Parse scope from callback params and assorted test/docs fixes
+
 ## 0.1.11
 
 ### Patch Changes
