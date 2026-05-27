@@ -290,6 +290,11 @@ export const load = app => {
       );
     }
 
+    page.contents = page.contents.replace(
+      /#### Implementation of\n\n.+?(\n\n|\n?$)/g,
+      ''
+    );
+
     if (type === Type.Components) {
       const signatureRegex = /> \*\*.*?\*\*[\s\S]*?(\n\n|$)/;
       page.contents = page.contents.replace(signatureRegex, '');
