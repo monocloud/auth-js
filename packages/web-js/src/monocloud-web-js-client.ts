@@ -158,6 +158,10 @@ export class MonoCloudWebJSClient {
     return `${this.options.appUrl}${ensureLeadingSlash(this.options.callbackPath ?? '/')}`;
   }
 
+  private get signOutRedirectUri(): string {
+    return `${this.options.appUrl}${ensureLeadingSlash(this.options.signOutCallbackPath ?? '/')}`;
+  }
+
   private get callbackStateKey(): string {
     return `${AUTH_CONSTANTS.CALLBACK_KEY}.${this.options.clientId}`;
   }
@@ -309,23 +313,42 @@ export class MonoCloudWebJSClient {
   }
 
   /**
-   * Processes the sign-in callback from the authorization server.
+   * Processes the authentication callback from the authorization server.
    *
-   * Call this from the route handler that owns the sign-in callback path
-   * (`callbackPath`).
+   * Call this once on application startup (typically in your entry point or
+   * router). It inspects the current URL together with the persisted callback
+   * state and automatically completes a pending sign-in or sign-out flow -
+   * there is no need to dispatch on the route yourself.
    *
-   * @example Router Integration
-   * ```typescript:src/routes/callback.ts
-   * // /callback route handler
-   * await client.processSignInCallback();
+   *
+   * @example Application Entry
+   * ```typescript:src/main.ts
+   * import { client } from './auth';
+   *
+   * async function init() {
+   *   // Complete any pending redirect callback before rendering.
+   *   await client.processCallback();
+   *
+   *   // Continue mounting the app.
+   *   renderApp();
+   * }
+   *
+   * init();
    * ```
    *
-   * @returns A promise that resolves when sign-in callback processing is complete.
-   * @throws {@link MonoCloudJsError} If no sign-in callback state is found (for example, the page was reloaded after the callback was already consumed, or the route was hit without an in-progress sign-in flow).
+   * @returns A promise that resolves when callback processing is complete.
    */
-  async processSignInCallback(): Promise<void> {
+  async processCallback(): Promise<void> {
+    const currentUrl = new URL(window.location.href);
+    const currentPath = `${currentUrl.origin}${currentUrl.pathname}`;
+
+    const isSignInPath = currentPath === this.redirectUri;
+    const isSignOutPath = currentPath === this.signOutRedirectUri;
+
     if (!this.mainWindow) {
-      this.postCallbackToParent();
+      if (isSignInPath || isSignOutPath) {
+        this.postCallbackToParent();
+      }
       return;
     }
 
@@ -333,47 +356,20 @@ export class MonoCloudWebJSClient {
     this.redirectCallbackState = undefined;
 
     if (!callbackState) {
-      throw new MonoCloudJsError('Sign-in callback state not found');
-    }
-
-    await this.internalProcessSignInCallback(
-      window.location.href,
-      callbackState
-    );
-  }
-
-  /**
-   * Processes the sign-out callback from the authorization server.
-   *
-   * Call this from the route handler that owns the sign-out callback path
-   * (`signOutCallbackPath`).
-   *
-   * @example Router Integration
-   * ```typescript:src/routes/logout.ts
-   * // /logout route handler
-   * await client.processSignOutCallback();
-   * ```
-   *
-   * @returns A promise that resolves when sign-out callback processing is complete.
-   * @throws {@link MonoCloudJsError} If no sign-out callback state is found (for example, the page was reloaded after the callback was already consumed, or the route was hit without an in-progress sign-out flow).
-   */
-  async processSignOutCallback(): Promise<void> {
-    if (!this.mainWindow) {
-      this.postCallbackToParent();
       return;
     }
 
-    const callbackState = this.redirectCallbackState;
-    this.redirectCallbackState = undefined;
-
-    if (!callbackState) {
-      throw new MonoCloudJsError('Sign-out callback state not found');
+    if (isSignInPath && !callbackState.signOut) {
+      await this.internalProcessSignInCallback(
+        window.location.href,
+        callbackState
+      );
+    } else if (isSignOutPath && callbackState.signOut) {
+      await this.internalProcessSignOutCallback(
+        window.location.href,
+        callbackState
+      );
     }
-
-    await this.internalProcessSignOutCallback(
-      window.location.href,
-      callbackState
-    );
   }
 
   /**
@@ -428,6 +424,12 @@ export class MonoCloudWebJSClient {
     };
 
     if (mode === 'redirect') {
+      if (this.isIframe) {
+        throw new MonoCloudJsError(
+          "Cannot start a redirect sign-in from inside an iframe: the MonoCloud sign-in page cannot be displayed in a framed context. Use signIn({ mode: 'popup' }) instead, or perform the redirect on the top-level window."
+        );
+      }
+
       const { url, callbackState } = await this.buildAuthRequest(
         mode,
         paramOverrides,
@@ -472,6 +474,13 @@ export class MonoCloudWebJSClient {
     const mode = signOutOptions?.mode ?? 'redirect';
     const federatedSignOut =
       signOutOptions?.federatedSignOut ?? this.federatedSignOut;
+
+    if (mode === 'redirect' && federatedSignOut && this.isIframe) {
+      throw new MonoCloudJsError(
+        "Cannot start a redirect sign-out from inside an iframe: the MonoCloud end-session page cannot be displayed in a framed context. Use signOut({ mode: 'popup' }) instead, or perform the redirect on the top-level window."
+      );
+    }
+
     const ref =
       federatedSignOut && mode === 'popup' ? this.createRef(mode) : undefined;
 

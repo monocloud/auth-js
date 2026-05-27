@@ -161,6 +161,42 @@ describe('signIn() Tests', () => {
     fetchSpy.assert();
   });
 
+  it('Redirect Mode - should throw when called from inside an iframe', async () => {
+    mockWindow.mockParentSide('silent').assert();
+
+    const instance = testInstance({ storage: mockStorage });
+
+    const error = await instance.signIn().catch(e => e);
+
+    expect(error).toBeInstanceOf(MonoCloudJsError);
+    expect(error.message).toContain(
+      'Cannot start a redirect sign-in from inside an iframe'
+    );
+    expect(window.location.assign).not.toHaveBeenCalled();
+  });
+
+  it('Popup Mode - should not throw the iframe guard when called from inside an iframe', async () => {
+    fetchBuilder().configureMetadata().createSpy();
+
+    const mockPopup = {
+      close: vi.fn(),
+      closed: false,
+      location: { href: '' },
+    } as unknown as Window;
+
+    vi.spyOn(window, 'open').mockReturnValue(mockPopup);
+
+    mockWindow.mockParentSide('silent').assert();
+
+    const instance = testInstance({ storage: mockStorage });
+
+    instance.signIn({ mode: 'popup' });
+
+    await vi.waitFor(() => {
+      expect(mockPopup.location.href).toMatch(urlRegex);
+    });
+  });
+
   it('Redirect Mode - should process callback using the default callback state key', async () => {
     const idToken = await generateIdToken({ nonce: 'nonce' });
 
@@ -192,7 +228,7 @@ describe('signIn() Tests', () => {
 
     const instance = testInstance({ storage: mockStorage });
 
-    await instance.processSignInCallback();
+    await instance.processCallback();
 
     mockStorage.expectCallbackStateRemoved().expectSession();
     expect(await instance.getSession()).toBeDefined();
@@ -200,7 +236,7 @@ describe('signIn() Tests', () => {
     fetchSpy.assert();
   });
 
-  it('Redirect Mode - should throw if there is no callback state found', async () => {
+  it('Redirect Mode - should no-op if there is no callback state found', async () => {
     mockWindow
       .setSearch('?state=state&code=code')
       .setPathname('/callback')
@@ -208,16 +244,13 @@ describe('signIn() Tests', () => {
 
     const instance = testInstance({ storage: mockStorage });
 
-    const error = await instance.processSignInCallback().catch(e => e);
-
-    expect(error).toBeInstanceOf(MonoCloudJsError);
-    expect(error.message).toBe('Sign-in callback state not found');
+    await expect(instance.processCallback()).resolves.toBeUndefined();
 
     mockStorage.expectCallbackStateRemoved().expectNoSession();
     expect(await instance.getSession()).toBeUndefined();
   });
 
-  it('Redirect Mode - should throw if the stored callback state is for a sign-out flow', async () => {
+  it('Redirect Mode - should no-op on the sign-in path if the stored callback state is for a sign-out flow', async () => {
     mockWindow
       .setSearch('?state=state&code=code')
       .setPathname('/callback')
@@ -233,10 +266,7 @@ describe('signIn() Tests', () => {
 
     const instance = testInstance({ storage: mockStorage });
 
-    const error = await instance.processSignInCallback().catch(e => e);
-
-    expect(error).toBeInstanceOf(MonoCloudValidationError);
-    expect(error.message).toBe('Incorrect callback state');
+    await expect(instance.processCallback()).resolves.toBeUndefined();
 
     mockStorage.expectCallbackStateRemoved().expectNoSession();
   });
@@ -272,7 +302,7 @@ describe('signIn() Tests', () => {
 
     const instance = testInstance({ storage: mockStorage });
 
-    await instance.processSignInCallback();
+    await instance.processCallback();
 
     mockStorage.expectCallbackStateRemoved().expectSession();
 
@@ -336,7 +366,7 @@ describe('signIn() Tests', () => {
 
     const instance = testInstance({ storage: mockStorage, postCallback: fn });
 
-    await instance.processSignInCallback();
+    await instance.processCallback();
 
     const session = await instance.getSession();
 
@@ -378,7 +408,7 @@ describe('signIn() Tests', () => {
 
     const instance = testInstance({ storage: mockStorage });
 
-    await instance.processSignInCallback();
+    await instance.processCallback();
 
     const session = await instance.getSession();
 
@@ -417,7 +447,7 @@ describe('signIn() Tests', () => {
       callbackPath: undefined,
     });
 
-    await instance.processSignInCallback();
+    await instance.processCallback();
 
     mockStorage.expectCallbackStateRemoved();
 
@@ -461,7 +491,7 @@ describe('signIn() Tests', () => {
 
     const instance = testInstance({ storage: mockStorage });
 
-    await instance.processSignInCallback();
+    await instance.processCallback();
     mockStorage.expectCallbackStateRemoved();
     const session = await instance.getSession();
 
@@ -517,7 +547,7 @@ describe('signIn() Tests', () => {
       defaultAuthParams: { responseType: 'code token' },
     });
 
-    await instance.processSignInCallback();
+    await instance.processCallback();
 
     mockStorage.expectCallbackStateRemoved();
     const session = await instance.getSession();
@@ -553,7 +583,7 @@ describe('signIn() Tests', () => {
 
     const instance = testInstance({ storage: mockStorage });
 
-    await instance.processSignInCallback();
+    await instance.processCallback();
 
     mockStorage.expectCallbackStateRemoved();
 
@@ -603,7 +633,7 @@ describe('signIn() Tests', () => {
 
     const instance = testInstance({ storage: mockStorage });
 
-    await instance.processSignInCallback();
+    await instance.processCallback();
 
     mockStorage.expectCallbackStateRemoved();
 
@@ -654,7 +684,7 @@ describe('signIn() Tests', () => {
 
     const instance = testInstance({ storage: mockStorage });
 
-    await instance.processSignInCallback();
+    await instance.processCallback();
 
     mockStorage.expectCallbackStateRemoved();
 
@@ -709,7 +739,7 @@ describe('signIn() Tests', () => {
       fetchUserinfo: false,
     });
 
-    await instance.processSignInCallback();
+    await instance.processCallback();
 
     mockStorage.expectCallbackStateRemoved();
 
@@ -740,7 +770,7 @@ describe('signIn() Tests', () => {
 
     const instance = testInstance({ storage: mockStorage });
 
-    const error = await instance.processSignInCallback().catch(e => e);
+    const error = await instance.processCallback().catch(e => e);
 
     expect(error).toBeInstanceOf(MonoCloudValidationError);
     expect(error.message).toBe('Sign in callback states mismatch');
@@ -769,7 +799,7 @@ describe('signIn() Tests', () => {
 
     const instance = testInstance({ storage: mockStorage });
 
-    const error = await instance.processSignInCallback().catch(e => e);
+    const error = await instance.processCallback().catch(e => e);
 
     expect(error).toBeInstanceOf(MonoCloudOPError);
     expect(error).toMatchObject({
@@ -805,7 +835,7 @@ describe('signIn() Tests', () => {
 
     const instance = testInstance({ storage: mockStorage });
 
-    await expect(instance.processSignInCallback()).rejects.toThrow(
+    await expect(instance.processCallback()).rejects.toThrow(
       'Error while fetching JWKS. Unexpected status code: 400'
     );
 
@@ -843,13 +873,13 @@ describe('signIn() Tests', () => {
 
     const instance = testInstance({ storage: mockStorage });
 
-    const processSignInCallbackPromise = instance.processSignInCallback();
+    const processCallbackPromise = instance.processCallback();
 
-    await expect(processSignInCallbackPromise).rejects.toBeInstanceOf(
+    await expect(processCallbackPromise).rejects.toBeInstanceOf(
       MonoCloudValidationError
     );
 
-    await expect(processSignInCallbackPromise).rejects.toThrow(
+    await expect(processCallbackPromise).rejects.toThrow(
       'Fetching userinfo requires the openid scope'
     );
 
@@ -886,13 +916,13 @@ describe('signIn() Tests', () => {
 
     const instance = testInstance({ storage: mockStorage });
 
-    const processSignInCallbackPromise = instance.processSignInCallback();
+    const processCallbackPromise = instance.processCallback();
 
-    await expect(processSignInCallbackPromise).rejects.toBeInstanceOf(
+    await expect(processCallbackPromise).rejects.toBeInstanceOf(
       MonoCloudValidationError
     );
 
-    await expect(processSignInCallbackPromise).rejects.toThrow(
+    await expect(processCallbackPromise).rejects.toThrow(
       "The 'expires_in' parameter is missing from the callback"
     );
 
@@ -921,7 +951,7 @@ describe('signIn() Tests', () => {
 
     const instance = testInstance({ storage: mockStorage });
 
-    const error = await instance.processSignInCallback().catch(e => e);
+    const error = await instance.processCallback().catch(e => e);
 
     expect(error).toBeInstanceOf(MonoCloudTokenError);
     expect(error.message).toBe(
@@ -959,7 +989,7 @@ describe('signIn() Tests', () => {
       validateIdToken: false,
     });
 
-    await instance.processSignInCallback();
+    await instance.processCallback();
 
     mockStorage.expectCallbackStateRemoved();
 
@@ -996,7 +1026,7 @@ describe('signIn() Tests', () => {
       validateIdToken: false,
     });
 
-    const error = await instance.processSignInCallback().catch(e => e);
+    const error = await instance.processCallback().catch(e => e);
 
     expect(error).toBeInstanceOf(MonoCloudTokenError);
     expect(error.message).toBe('JWT does not contain payload');
@@ -1030,7 +1060,7 @@ describe('signIn() Tests', () => {
       validateIdToken: false,
     });
 
-    const error = await instance.processSignInCallback().catch(e => e);
+    const error = await instance.processCallback().catch(e => e);
 
     expect(error).toBeInstanceOf(MonoCloudHttpError);
     expect(error.message).toBe(
@@ -1068,7 +1098,7 @@ describe('signIn() Tests', () => {
 
     const instance = testInstance({ storage: mockStorage });
 
-    const error = await instance.processSignInCallback().catch(e => e);
+    const error = await instance.processCallback().catch(e => e);
 
     expect(error).toBeInstanceOf(MonoCloudHttpError);
     expect(error.message).toBe(
@@ -1091,7 +1121,7 @@ describe('signIn() Tests', () => {
 
     const instance = testInstance({ storage: mockStorage });
 
-    await instance.processSignInCallback();
+    await instance.processCallback();
 
     expect(window.fetch).not.toHaveBeenCalled();
 
@@ -1104,6 +1134,23 @@ describe('signIn() Tests', () => {
         'http://localhost:3000'
       );
     });
+  });
+
+  it('Popup Mode - should not post to the parent when the URL is not a callback path', async () => {
+    fetchBuilder().createSpy();
+
+    mockWindow
+      .mockPostMessage()
+      .mockParentSide('popup')
+      .setPathname('/some-other-page')
+      .assert();
+
+    const instance = testInstance({ storage: mockStorage });
+
+    await instance.processCallback();
+
+    expect(mockWindow.parentPostMessage).not.toHaveBeenCalled();
+    expect(window.fetch).not.toHaveBeenCalled();
   });
 
   it('Popup Mode - should throw an error if states mismatch', async () => {
@@ -2200,7 +2247,7 @@ describe('signIn() Tests', () => {
 
     const instance = testInstance({ storage: mockStorage });
 
-    const processPromise = instance.processSignInCallback();
+    const processPromise = instance.processCallback();
 
     await expect(processPromise).rejects.toThrow(SyntaxError);
 
@@ -2311,7 +2358,7 @@ describe('signIn() Tests', () => {
 
     const instance = testInstance({ storage: mockStorage });
 
-    await instance.processSignInCallback();
+    await instance.processCallback();
 
     expect(mockParent.postMessage).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -2521,7 +2568,7 @@ describe('signIn() Tests', () => {
       .setPathname('/callback')
       .assert();
 
-    await instance.processSignInCallback();
+    await instance.processCallback();
 
     const session = await instance.getSession();
     expect(session).toBeDefined();
@@ -2571,7 +2618,7 @@ describe('signIn() Tests', () => {
       .setPathname('/callback')
       .assert();
 
-    await instance.processSignInCallback();
+    await instance.processCallback();
 
     const session = await instance.getSession();
     expect(session).toBeDefined();

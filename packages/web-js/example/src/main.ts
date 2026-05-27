@@ -75,18 +75,8 @@ const updateUI = async (): Promise<void> => {
   }
 };
 
-const dispatchCallback = (): Promise<void> => {
-  switch (window.location.pathname) {
-    case options.callbackPath:
-      return client.processSignInCallback();
-    case options.signOutCallbackPath:
-      return client.processSignOutCallback();
-    default:
-      return Promise.resolve();
-  }
-};
-
-dispatchCallback()
+client
+  .processCallback()
   .then(() => {
     processingCallback = false;
     const processCallbackMessage = document.getElementById('loading')!;
