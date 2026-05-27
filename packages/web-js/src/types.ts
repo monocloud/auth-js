@@ -261,6 +261,21 @@ export interface MonoCloudWebJSClientOptions {
    * Duration (in seconds) to cache OpenID Connect discovery metadata after it is fetched from the authorization server.
    */
   metadataCacheDuration?: number;
+
+  /**
+   * Storage implementation used to persist sessions. Defaults to {@link LocalStorage}.
+   */
+  storage?: IStorage;
+
+  /**
+   * Callback executed after a successful sign-in or sign-out callback. Useful for client-side router integration.
+   */
+  postCallback?: PostCallback;
+
+  /**
+   * Hook invoked while creating or updating session.
+   */
+  onSessionCreating?: OnSessionCreating;
 }
 
 /**

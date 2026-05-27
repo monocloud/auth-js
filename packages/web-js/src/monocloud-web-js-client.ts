@@ -268,42 +268,32 @@ export class MonoCloudWebJSClient {
    * import { MonoCloudWebJSClient, MemoryStorage } from '@monocloud/auth-web-js';
    * import { router } from './router';
    *
-   * export const client = new MonoCloudWebJSClient(
-   *   {
-   *     tenantDomain: 'https://your-tenant.us.monocloud.com',
-   *     clientId: 'your-client-id',
-   *     appUrl: 'http://localhost:3000',
-   *   },
-   *   new MemoryStorage(),
-   *   state => {
+   * export const client = new MonoCloudWebJSClient({
+   *   tenantDomain: 'https://your-tenant.us.monocloud.com',
+   *   clientId: 'your-client-id',
+   *   appUrl: 'http://localhost:3000',
+   *   storage: new MemoryStorage(),
+   *   postCallback: state => {
    *     // Use the router to navigate instead of a full page reload.
    *     router.push(state.returnUrl ?? '/dashboard');
-   *   }
-   * );
+   *   },
+   * });
    * ```
    *
    * @param options Configuration options for the client.
-   * @param storage Storage implementation used to persist sessions. Defaults to {@link LocalStorage}.
-   * @param postCallbackFn Callback executed after a successful sign-in or sign-out callback. Useful for client-side router integration.
-   * @param onSessionCreating Hook invoked while creating or updating session.
    */
-  constructor(
-    options: MonoCloudWebJSClientOptions,
-    storage: IStorage = new LocalStorage(),
-    postCallbackFn?: PostCallback,
-    onSessionCreating?: OnSessionCreating
-  ) {
+  constructor(options: MonoCloudWebJSClientOptions) {
     this.options = {
       ...options,
       appUrl: removeTrailingSlash(options.appUrl),
     };
 
-    this.storage = storage;
-    if (postCallbackFn) {
-      this.postCallbackFn = postCallbackFn;
+    this.storage = options.storage ?? new LocalStorage();
+    if (options.postCallback) {
+      this.postCallbackFn = options.postCallback;
     }
 
-    this.onSessionCreating = onSessionCreating;
+    this.onSessionCreating = options.onSessionCreating;
 
     this.oidcClient = new MonoCloudOidcClient(
       this.options.tenantDomain,
