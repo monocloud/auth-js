@@ -35,6 +35,9 @@
   "publishConfig": {
     "main": "./dist/index.cjs",
     "module": "./dist/index.mjs",
+    "browser": "./dist/index.mjs",
+    "unpkg": "./dist/index.mjs",
+    "jsdelivr": "./dist/index.mjs",
     "types": "./dist/index.d.mts",
     "exports": {
       ".": {
