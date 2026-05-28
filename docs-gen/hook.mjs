@@ -18,6 +18,7 @@ const ROOT_SDK_NAME_REPLACEMENTS = [
   ['@monocloud/auth-node-core', 'Node.js Core'],
   ['@monocloud/auth-core', 'Node.js'],
   ['@monocloud/backend-node', 'Node.js Backend'],
+  ['@monocloud/auth-web-js', 'JavaScript'],
 ];
 
 const Type = {
