@@ -66,8 +66,8 @@ import { withDedupedLock } from './lock';
  * import { MonoCloudWebJSClient } from '@monocloud/auth-web-js';
  *
  * export const client = new MonoCloudWebJSClient({
- *   tenantDomain: 'https://your-tenant.us.monocloud.com',
- *   clientId: 'your-client-id',
+ *   tenantDomain: 'https://<your-tenant>',
+ *   clientId: '<your-client-id>',
  *   appUrl: 'http://localhost:3000',
  *   callbackPath: '/callback',
  *   signOutCallbackPath: '/logout',
@@ -270,8 +270,8 @@ export class MonoCloudWebJSClient {
    * import { MonoCloudWebJSClient } from '@monocloud/auth-web-js';
    *
    * export const client = new MonoCloudWebJSClient({
-   *   tenantDomain: 'https://your-tenant.us.monocloud.com',
-   *   clientId: 'your-client-id',
+   *   tenantDomain: 'https://<your-tenant>',
+   *   clientId: '<your-client-id>',
    *   appUrl: 'http://localhost:3000',
    * });
    * ```
@@ -282,12 +282,11 @@ export class MonoCloudWebJSClient {
    * import { router } from './router';
    *
    * export const client = new MonoCloudWebJSClient({
-   *   tenantDomain: 'https://your-tenant.us.monocloud.com',
-   *   clientId: 'your-client-id',
+   *   tenantDomain: 'https://<your-tenant>',
+   *   clientId: '<your-client-id>',
    *   appUrl: 'http://localhost:3000',
    *   storage: new MemoryStorage(),
    *   postCallback: state => {
-   *     // Use the router to navigate instead of a full page reload.
    *     router.push(state.returnUrl ?? '/dashboard');
    *   },
    * });
@@ -332,14 +331,11 @@ export class MonoCloudWebJSClient {
    *
    * @example Application Entry
    * ```typescript:src/main.ts
-   * import { client } from './auth';
-   *
    * async function init() {
    *   // Complete any pending redirect callback before rendering.
    *   await client.processCallback();
    *
    *   // Continue mounting the app.
-   *   renderApp();
    * }
    *
    * init();
@@ -386,27 +382,17 @@ export class MonoCloudWebJSClient {
    *
    * @example Redirect Flow
    * ```typescript:src/app.ts tab="Redirect Flow" tab-group="signIn"
-   * document.getElementById('login-btn')!.addEventListener('click', async () => {
-   *   // Standard top-level redirect to the authorization server.
-   *   await client.signIn();
-   * });
+   * await client.signIn();
    * ```
    *
    * @example Popup Flow
    * ```typescript:src/app.ts tab="Popup Flow" tab-group="signIn"
-   * document.getElementById('login-popup-btn')!.addEventListener('click', async () => {
-   *   // Opens a centered popup for authentication.
-   *   await client.signIn({ mode: 'popup' });
-   *   console.log('User finished popup flow!');
-   * });
+   * await client.signIn({ mode: 'popup' });
    * ```
    *
    * @example Sign Up
    * ```typescript:src/app.ts tab="Sign Up" tab-group="signIn"
-   * document.getElementById('register-btn')!.addEventListener('click', async () => {
-   *   // Forces the identity provider to show the registration/sign-up screen.
-   *   await client.signIn({ signUp: true });
-   * });
+   * await client.signIn({ signUp: true });
    * ```
    *
    * @param signInOptions Optional configuration for the sign-in request.
@@ -463,17 +449,12 @@ export class MonoCloudWebJSClient {
    *
    * @example Standard Sign Out
    * ```typescript:src/app.ts tab="Redirect Flow" tab-group="signOut"
-   * document.getElementById('logout-btn')!.addEventListener('click', async () => {
-   *   await client.signOut();
-   * });
+   * await client.signOut();
    * ```
    *
    * @example Popup Sign Out
    * ```typescript:src/app.ts tab="Popup Flow" tab-group="signOut"
-   * document.getElementById('logout-popup-btn')!.addEventListener('click', async () => {
-   *   // Opens a popup to perform federated sign-out while keeping the user on the current page.
-   *   await client.signOut({ mode: 'popup' });
-   * });
+   * await client.signOut({ mode: 'popup' });
    * ```
    *
    * @param signOutOptions Optional configuration for the sign-out request.
@@ -556,15 +537,15 @@ export class MonoCloudWebJSClient {
    *
    * Requires a session that includes a refresh token (obtained by including the `offline_access` scope at sign-in).
    *
-   * To start a fresh, non-interactive authorization (for example, on app bootstrap when there is no local session yet) use {@link MonoCloudWebJSClient.signInSilent} instead.
+   * To start a fresh, non-interactive authorization (for example, on app bootstrap when there is no local session yet) use {@link MonoCloudWebJSClient.signInSilent | signInSilent()} instead.
    *
-   * @example Usage
-   * ```typescript:src/app.ts
+   * @example Default
+   * ```typescript:src/app.ts tab="Default" tab-group="refreshSession"
    * await client.refreshSession();
    * ```
    *
    * @example Resource-Scoped Refresh
-   * ```typescript:src/app.ts
+   * ```typescript:src/app.ts tab="Resource-Scoped Refresh" tab-group="refreshSession"
    * await client.refreshSession({
    *   refreshGrantOptions: {
    *     resource: 'https://api.example.com',
@@ -617,9 +598,9 @@ export class MonoCloudWebJSClient {
    *
    * Useful for restoring a session at app bootstrap when the user is signed in at MonoCloud but no local session exists yet (for example, after opening a new tab or a hard refresh that cleared in-memory storage).
    *
-   * The method runs a full authorization round-trip through a hidden iframe. If MonoCloud has a valid session it resolves to the new session. Otherwise it rejects with a {@link MonoCloudOPError} - typically with `error: 'login_required'`, `'interaction_required'`, `'consent_required'`, or `'account_selection_required'`, depending on why the authorization server cannot satisfy the request without user interaction.
+   * The method runs a full authorization round-trip through a hidden iframe. If MonoCloud has a valid session it resolves to the new session. Otherwise it rejects with a {@link MonoCloudOPError}.
    *
-   * @example App Bootstrap
+   * @example Usage
    * ```typescript:src/app.ts
    * import { MonoCloudOPError } from '@monocloud/auth-web-js';
    *
@@ -635,14 +616,6 @@ export class MonoCloudWebJSClient {
    * }
    * ```
    *
-   * @example Resource-Scoped Silent Sign In
-   * ```typescript:src/app.ts
-   * await client.signInSilent({
-   *   resource: 'https://api.example.com',
-   *   scopes: 'read:data',
-   * });
-   * ```
-   *
    * @param signInSilentOptions Optional configuration for the silent sign-in request.
    * @returns The newly established session.
    * @throws {@link MonoCloudOPError} If the authorization server cannot satisfy the request - for example, because the user has no IdP session (`login_required`) or interaction is otherwise required.
@@ -654,7 +627,10 @@ export class MonoCloudWebJSClient {
     const dedupeKey = this.dedupeKey(
       'signInSilent',
       signInSilentOptions?.resource,
-      signInSilentOptions?.scopes
+      signInSilentOptions?.scopes,
+      signInSilentOptions?.maxAge?.toString(),
+      signInSilentOptions?.loginHint,
+      signInSilentOptions?.acrValues?.join(' ')
     );
 
     return await withDedupedLock(dedupeKey, this.lockKey, async () => {
@@ -662,10 +638,14 @@ export class MonoCloudWebJSClient {
         'silent',
         {
           prompt: 'none',
+          maxAge: signInSilentOptions?.maxAge,
+          loginHint: signInSilentOptions?.loginHint,
+          acrValues: signInSilentOptions?.acrValues,
           scopes: signInSilentOptions?.scopes,
           resource: signInSilentOptions?.resource,
         },
         {
+          maxAge: signInSilentOptions?.maxAge,
           appState: signInSilentOptions?.appState,
         }
       );

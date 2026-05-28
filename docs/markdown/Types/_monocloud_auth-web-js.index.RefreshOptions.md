@@ -2,14 +2,12 @@
 rootSdk: JavaScript
 title: "RefreshOptions"
 category: Types
-description: "Options used to customize the session refresh flow. refreshSession() exclusively uses the Refresh Token Grant."
+description: "Options used to customize the session refresh flow."
 ---
 
 # Type: RefreshOptions
 
 Options used to customize the session refresh flow.
-
-`refreshSession()` exclusively uses the Refresh Token Grant. To start a fresh, non-interactive authorization (e.g. on app bootstrap) use [MonoCloudWebJSClient.signInSilent](/sdks/web-js/api-reference/classes/monocloudwebjsclient#signinsilent) instead.
 
 ## Properties
 

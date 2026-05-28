@@ -474,8 +474,6 @@ export interface SignOutOptions {
 /**
  * Options used to customize the session refresh flow.
  *
- * `refreshSession()` exclusively uses the Refresh Token Grant. To start a fresh, non-interactive authorization (e.g. on app bootstrap) use {@link MonoCloudWebJSClient.signInSilent} instead.
- *
  * @category Types
  */
 export interface RefreshOptions {
@@ -491,6 +489,27 @@ export interface RefreshOptions {
  * @category Types
  */
 export interface SignInSilentOptions {
+  /**
+   * Maximum allowed time (in seconds) since the user's last authentication.
+   *
+   * If the existing session is older than this value, the authorization server cannot satisfy the silent request and will reject with `login_required`.
+   */
+  maxAge?: number;
+
+  /**
+   * Hint identifying the user (for example, an email or username). Helps the authorization server disambiguate when multiple sessions are present.
+   *
+   * @example "user@example.com"
+   */
+  loginHint?: string;
+
+  /**
+   * Authentication Context Class Reference (ACR) values requesting specific authentication assurance levels or methods.
+   *
+   * If the existing session does not satisfy the requested ACR, the authorization server will reject with `interaction_required`.
+   */
+  acrValues?: string[];
+
   /**
    * Space-separated scopes requested from the authorization server for this specific silent sign-in.
    *

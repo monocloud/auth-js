@@ -25,8 +25,8 @@ Features:
 import { MonoCloudWebJSClient } from '@monocloud/auth-web-js';
 
 export const client = new MonoCloudWebJSClient({
-  tenantDomain: 'https://your-tenant.us.monocloud.com',
-  clientId: 'your-client-id',
+  tenantDomain: 'https://<your-tenant>',
+  clientId: '<your-client-id>',
   appUrl: 'http://localhost:3000',
   callbackPath: '/callback',
   signOutCallbackPath: '/logout',
@@ -57,8 +57,8 @@ Initializes a new instance of MonoCloudWebJSClient.
 import { MonoCloudWebJSClient } from '@monocloud/auth-web-js';
 
 export const client = new MonoCloudWebJSClient({
-  tenantDomain: 'https://your-tenant.us.monocloud.com',
-  clientId: 'your-client-id',
+  tenantDomain: 'https://<your-tenant>',
+  clientId: '<your-client-id>',
   appUrl: 'http://localhost:3000',
 });
 ```
@@ -68,12 +68,11 @@ import { MonoCloudWebJSClient, MemoryStorage } from '@monocloud/auth-web-js';
 import { router } from './router';
 
 export const client = new MonoCloudWebJSClient({
-  tenantDomain: 'https://your-tenant.us.monocloud.com',
-  clientId: 'your-client-id',
+  tenantDomain: 'https://<your-tenant>',
+  clientId: '<your-client-id>',
   appUrl: 'http://localhost:3000',
   storage: new MemoryStorage(),
   postCallback: state => {
-    // Use the router to navigate instead of a full page reload.
     router.push(state.returnUrl ?? '/dashboard');
   },
 });
@@ -174,14 +173,11 @@ A promise that resolves when callback processing is complete.
 #### Example
 
 ```typescript:src/main.ts
-import { client } from './auth';
-
 async function init() {
   // Complete any pending redirect callback before rendering.
   await client.processCallback();
 
   // Continue mounting the app.
-  renderApp();
 }
 
 init();
@@ -223,7 +219,7 @@ Refreshes the current user's session using the OAuth 2.0 Refresh Token Grant.
 
 Requires a session that includes a refresh token (obtained by including the `offline_access` scope at sign-in).
 
-To start a fresh, non-interactive authorization (for example, on app bootstrap when there is no local session yet) use [MonoCloudWebJSClient.signInSilent](#signinsilent) instead.
+To start a fresh, non-interactive authorization (for example, on app bootstrap when there is no local session yet) use [signInSilent()](#signinsilent) instead.
 
 #### Parameters
 
@@ -239,11 +235,11 @@ A promise that resolves when the session has been refreshed.
 
 #### Examples
 
-```typescript:src/app.ts
+```typescript:src/app.ts tab="Default" tab-group="refreshSession"
 await client.refreshSession();
 ```
 
-```typescript:src/app.ts
+```typescript:src/app.ts tab="Resource-Scoped Refresh" tab-group="refreshSession"
 await client.refreshSession({
   refreshGrantOptions: {
     resource: 'https://api.example.com',
@@ -277,25 +273,15 @@ Initiates the sign-in flow.
 #### Examples
 
 ```typescript:src/app.ts tab="Redirect Flow" tab-group="signIn"
-document.getElementById('login-btn')!.addEventListener('click', async () => {
-  // Standard top-level redirect to the authorization server.
-  await client.signIn();
-});
+await client.signIn();
 ```
 
 ```typescript:src/app.ts tab="Popup Flow" tab-group="signIn"
-document.getElementById('login-popup-btn')!.addEventListener('click', async () => {
-  // Opens a centered popup for authentication.
-  await client.signIn({ mode: 'popup' });
-  console.log('User finished popup flow!');
-});
+await client.signIn({ mode: 'popup' });
 ```
 
 ```typescript:src/app.ts tab="Sign Up" tab-group="signIn"
-document.getElementById('register-btn')!.addEventListener('click', async () => {
-  // Forces the identity provider to show the registration/sign-up screen.
-  await client.signIn({ signUp: true });
-});
+await client.signIn({ signUp: true });
 ```
 
 ---
@@ -308,7 +294,7 @@ Attempts to silently sign the user in using a hidden iframe and `prompt=none`.
 
 Useful for restoring a session at app bootstrap when the user is signed in at MonoCloud but no local session exists yet (for example, after opening a new tab or a hard refresh that cleared in-memory storage).
 
-The method runs a full authorization round-trip through a hidden iframe. If MonoCloud has a valid session it resolves to the new session. Otherwise it rejects with a [MonoCloudOPError](/sdks/web-js/api-reference/error-classes/monocloudoperror) - typically with `error: 'login_required'`, `'interaction_required'`, `'consent_required'`, or `'account_selection_required'`, depending on why the authorization server cannot satisfy the request without user interaction.
+The method runs a full authorization round-trip through a hidden iframe. If MonoCloud has a valid session it resolves to the new session. Otherwise it rejects with a [MonoCloudOPError](/sdks/web-js/api-reference/error-classes/monocloudoperror).
 
 #### Parameters
 
@@ -322,7 +308,7 @@ The method runs a full authorization round-trip through a hidden iframe. If Mono
 
 The newly established session.
 
-#### Examples
+#### Example
 
 ```typescript:src/app.ts
 import { MonoCloudOPError } from '@monocloud/auth-web-js';
@@ -337,13 +323,6 @@ try {
     throw error;
   }
 }
-```
-
-```typescript:src/app.ts
-await client.signInSilent({
-  resource: 'https://api.example.com',
-  scopes: 'read:data',
-});
 ```
 
 #### Throws
@@ -379,14 +358,9 @@ A promise that resolves when the sign-out flow has been initiated (redirect mode
 #### Examples
 
 ```typescript:src/app.ts tab="Redirect Flow" tab-group="signOut"
-document.getElementById('logout-btn')!.addEventListener('click', async () => {
-  await client.signOut();
-});
+await client.signOut();
 ```
 
 ```typescript:src/app.ts tab="Popup Flow" tab-group="signOut"
-document.getElementById('logout-popup-btn')!.addEventListener('click', async () => {
-  // Opens a popup to perform federated sign-out while keeping the user on the current page.
-  await client.signOut({ mode: 'popup' });
-});
+await client.signOut({ mode: 'popup' });
 ```
