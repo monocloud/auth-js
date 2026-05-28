@@ -7,7 +7,7 @@ description: "Callback executed after sign-in or sign-out callback processing."
 
 # Handler Type: PostCallback
 
-> **PostCallback** = (`state`: [`PostCallbackParams`](/sdks/web-js/api-reference/types/postcallbackparams)) => `Promise`\<`void`\> \| `void`
+> **PostCallback** = (`state`: [`CallbackState`](/sdks/web-js/api-reference/types/callbackstate)) => `Promise`\<`void`\> \| `void`
 
 Callback executed after sign-in or sign-out callback processing.
 
@@ -15,9 +15,9 @@ The default implementation removes query parameters from the current URL on `sig
 
 ## Parameters
 
-| Parameter | Type                                                                                | Description                             |
-| --------- | ----------------------------------------------------------------------------------- | --------------------------------------- |
-| `state`   | [`PostCallbackParams`](/sdks/web-js/api-reference/types/postcallbackparams) | Metadata describing the completed flow. |
+| Parameter | Type                                                                      | Description     |
+| --------- | ------------------------------------------------------------------------- | --------------- |
+| `state`   | [`CallbackState`](/sdks/web-js/api-reference/types/callbackstate) | Callback state. |
 
 ## Returns
 

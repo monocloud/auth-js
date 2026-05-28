@@ -50,7 +50,6 @@ category: Other
 - [MonoCloudUser](/sdks/web-js/api-reference/types/monoclouduser)
 - [MonoCloudWebJSClientOptions](/sdks/web-js/api-reference/types/monocloudwebjsclientoptions)
 - [ParResponse](/sdks/web-js/api-reference/types/parresponse)
-- [PostCallbackParams](/sdks/web-js/api-reference/types/postcallbackparams)
 - [PushedAuthorizationParams](/sdks/web-js/api-reference/types/pushedauthorizationparams)
 - [RefetchUserInfoOptions](/sdks/web-js/api-reference/types/refetchuserinfooptions)
 - [RefreshGrantOptions](/sdks/web-js/api-reference/types/refreshgrantoptions)

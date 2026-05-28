@@ -391,7 +391,7 @@ describe('signIn() Tests', () => {
     mockWindow
       .setSearch('?state=state&code=code')
       .setPathname('/callback')
-      .expectHrefCalled('/test')
+      .expectHrefCalled('http://localhost:3000/test')
       .assert();
 
     const state: CallbackState = {
@@ -414,6 +414,54 @@ describe('signIn() Tests', () => {
 
     expect(session?.user).toBeDefined();
     fetchSpy.assert();
+  });
+
+  it('should ignore returnUrl that resolves to a different origin than appUrl', async () => {
+    const idToken = await generateIdToken({ nonce: 'nonce' });
+
+    const fetchSpy = fetchBuilder()
+      .configureMetadata()
+      .configureJwks()
+      .configureTokenEndpoint({
+        idToken,
+        body: 'grant_type=authorization_code&code=code&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fcallback&code_verifier=codeVerifier',
+      })
+      .configureUserinfo()
+      .createSpy();
+
+    mockWindow
+      .setSearch('?state=state&code=code')
+      .setPathname('/callback')
+      .assert();
+
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+    const state: CallbackState = {
+      codeVerifier: 'codeVerifier',
+      nonce: 'nonce',
+      state: 'state',
+      mode: 'redirect',
+      scopes: 'openid offline_access',
+      returnUrl: 'https://evil.com/phish',
+      responseType: 'code',
+    };
+
+    mockStorage.setCallbackState(state);
+
+    const instance = testInstance({ storage: mockStorage });
+
+    await instance.processCallback();
+
+    const session = await instance.getSession();
+
+    expect(session?.user).toBeDefined();
+    expect(warnSpy).toHaveBeenCalledWith(
+      expect.stringContaining('different origin')
+    );
+    expect(window.location.href).not.toContain('evil.com');
+    fetchSpy.assert();
+
+    warnSpy.mockRestore();
   });
 
   it('should use default path for processing callback if the callback path is undefined', async () => {

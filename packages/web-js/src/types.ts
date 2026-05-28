@@ -339,39 +339,16 @@ export type InteractionMode =
   | 'redirect';
 
 /**
- * Metadata passed to {@link PostCallback} after callback processing completes.
- *
- * @category Types
- */
-export type PostCallbackParams =
-  | {
-      /** Indicates a sign-in flow was completed. */
-      type: 'signIn';
-      /** Interaction mode used during sign-in. */
-      mode: InteractionMode | 'silent';
-      /** Optional URL to navigate to after sign-in. */
-      returnUrl?: string;
-    }
-  | {
-      /** Indicates a sign-out flow was completed. */
-      type: 'signOut';
-      /** Interaction mode used during sign-out. */
-      mode: InteractionMode;
-      /** Optional URL to navigate to after sign-out. */
-      returnUrl?: string;
-    };
-
-/**
  * Callback executed after sign-in or sign-out callback processing.
  *
  * The default implementation removes query parameters from the current URL on `signIn` (no navigation) or performs a full page reload to `returnUrl`. Provide a custom implementation to integrate with a client-side router and avoid full page reloads.
  *
  * @category Types (Handler)
  *
- * @param state Metadata describing the completed flow.
+ * @param state Callback state.
  * @returns Returns a promise or void. Execution continues once the callback completes.
  */
-export type PostCallback = (state: PostCallbackParams) => Promise<void> | void;
+export type PostCallback = (state: CallbackState) => Promise<void> | void;
 
 /**
  * Options used to customize the sign-in flow.

@@ -36,7 +36,6 @@ import type {
   OnSessionCreating,
   GetTokensOptions,
   MonoCloudTokens,
-  InteractionMode,
 } from './types';
 import { AUTH_CONSTANTS } from './constants';
 import { Ref } from './ref';
@@ -95,13 +94,23 @@ export class MonoCloudWebJSClient {
       url.search = '';
       url.hash = '';
       history.replaceState({}, document.title, url.href);
-    } else {
+      return;
+    }
+
+    const resolved = new URL(state.returnUrl, this.options.appUrl);
+    if (resolved.origin !== this.appOrigin) {
       // eslint-disable-next-line no-console
       console.warn(
-        'Warning: The default behavior for return URL is to perform a full page reload, which resets all data when using MemoryStorage. To integrate with a client-side router, pass a custom postCallback() function during client initialization.'
+        `Ignoring returnUrl "${state.returnUrl}" because it resolves to a different origin than appUrl.`
       );
-      window.location.href = state.returnUrl;
+      return;
     }
+
+    // eslint-disable-next-line no-console
+    console.warn(
+      'Warning: The default behavior for return URL is to perform a full page reload, which resets all data when using MemoryStorage. To integrate with a client-side router, pass a custom postCallback() function during client initialization.'
+    );
+    window.location.href = resolved.href;
   };
 
   private readonly onSessionCreating?: OnSessionCreating;
@@ -1157,11 +1166,7 @@ export class MonoCloudWebJSClient {
 
       await this.setSession(session);
 
-      await this.postCallbackFn({
-        type: 'signIn',
-        returnUrl: callbackState.returnUrl,
-        mode: callbackState.mode,
-      });
+      await this.postCallbackFn(callbackState);
       return;
     }
 
@@ -1189,11 +1194,7 @@ export class MonoCloudWebJSClient {
 
     await this.setSession(session);
 
-    await this.postCallbackFn({
-      type: 'signIn',
-      returnUrl: callbackState.returnUrl,
-      mode: callbackState.mode,
-    });
+    await this.postCallbackFn(callbackState);
   }
 
   private async internalProcessSignOutCallback(
@@ -1220,11 +1221,7 @@ export class MonoCloudWebJSClient {
       throw new MonoCloudValidationError('Sign out states mismatch');
     }
 
-    await this.postCallbackFn({
-      type: 'signOut',
-      returnUrl: callbackState.returnUrl,
-      mode: callbackState.mode as InteractionMode,
-    });
+    await this.postCallbackFn(callbackState);
   }
 
   private postCallbackToParent(): void {
