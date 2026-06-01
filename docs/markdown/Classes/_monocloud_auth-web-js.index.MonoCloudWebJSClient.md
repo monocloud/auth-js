@@ -27,9 +27,6 @@ import { MonoCloudWebJSClient } from '@monocloud/auth-web-js';
 export const client = new MonoCloudWebJSClient({
   tenantDomain: 'https://<your-tenant>',
   clientId: '<your-client-id>',
-  appUrl: 'http://localhost:3000',
-  callbackPath: '/callback',
-  signOutCallbackPath: '/logout',
 });
 ```
 
@@ -59,7 +56,6 @@ import { MonoCloudWebJSClient } from '@monocloud/auth-web-js';
 export const client = new MonoCloudWebJSClient({
   tenantDomain: 'https://<your-tenant>',
   clientId: '<your-client-id>',
-  appUrl: 'http://localhost:3000',
 });
 ```
 
@@ -70,7 +66,6 @@ import { router } from './router';
 export const client = new MonoCloudWebJSClient({
   tenantDomain: 'https://<your-tenant>',
   clientId: '<your-client-id>',
-  appUrl: 'http://localhost:3000',
   storage: new MemoryStorage(),
   postCallback: state => {
     router.push(state.returnUrl ?? '/dashboard');

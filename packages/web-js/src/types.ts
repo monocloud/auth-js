@@ -117,9 +117,11 @@ export interface MonoCloudWebJSClientOptions {
    *
    * Used to construct redirect URLs and validate cross-origin messages received from popups or iframes.
    *
+   * If omitted, it defaults to the current page's origin (`window.location.origin`).
+   *
    * @example "https://example.com"
    */
-  appUrl: string;
+  appUrl?: string;
 
   /**
    * Relative callback path where MonoCloud redirects the user after sign-in.
@@ -204,11 +206,11 @@ export interface MonoCloudWebJSClientOptions {
   /**
    * Relative path where MonoCloud redirects the user after sign-out.
    *
-   * If provided, this URL must be registered in the application's sign-out URLs in MonoCloud.
+   * This URL must be registered in the application's sign-out URLs in MonoCloud. If omitted, the sign-out callback URL defaults to `appUrl` with path `/`.
    *
    * @example "/signout"
    */
-  signOutCallbackPath?: string;
+  signOutPath?: string;
 
   /**
    * Client secret or JSON Web Key used for client authentication.

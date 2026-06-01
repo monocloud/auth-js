@@ -24,7 +24,7 @@ export const testInstance = (
     appUrl: 'http://localhost:3000',
     tenantDomain: 'https://example.com',
     callbackPath: '/callback',
-    signOutCallbackPath: '/signout',
+    signOutPath: '/signout',
     clientId: 'clientId',
   };
 

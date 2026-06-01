@@ -68,9 +68,6 @@ import { withDedupedLock } from './lock';
  * export const client = new MonoCloudWebJSClient({
  *   tenantDomain: 'https://<your-tenant>',
  *   clientId: '<your-client-id>',
- *   appUrl: 'http://localhost:3000',
- *   callbackPath: '/callback',
- *   signOutCallbackPath: '/logout',
  * });
  * ```
  *
@@ -97,7 +94,7 @@ export class MonoCloudWebJSClient {
       return;
     }
 
-    const resolved = new URL(state.returnUrl, this.options.appUrl);
+    const resolved = new URL(state.returnUrl, this.appUrl);
     if (resolved.origin !== this.appOrigin) {
       // eslint-disable-next-line no-console
       console.warn(
@@ -163,12 +160,22 @@ export class MonoCloudWebJSClient {
     );
   }
 
+  private get appUrl(): string {
+    return this.options.appUrl ?? window.location.origin;
+  }
+
+  private buildCallbackUri(path?: string): string {
+    return removeTrailingSlash(
+      `${this.appUrl}${ensureLeadingSlash(path ?? '/')}`
+    );
+  }
+
   private get redirectUri(): string {
-    return `${this.options.appUrl}${ensureLeadingSlash(this.options.callbackPath ?? '/')}`;
+    return this.buildCallbackUri(this.options.callbackPath);
   }
 
   private get signOutRedirectUri(): string {
-    return `${this.options.appUrl}${ensureLeadingSlash(this.options.signOutCallbackPath ?? '/')}`;
+    return this.buildCallbackUri(this.options.signOutPath);
   }
 
   private get callbackStateKey(): string {
@@ -220,7 +227,7 @@ export class MonoCloudWebJSClient {
   }
 
   private get appOrigin(): string {
-    return new URL(this.options.appUrl).origin;
+    return new URL(this.appUrl).origin;
   }
 
   private get isTopLevel(): boolean {
@@ -272,7 +279,6 @@ export class MonoCloudWebJSClient {
    * export const client = new MonoCloudWebJSClient({
    *   tenantDomain: 'https://<your-tenant>',
    *   clientId: '<your-client-id>',
-   *   appUrl: 'http://localhost:3000',
    * });
    * ```
    *
@@ -284,7 +290,6 @@ export class MonoCloudWebJSClient {
    * export const client = new MonoCloudWebJSClient({
    *   tenantDomain: 'https://<your-tenant>',
    *   clientId: '<your-client-id>',
-   *   appUrl: 'http://localhost:3000',
    *   storage: new MemoryStorage(),
    *   postCallback: state => {
    *     router.push(state.returnUrl ?? '/dashboard');
@@ -345,7 +350,9 @@ export class MonoCloudWebJSClient {
    */
   async processCallback(): Promise<void> {
     const currentUrl = new URL(window.location.href);
-    const currentPath = `${currentUrl.origin}${currentUrl.pathname}`;
+    const currentPath = removeTrailingSlash(
+      `${currentUrl.origin}${currentUrl.pathname}`
+    );
 
     const isSignInPath = currentPath === this.redirectUri;
     const isSignOutPath = currentPath === this.signOutRedirectUri;
@@ -485,20 +492,15 @@ export class MonoCloudWebJSClient {
         return;
       }
 
-      let postLogoutRedirectUri: string | undefined;
-
-      if (this.options.signOutCallbackPath) {
-        postLogoutRedirectUri = new URL(
-          this.options.signOutCallbackPath,
-          this.options.appUrl
-        ).toString();
-      }
+      let postLogoutRedirectUri = this.signOutRedirectUri;
 
       if (signOutOptions?.postLogoutRedirectUri) {
-        ({ postLogoutRedirectUri } = signOutOptions);
+        postLogoutRedirectUri = removeTrailingSlash(
+          signOutOptions.postLogoutRedirectUri
+        );
       }
 
-      const state = postLogoutRedirectUri ? generateState() : undefined;
+      const state = generateState();
 
       const url = await this.oidcClient.endSessionUrl({
         idToken: session?.idToken,
@@ -959,7 +961,9 @@ export class MonoCloudWebJSClient {
   ): Promise<void> {
     const url = new URL(callbackUrl);
 
-    if (this.redirectUri !== `${url.origin}${url.pathname}`) {
+    if (
+      this.redirectUri !== removeTrailingSlash(`${url.origin}${url.pathname}`)
+    ) {
       throw new MonoCloudValidationError('Incorrect callback url');
     }
 
@@ -1185,8 +1189,8 @@ export class MonoCloudWebJSClient {
     const url = new URL(callbackUrl);
 
     if (
-      ensureLeadingSlash(this.options.signOutCallbackPath ?? '/') !==
-      url.pathname
+      this.signOutRedirectUri !==
+      removeTrailingSlash(`${url.origin}${url.pathname}`)
     ) {
       throw new MonoCloudValidationError('Incorrect callback url');
     }

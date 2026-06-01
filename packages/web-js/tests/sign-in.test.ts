@@ -64,12 +64,31 @@ describe('signIn() Tests', () => {
 
     mockWindow
       .expectOrigin('https://example.com/connect/authorize')
-      .expectQuery('redirect_uri', 'http://localhost:3000/')
+      .expectQuery('redirect_uri', 'http://localhost:3000')
       .assert();
 
     const instance = testInstance({
       storage: mockStorage,
       callbackPath: undefined,
+    });
+
+    await instance.signIn();
+
+    expect(window.location.assign).toHaveBeenCalledOnce();
+    fetchSpy.assert();
+  });
+
+  it('should default appUrl to the current window origin when not provided', async () => {
+    const fetchSpy = fetchBuilder().configureMetadata().createSpy();
+
+    mockWindow
+      .expectOrigin('https://example.com/connect/authorize')
+      .expectQuery('redirect_uri', 'http://localhost:3000/callback')
+      .assert();
+
+    const instance = testInstance({
+      storage: mockStorage,
+      appUrl: undefined,
     });
 
     await instance.signIn();
@@ -472,7 +491,7 @@ describe('signIn() Tests', () => {
       .configureJwks()
       .configureTokenEndpoint({
         idToken,
-        body: 'grant_type=authorization_code&code=code&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2F&code_verifier=codeVerifier',
+        body: 'grant_type=authorization_code&code=code&redirect_uri=http%3A%2F%2Flocalhost%3A3000&code_verifier=codeVerifier',
       })
       .configureUserinfo()
       .createSpy();
