@@ -131,6 +131,10 @@ export class MonoCloudCoreClient {
 
       const { method } = await request.getRawRequest();
 
+      if (this.handlePreflight(method, request, response, 'GET, OPTIONS')) {
+        return response.done();
+      }
+
       if (method.toLowerCase() !== 'get') {
         response.methodNotAllowed();
         return response.done();
@@ -403,6 +407,12 @@ export class MonoCloudCoreClient {
 
       const { method, url, body } = await request.getRawRequest();
 
+      if (
+        this.handlePreflight(method, request, response, 'GET, POST, OPTIONS')
+      ) {
+        return response.done();
+      }
+
       if (method.toLowerCase() !== 'get' && method.toLowerCase() !== 'post') {
         response.methodNotAllowed();
         return response.done();
@@ -555,6 +565,10 @@ export class MonoCloudCoreClient {
 
       const { method } = await request.getRawRequest();
 
+      if (this.handlePreflight(method, request, response, 'GET, OPTIONS')) {
+        return response.done();
+      }
+
       if (method.toLowerCase() !== 'get') {
         response.methodNotAllowed();
         return response.done();
@@ -665,6 +679,10 @@ export class MonoCloudCoreClient {
       response.setNoCache();
 
       const { method } = await request.getRawRequest();
+
+      if (this.handlePreflight(method, request, response, 'GET, OPTIONS')) {
+        return response.done();
+      }
 
       if (method.toLowerCase() !== 'get') {
         response.methodNotAllowed();
@@ -1112,6 +1130,57 @@ export class MonoCloudCoreClient {
     }
 
     return payload;
+  }
+
+  /**
+   * Handles a CORS preflight (`OPTIONS`) request without running the auth flow.
+   *
+   * @param method - The request method (already read from the raw request).
+   * @param request - MonoCloud request object.
+   * @param response - MonoCloud response object.
+   * @param allowedMethods - The methods the endpoint accepts (for example `'GET, OPTIONS'`).
+   *
+   * @returns `true` if the request was a preflight and has been handled; otherwise `false`.
+   *
+   * @see RFC 7231 Section 4.3.1 - Authorization checks must not be performed on preflight requests
+   */
+  private handlePreflight(
+    method: string,
+    request: MonoCloudRequest,
+    response: MonoCloudResponse,
+    allowedMethods: string
+  ): boolean {
+    if (
+      method.toLowerCase() !== 'options' ||
+      !isPresent(request.getHeader('access-control-request-method'))
+    ) {
+      return false;
+    }
+
+    this.debug('Handling CORS preflight request');
+
+    const origin = request.getHeader('origin');
+
+    if (isPresent(origin)) {
+      response.setHeader('Access-Control-Allow-Origin', origin);
+      response.setHeader('Access-Control-Allow-Credentials', 'true');
+      response.setHeader('Vary', 'Origin');
+    }
+
+    response.setHeader('Access-Control-Allow-Methods', allowedMethods);
+
+    const requestedHeaders = request.getHeader(
+      'access-control-request-headers'
+    );
+    if (isPresent(requestedHeaders)) {
+      response.setHeader('Access-Control-Allow-Headers', requestedHeaders);
+    }
+
+    response.setHeader('Access-Control-Max-Age', '86400');
+
+    response.noContent();
+
+    return true;
   }
 
   private handleCatchAll(error: Error, res: MonoCloudResponse): void {

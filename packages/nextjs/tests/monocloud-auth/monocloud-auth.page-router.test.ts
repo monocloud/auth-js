@@ -76,4 +76,54 @@ describe('Authentication Handler - Page Router', () => {
       });
     });
   });
+
+  describe('CORS preflight', () => {
+    (
+      [
+        ['/api/auth/signin', 'GET, OPTIONS'],
+        ['/api/auth/callback', 'GET, POST, OPTIONS'],
+        ['/api/auth/userinfo', 'GET, OPTIONS'],
+        ['/api/auth/signout', 'GET, OPTIONS'],
+      ] as [string, string][]
+    ).forEach(([endpoint, allowedMethods]) => {
+      it(`should answer a CORS preflight on ${endpoint} with 204 and CORS headers`, async () => {
+        const response = await fetch(`${baseUrl}${endpoint}`, {
+          method: 'OPTIONS',
+          headers: {
+            origin: 'https://app.example.com',
+            'access-control-request-method': 'GET',
+            'access-control-request-headers': 'content-type, x-custom',
+          },
+        });
+
+        expect(response.status).toBe(204);
+        expect(response.headers.get('access-control-allow-origin')).toBe(
+          'https://app.example.com'
+        );
+        expect(response.headers.get('access-control-allow-credentials')).toBe(
+          'true'
+        );
+        expect(response.headers.get('access-control-allow-methods')).toBe(
+          allowedMethods
+        );
+        expect(response.headers.get('access-control-allow-headers')).toBe(
+          'content-type, x-custom'
+        );
+        expect(response.headers.get('access-control-max-age')).toBe('86400');
+        expect(response.headers.get('vary')).toContain('Origin');
+      });
+    });
+
+    it('should treat a bare OPTIONS request (no Access-Control-Request-Method) as 405', async () => {
+      setupOp(defaultDiscovery, noTokenAndUserInfo);
+
+      const response = await fetch(`${baseUrl}/api/auth/userinfo`, {
+        method: 'OPTIONS',
+        headers: { origin: 'https://app.example.com' },
+      });
+
+      expect(response.status).toBe(405);
+      expect(response.headers.get('access-control-allow-methods')).toBeNull();
+    });
+  });
 });

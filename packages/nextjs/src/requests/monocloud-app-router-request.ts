@@ -10,6 +10,10 @@ export default class MonoCloudAppRouterRequest implements MonoCloudRequest {
     return url.searchParams.get(parameter) ?? undefined;
   }
 
+  getHeader(name: string): string | undefined {
+    return this.req.headers.get(name) ?? undefined;
+  }
+
   getCookie(name: string): Promise<string | undefined> {
     return Promise.resolve(this.req.cookies.get(name)?.value);
   }

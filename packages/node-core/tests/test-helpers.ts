@@ -18,13 +18,15 @@ interface MockQuery {
 interface MockRequest {
   cookies?: MockCookies;
   query?: MockQuery;
-  method?: 'GET' | 'POST';
+  headers?: { [key: string]: string };
+  method?: string;
   url?: string;
   body?: any;
 }
 
 interface MockResponse {
   cookies: MockCookies;
+  headers: { [key: string]: string };
   redirectedUrl?: string;
   statusCode?: number;
   body?: any;
@@ -40,7 +42,7 @@ export class TestRes implements MonoCloudResponse {
   public readonly res: MockResponse;
 
   constructor(cookies?: MockCookies) {
-    this.res = { cookies: cookies ?? {} };
+    this.res = { cookies: cookies ?? {}, headers: {} };
   }
 
   internalServerError(): void {
@@ -73,6 +75,11 @@ export class TestRes implements MonoCloudResponse {
   methodNotAllowed(): void {
     this.throwIfDone();
     this.res.statusCode = 405;
+  }
+
+  setHeader(name: string, value: string): void {
+    this.throwIfDone();
+    this.res.headers[name] = value;
   }
 
   setNoCache(): void {
@@ -113,6 +120,7 @@ export class TestReq implements MonoCloudRequest {
     this.req = {
       cookies: req?.cookies ?? {},
       query: req?.query ?? {},
+      headers: req?.headers ?? {},
       url: req?.url,
       body: req?.body,
       method: req?.method,
@@ -125,6 +133,14 @@ export class TestReq implements MonoCloudRequest {
       return url.searchParams.get(parameter) ?? undefined;
     }
     return this.req.query?.[parameter];
+  }
+
+  getHeader(name: string): string | undefined {
+    const headers = this.req.headers ?? {};
+    const key = Object.keys(headers).find(
+      k => k.toLowerCase() === name.toLowerCase()
+    );
+    return key === undefined ? undefined : headers[key];
   }
 
   getRawRequest(): Promise<{

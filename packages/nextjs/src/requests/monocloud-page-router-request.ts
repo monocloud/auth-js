@@ -10,6 +10,17 @@ export default class MonoCloudPageRouterRequest implements MonoCloudRequest {
     return this.req.query[parameter];
   }
 
+  getHeader(name: string): string | undefined {
+    const value = this.req.headers[name.toLowerCase()];
+
+    /* v8 ignore next 3 -- @preserve duplicate headers (string[]) are not read by the SDK */
+    if (Array.isArray(value)) {
+      return value.join(', ');
+    }
+
+    return value;
+  }
+
   /* v8 ignore next */
   getCookie(name: string): Promise<string | undefined> {
     return Promise.resolve(this.req.cookies[name]);

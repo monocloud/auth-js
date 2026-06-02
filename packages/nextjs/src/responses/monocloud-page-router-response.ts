@@ -59,6 +59,10 @@ export default class MonoCloudPageRouterResponse implements MonoCloudResponse {
     this.res.status(405);
   }
 
+  setHeader(name: string, value: string): void {
+    this.res.setHeader(name, value);
+  }
+
   /* v8 ignore next */
   setNoCache(): void {
     this.res.setHeader(

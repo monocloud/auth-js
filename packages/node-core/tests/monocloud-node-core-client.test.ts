@@ -3619,6 +3619,117 @@ describe('MonoCloud Base Instance', () => {
         expect(res.res.statusCode).toBe(500);
       });
     });
+
+    describe('preflight (CORS OPTIONS)', () => {
+      const preflightHeaders = {
+        origin: 'https://app.example.com',
+        'access-control-request-method': 'GET',
+        'access-control-request-headers': 'content-type, x-custom',
+      };
+
+      const cases: {
+        name: string;
+        invoke: (
+          instance: MonoCloudCoreClient,
+          req: TestReq,
+          res: TestRes
+        ) => Promise<unknown>;
+        allowedMethods: string;
+      }[] = [
+        {
+          name: 'signin',
+          invoke: (i, req, res) => i.signIn(req, res),
+          allowedMethods: 'GET, OPTIONS',
+        },
+        {
+          name: 'callback',
+          invoke: (i, req, res) => i.callback(req, res),
+          allowedMethods: 'GET, POST, OPTIONS',
+        },
+        {
+          name: 'userinfo',
+          invoke: (i, req, res) => i.userInfo(req, res),
+          allowedMethods: 'GET, OPTIONS',
+        },
+        {
+          name: 'signout',
+          invoke: (i, req, res) => i.signOut(req, res),
+          allowedMethods: 'GET, OPTIONS',
+        },
+      ];
+
+      cases.forEach(({ name, invoke, allowedMethods }) => {
+        it(`should answer a CORS preflight on ${name} with 204 and CORS headers without running the auth flow`, async () => {
+          const instance = getConfiguredInstance();
+
+          const req = new TestReq({
+            method: 'OPTIONS',
+            headers: preflightHeaders,
+          });
+          const res = new TestRes();
+
+          await invoke(instance, req, res);
+
+          expect(res.res.statusCode).toBe(204);
+          expect(res.res.headers['Access-Control-Allow-Origin']).toBe(
+            'https://app.example.com'
+          );
+          expect(res.res.headers['Access-Control-Allow-Credentials']).toBe(
+            'true'
+          );
+          expect(res.res.headers.Vary).toBe('Origin');
+          expect(res.res.headers['Access-Control-Allow-Methods']).toBe(
+            allowedMethods
+          );
+          expect(res.res.headers['Access-Control-Allow-Headers']).toBe(
+            'content-type, x-custom'
+          );
+          expect(res.res.headers['Access-Control-Max-Age']).toBe('86400');
+          expect(res.res.done).toBe(true);
+          expect(res.res.body).toBeUndefined();
+          expect(res.res.redirectedUrl).toBeUndefined();
+        });
+      });
+
+      it('should omit origin-specific headers when no Origin is present', async () => {
+        const instance = getConfiguredInstance();
+
+        const req = new TestReq({
+          method: 'OPTIONS',
+          headers: { 'access-control-request-method': 'GET' },
+        });
+        const res = new TestRes();
+
+        await instance.userInfo(req, res);
+
+        expect(res.res.statusCode).toBe(204);
+        expect(res.res.headers['Access-Control-Allow-Origin']).toBeUndefined();
+        expect(
+          res.res.headers['Access-Control-Allow-Credentials']
+        ).toBeUndefined();
+        expect(res.res.headers.Vary).toBeUndefined();
+        expect(res.res.headers['Access-Control-Allow-Methods']).toBe(
+          'GET, OPTIONS'
+        );
+        expect(res.res.headers['Access-Control-Allow-Headers']).toBeUndefined();
+        expect(res.res.headers['Access-Control-Max-Age']).toBe('86400');
+      });
+
+      it('should treat a bare OPTIONS request (no Access-Control-Request-Method) as method not allowed', async () => {
+        const instance = getConfiguredInstance();
+
+        const req = new TestReq({
+          method: 'OPTIONS',
+          headers: { origin: 'https://app.example.com' },
+        });
+        const res = new TestRes();
+
+        await instance.userInfo(req, res);
+
+        expect(res.res.statusCode).toBe(405);
+        expect(res.res.headers['Access-Control-Allow-Methods']).toBeUndefined();
+      });
+    });
   });
 
   describe('instance helpers', () => {

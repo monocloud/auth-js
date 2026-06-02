@@ -38,6 +38,12 @@ export interface MonoCloudRequest extends IMonoCloudCookieRequest {
    * @param parameter - The name of the query parameter to retrieve.
    */
   getQuery(parameter: string): string | string[] | undefined;
+  /**
+   * Retrieves a request header value by name.
+   *
+   * @param name - The (case-insensitive) name of the header to retrieve.
+   */
+  getHeader(name: string): string | undefined;
   /** Returns the raw request details including method, URL, and body. */
   getRawRequest(): Promise<{
     method: string;
@@ -94,6 +100,13 @@ export interface MonoCloudResponse extends IMonoCloudCookieResponse {
   internalServerError(): void;
   /** Sends a 405 Method Not Allowed response. */
   methodNotAllowed(): void;
+  /**
+   * Sets a header on the response.
+   *
+   * @param name - The name of the header to set.
+   * @param value - The value to assign to the header.
+   */
+  setHeader(name: string, value: string): void;
   /** Sets cache-control headers to prevent caching. */
   setNoCache(): void;
   /** Finalizes and returns the response. */

@@ -48,6 +48,10 @@ export default class MonoCloudAppRouterResponse implements MonoCloudResponse {
     this.res = new NextResponse(null, { status: 405, headers });
   }
 
+  setHeader(name: string, value: string): void {
+    this.res.headers.set(name, value);
+  }
+
   setNoCache(): void {
     this.res.headers.set(
       'Cache-Control',
