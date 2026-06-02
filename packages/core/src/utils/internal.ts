@@ -403,6 +403,49 @@ export const sha256 = async (input: string): Promise<string> =>
 
 /**
  * @ignore
+ * Computes the base64url-encoded left-most half of the digest of `value`,
+ * using the hash algorithm implied by an id token signing algorithm.
+ *
+ * @param value - The value to hash (for example an access token, code or state).
+ * @param alg - The id token signing algorithm.
+ *
+ * @returns The base64url encoded left-most half of the digest.
+ */
+export const hashTokenValue = async (
+  value: string,
+  alg: SecurityAlgorithms
+): Promise<string> => {
+  const digest = `SHA-${alg.slice(-3)}`;
+
+  const hash = new Uint8Array(
+    await crypto.subtle.digest(
+      digest,
+      stringToArrayBuffer(value) as BufferSource
+    )
+  );
+
+  return encodeBase64Url(hash.slice(0, hash.length / 2));
+};
+
+/**
+ * @ignore
+ * Validates an OpenID Connect hash claim (such as `at_hash`, `c_hash` or
+ * `s_hash`) against the value it was derived from.
+ *
+ * @param value - The value the hash was derived from (for example the access token or state).
+ * @param expectedHash - The hash claim value present in the id token.
+ * @param alg - The id token signing algorithm.
+ *
+ * @returns `true` when the computed hash matches `expectedHash`, `false` otherwise.
+ */
+export const validateTokenHash = async (
+  value: string,
+  expectedHash: string,
+  alg: SecurityAlgorithms
+): Promise<boolean> => (await hashTokenValue(value, alg)) === expectedHash;
+
+/**
+ * @ignore
  * Generates a random Base64URL encoded string.
  *
  * @param length - The number of random bytes to generate.

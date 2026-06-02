@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   fetchBuilder,
   generateIdToken,
+  generateTokenHash,
   MockWindow,
 } from '@monocloud/auth-test-utils';
 import { testInstance, VanillaJsMockStorage } from './utils';
@@ -723,7 +724,7 @@ describe('signIn() Tests', () => {
   it("Redirect Mode - should process a redirect callback (Implicit - 'id_token token' response type)", async () => {
     const idToken = await generateIdToken({
       nonce: 'nonce',
-      claims: { sub: 'some' },
+      claims: { sub: 'some', at_hash: await generateTokenHash('at') },
     });
 
     const fetchSpy = fetchBuilder()
@@ -773,10 +774,299 @@ describe('signIn() Tests', () => {
     fetchSpy.assert();
   });
 
-  it('Redirect Mode - should set the scope in access token as requested scope if scope is not present', async () => {
+  it("Redirect Mode - should throw an error if 'at_hash' is missing for 'id_token token' response type", async () => {
     const idToken = await generateIdToken({
       nonce: 'nonce',
       claims: { sub: 'some' },
+    });
+
+    const fetchSpy = fetchBuilder()
+      .configureMetadata()
+      .configureJwks()
+      .createSpy();
+
+    mockWindow
+      .setHash(
+        `#state=state&id_token=${idToken}&access_token=at&expires_in=600&scope=openid`
+      )
+      .setPathname('/callback')
+      .assert();
+
+    const state: CallbackState = {
+      nonce: 'nonce',
+      state: 'state',
+      mode: 'redirect',
+      scopes: 'openid',
+      responseType: 'id_token token',
+    };
+
+    mockStorage.setCallbackState(state);
+
+    const instance = testInstance({ storage: mockStorage });
+
+    const error = await instance.processCallback().catch(e => e);
+
+    expect(error).toBeInstanceOf(MonoCloudValidationError);
+    expect(error.message).toBe("Invalid 'at_hash' in id token");
+
+    mockStorage.expectCallbackStateRemoved();
+    fetchSpy.assert();
+  });
+
+  it("Redirect Mode - should throw an error if 'at_hash' does not match the access token", async () => {
+    const idToken = await generateIdToken({
+      nonce: 'nonce',
+      claims: { sub: 'some', at_hash: await generateTokenHash('different') },
+    });
+
+    const fetchSpy = fetchBuilder()
+      .configureMetadata()
+      .configureJwks()
+      .createSpy();
+
+    mockWindow
+      .setHash(
+        `#state=state&id_token=${idToken}&access_token=at&expires_in=600&scope=openid`
+      )
+      .setPathname('/callback')
+      .assert();
+
+    const state: CallbackState = {
+      nonce: 'nonce',
+      state: 'state',
+      mode: 'redirect',
+      scopes: 'openid',
+      responseType: 'id_token token',
+    };
+
+    mockStorage.setCallbackState(state);
+
+    const instance = testInstance({ storage: mockStorage });
+
+    const error = await instance.processCallback().catch(e => e);
+
+    expect(error).toBeInstanceOf(MonoCloudValidationError);
+    expect(error.message).toBe("Invalid 'at_hash' in id token");
+
+    mockStorage.expectCallbackStateRemoved();
+    fetchSpy.assert();
+  });
+
+  it("Redirect Mode - should validate a matching 's_hash' for the implicit flow", async () => {
+    const idToken = await generateIdToken({
+      nonce: 'nonce',
+      claims: { sub: 'some', s_hash: await generateTokenHash('state') },
+    });
+
+    const fetchSpy = fetchBuilder()
+      .configureMetadata()
+      .configureJwks()
+      .createSpy();
+
+    mockWindow
+      .setHash(`#state=state&id_token=${idToken}&scope=openid`)
+      .setPathname('/callback')
+      .assert();
+
+    const state: CallbackState = {
+      nonce: 'nonce',
+      state: 'state',
+      mode: 'redirect',
+      scopes: 'openid',
+      responseType: 'id_token',
+    };
+
+    mockStorage.setCallbackState(state);
+
+    const instance = testInstance({ storage: mockStorage });
+
+    await instance.processCallback();
+
+    const session = await instance.getSession();
+
+    expect(session?.user.sub).toBe('some');
+    expect((session?.user as Record<string, unknown>).s_hash).toBeUndefined();
+
+    mockStorage.expectCallbackStateRemoved();
+    fetchSpy.assert();
+  });
+
+  it("Redirect Mode - should throw an error if 's_hash' does not match the state", async () => {
+    const idToken = await generateIdToken({
+      nonce: 'nonce',
+      claims: { sub: 'some', s_hash: await generateTokenHash('different') },
+    });
+
+    const fetchSpy = fetchBuilder()
+      .configureMetadata()
+      .configureJwks()
+      .createSpy();
+
+    mockWindow
+      .setHash(`#state=state&id_token=${idToken}&scope=openid`)
+      .setPathname('/callback')
+      .assert();
+
+    const state: CallbackState = {
+      nonce: 'nonce',
+      state: 'state',
+      mode: 'redirect',
+      scopes: 'openid',
+      responseType: 'id_token',
+    };
+
+    mockStorage.setCallbackState(state);
+
+    const instance = testInstance({ storage: mockStorage });
+
+    const error = await instance.processCallback().catch(e => e);
+
+    expect(error).toBeInstanceOf(MonoCloudValidationError);
+    expect(error.message).toBe("Invalid 's_hash' in id token");
+
+    mockStorage.expectCallbackStateRemoved();
+    fetchSpy.assert();
+  });
+
+  it("Redirect Mode - should validate both 'at_hash' and 's_hash' for the 'id_token token' response type", async () => {
+    const idToken = await generateIdToken({
+      nonce: 'nonce',
+      claims: {
+        sub: 'some',
+        at_hash: await generateTokenHash('at'),
+        s_hash: await generateTokenHash('state'),
+      },
+    });
+
+    const fetchSpy = fetchBuilder()
+      .configureMetadata()
+      .configureJwks()
+      .configureUserinfo({ claims: { sub: 'some' } })
+      .createSpy();
+
+    mockWindow
+      .setHash(
+        `#state=state&id_token=${idToken}&access_token=at&expires_in=600&scope=openid`
+      )
+      .setPathname('/callback')
+      .assert();
+
+    const state: CallbackState = {
+      nonce: 'nonce',
+      state: 'state',
+      mode: 'redirect',
+      scopes: 'openid',
+      responseType: 'id_token token',
+    };
+
+    mockStorage.setCallbackState(state);
+
+    const instance = testInstance({ storage: mockStorage });
+
+    await instance.processCallback();
+
+    const session = await instance.getSession();
+
+    expect(session?.user.sub).toBe('some');
+    expect((session?.user as Record<string, unknown>).at_hash).toBeUndefined();
+    expect((session?.user as Record<string, unknown>).s_hash).toBeUndefined();
+    expect(session?.accessTokens?.[0].accessToken).toBe('at');
+
+    mockStorage.expectCallbackStateRemoved();
+    fetchSpy.assert();
+  });
+
+  it("Redirect Mode - should throw an error if 's_hash' does not match for the 'id_token token' response type", async () => {
+    const idToken = await generateIdToken({
+      nonce: 'nonce',
+      claims: {
+        sub: 'some',
+        at_hash: await generateTokenHash('at'),
+        s_hash: await generateTokenHash('different'),
+      },
+    });
+
+    const fetchSpy = fetchBuilder()
+      .configureMetadata()
+      .configureJwks()
+      .createSpy();
+
+    mockWindow
+      .setHash(
+        `#state=state&id_token=${idToken}&access_token=at&expires_in=600&scope=openid`
+      )
+      .setPathname('/callback')
+      .assert();
+
+    const state: CallbackState = {
+      nonce: 'nonce',
+      state: 'state',
+      mode: 'redirect',
+      scopes: 'openid',
+      responseType: 'id_token token',
+    };
+
+    mockStorage.setCallbackState(state);
+
+    const instance = testInstance({ storage: mockStorage });
+
+    const error = await instance.processCallback().catch(e => e);
+
+    expect(error).toBeInstanceOf(MonoCloudValidationError);
+    expect(error.message).toBe("Invalid 's_hash' in id token");
+
+    mockStorage.expectCallbackStateRemoved();
+    fetchSpy.assert();
+  });
+
+  it("Redirect Mode - should skip 'at_hash' validation for 'id_token token' when validateIdToken is false", async () => {
+    const idToken = await generateIdToken({
+      nonce: 'nonce',
+      claims: { sub: 'some' },
+    });
+
+    const fetchSpy = fetchBuilder()
+      .configureMetadata()
+      .configureUserinfo({ claims: { sub: 'some' } })
+      .createSpy();
+
+    mockWindow
+      .setHash(
+        `#state=state&id_token=${idToken}&access_token=at&expires_in=600&scope=openid`
+      )
+      .setPathname('/callback')
+      .assert();
+
+    const state: CallbackState = {
+      nonce: 'nonce',
+      state: 'state',
+      mode: 'redirect',
+      scopes: 'openid',
+      responseType: 'id_token token',
+    };
+
+    mockStorage.setCallbackState(state);
+
+    const instance = testInstance({
+      storage: mockStorage,
+      validateIdToken: false,
+    });
+
+    await instance.processCallback();
+
+    const session = await instance.getSession();
+
+    expect(session?.user.sub).toBe('some');
+    expect(session?.accessTokens?.[0].accessToken).toBe('at');
+
+    mockStorage.expectCallbackStateRemoved();
+    fetchSpy.assert();
+  });
+
+  it('Redirect Mode - should set the scope in access token as requested scope if scope is not present', async () => {
+    const idToken = await generateIdToken({
+      nonce: 'nonce',
+      claims: { sub: 'some', at_hash: await generateTokenHash('at') },
     });
 
     const fetchSpy = fetchBuilder()
@@ -913,7 +1203,7 @@ describe('signIn() Tests', () => {
   it('Redirect Mode - should throw an error if fetchUserinfo is true and scope does not have openid', async () => {
     const idToken = await generateIdToken({
       nonce: 'nonce',
-      claims: { sub: 'some' },
+      claims: { sub: 'some', at_hash: await generateTokenHash('at') },
     });
 
     const fetchSpy = fetchBuilder()
@@ -958,7 +1248,7 @@ describe('signIn() Tests', () => {
   it('Redirect Mode - should throw an error if expires_in is not present in implicit flow', async () => {
     const idToken = await generateIdToken({
       nonce: 'nonce',
-      claims: { sub: 'some' },
+      claims: { sub: 'some', at_hash: await generateTokenHash('at') },
     });
 
     const fetchSpy = fetchBuilder()
@@ -2676,7 +2966,10 @@ describe('signIn() Tests', () => {
 
     const callbackState = mockStorage.getCallbackState()!;
 
-    const validIdToken = await generateIdToken({ nonce: callbackState.nonce });
+    const validIdToken = await generateIdToken({
+      nonce: callbackState.nonce,
+      claims: { at_hash: await generateTokenHash('at') },
+    });
 
     mockWindow
       .setHash(

@@ -2,6 +2,7 @@ export {
   fetchBuilder,
   defaultMetadata,
   generateIdToken,
+  generateTokenHash,
   idTokenPrivateKey,
   idTokenPublicKey,
   AuthorizationServerFetchBuilder,

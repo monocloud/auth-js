@@ -34,6 +34,7 @@ import {
   getBoolean,
   getNumber,
   getPublicSigKeyFromIssuerJwks,
+  hashTokenValue,
   isAbsoluteUrl,
   isJsonObject,
   isPresent,
@@ -46,7 +47,9 @@ import {
   setsEqual,
   stringToArrayBuffer,
   toB64Url,
+  validateTokenHash,
 } from '../src/utils/internal';
+import { generateTokenHash } from '@monocloud/auth-test-utils';
 
 describe('getBoolean', () => {
   it('should return true when value is "true"', () => {
@@ -1285,4 +1288,57 @@ describe('profileSync', () => {
     const result = profileSync(existingUser, idToken);
     expect(result.stale).toBe('stale-claim');
   });
+});
+
+describe('hashTokenValue', () => {
+  it('should compute the base64url left-most half digest of the value', async () => {
+    const expected = await generateTokenHash('access-token-value');
+
+    expect(await hashTokenValue('access-token-value', 'RS256')).toBe(expected);
+  });
+});
+
+describe('validateTokenHash', () => {
+  it('should return true when the computed hash matches the expected hash', async () => {
+    const expected = await generateTokenHash('access-token-value');
+
+    expect(
+      await validateTokenHash('access-token-value', expected, 'RS256')
+    ).toBe(true);
+  });
+
+  it('should return false when the computed hash does not match', async () => {
+    const expected = await generateTokenHash('access-token-value');
+
+    expect(
+      await validateTokenHash('a-different-value', expected, 'RS256')
+    ).toBe(false);
+  });
+
+  it.each([
+    ['RS256', 'SHA-256'],
+    ['RS384', 'SHA-384'],
+    ['RS512', 'SHA-512'],
+    ['PS256', 'SHA-256'],
+    ['PS384', 'SHA-384'],
+    ['PS512', 'SHA-512'],
+    ['ES256', 'SHA-256'],
+    ['ES384', 'SHA-384'],
+    ['ES512', 'SHA-512'],
+  ] as const)(
+    'should derive the hash algorithm from the id token signing algorithm (%s -> %s)',
+    async (alg, hashAlgorithm) => {
+      const expected = await generateTokenHash(
+        'access-token-value',
+        hashAlgorithm
+      );
+
+      expect(await validateTokenHash('access-token-value', expected, alg)).toBe(
+        true
+      );
+      expect(await validateTokenHash('a-different-value', expected, alg)).toBe(
+        false
+      );
+    }
+  );
 });

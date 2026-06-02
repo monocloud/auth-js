@@ -11,6 +11,7 @@ import type {
   IdTokenClaims,
   MonoCloudSession,
   ResponseTypes,
+  SecurityAlgorithms,
   UserinfoResponse,
 } from '@monocloud/auth-core';
 import {
@@ -22,6 +23,7 @@ import {
   parseSpaceSeparatedSet,
   removeTrailingSlash,
   setsEqual,
+  validateTokenHash,
 } from '@monocloud/auth-core/internal';
 import type {
   CallbackState,
@@ -144,6 +146,13 @@ export class MonoCloudWebJSClient {
   private get validateIdToken(): boolean {
     return (
       this.options.validateIdToken ?? AUTH_CONSTANTS.DEFAULT_VALIDATE_ID_TOKEN
+    );
+  }
+
+  private get idTokenSigningAlgorithm(): SecurityAlgorithms {
+    return (
+      this.options.idTokenSigningAlgorithm ??
+      AUTH_CONSTANTS.DEFAULT_ID_TOKEN_SIGNING_ALG
     );
   }
 
@@ -1083,6 +1092,31 @@ export class MonoCloudWebJSClient {
             callbackState.maxAge,
             callbackState.nonce
           );
+
+          if (
+            callbackState.responseType === 'id_token token' &&
+            (!isPresent(idTokenClaims.at_hash) ||
+              !(await validateTokenHash(
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                accessToken!,
+                idTokenClaims.at_hash,
+                this.idTokenSigningAlgorithm
+              )))
+          ) {
+            throw new MonoCloudValidationError("Invalid 'at_hash' in id token");
+          }
+
+          if (
+            isPresent(idTokenClaims.s_hash) &&
+            (!isPresent(callbackState.state) ||
+              !(await validateTokenHash(
+                callbackState.state,
+                idTokenClaims.s_hash,
+                this.idTokenSigningAlgorithm
+              )))
+          ) {
+            throw new MonoCloudValidationError("Invalid 's_hash' in id token");
+          }
         } else {
           // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           idTokenClaims = MonoCloudOidcClient.decodeJwt(idToken!);
