@@ -60,7 +60,6 @@ export type {
   SignOutOptions,
   CallbackState,
   PostCallback,
-  PostCallbackParams,
   GetTokensOptions,
   DefaultAuthParams,
 } from './types';

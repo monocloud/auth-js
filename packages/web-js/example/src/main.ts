@@ -13,19 +13,15 @@ import {
  * The example demonstrates how to sign in (interactive and silent), sign out, refresh the session, refetch the userinfo and get tokens.
  *
  * You have to enable the following settings in your client with Single Page Application preset:
- *  - Allowed Callback URLs: http://localhost:5173/callback
- *  - Allowed Signout URLs: http://localhost:5173/logout
+ *  - Allowed Callback URLs: http://localhost:5173
+ *  - Allowed Signout URLs: http://localhost:5173
  *  - Allowed Origins (CORS): http://localhost:5173
- *  - Scopes (at least): openid, profile, email
  *  - Enable Refresh Tokens
  */
 
 const options: MonoCloudWebJSClientOptions = {
   tenantDomain: 'https://<your-tenant>',
   clientId: '<your-client-id>',
-  appUrl: 'http://localhost:5173',
-  callbackPath: '/callback',
-  signOutCallbackPath: '/logout',
   defaultAuthParams: {
     scopes: 'openid profile email offline_access',
     // resource: <space separated resources>
@@ -75,18 +71,8 @@ const updateUI = async (): Promise<void> => {
   }
 };
 
-const dispatchCallback = (): Promise<void> => {
-  switch (window.location.pathname) {
-    case options.callbackPath:
-      return client.processSignInCallback();
-    case options.signOutCallbackPath:
-      return client.processSignOutCallback();
-    default:
-      return Promise.resolve();
-  }
-};
-
-dispatchCallback()
+client
+  .processCallback()
   .then(() => {
     processingCallback = false;
     const processCallbackMessage = document.getElementById('loading')!;

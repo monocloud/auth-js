@@ -58,20 +58,15 @@ import { MonoCloudWebJSClient } from '@monocloud/auth-web-js';
 export const client = new MonoCloudWebJSClient({
   tenantDomain: 'https://<your-tenant-domain>',
   clientId: '<your-client-id>',
-  appUrl: 'http://localhost:3000',
-  callbackPath: '/callback',
-  signOutCallbackPath: '/logout',
 });
 ```
 
-### Wire Up the Callback Routes
+### Process the Callback
 
-Call the matching process method from each callback route. The SDK never infers which flow is in progress — wire each handler to the route that owns its redirect URI.
+Call `processCallback()` once at application startup. It inspects the current URL and the persisted callback state to automatically complete a pending sign-in or sign-out flow — no per-route dispatch required. When the current URL is not an in-progress callback, it is a no-op.
 
 ```typescript
-await client.processSignInCallback();
-
-await client.processSignOutCallback();
+await client.processCallback();
 ```
 
 ### Sign In and Sign Out

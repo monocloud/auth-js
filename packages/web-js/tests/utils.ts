@@ -5,9 +5,7 @@ import type {
   CallbackState,
   IStorage,
   InteractionMode,
-  PostCallback,
   MonoCloudWebJSClientOptions,
-  OnSessionCreating,
 } from '../src';
 import { AUTH_CONSTANTS } from '../src/constants';
 import { MonoCloudWebJSClient } from '../src';
@@ -20,34 +18,20 @@ export const ensureLockManagerStub = (): void => {
 };
 
 export const testInstance = (
-  options?: Partial<MonoCloudWebJSClientOptions> & {
-    storage?: IStorage;
-    postCallback?: PostCallback;
-    onSessionCreating?: OnSessionCreating;
-  }
+  options?: Partial<MonoCloudWebJSClientOptions>
 ): MonoCloudWebJSClient => {
   const deafultOptions = {
     appUrl: 'http://localhost:3000',
     tenantDomain: 'https://example.com',
     callbackPath: '/callback',
-    signOutCallbackPath: '/signout',
+    signOutPath: '/signout',
     clientId: 'clientId',
   };
 
-  // eslint-disable-next-line no-param-reassign
-  options = options
-    ? {
-        ...deafultOptions,
-        ...options,
-      }
-    : deafultOptions;
-
-  const instance = new MonoCloudWebJSClient(
-    options as MonoCloudWebJSClientOptions,
-    options.storage,
-    options.postCallback,
-    options.onSessionCreating
-  );
+  const instance = new MonoCloudWebJSClient({
+    ...deafultOptions,
+    ...options,
+  } as MonoCloudWebJSClientOptions);
 
   return instance;
 };

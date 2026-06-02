@@ -18,6 +18,7 @@ const ROOT_SDK_NAME_REPLACEMENTS = [
   ['@monocloud/auth-node-core', 'Node.js Core'],
   ['@monocloud/auth-core', 'Node.js'],
   ['@monocloud/backend-node', 'Node.js Backend'],
+  ['@monocloud/auth-web-js', 'JavaScript'],
 ];
 
 const Type = {
@@ -289,6 +290,11 @@ export const load = app => {
         ''
       );
     }
+
+    page.contents = page.contents.replace(
+      /#### Implementation of\n\n.+?(\n\n|\n?$)/g,
+      ''
+    );
 
     if (type === Type.Components) {
       const signatureRegex = /> \*\*.*?\*\*[\s\S]*?(\n\n|$)/;

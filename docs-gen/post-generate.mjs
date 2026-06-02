@@ -8,6 +8,7 @@ const SDK_SLUGS = {
   '_monocloud_auth-node-core': 'nodejs-core',
   '_monocloud_auth-core': 'nodejs',
   '_monocloud_backend-node': 'nodejs-backend',
+  '_monocloud_auth-web-js': 'web-js',
 };
 
 const CATEGORY_MAP = {

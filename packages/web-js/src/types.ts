@@ -117,9 +117,11 @@ export interface MonoCloudWebJSClientOptions {
    *
    * Used to construct redirect URLs and validate cross-origin messages received from popups or iframes.
    *
+   * If omitted, it defaults to the current page's origin (`window.location.origin`).
+   *
    * @example "https://example.com"
    */
-  appUrl: string;
+  appUrl?: string;
 
   /**
    * Relative callback path where MonoCloud redirects the user after sign-in.
@@ -204,11 +206,11 @@ export interface MonoCloudWebJSClientOptions {
   /**
    * Relative path where MonoCloud redirects the user after sign-out.
    *
-   * If provided, this URL must be registered in the application's sign-out URLs in MonoCloud.
+   * This URL must be registered in the application's sign-out URLs in MonoCloud. If omitted, the sign-out callback URL defaults to `appUrl` with path `/`.
    *
    * @example "/signout"
    */
-  signOutCallbackPath?: string;
+  signOutPath?: string;
 
   /**
    * Client secret or JSON Web Key used for client authentication.
@@ -261,6 +263,21 @@ export interface MonoCloudWebJSClientOptions {
    * Duration (in seconds) to cache OpenID Connect discovery metadata after it is fetched from the authorization server.
    */
   metadataCacheDuration?: number;
+
+  /**
+   * Storage implementation used to persist sessions. Defaults to {@link LocalStorage}.
+   */
+  storage?: IStorage;
+
+  /**
+   * Callback executed after a successful sign-in or sign-out callback. Useful for client-side router integration.
+   */
+  postCallback?: PostCallback;
+
+  /**
+   * Hook invoked while creating or updating session.
+   */
+  onSessionCreating?: OnSessionCreating;
 }
 
 /**
@@ -324,39 +341,16 @@ export type InteractionMode =
   | 'redirect';
 
 /**
- * Metadata passed to {@link PostCallback} after callback processing completes.
- *
- * @category Types
- */
-export type PostCallbackParams =
-  | {
-      /** Indicates a sign-in flow was completed. */
-      type: 'signIn';
-      /** Interaction mode used during sign-in. */
-      mode: InteractionMode | 'silent';
-      /** Optional URL to navigate to after sign-in. */
-      returnUrl?: string;
-    }
-  | {
-      /** Indicates a sign-out flow was completed. */
-      type: 'signOut';
-      /** Interaction mode used during sign-out. */
-      mode: InteractionMode;
-      /** Optional URL to navigate to after sign-out. */
-      returnUrl?: string;
-    };
-
-/**
  * Callback executed after sign-in or sign-out callback processing.
  *
  * The default implementation removes query parameters from the current URL on `signIn` (no navigation) or performs a full page reload to `returnUrl`. Provide a custom implementation to integrate with a client-side router and avoid full page reloads.
  *
  * @category Types (Handler)
  *
- * @param state Metadata describing the completed flow.
+ * @param state Callback state.
  * @returns Returns a promise or void. Execution continues once the callback completes.
  */
-export type PostCallback = (state: PostCallbackParams) => Promise<void> | void;
+export type PostCallback = (state: CallbackState) => Promise<void> | void;
 
 /**
  * Options used to customize the sign-in flow.
@@ -482,8 +476,6 @@ export interface SignOutOptions {
 /**
  * Options used to customize the session refresh flow.
  *
- * `refreshSession()` exclusively uses the Refresh Token Grant. To start a fresh, non-interactive authorization (e.g. on app bootstrap) use {@link MonoCloudWebJSClient.signInSilent} instead.
- *
  * @category Types
  */
 export interface RefreshOptions {
@@ -499,6 +491,27 @@ export interface RefreshOptions {
  * @category Types
  */
 export interface SignInSilentOptions {
+  /**
+   * Maximum allowed time (in seconds) since the user's last authentication.
+   *
+   * If the existing session is older than this value, the authorization server cannot satisfy the silent request and will reject with `login_required`.
+   */
+  maxAge?: number;
+
+  /**
+   * Hint identifying the user (for example, an email or username). Helps the authorization server disambiguate when multiple sessions are present.
+   *
+   * @example "user@example.com"
+   */
+  loginHint?: string;
+
+  /**
+   * Authentication Context Class Reference (ACR) values requesting specific authentication assurance levels or methods.
+   *
+   * If the existing session does not satisfy the requested ACR, the authorization server will reject with `interaction_required`.
+   */
+  acrValues?: string[];
+
   /**
    * Space-separated scopes requested from the authorization server for this specific silent sign-in.
    *

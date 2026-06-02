@@ -139,6 +139,9 @@ export class MockWindow {
         hash: this.hash,
         search: this.search,
         pathname: this.pathname,
+        get origin() {
+          return new URL(mockWindowInstance.href).origin;
+        },
         get href() {
           const href =
             (mockWindowInstance.href.endsWith('/')

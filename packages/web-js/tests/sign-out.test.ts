@@ -25,7 +25,7 @@ describe('signOut() Tests', () => {
     window.sessionStorage.clear();
   });
 
-  it('Redirect Mode - should set custom redirect uri from options', async () => {
+  it('Redirect Mode - should set custom redirect uri from options (with trailing slash trimmed)', async () => {
     const fetchSpy = fetchBuilder().configureMetadata().createSpy();
 
     mockWindow
@@ -38,7 +38,7 @@ describe('signOut() Tests', () => {
     const instance = testInstance({ storage: mockStorage });
 
     instance.signOut({
-      postLogoutRedirectUri: 'http://localhost:3000/signout/custom',
+      postLogoutRedirectUri: 'http://localhost:3000/signout/custom/',
     });
 
     await vi.waitFor(() => {
@@ -47,19 +47,67 @@ describe('signOut() Tests', () => {
     });
   });
 
-  it('should redirect to signout without state, logout uri and idToken', async () => {
+  it('Redirect Mode - should throw a federated sign-out from inside an iframe and not clear the session', async () => {
+    mockWindow.mockParentSide('silent').assert();
+
+    const session: MonoCloudSession = {
+      user: { sub: 'sub' },
+      accessTokens: [],
+      authorizedScopes: 'openid',
+    };
+
+    await setSession(mockStorage, session);
+
+    const instance = testInstance({ storage: mockStorage });
+
+    const error = await instance
+      .signOut({ federatedSignOut: true })
+      .catch(e => e);
+
+    expect(error).toBeInstanceOf(MonoCloudJsError);
+    expect(error.message).toContain(
+      'Cannot start a redirect sign-out from inside an iframe'
+    );
+    expect(window.location.assign).not.toHaveBeenCalled();
+
+    mockStorage.expectSession(session);
+    expect(await instance.getSession()).toEqual(session);
+  });
+
+  it('should not throw a non-federated sign-out from inside an iframe', async () => {
+    mockWindow.mockParentSide('silent').assert();
+
+    const session: MonoCloudSession = {
+      user: { sub: 'sub' },
+      accessTokens: [],
+      authorizedScopes: 'openid',
+    };
+
+    await setSession(mockStorage, session);
+
+    const instance = testInstance({ storage: mockStorage });
+
+    await expect(
+      instance.signOut({ federatedSignOut: false })
+    ).resolves.toBeUndefined();
+
+    expect(window.location.assign).not.toHaveBeenCalled();
+    mockStorage.expectNoSession();
+  });
+
+  it('should redirect to signout with the root post logout redirect uri (and state) when signOutPath is not set', async () => {
     const fetchSpy = fetchBuilder().configureMetadata().createSpy();
 
     mockWindow
       .expectQuery('client_id', 'clientId')
-      .doNotExpectQueryKey('state')
-      .doNotExpectQueryKey('post_logout_redirect_uri')
+      .expectQueryKey('state')
+      .expectQuery('post_logout_redirect_uri', 'http://localhost:3000')
       .doNotExpectQueryKey('id_token_hint')
       .assert();
 
     const instance = testInstance({
       storage: mockStorage,
-      signOutCallbackPath: undefined,
+      signOutPath: undefined,
     });
 
     instance.signOut();
@@ -70,13 +118,13 @@ describe('signOut() Tests', () => {
     });
   });
 
-  it('should redirect to signout without state, logout uri and idToken (Session Present)', async () => {
+  it('should redirect to signout with the root post logout redirect uri (and state) when signOutPath is not set (Session Present)', async () => {
     const fetchSpy = fetchBuilder().configureMetadata().createSpy();
 
     mockWindow
       .expectQuery('client_id', 'clientId')
-      .doNotExpectQueryKey('state')
-      .doNotExpectQueryKey('post_logout_redirect_uri')
+      .expectQueryKey('state')
+      .expectQuery('post_logout_redirect_uri', 'http://localhost:3000')
       .doNotExpectQueryKey('id_token_hint')
       .assert();
 
@@ -97,7 +145,7 @@ describe('signOut() Tests', () => {
 
     const instance = testInstance({
       storage: mockStorage,
-      signOutCallbackPath: undefined,
+      signOutPath: undefined,
     });
 
     expect(await instance.getSession()).toBeDefined();
@@ -151,17 +199,17 @@ describe('signOut() Tests', () => {
 
     const instance = testInstance({
       storage: mockStorage,
-      signOutCallbackPath: '/signout',
+      signOutPath: '/signout',
     });
 
-    instance.processSignOutCallback();
+    instance.processCallback();
 
     await vi.waitFor(() => {
       mockStorage.expectCallbackStateRemoved();
     });
   });
 
-  it('Redirect Mode - should process signout callback even if the signOutCallbackPath is not set', async () => {
+  it('Redirect Mode - should process signout callback even if the signOutPath is not set', async () => {
     mockWindow.setSearch('?state=state').setPathname('/').assert();
 
     const state: CallbackState = {
@@ -174,17 +222,17 @@ describe('signOut() Tests', () => {
 
     const instance = testInstance({
       storage: mockStorage,
-      signOutCallbackPath: undefined,
+      signOutPath: undefined,
     });
 
-    instance.processSignOutCallback();
+    instance.processCallback();
 
     await vi.waitFor(() => {
       mockStorage.expectCallbackStateRemoved();
     });
   });
 
-  it('Redirect Mode - should process signout callback with signOutCallbackPath without leading slash', async () => {
+  it('Redirect Mode - should process signout callback with signOutPath without leading slash', async () => {
     mockWindow.setSearch('?state=state').setPathname('/signout').assert();
 
     const state: CallbackState = {
@@ -197,10 +245,10 @@ describe('signOut() Tests', () => {
 
     const instance = testInstance({
       storage: mockStorage,
-      signOutCallbackPath: 'signout',
+      signOutPath: 'signout',
     });
 
-    instance.processSignOutCallback();
+    instance.processCallback();
 
     await vi.waitFor(() => {
       mockStorage.expectCallbackStateRemoved();
@@ -220,7 +268,7 @@ describe('signOut() Tests', () => {
 
     const instance = testInstance({ storage: mockStorage });
 
-    const error = await instance.processSignOutCallback().catch(e => e);
+    const error = await instance.processCallback().catch(e => e);
 
     expect(error).toBeInstanceOf(MonoCloudValidationError);
     expect(error.message).toBe('Sign out states mismatch');
@@ -248,10 +296,10 @@ describe('signOut() Tests', () => {
 
     const instance = testInstance({
       storage: mockStorage,
-      signOutCallbackPath: '/signout',
+      signOutPath: '/signout',
     });
 
-    instance.processSignOutCallback();
+    instance.processCallback();
 
     await vi.waitFor(() => {
       expect(mockWindow.parentPostMessage).toHaveBeenCalledWith(
@@ -277,7 +325,7 @@ describe('signOut() Tests', () => {
 
     const instance = testInstance({
       storage: mockStorage,
-      signOutCallbackPath: '/signout',
+      signOutPath: '/signout',
     });
 
     const signOutPromise = instance.signOut({ mode: 'popup' });
@@ -328,7 +376,7 @@ describe('signOut() Tests', () => {
 
     const instance = testInstance({
       storage: mockStorage,
-      signOutCallbackPath: undefined,
+      signOutPath: undefined,
     });
 
     const signOutPromise = instance.signOut({ mode: 'popup' });
@@ -345,11 +393,13 @@ describe('signOut() Tests', () => {
       expect.any(String)
     );
 
+    const state = new URL(mockPopup.location.href).searchParams.get('state');
+
     window.dispatchEvent(
       new MessageEvent('message', {
         data: {
           source: 'monocloud-auth-web-js',
-          url: `http://localhost:3000`,
+          url: `http://localhost:3000?state=${state}`,
         },
         source: mockPopup,
         origin: 'http://localhost:3000',
@@ -509,7 +559,7 @@ describe('signOut() Tests', () => {
 
     const instance = testInstance({
       storage: mockStorage,
-      signOutCallbackPath: undefined,
+      signOutPath: undefined,
     });
 
     const signOutPromise = instance.signOut({ mode: 'popup' });
@@ -533,11 +583,13 @@ describe('signOut() Tests', () => {
 
     expect(mockPopup.close).not.toHaveBeenCalled();
 
+    const state = new URL(mockPopup.location.href).searchParams.get('state');
+
     window.dispatchEvent(
       new MessageEvent('message', {
         data: {
           source: 'monocloud-auth-web-js',
-          url: `http://localhost:3000`,
+          url: `http://localhost:3000?state=${state}`,
         },
         source: mockPopup,
         origin: 'http://localhost:3000',
@@ -567,7 +619,7 @@ describe('signOut() Tests', () => {
 
     const instance = testInstance({
       storage: mockStorage,
-      signOutCallbackPath: undefined,
+      signOutPath: undefined,
     });
 
     expect(await instance.getSession()).toBeUndefined();
@@ -595,11 +647,13 @@ describe('signOut() Tests', () => {
 
     expect(mockPopup.close).not.toHaveBeenCalled();
 
+    const state = new URL(mockPopup.location.href).searchParams.get('state');
+
     window.dispatchEvent(
       new MessageEvent('message', {
         data: {
           source: 'monocloud-auth-web-js',
-          url: `http://localhost:3000`,
+          url: `http://localhost:3000?state=${state}`,
         },
         source: mockPopup as unknown as Window,
         origin: 'http://localhost:3000',
@@ -629,7 +683,7 @@ describe('signOut() Tests', () => {
 
     const instance = testInstance({
       storage: mockStorage,
-      signOutCallbackPath: undefined,
+      signOutPath: undefined,
     });
 
     expect(await instance.getSession()).toBeUndefined();
@@ -655,11 +709,13 @@ describe('signOut() Tests', () => {
 
     expect(mockPopup.close).not.toHaveBeenCalled();
 
+    const state = new URL(mockPopup.location.href).searchParams.get('state');
+
     window.dispatchEvent(
       new MessageEvent('message', {
         data: {
           source: 'monocloud-auth-web-js',
-          url: `http://localhost:3000`,
+          url: `http://localhost:3000?state=${state}`,
         },
         source: mockPopup as unknown as Window,
         origin: 'http://localhost:3000',
@@ -856,12 +912,12 @@ describe('signOut() Tests', () => {
 
     const instance = testInstance({
       storage: mockStorage,
-      signOutCallbackPath: '/signout',
+      signOutPath: '/signout',
     });
 
     expect(await instance.getSession()).toBeDefined();
 
-    const error = await instance.processSignOutCallback().catch(e => e);
+    const error = await instance.processCallback().catch(e => e);
 
     expect(error).toBeInstanceOf(MonoCloudValidationError);
     expect(error.message).toBe('Sign out states mismatch');
@@ -913,18 +969,17 @@ describe('signOut() Tests', () => {
     expect(error.message).toBe('Incorrect callback state');
   });
 
-  it('processSignOutCallback - should throw when callback state is missing', async () => {
+  it('processCallback - should no-op when callback state is missing', async () => {
     mockWindow.setPathname('/signout').assert();
 
     const instance = testInstance({ storage: mockStorage });
 
-    const error = await instance.processSignOutCallback().catch(e => e);
+    await expect(instance.processCallback()).resolves.toBeUndefined();
 
-    expect(error).toBeInstanceOf(MonoCloudJsError);
-    expect(error.message).toBe('Sign-out callback state not found');
+    mockStorage.expectCallbackStateRemoved().expectNoSession();
   });
 
-  it('processSignOutCallback - should throw when callback state is a sign-in state', async () => {
+  it('processCallback - should no-op on the sign-out path when callback state is a sign-in state', async () => {
     mockWindow.setPathname('/signout').assert();
 
     const state: CallbackState = {
@@ -937,10 +992,7 @@ describe('signOut() Tests', () => {
 
     const instance = testInstance({ storage: mockStorage });
 
-    const error = await instance.processSignOutCallback().catch(e => e);
-
-    expect(error).toBeInstanceOf(MonoCloudValidationError);
-    expect(error.message).toBe('Incorrect callback state');
+    await expect(instance.processCallback()).resolves.toBeUndefined();
 
     mockStorage.expectCallbackStateRemoved().expectNoSession();
   });

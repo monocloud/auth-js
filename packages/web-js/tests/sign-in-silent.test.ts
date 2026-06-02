@@ -479,6 +479,33 @@ describe('instance.signInSilent() Tests', () => {
     });
   });
 
+  it('should forward maxAge, loginHint, and acrValues to the authorize request', async () => {
+    fetchBuilder().configureMetadata().createSpy();
+    mockWindow.assert();
+    const { getSrc } = mountIframe();
+
+    const instance = testInstance({ storage: mockStorage });
+
+    const promise = instance.signInSilent({
+      maxAge: 60,
+      loginHint: 'user@example.com',
+      acrValues: ['mfa', 'urn:level:high'],
+    });
+
+    await vi.waitFor(() => {
+      expect(getSrc()).toContain('https://example.com/connect/authorize');
+    });
+
+    const url = new URL(getSrc());
+    expect(url.searchParams.get('max_age')).toBe('60');
+    expect(url.searchParams.get('login_hint')).toBe('user@example.com');
+    expect(url.searchParams.get('acr_values')).toBe('mfa urn:level:high');
+    expect(url.searchParams.get('prompt')).toBe('none');
+
+    dispatchSoftError(url.searchParams.get('state'));
+    await promise.catch(() => {});
+  });
+
   it('should merge per-call scopes and resource with the configured defaults', async () => {
     fetchBuilder().configureMetadata().createSpy();
     mockWindow.assert();
