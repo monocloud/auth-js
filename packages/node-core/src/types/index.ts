@@ -384,9 +384,16 @@ export interface MonoCloudOptionsBase {
   /**
    * Allowed clock skew (in seconds) when validating token timestamps.
    *
-   * @defaultValue 60 (seconds)
+   * @defaultValue 0 (seconds)
    */
   clockSkew: number;
+
+  /**
+   * Additional time tolerance (in seconds) applied when validating time-based token claims (such as `exp` and `nbf`).
+   *
+   * @defaultValue 60 (seconds)
+   */
+  clockTolerance: number;
 
   /**
    * Maximum time (in milliseconds) to wait for responses from the MonoCloud authorization server.
@@ -580,6 +587,7 @@ export interface MonoCloudSessionOptions extends Partial<
  * | `MONOCLOUD_AUTH_RESOURCE` | Default resource (audience) identifier used when issuing access tokens. |
  * | `MONOCLOUD_AUTH_USE_PAR` | Enables Pushed Authorization Requests (PAR) for authorization flows. |
  * | `MONOCLOUD_AUTH_CLOCK_SKEW` | Allowed clock drift (in seconds) when validating token timestamps. |
+ * | `MONOCLOUD_AUTH_CLOCK_TOLERANCE` | Additional time tolerance (in seconds) applied when validating time-based token claims. |
  * | `MONOCLOUD_AUTH_FEDERATED_SIGNOUT` | If `true`, signing out of the application also signs the user out of MonoCloud (SSO sign-out). |
  * | `MONOCLOUD_AUTH_RESPONSE_TIMEOUT` | Maximum time (in milliseconds) to wait for responses from the authentication service. |
  * | `MONOCLOUD_AUTH_ALLOW_QUERY_PARAM_OVERRIDES` | Allows authorization parameters (such as `scope`, `resource`, or `prompt`) to be overridden via URL query parameters. |

@@ -35,6 +35,8 @@ export const getOptions = (
   const MONOCLOUD_AUTH_USER_INFO_URL = process.env.MONOCLOUD_AUTH_USER_INFO_URL;
   const MONOCLOUD_AUTH_RESOURCE = process.env.MONOCLOUD_AUTH_RESOURCE;
   const MONOCLOUD_AUTH_CLOCK_SKEW = process.env.MONOCLOUD_AUTH_CLOCK_SKEW;
+  const MONOCLOUD_AUTH_CLOCK_TOLERANCE =
+    process.env.MONOCLOUD_AUTH_CLOCK_TOLERANCE;
   const MONOCLOUD_AUTH_RESPONSE_TIMEOUT =
     process.env.MONOCLOUD_AUTH_RESPONSE_TIMEOUT;
   const MONOCLOUD_AUTH_USE_PAR = process.env.MONOCLOUD_AUTH_USE_PAR;
@@ -142,6 +144,10 @@ export const getOptions = (
       options?.clockSkew ??
       getNumber(MONOCLOUD_AUTH_CLOCK_SKEW) ??
       DEFAULT_OPTIONS.clockSkew,
+    clockTolerance:
+      options?.clockTolerance ??
+      getNumber(MONOCLOUD_AUTH_CLOCK_TOLERANCE) ??
+      DEFAULT_OPTIONS.clockTolerance,
     responseTimeout:
       options?.responseTimeout ??
       getNumber(MONOCLOUD_AUTH_RESPONSE_TIMEOUT) ??

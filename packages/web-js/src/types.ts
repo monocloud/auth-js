@@ -190,14 +190,14 @@ export interface MonoCloudWebJSClientOptions {
   popupWindowHeight?: number;
 
   /**
-   * Maximum allowed clock skew (in seconds) for ID token issue and expiration (`iat`, `exp`) validation.
+   * Maximum allowed clock skew (in seconds) for claims validations.
    *
-   * @defaultValue 60 (seconds)
+   * @defaultValue 0 (seconds)
    */
   clockSkew?: number;
 
   /**
-   * Maximum allowed clock tolerance (in seconds) applied to other time-based ID token claims such as `nbf` and `auth_time`.
+   * Maximum allowed clock tolerance (in seconds) applied to time-based claims validations.
    *
    * @defaultValue 60 (seconds)
    */

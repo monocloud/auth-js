@@ -686,7 +686,7 @@ export class MonoCloudOidcClient extends MonoCloudOidcClientBase {
           tokens.id_token,
           jwks.keys,
           options?.idTokenClockSkew ?? 0,
-          options?.idTokenClockTolerance ?? 0,
+          options?.idTokenClockTolerance ?? 60,
           options?.idTokenMaxAge,
           options?.idTokenNonce
         );
@@ -838,7 +838,7 @@ export class MonoCloudOidcClient extends MonoCloudOidcClientBase {
           tokens.id_token,
           jwks.keys,
           options?.idTokenClockSkew ?? 0,
-          options?.idTokenClockTolerance ?? 0
+          options?.idTokenClockTolerance ?? 60
         );
       } else {
         idTokenClaims = MonoCloudOidcClient.decodeJwt(tokens.id_token);
@@ -1110,7 +1110,7 @@ export class MonoCloudOidcClient extends MonoCloudOidcClientBase {
     if (
       typeof claims.auth_time === 'number' &&
       typeof maxAge === 'number' &&
-      claims.auth_time + maxAge < current
+      claims.auth_time + maxAge < current - clockTolerance
     ) {
       throw new MonoCloudTokenError(
         'Too much time has elapsed since the last End-User authentication'

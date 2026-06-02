@@ -68,7 +68,7 @@ describe('Configuration Options', () => {
     const options = getOptions();
 
     expect(options.clockSkew).toBe(0);
-    expect(options.clockTolerance).toBe(300);
+    expect(options.clockTolerance).toBe(60);
     expect(options.clientAuthMethod).toBe('client_secret_post');
     expect(options.introspectJwtTokens).toBe(false);
   });
