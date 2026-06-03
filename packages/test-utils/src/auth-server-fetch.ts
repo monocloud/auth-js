@@ -52,6 +52,22 @@ export const generateIdToken = async (options?: {
   return sign.sign(key);
 };
 
+export const generateTokenHash = async (
+  value: string,
+  hashAlgorithm: 'SHA-256' | 'SHA-384' | 'SHA-512' = 'SHA-256'
+): Promise<string> => {
+  const hash = new Uint8Array(
+    await crypto.subtle.digest(hashAlgorithm, new TextEncoder().encode(value))
+  );
+
+  const leftHalf = hash.slice(0, hash.length / 2);
+
+  return btoa(String.fromCharCode(...leftHalf))
+    .replace(/=/g, '')
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_');
+};
+
 interface ResponseExpectation {
   status: number;
   body?: string;

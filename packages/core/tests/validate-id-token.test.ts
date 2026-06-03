@@ -463,3 +463,134 @@ describe('MonoCloudOidcClient.validateIdToken()', () => {
     }
   });
 });
+
+describe('MonoCloudOidcClient.validateIdToken() clock tolerance', () => {
+  it('should accept a slightly expired id token when the clock tolerance covers the difference', async () => {
+    const idToken = await generateIdToken({
+      claims: { exp: now() - 30 },
+      nonce: 'nonce',
+    });
+
+    const client = new MonoCloudOidcClient('example.com', 'clientId');
+
+    const result = await client.validateIdToken(
+      idToken,
+      [idTokenPublicKey],
+      0,
+      60,
+      undefined,
+      'nonce'
+    );
+
+    expect(result.sub).toBe('sub');
+  });
+
+  it('should reject the same slightly expired id token when the clock tolerance is zero', async () => {
+    const idToken = await generateIdToken({
+      claims: { exp: now() - 30 },
+      nonce: 'nonce',
+    });
+
+    const client = new MonoCloudOidcClient('example.com', 'clientId');
+
+    const promise = client.validateIdToken(
+      idToken,
+      [idTokenPublicKey],
+      0,
+      0,
+      undefined,
+      'nonce'
+    );
+
+    await assertTokenError(
+      promise,
+      'Unexpected JWT "exp" (expiration time) claim value, timestamp is <= now()'
+    );
+  });
+
+  it('should accept an id token whose nbf is slightly in the future when the clock tolerance covers it', async () => {
+    const idToken = await generateIdToken({
+      claims: { nbf: now() + 30 },
+      nonce: 'nonce',
+    });
+
+    const client = new MonoCloudOidcClient('example.com', 'clientId');
+
+    const result = await client.validateIdToken(
+      idToken,
+      [idTokenPublicKey],
+      0,
+      60,
+      undefined,
+      'nonce'
+    );
+
+    expect(result.sub).toBe('sub');
+  });
+
+  it('should reject the same future-nbf id token when the clock tolerance is zero', async () => {
+    const idToken = await generateIdToken({
+      claims: { nbf: now() + 30 },
+      nonce: 'nonce',
+    });
+
+    const client = new MonoCloudOidcClient('example.com', 'clientId');
+
+    const promise = client.validateIdToken(
+      idToken,
+      [idTokenPublicKey],
+      0,
+      0,
+      undefined,
+      'nonce'
+    );
+
+    await assertTokenError(
+      promise,
+      'Unexpected JWT "nbf" (not before) claim value, timestamp is > now()'
+    );
+  });
+
+  it('should accept an id token that is just past max_age when the clock tolerance covers the difference', async () => {
+    const idToken = await generateIdToken({
+      claims: { auth_time: now() - 90 },
+      nonce: 'nonce',
+    });
+
+    const client = new MonoCloudOidcClient('example.com', 'clientId');
+
+    const result = await client.validateIdToken(
+      idToken,
+      [idTokenPublicKey],
+      0,
+      60,
+      60,
+      'nonce'
+    );
+
+    expect(result.sub).toBe('sub');
+  });
+
+  it('should reject the same just-past-max_age id token when the clock tolerance is zero', async () => {
+    const idToken = await generateIdToken({
+      claims: { auth_time: now() - 90 },
+      nonce: 'nonce',
+    });
+
+    const client = new MonoCloudOidcClient('example.com', 'clientId');
+
+    const promise = client.validateIdToken(
+      idToken,
+      [idTokenPublicKey],
+      0,
+      0,
+      60,
+      'nonce'
+    );
+
+    await assertTokenError(
+      promise,
+      'Too much time has elapsed since the last End-User authentication'
+    );
+  });
+});

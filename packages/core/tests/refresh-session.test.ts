@@ -779,7 +779,7 @@ describe('MonoCloudOidcClient.refreshSession()', () => {
     fetchSpy.assert();
   });
 
-  it('should refresh a session without id token clock skew and clock tolerance (0 for both)', async () => {
+  it('should refresh a session using the default id token clock skew (0) and clock tolerance (60)', async () => {
     const idToken = await generateIdToken();
 
     const fetchSpy = fetchBuilder()

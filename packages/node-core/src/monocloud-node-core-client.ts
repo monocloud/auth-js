@@ -483,7 +483,7 @@ export class MonoCloudCoreClient {
           idTokenClockSkew: this.options.clockSkew,
           idTokenNonce: monoCloudState.nonce,
           idTokenMaxAge: monoCloudState.maxAge,
-          idTokenClockTolerance: 5,
+          idTokenClockTolerance: this.options.clockTolerance,
           fetchUserInfo:
             callbackOptions?.fetchUserInfo ?? this.options.fetchUserInfo,
           filteredIdTokenClaims: this.options.filteredIdTokenClaims,
@@ -1039,7 +1039,7 @@ export class MonoCloudCoreClient {
         fetchUserInfo: options?.refetchUserInfo ?? this.options.refetchUserInfo,
         validateIdToken: true,
         idTokenClockSkew: this.options.clockSkew,
-        idTokenClockTolerance: 5,
+        idTokenClockTolerance: this.options.clockTolerance,
         refreshGrantOptions: {
           resource,
           scopes,
@@ -1090,6 +1090,8 @@ export class MonoCloudCoreClient {
       audience: this.options.clientId,
       algorithms: [this.options.idTokenSigningAlg],
       requiredClaims: ['iat'],
+      clockTolerance: this.options.clockTolerance,
+      currentDate: new Date((now() + this.options.clockSkew) * 1000),
     });
 
     if (

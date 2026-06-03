@@ -56,6 +56,51 @@ describe('Configuration Options', () => {
     ]);
   });
 
+  it('should default clockSkew to 0 and clockTolerance to 60', () => {
+    setRequiredEnv();
+
+    const options = getOptions();
+
+    expect(options.clockSkew).toBe(0);
+    expect(options.clockTolerance).toBe(60);
+  });
+
+  it('should resolve clockSkew and clockTolerance from environment variables', () => {
+    setRequiredEnv();
+    addEnv('MONOCLOUD_AUTH_CLOCK_SKEW', '15');
+    addEnv('MONOCLOUD_AUTH_CLOCK_TOLERANCE', '90');
+
+    const options = getOptions();
+
+    expect(options.clockSkew).toBe(15);
+    expect(options.clockTolerance).toBe(90);
+  });
+
+  it('should resolve clockSkew and clockTolerance from explicit options', () => {
+    setRequiredEnv();
+
+    const options = getOptions({ clockSkew: 5, clockTolerance: 30 });
+
+    expect(options.clockSkew).toBe(5);
+    expect(options.clockTolerance).toBe(30);
+  });
+
+  it('should throw if clockSkew is negative', () => {
+    setRequiredEnv();
+
+    expect(() => getOptions({ clockSkew: -1 })).toThrow(
+      MonoCloudValidationError
+    );
+  });
+
+  it('should throw if clockTolerance is negative', () => {
+    setRequiredEnv();
+
+    expect(() => getOptions({ clockTolerance: -1 })).toThrow(
+      MonoCloudValidationError
+    );
+  });
+
   it('should throw if the resource are not a valid url', () => {
     setRequiredEnv();
     addEnv('MONOCLOUD_AUTH_RESOURCE', 'ap1 api2');

@@ -50,9 +50,9 @@ export class MonoCloudOidcBackendClient extends MonoCloudOidcClientBase {
   protected clockSkew = 0;
 
   /**
-   * Additional time tolerance in seconds applied when validating time-based claims (`exp`, `nbf`). Defaults to 300 (5 minutes).
+   * Additional time tolerance in seconds applied when validating time-based claims (`exp`, `nbf`). Defaults to 60 (1 minute).
    */
-  protected clockTolerance = 300;
+  protected clockTolerance = 60;
 
   /**
    * Creates a new instance of MonoCloudOidcBackendClient.

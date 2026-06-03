@@ -3418,6 +3418,83 @@ describe('MonoCloud Base Instance', () => {
         expect(res.res.statusCode).toBe(204);
       });
 
+      const createExpiredBackchannelLogout = async (): Promise<any> => {
+        const kp = await jose.generateKeyPair('ES256', { extractable: true });
+        const jwk = await jose.exportJWK(kp.publicKey);
+        const sub = await jose.calculateJwkThumbprint(jwk);
+        return {
+          token: await new jose.SignJWT({
+            sub_jwk: jwk,
+            sub,
+            sid: 'sid',
+            events: {
+              'http://schemas.openid.net/event/backchannel-logout': {},
+            },
+          })
+            .setProtectedHeader({ alg: 'ES256' })
+            .setIssuer('https://example.com')
+            .setAudience('__test_client_id__')
+            .setIssuedAt(now() - 90)
+            .setExpirationTime(now() - 30)
+            .sign(kp.privateKey),
+          key: jwk,
+          sub,
+        };
+      };
+
+      it('should accept a slightly expired logout token within the clock tolerance', async () => {
+        const backchannelLogoutToken = await createExpiredBackchannelLogout();
+        nock('https://example.com')
+          .get('/jwks')
+          .reply(200, { keys: [backchannelLogoutToken.key] });
+
+        setupDiscovery({ jwks_uri: 'https://example.com/jwks' });
+
+        const instance = getConfiguredInstance({
+          idTokenSigningAlg: 'ES256',
+          onBackChannelLogout: sub => {
+            expect(sub).toBe(backchannelLogoutToken.sub);
+          },
+        });
+
+        const req = new TestReq({
+          method: 'POST',
+          body: { logout_token: backchannelLogoutToken.token },
+        });
+        const res = new TestRes();
+
+        await instance.backChannelLogout(req, res);
+
+        expect(res.res.statusCode).toBe(204);
+      });
+
+      it('should reject the same expired logout token when the clock tolerance is zero', async () => {
+        const backchannelLogoutToken = await createExpiredBackchannelLogout();
+        nock('https://example.com')
+          .get('/jwks')
+          .reply(200, { keys: [backchannelLogoutToken.key] });
+
+        setupDiscovery({ jwks_uri: 'https://example.com/jwks' });
+
+        const instance = getConfiguredInstance({
+          idTokenSigningAlg: 'ES256',
+          clockTolerance: 0,
+          onBackChannelLogout: () => {
+            throw new Error('should not be called for an expired logout token');
+          },
+        });
+
+        const req = new TestReq({
+          method: 'POST',
+          body: { logout_token: backchannelLogoutToken.token },
+        });
+        const res = new TestRes();
+
+        await instance.backChannelLogout(req, res);
+
+        expect(res.res.statusCode).toBe(500);
+      });
+
       it('should return a method not allowed if the request was not a post', async () => {
         const instance = getConfiguredInstance({
           onBackChannelLogout: () => {},
