@@ -31,9 +31,9 @@ Number of seconds to adjust the current time to account for clock differences be
 
 ## clockTolerance
 
-> `protected` **clockTolerance**: `number` = `300`
+> `protected` **clockTolerance**: `number` = `60`
 
-Additional time tolerance in seconds applied when validating time-based claims (`exp`, `nbf`). Defaults to 300 (5 minutes).
+Additional time tolerance in seconds applied when validating time-based claims (`exp`, `nbf`). Defaults to 60 (1 minute).
 
 ### Inherited from
 
