@@ -1,5 +1,14 @@
 # @monocloud/backend-node
 
+## 0.1.7
+
+### Patch Changes
+
+- e69c256: - Validate at_hash and s_hash id token claims in the implicit flow
+  - Make clockTolerance configurable in node-cre and default clockSkew to 0, clockTolerance to 60
+- Updated dependencies [e69c256]
+  - @monocloud/auth-core@0.1.13
+
 ## 0.1.6
 
 ### Patch Changes
