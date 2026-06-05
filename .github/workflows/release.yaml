@@ -130,6 +130,7 @@ jobs:
           '@monocloud/auth-core': patch
           '@monocloud/auth-node-core': patch
           '@monocloud/auth-web-js': patch
+          '@monocloud/auth-react': patch
           '@monocloud/auth-nextjs': patch
           '@monocloud/backend-node': patch
           ---

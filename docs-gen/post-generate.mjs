@@ -5,6 +5,7 @@ import { glob } from 'glob';
 const SDK_SLUGS = {
   default: 'docs',
   '_monocloud_auth-nextjs': 'nextjs',
+  '_monocloud_auth-react': 'react',
   '_monocloud_auth-node-core': 'nodejs-core',
   '_monocloud_auth-core': 'nodejs',
   '_monocloud_backend-node': 'nodejs-backend',

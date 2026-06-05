@@ -43,3 +43,7 @@ scripts/verdaccio/verdaccio-storage
 dist
 
 .npmrc
+
+# Claude Code (local/runtime artifacts)
+.claude/settings.local.json
+.claude/scheduled_tasks.lock

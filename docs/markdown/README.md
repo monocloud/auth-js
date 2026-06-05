@@ -36,6 +36,7 @@ This SDK provides a typed JavaScript client for implementing **OAuth 2.0** and *
 ### Who is this for?
 
 - Single-page applications (SPAs)
+- React applications
 - Next.js applications (App Router & Pages Router)
 - Node.js backends performing server-side auth flows
 - Applications that need secure redirects, token handling, and session management
@@ -51,6 +52,7 @@ This SDK provides a typed JavaScript client for implementing **OAuth 2.0** and *
 | ----------------------------- | ------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------- |
 | **@monocloud/auth-core**      | Framework-agnostic authentication primitives and OAuth/OIDC logic  | [npm](https://www.npmjs.com/package/@monocloud/auth-core) \| [README](https://github.com/monocloud/auth-js/tree/main/packages/core)            |
 | **@monocloud/auth-web-js**    | Browser-side authentication SDK for SPAs and other JavaScript apps | [npm](https://www.npmjs.com/package/@monocloud/auth-web-js) \| [README](https://github.com/monocloud/auth-js/tree/main/packages/web-js)        |
+| **@monocloud/auth-react**     | Authentication SDK for React single-page applications              | [npm](https://www.npmjs.com/package/@monocloud/auth-react) \| [README](https://github.com/monocloud/auth-js/tree/main/packages/react)          |
 | **@monocloud/auth-node-core** | Node.js-specific helpers for server-side authentication flows      | [npm](https://www.npmjs.com/package/@monocloud/auth-node-core) \| [README](https://github.com/monocloud/auth-js/tree/main/packages/node-core)  |
 | **@monocloud/auth-nextjs**    | Authentication SDK for Next.js (App Router & Pages Router)         | [npm](https://www.npmjs.com/package/@monocloud/auth-nextjs) \| [README](https://github.com/monocloud/auth-js/tree/main/packages/nextjs)        |
 | **@monocloud/backend-node**   | Authentication SDK for Node.js API Servers                         | [npm](https://www.npmjs.com/package/@monocloud/backend-node) \| [README](https://github.com/monocloud/auth-js/tree/main/packages/node-backend) |
