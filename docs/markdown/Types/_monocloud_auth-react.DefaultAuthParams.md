@@ -1,5 +1,5 @@
 ---
-rootSdk: @monocloud/auth-react
+rootSdk: React
 title: "DefaultAuthParams"
 category: Types
 description: "Subset of AuthorizationParams that can be pre-configured as defaults for every authentication request."

@@ -1,5 +1,5 @@
 ---
-rootSdk: @monocloud/auth-react
+rootSdk: React
 title: "AuthState"
 category: Types
 description: "The current authentication state."

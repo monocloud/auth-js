@@ -1,5 +1,5 @@
 ---
-rootSdk: @monocloud/auth-react
+rootSdk: React
 title: "Group"
 category: Types
 description: "Represents a user group included in the authenticated session."

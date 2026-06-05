@@ -1,5 +1,5 @@
 ---
-rootSdk: @monocloud/auth-react
+rootSdk: React
 title: "MonoCloudWebJSClientOptions"
 category: Types
 description: "Configuration options used to initialize MonoCloudWebJSClient."

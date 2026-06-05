@@ -1,5 +1,5 @@
 ---
-rootSdk: @monocloud/auth-react
+rootSdk: React
 title: "MonoCloudTokens"
 category: Types
 description: "Tokens available in the current session."

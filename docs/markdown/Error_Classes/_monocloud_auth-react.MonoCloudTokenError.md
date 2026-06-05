@@ -1,5 +1,5 @@
 ---
-rootSdk: @monocloud/auth-react
+rootSdk: React
 title: "MonoCloudTokenError"
 category: Error Classes
 description: "Error thrown when a token operation fails."

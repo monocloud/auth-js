@@ -1,5 +1,5 @@
 ---
-rootSdk: @monocloud/auth-react
+rootSdk: React
 title: "IdTokenClaims"
 category: Types
 description: "Standard OpenID Connect ID Token claims."

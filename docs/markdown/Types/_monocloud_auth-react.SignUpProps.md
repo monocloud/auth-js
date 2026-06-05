@@ -1,5 +1,5 @@
 ---
-rootSdk: @monocloud/auth-react
+rootSdk: React
 title: "SignUpProps"
 category: Types
 description: "Props for the <SignUp /> component."

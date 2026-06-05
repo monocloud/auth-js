@@ -1,5 +1,5 @@
 ---
-rootSdk: @monocloud/auth-react
+rootSdk: React
 title: "Protected"
 category: Components
 description: "<Protected> conditionally renders its children based on the user’s authentication state and (optionally) group membership."

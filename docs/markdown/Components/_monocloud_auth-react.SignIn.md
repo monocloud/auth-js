@@ -1,5 +1,5 @@
 ---
-rootSdk: @monocloud/auth-react
+rootSdk: React
 title: "SignIn"
 category: Components
 description: "<SignIn> renders a button that starts the sign-in flow when clicked."

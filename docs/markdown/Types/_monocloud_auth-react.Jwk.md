@@ -1,5 +1,5 @@
 ---
-rootSdk: @monocloud/auth-react
+rootSdk: React
 title: "Jwk"
 category: Types
 description: "Represents a JSON Web Key (JWK) as defined by RFC 7517."

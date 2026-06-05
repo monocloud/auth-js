@@ -1,5 +1,5 @@
 ---
-rootSdk: @monocloud/auth-react
+rootSdk: React
 title: "MonoCloudAuthProvider"
 category: Components
 description: "<MonoCloudAuthProvider> initializes the MonoCloud JavaScript client and makes the authentication state and actions available through useAuth."

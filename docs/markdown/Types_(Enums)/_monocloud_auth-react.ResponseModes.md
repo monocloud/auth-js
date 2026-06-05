@@ -1,5 +1,5 @@
 ---
-rootSdk: @monocloud/auth-react
+rootSdk: React
 title: "ResponseModes"
 category: Enums
 description: "Supported OAuth 2.0 / OpenID Connect response_mode values."

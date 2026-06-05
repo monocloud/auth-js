@@ -1,5 +1,5 @@
 ---
-rootSdk: @monocloud/auth-react
+rootSdk: React
 title: "IStorage"
 category: Types
 description: "Defines a storage adapter used to persist session data."

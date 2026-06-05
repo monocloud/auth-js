@@ -1,5 +1,5 @@
 ---
-rootSdk: @monocloud/auth-react
+rootSdk: React
 title: "ProcessCallbackProps"
 category: Types
 description: "Props for the <ProcessCallback /> component."

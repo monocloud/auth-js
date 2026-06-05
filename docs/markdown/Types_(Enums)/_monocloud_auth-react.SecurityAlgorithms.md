@@ -1,5 +1,5 @@
 ---
-rootSdk: @monocloud/auth-react
+rootSdk: React
 title: "SecurityAlgorithms"
 category: Enums
 description: "Supported JSON Web Signature (JWS) algorithms used to sign tokens."

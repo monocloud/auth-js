@@ -1,5 +1,5 @@
 ---
-rootSdk: @monocloud/auth-react
+rootSdk: React
 title: "SignInSilentOptions"
 category: Types
 description: "Options used to customize the silent sign-in flow."

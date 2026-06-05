@@ -1,5 +1,5 @@
 ---
-rootSdk: @monocloud/auth-react
+rootSdk: React
 title: "Prompt"
 category: Enums
 description: "Supported OpenID Connect prompt parameter values."

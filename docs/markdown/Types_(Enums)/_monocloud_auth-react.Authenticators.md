@@ -1,5 +1,5 @@
 ---
-rootSdk: @monocloud/auth-react
+rootSdk: React
 title: "Authenticators"
 category: Enums
 description: "Supported authentication methods and identity providers."

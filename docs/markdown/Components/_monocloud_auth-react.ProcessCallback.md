@@ -1,5 +1,5 @@
 ---
-rootSdk: @monocloud/auth-react
+rootSdk: React
 title: "ProcessCallback"
 category: Components
 description: "<ProcessCallback/> completes a pending sign-in or sign-out callback on the current URL and synchronizes the authentication state."

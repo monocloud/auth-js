@@ -1,5 +1,5 @@
 ---
-rootSdk: @monocloud/auth-react
+rootSdk: React
 title: "MonoCloudWebJSClient"
 category: Classes
 description: "MonoCloudWebJSClient is the core SDK entry point for integrating MonoCloud authentication into single-page applications (SPAs) and other browser-based JavaScript environments."

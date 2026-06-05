@@ -1,5 +1,5 @@
 ---
-rootSdk: @monocloud/auth-react
+rootSdk: React
 title: "useAuth"
 category: Hooks
 description: "useAuth() is a client-side hook that exposes the current authentication state and actions provided by MonoCloudAuthProvider."

@@ -1,5 +1,5 @@
 ---
-rootSdk: @monocloud/auth-react
+rootSdk: React
 title: "MonoCloudValidationError"
 category: Error Classes
 description: "Error thrown when validation fails."

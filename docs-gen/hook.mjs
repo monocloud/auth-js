@@ -15,6 +15,7 @@ const DESCRIPTION_HARD_MAX_LENGTH = 200;
 
 const ROOT_SDK_NAME_REPLACEMENTS = [
   ['@monocloud/auth-nextjs', 'Next.js'],
+  ['@monocloud/auth-react', 'React'],
   ['@monocloud/auth-node-core', 'Node.js Core'],
   ['@monocloud/auth-core', 'Node.js'],
   ['@monocloud/backend-node', 'Node.js Backend'],

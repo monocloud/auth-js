@@ -1,5 +1,5 @@
 ---
-rootSdk: @monocloud/auth-react
+rootSdk: React
 title: "useClient"
 category: Hooks
 description: "useClient() returns the underlying MonoCloudWebJSClient created by MonoCloudAuthProvider."

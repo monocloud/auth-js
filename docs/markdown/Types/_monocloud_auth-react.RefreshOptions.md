@@ -1,5 +1,5 @@
 ---
-rootSdk: @monocloud/auth-react
+rootSdk: React
 title: "RefreshOptions"
 category: Types
 description: "Options used to customize the session refresh flow."

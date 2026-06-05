@@ -1,5 +1,5 @@
 ---
-rootSdk: @monocloud/auth-react
+rootSdk: React
 title: "MonoCloudAuthBaseError"
 category: Error Classes
 description: "Base class for all MonoCloud authentication errors."

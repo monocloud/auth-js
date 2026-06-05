@@ -1,5 +1,5 @@
 ---
-rootSdk: @monocloud/auth-react
+rootSdk: React
 title: "GetTokensOptions"
 category: Types
 description: "Options used to control token retrieval and refresh behavior in getTokens()."

@@ -1,5 +1,5 @@
 ---
-rootSdk: @monocloud/auth-react
+rootSdk: React
 title: "ApplicationState"
 category: Types
 description: "Custom application state passed through an authentication flow."

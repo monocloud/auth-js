@@ -1,5 +1,5 @@
 ---
-rootSdk: @monocloud/auth-react
+rootSdk: React
 title: "CallbackState"
 category: Types
 description: "Internal state persisted between an authorization request and its callback."

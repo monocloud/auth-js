@@ -1,5 +1,5 @@
 ---
-rootSdk: @monocloud/auth-react
+rootSdk: React
 title: "Address"
 category: Types
 description: "Represents a postal address as defined by the OpenID Connect standard address claim."

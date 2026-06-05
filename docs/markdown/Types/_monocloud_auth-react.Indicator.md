@@ -1,5 +1,5 @@
 ---
-rootSdk: @monocloud/auth-react
+rootSdk: React
 title: "Indicator"
 category: Types
 description: "Represents an additional resource indicator that can be requested when acquiring tokens."

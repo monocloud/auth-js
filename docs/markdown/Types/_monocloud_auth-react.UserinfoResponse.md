@@ -1,5 +1,5 @@
 ---
-rootSdk: @monocloud/auth-react
+rootSdk: React
 title: "UserinfoResponse"
 category: Types
 description: "Represents the OpenID Connect UserInfo response."

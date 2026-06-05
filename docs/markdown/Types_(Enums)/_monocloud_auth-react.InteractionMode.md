@@ -1,5 +1,5 @@
 ---
-rootSdk: @monocloud/auth-react
+rootSdk: React
 title: "InteractionMode"
 category: Enums
 description: "Interaction modes supported for sign-in and sign-out flows."

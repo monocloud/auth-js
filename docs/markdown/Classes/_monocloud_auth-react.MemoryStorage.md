@@ -1,5 +1,5 @@
 ---
-rootSdk: @monocloud/auth-react
+rootSdk: React
 title: "MemoryStorage"
 category: Classes
 description: "In-memory implementation of IStorage. Useful for testing or for sessions that should not persist across page reloads."

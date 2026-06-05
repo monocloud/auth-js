@@ -1,5 +1,5 @@
 ---
-rootSdk: @monocloud/auth-react
+rootSdk: React
 title: "SignOutProps"
 category: Types
 description: "Props for the <SignOut /> component."

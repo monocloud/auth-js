@@ -1,5 +1,5 @@
 ---
-rootSdk: @monocloud/auth-react
+rootSdk: React
 title: "MonoCloudAuthProviderProps"
 category: Types
 description: "Props for <MonoCloudAuthProvider />."

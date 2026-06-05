@@ -1,5 +1,5 @@
 ---
-rootSdk: @monocloud/auth-react
+rootSdk: React
 title: "MonoCloudJsError"
 category: Error Classes
 description: "Error thrown when a general JavaScript or internal SDK failure occurs."

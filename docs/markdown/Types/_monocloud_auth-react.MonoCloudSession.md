@@ -1,5 +1,5 @@
 ---
-rootSdk: @monocloud/auth-react
+rootSdk: React
 title: "MonoCloudSession"
 category: Types
 description: "Represents an authenticated session, containing the authenticated user profile along with the tokens and metadata issued during authentication."

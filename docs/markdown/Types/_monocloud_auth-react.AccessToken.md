@@ -1,5 +1,5 @@
 ---
-rootSdk: @monocloud/auth-react
+rootSdk: React
 title: "AccessToken"
 category: Types
 description: "Represents an OAuth 2.0 access token and its associated metadata."

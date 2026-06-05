@@ -1,5 +1,5 @@
 ---
-rootSdk: @monocloud/auth-react
+rootSdk: React
 title: "DisplayOptions"
 category: Enums
 description: "Supported OpenID Connect display parameter values."

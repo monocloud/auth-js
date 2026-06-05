@@ -1,5 +1,5 @@
 ---
-rootSdk: @monocloud/auth-react
+rootSdk: React
 title: "MonoCloudUser"
 category: Types
 description: "Represents the authenticated user stored in a MonoCloud session."

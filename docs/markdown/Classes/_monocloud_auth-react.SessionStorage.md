@@ -1,5 +1,5 @@
 ---
-rootSdk: @monocloud/auth-react
+rootSdk: React
 title: "SessionStorage"
 category: Classes
 description: "window.sessionStorage-backed implementation of IStorage. Data persists for the lifetime of the current browser tab."

@@ -1,5 +1,5 @@
 ---
-rootSdk: @monocloud/auth-react
+rootSdk: React
 title: "LocalStorage"
 category: Classes
 description: "window.localStorage-backed implementation of IStorage. This is the default storage used by MonoCloudWebJSClient."

@@ -1,5 +1,5 @@
 ---
-rootSdk: @monocloud/auth-react
+rootSdk: React
 title: "ProtectedComponentProps"
 category: Types
 description: "Props for the <Protected /> component."

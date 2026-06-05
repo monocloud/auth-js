@@ -1,5 +1,5 @@
 ---
-rootSdk: @monocloud/auth-react
+rootSdk: React
 title: "OnSessionCreating"
 category: Handler Types
 description: "Callback invoked when a session is being created or updated."

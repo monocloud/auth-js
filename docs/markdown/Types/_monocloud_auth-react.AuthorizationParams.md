@@ -1,5 +1,5 @@
 ---
-rootSdk: @monocloud/auth-react
+rootSdk: React
 title: "AuthorizationParams"
 category: Types
 description: "Parameters used to construct an OAuth 2.0 / OpenID Connect authorization request."

@@ -1,5 +1,5 @@
 ---
-rootSdk: @monocloud/auth-react
+rootSdk: React
 title: "SignOut"
 category: Components
 description: "<SignOut> renders a button that starts the sign-out flow when clicked."

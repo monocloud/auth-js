@@ -1,5 +1,5 @@
 ---
-rootSdk: @monocloud/auth-react
+rootSdk: React
 title: "SignOutOptions"
 category: Types
 description: "Options used to customize the sign-out flow."

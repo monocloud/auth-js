@@ -1,5 +1,5 @@
 ---
-rootSdk: @monocloud/auth-react
+rootSdk: React
 title: "PostCallback"
 category: Handler Types
 description: "Callback executed after sign-in or sign-out callback processing."
