@@ -10,6 +10,7 @@ category: Other
 
 - [@monocloud/auth-core](/sdks/nodejs/api-reference/undefined/_monocloud_auth-core)
 - [@monocloud/auth-web-js](/sdks/web-js/api-reference/undefined/_monocloud_auth-web-js)
+- [@monocloud/auth-react](/sdks/react/api-reference/undefined/_monocloud_auth-react)
 - [@monocloud/auth-node-core](/sdks/nodejs-core/api-reference/undefined/_monocloud_auth-node-core)
 - [@monocloud/auth-nextjs](/sdks/nextjs/api-reference/undefined/_monocloud_auth-nextjs)
 - [@monocloud/backend-node](/sdks/nodejs-backend/api-reference/undefined/_monocloud_backend-node)

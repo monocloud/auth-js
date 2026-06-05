@@ -15,6 +15,7 @@ const config = {
   entryPoints: [
     '../packages/core',
     '../packages/web-js',
+    '../packages/react',
     '../packages/node-core',
     '../packages/nextjs',
     '../packages/node-backend',
