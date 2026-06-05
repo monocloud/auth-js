@@ -62,7 +62,7 @@ const initialState: AuthState = {
  * "use client";
  *
  * import { MonoCloudAuthProvider } from "@monocloud/auth-react";
- * import { useNavigate } from "react-router-dom";
+ * import { useNavigate } from "react-router";
  *
  * export default function Root() {
  *   const navigate = useNavigate();
