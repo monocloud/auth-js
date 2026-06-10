@@ -1,5 +1,11 @@
 # @monocloud/auth-core
 
+## 0.1.14
+
+### Patch Changes
+
+- 766e7f3: - Lowered PBKDF2_ITERATIONS to 100k
+
 ## 0.1.13
 
 ### Patch Changes

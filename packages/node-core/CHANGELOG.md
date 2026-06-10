@@ -1,5 +1,15 @@
 # @monocloud/auth-node-core
 
+## 0.1.18
+
+### Patch Changes
+
+- 766e7f3: - Add `groupsClaim` to `MonoCloudOptionsBase`, `DEFAULT_OPTIONS`,
+  `get-options` (env resolution), and the options validation schema;
+  `MonoCloudCoreClient.isUserInGroup()` now defaults to the configured claim.
+- Updated dependencies [766e7f3]
+  - @monocloud/auth-core@0.1.14
+
 ## 0.1.17
 
 ### Patch Changes

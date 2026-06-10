@@ -1,5 +1,18 @@
 # @monocloud/auth-nextjs
 
+## 0.1.19
+
+### Patch Changes
+
+- 766e7f3: - Resolve the claim from the core option at the group-check call sites
+  instead of reading `process.env` directly; the standalone `isUserInGroup`
+  method defers to node-core's resolution. `NEXT_PUBLIC_MONOCLOUD_AUTH_GROUPS_CLAIM`
+  is unchanged for client components.
+- Updated dependencies [766e7f3]
+- Updated dependencies [766e7f3]
+  - @monocloud/auth-node-core@0.1.18
+  - @monocloud/auth-core@0.1.14
+
 ## 0.1.18
 
 ### Patch Changes
