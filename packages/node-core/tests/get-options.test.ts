@@ -85,6 +85,32 @@ describe('Configuration Options', () => {
     expect(options.clockTolerance).toBe(30);
   });
 
+  it('should default groupsClaim to "groups"', () => {
+    setRequiredEnv();
+
+    const options = getOptions();
+
+    expect(options.groupsClaim).toBe('groups');
+  });
+
+  it('should resolve groupsClaim from environment variables', () => {
+    setRequiredEnv();
+    addEnv('MONOCLOUD_AUTH_GROUPS_CLAIM', 'custom_groups');
+
+    const options = getOptions();
+
+    expect(options.groupsClaim).toBe('custom_groups');
+  });
+
+  it('should resolve groupsClaim from explicit options', () => {
+    setRequiredEnv();
+    addEnv('MONOCLOUD_AUTH_GROUPS_CLAIM', 'env_groups');
+
+    const options = getOptions({ groupsClaim: 'option_groups' });
+
+    expect(options.groupsClaim).toBe('option_groups');
+  });
+
   it('should throw if clockSkew is negative', () => {
     setRequiredEnv();
 

@@ -201,13 +201,13 @@ Checks if the current session user belongs to the specified groups.
 
 #### Parameters
 
-| Parameter      | Type                                                                                               | Description                                                                          |
-| -------------- | -------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
-| `request`      | [`IMonoCloudCookieRequest`](/sdks/nodejs-core/api-reference/types/imonocloudcookierequest)   | MonoCloud cookie request object.                                                     |
-| `response`     | [`IMonoCloudCookieResponse`](/sdks/nodejs-core/api-reference/types/imonocloudcookieresponse) | MonoCloud cookie response object.                                                    |
-| `groups`       | `string`[]                                                                                         | List of group names or IDs to check.                                                 |
-| `groupsClaim?` | `string`                                                                                           | Optional claim name that holds groups. Defaults to "groups".                         |
-| `matchAll?`    | `boolean`                                                                                          | If `true`, requires membership in all groups; otherwise any one group is sufficient. |
+| Parameter      | Type                                                                                               | Description                                                                                                            |
+| -------------- | -------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `request`      | [`IMonoCloudCookieRequest`](/sdks/nodejs-core/api-reference/types/imonocloudcookierequest)   | MonoCloud cookie request object.                                                                                       |
+| `response`     | [`IMonoCloudCookieResponse`](/sdks/nodejs-core/api-reference/types/imonocloudcookieresponse) | MonoCloud cookie response object.                                                                                      |
+| `groups`       | `string`[]                                                                                         | List of group names or IDs to check.                                                                                   |
+| `groupsClaim?` | `string`                                                                                           | Optional claim name that holds groups. Defaults to the configured `groupsClaim` option (`"groups"` unless overridden). |
+| `matchAll?`    | `boolean`                                                                                          | If `true`, requires membership in all groups; otherwise any one group is sufficient.                                   |
 
 #### Returns
 

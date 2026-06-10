@@ -5025,6 +5025,25 @@ describe('MonoCloud Base Instance', () => {
         expect(result).toBe(true);
       });
 
+      it('should default to the configured groupsClaim option when none is passed', async () => {
+        const cookies = {};
+
+        await setSessionCookieValue(cookies, {
+          session: { user: { sub: 'sun', custom_groups: ['test'] } },
+          lifetime: { u: now(), e: now() + 4, c: now() },
+        });
+
+        const req = new TestReq({ cookies });
+        const res = new TestRes();
+
+        const instance = getConfiguredInstance({
+          groupsClaim: 'custom_groups',
+        });
+
+        const result = await instance.isUserInGroup(req, res, ['test']);
+        expect(result).toBe(true);
+      });
+
       it.each([
         [[], ['test'], false, false],
         [undefined, ['test'], false, false],

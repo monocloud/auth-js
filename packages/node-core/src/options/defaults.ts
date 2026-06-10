@@ -19,6 +19,7 @@ export const DEFAULT_OPTIONS = {
   },
   allowQueryParamOverrides: true,
   strictProfileSync: false,
+  groupsClaim: 'groups',
   session: {
     cookie: {
       httpOnly: true,
