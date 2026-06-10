@@ -92,6 +92,7 @@ export const getOptions = (
     process.env.MONOCLOUD_AUTH_JWKS_CACHE_DURATION;
   const MONOCLOUD_AUTH_METADATA_CACHE_DURATION =
     process.env.MONOCLOUD_AUTH_METADATA_CACHE_DURATION;
+  const MONOCLOUD_AUTH_GROUPS_CLAIM = process.env.MONOCLOUD_AUTH_GROUPS_CLAIM;
 
   const appUrl = options?.appUrl ?? MONOCLOUD_AUTH_APP_URL!;
 
@@ -259,6 +260,10 @@ export const getOptions = (
         .map(x => x.trim())
         .filter(x => x.length) ??
       DEFAULT_OPTIONS.filteredIdTokenClaims,
+    groupsClaim:
+      options?.groupsClaim ??
+      MONOCLOUD_AUTH_GROUPS_CLAIM ??
+      DEFAULT_OPTIONS.groupsClaim,
     debugger: options?.debugger ?? DEFAULT_OPTIONS.debugger,
     userAgent: options?.userAgent ?? DEFAULT_OPTIONS.userAgent,
     jwksCacheDuration:

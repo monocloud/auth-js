@@ -32,30 +32,33 @@ When both are provided, **constructor options override environment variables**.
 
 ### Authentication & Security
 
-| Environment Variable                         | Description                                                                                                           |
-| -------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
-| `MONOCLOUD_AUTH_SCOPES`                      | Space-separated list of OIDC scopes to request (for example, `openid profile email`).                                 |
-| `MONOCLOUD_AUTH_RESOURCE`                    | Default resource (audience) identifier used when issuing access tokens.                                               |
-| `MONOCLOUD_AUTH_USE_PAR`                     | Enables Pushed Authorization Requests (PAR) for authorization flows.                                                  |
-| `MONOCLOUD_AUTH_CLOCK_SKEW`                  | Allowed clock drift (in seconds) when validating token timestamps.                                                    |
-| `MONOCLOUD_AUTH_CLOCK_TOLERANCE`             | Additional time tolerance (in seconds) applied when validating time-based token claims.                               |
-| `MONOCLOUD_AUTH_FEDERATED_SIGNOUT`           | If `true`, signing out of the application also signs the user out of MonoCloud (SSO sign-out).                        |
-| `MONOCLOUD_AUTH_RESPONSE_TIMEOUT`            | Maximum time (in milliseconds) to wait for responses from the authentication service.                                 |
-| `MONOCLOUD_AUTH_ALLOW_QUERY_PARAM_OVERRIDES` | Allows authorization parameters (such as `scope`, `resource`, or `prompt`) to be overridden via URL query parameters. |
-| `MONOCLOUD_AUTH_POST_LOGOUT_REDIRECT_URI`    | URL users are redirected to after a successful logout.                                                                |
-| `MONOCLOUD_AUTH_FETCH_USER_INFO`             | Determines whether user profile data is fetched from the `UserInfo` endpoint after authorization.                     |
-| `MONOCLOUD_AUTH_REFETCH_USER_INFO`           | If `true`, user information is re-fetched on each userinfo request.                                                   |
-| `MONOCLOUD_AUTH_ID_TOKEN_SIGNING_ALG`        | Expected signing algorithm for ID tokens (for example, `RS256`).                                                      |
-| `MONOCLOUD_AUTH_FILTERED_ID_TOKEN_CLAIMS`    | Space-separated list of ID token claims excluded from the session object.                                             |
+| Environment Variable                         | Description                                                                                                                                                                |
+| -------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `MONOCLOUD_AUTH_SCOPES`                      | Space-separated list of OIDC scopes to request (for example, `openid profile email`).                                                                                      |
+| `MONOCLOUD_AUTH_RESOURCE`                    | Default resource (audience) identifier used when issuing access tokens.                                                                                                    |
+| `MONOCLOUD_AUTH_USE_PAR`                     | Enables Pushed Authorization Requests (PAR) for authorization flows.                                                                                                       |
+| `MONOCLOUD_AUTH_CLOCK_SKEW`                  | Allowed clock drift (in seconds) when validating token timestamps.                                                                                                         |
+| `MONOCLOUD_AUTH_CLOCK_TOLERANCE`             | Additional time tolerance (in seconds) applied when validating time-based token claims.                                                                                    |
+| `MONOCLOUD_AUTH_FEDERATED_SIGNOUT`           | If `true`, signing out of the application also signs the user out of MonoCloud (SSO sign-out).                                                                             |
+| `MONOCLOUD_AUTH_RESPONSE_TIMEOUT`            | Maximum time (in milliseconds) to wait for responses from the authentication service.                                                                                      |
+| `MONOCLOUD_AUTH_ALLOW_QUERY_PARAM_OVERRIDES` | Allows authorization parameters (such as `scope`, `resource`, or `prompt`) to be overridden via URL query parameters.                                                      |
+| `MONOCLOUD_AUTH_POST_LOGOUT_REDIRECT_URI`    | URL users are redirected to after a successful logout.                                                                                                                     |
+| `MONOCLOUD_AUTH_FETCH_USER_INFO`             | Determines whether user profile data is fetched from the `UserInfo` endpoint after authorization.                                                                          |
+| `MONOCLOUD_AUTH_REFETCH_USER_INFO`           | If `true`, user information is re-fetched on each userinfo request.                                                                                                        |
+| `MONOCLOUD_AUTH_REFETCH_STRICT_PROFILE_SYNC` | When `true`, the session user profile is fully replaced from the latest ID token (and UserInfo response, if applicable) instead of being merged with the existing profile. |
+| `MONOCLOUD_AUTH_ID_TOKEN_SIGNING_ALG`        | Expected signing algorithm for ID tokens (for example, `RS256`).                                                                                                           |
+| `MONOCLOUD_AUTH_FILTERED_ID_TOKEN_CLAIMS`    | Space-separated list of ID token claims excluded from the session object.                                                                                                  |
+| `MONOCLOUD_AUTH_GROUPS_CLAIM`                | Name of the claim in the user profile that holds group memberships, used as the default when evaluating group-based authorization. Defaults to `groups`.                   |
 
 ### Routes
 
-| Environment Variable           | Description                                                                               |
-| ------------------------------ | ----------------------------------------------------------------------------------------- |
-| `MONOCLOUD_AUTH_CALLBACK_URL`  | Application path where the authorization server redirects the user after authentication.  |
-| `MONOCLOUD_AUTH_SIGNIN_URL`    | Internal route used to initiate the sign-in flow.                                         |
-| `MONOCLOUD_AUTH_SIGNOUT_URL`   | Internal route used to initiate the sign-out flow.                                        |
-| `MONOCLOUD_AUTH_USER_INFO_URL` | Route that exposes the authenticated user’s profile retrieved from the UserInfo endpoint. |
+| Environment Variable                     | Description                                                                                       |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| `MONOCLOUD_AUTH_CALLBACK_URL`            | Application path where the authorization server redirects the user after authentication.          |
+| `MONOCLOUD_AUTH_BACK_CHANNEL_LOGOUT_URL` | Application path that handles OpenID Connect back-channel logout requests initiated by MonoCloud. |
+| `MONOCLOUD_AUTH_SIGNIN_URL`              | Internal route used to initiate the sign-in flow.                                                 |
+| `MONOCLOUD_AUTH_SIGNOUT_URL`             | Internal route used to initiate the sign-out flow.                                                |
+| `MONOCLOUD_AUTH_USER_INFO_URL`           | Route that exposes the authenticated user’s profile retrieved from the UserInfo endpoint.         |
 
 ### Session Cookie Settings
 
@@ -90,6 +93,12 @@ When both are provided, **constructor options override environment variables**.
 | `MONOCLOUD_AUTH_JWKS_CACHE_DURATION`     | Duration (in seconds) to cache the JSON Web Key Set (JWKS) used to verify tokens. |
 | `MONOCLOUD_AUTH_METADATA_CACHE_DURATION` | Duration (in seconds) to cache the OpenID Connect discovery metadata.             |
 
+### Debugging
+
+| Environment Variable | Description                                                                                                                                                                                                          |
+| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `DEBUG`              | Standard [`debug`](https://www.npmjs.com/package/debug) namespace filter that enables the SDK's internal debug logging. Set to the client's debug namespace (`node-auth-core` by default) or a wildcard such as `*`. |
+
 ## Extends
 
 - `Partial`\<`Omit`\<[`MonoCloudOptionsBase`](/sdks/nodejs-core/api-reference/types/monocloudoptionsbase), `"defaultAuthParams"` \| `"session"` \| `"routes"` \| `"state"`\>\>
@@ -110,6 +119,7 @@ When both are provided, **constructor options override environment variables**.
 | `federatedSignOut?`                 | `boolean`                                                                                             | When `true`, signing out also logs the user out of MonoCloud (Single Sign-Out).                                                                                                                                                                 |
 | `fetchUserInfo?`                       | `boolean`                                                                                             | Fetch user profile data from the `UserInfo` endpoint after authentication completes.                                                                                                                                                            |
 | `filteredIdTokenClaims?`       | `string`[]                                                                                            | List of ID token claims that should be removed before storing data in the session.                                                                                                                                                              |
+| `groupsClaim?`                           | `string`                                                                                              | Name of the claim in the user profile that holds group memberships, used as the default when evaluating group-based authorization.                                                                                                              |
 | `idTokenSigningAlg?`               | [`SecurityAlgorithms`](/sdks/nextjs/api-reference/enums/securityalgorithms)         | Expected signing algorithm for ID tokens.                                                                                                                                                                                                       |
 | `jwksCacheDuration?`               | `number`                                                                                              | Duration (in seconds) to cache the JWKS document.                                                                                                                                                                                               |
 | `metadataCacheDuration?`       | `number`                                                                                              | Duration (in seconds) to cache OpenID discovery metadata.                                                                                                                                                                                       |

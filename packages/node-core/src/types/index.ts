@@ -476,6 +476,14 @@ export interface MonoCloudOptionsBase {
   filteredIdTokenClaims: string[];
 
   /**
+   * Name of the claim in the user profile that holds group memberships, used as the
+   * default when evaluating group-based authorization.
+   *
+   * @defaultValue 'groups'
+   */
+  groupsClaim: string;
+
+  /**
    * Identifier used for internal debugging/logging.
    */
   debugger: string;
@@ -594,14 +602,17 @@ export interface MonoCloudSessionOptions extends Partial<
  * | `MONOCLOUD_AUTH_POST_LOGOUT_REDIRECT_URI` | URL users are redirected to after a successful logout. |
  * | `MONOCLOUD_AUTH_FETCH_USER_INFO` | Determines whether user profile data is fetched from the `UserInfo` endpoint after authorization. |
  * | `MONOCLOUD_AUTH_REFETCH_USER_INFO` | If `true`, user information is re-fetched on each userinfo request. |
+ * | `MONOCLOUD_AUTH_REFETCH_STRICT_PROFILE_SYNC` | When `true`, the session user profile is fully replaced from the latest ID token (and UserInfo response, if applicable) instead of being merged with the existing profile. |
  * | `MONOCLOUD_AUTH_ID_TOKEN_SIGNING_ALG` | Expected signing algorithm for ID tokens (for example, `RS256`). |
  * | `MONOCLOUD_AUTH_FILTERED_ID_TOKEN_CLAIMS` | Space-separated list of ID token claims excluded from the session object. |
+ * | `MONOCLOUD_AUTH_GROUPS_CLAIM` | Name of the claim in the user profile that holds group memberships, used as the default when evaluating group-based authorization. Defaults to `groups`. |
  *
  *  ### Routes
  *
  * | Environment Variable | Description |
  * |----------------------|-------------|
  * | `MONOCLOUD_AUTH_CALLBACK_URL` | Application path where the authorization server redirects the user after authentication. |
+ * | `MONOCLOUD_AUTH_BACK_CHANNEL_LOGOUT_URL` | Application path that handles OpenID Connect back-channel logout requests initiated by MonoCloud. |
  * | `MONOCLOUD_AUTH_SIGNIN_URL` | Internal route used to initiate the sign-in flow. |
  * | `MONOCLOUD_AUTH_SIGNOUT_URL` | Internal route used to initiate the sign-out flow. |
  * | `MONOCLOUD_AUTH_USER_INFO_URL` | Route that exposes the authenticated user’s profile retrieved from the UserInfo endpoint. |
@@ -638,6 +649,12 @@ export interface MonoCloudSessionOptions extends Partial<
  * |----------------------|-------------|
  * | `MONOCLOUD_AUTH_JWKS_CACHE_DURATION` | Duration (in seconds) to cache the JSON Web Key Set (JWKS) used to verify tokens. |
  * | `MONOCLOUD_AUTH_METADATA_CACHE_DURATION` | Duration (in seconds) to cache the OpenID Connect discovery metadata. |
+ *
+ * ### Debugging
+ *
+ * | Environment Variable | Description |
+ * |----------------------|-------------|
+ * | `DEBUG` | Standard [`debug`](https://www.npmjs.com/package/debug) namespace filter that enables the SDK's internal debug logging. Set to the client's debug namespace (`node-auth-core` by default) or a wildcard such as `*`. |
  *
  * @category Types
  */

@@ -121,6 +121,46 @@ describe('MonoCloud.isUserInGroup() - App Router', () => {
   });
 });
 
+describe('MonoCloud.isUserInGroup() - App Router (groupsClaim from env)', () => {
+  let monoCloud: MonoCloudNextClient;
+
+  beforeEach(async () => {
+    req = new NextRequest('http://localhost:3000/');
+
+    process.env.MONOCLOUD_AUTH_GROUPS_CLAIM = 'CUSTOM_GROUPS';
+
+    monoCloud = new MonoCloudNextClient();
+
+    await setSessionCookie(req, undefined, {
+      ...defaultSessionCookieValue,
+      user: {
+        ...defaultSessionCookieValue.user,
+        groups: ['nope'],
+        CUSTOM_GROUPS: ['test'],
+      },
+    });
+  });
+
+  afterEach(() => {
+    req = undefined as unknown as NextRequest;
+    delete process.env.MONOCLOUD_AUTH_GROUPS_CLAIM;
+  });
+
+  it('should use the groupsClaim configured via MONOCLOUD_AUTH_GROUPS_CLAIM', async () => {
+    const result = await monoCloud.isUserInGroup(['test']);
+
+    expect(result).toBe(true);
+  });
+
+  it('still allows the per-call groupsClaim to take precedence', async () => {
+    const result = await monoCloud.isUserInGroup(['test'], {
+      groupsClaim: 'groups',
+    });
+
+    expect(result).toBe(false);
+  });
+});
+
 describe('MonoCloud.isUserInGroup() - App Router (No session + No groups)', () => {
   let monoCloud: MonoCloudNextClient;
   beforeEach(() => {

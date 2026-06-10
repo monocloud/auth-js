@@ -113,6 +113,21 @@ must reflect the new path. For example, during local development:
 
 `http://localhost:3000/api/custom_callback`
 
+### Next.js-specific environment variables
+
+In addition to the `MONOCLOUD_AUTH_*` variables documented on [MonoCloudOptions](/sdks/nextjs/api-reference/types/monocloudoptions),
+the Next.js SDK reads the following variables.
+
+These are browser-facing mirrors of the corresponding `MONOCLOUD_AUTH_*` options, set them
+when you override the matching server-side route or `groupsClaim`.
+
+| Environment Variable                       | Description                                                                                                                                                                                           |
+| ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `NEXT_PUBLIC_MONOCLOUD_AUTH_SIGNIN_URL`    | Client-side sign-in route used by `<SignIn>`, `<SignUp>`, and client-side page protection to redirect the browser. Set this to match `MONOCLOUD_AUTH_SIGNIN_URL` when you override the sign-in route. |
+| `NEXT_PUBLIC_MONOCLOUD_AUTH_SIGNOUT_URL`   | Client-side sign-out route used by `<SignOut>`. Set this to match `MONOCLOUD_AUTH_SIGNOUT_URL` when you override the sign-out route.                                                                  |
+| `NEXT_PUBLIC_MONOCLOUD_AUTH_USER_INFO_URL` | Client-side userinfo route used by `useAuth()` to fetch the authenticated user. Set this to match `MONOCLOUD_AUTH_USER_INFO_URL` when you override the userinfo route.                                |
+| `NEXT_PUBLIC_MONOCLOUD_AUTH_GROUPS_CLAIM`  | Client-side equivalent of the `groupsClaim` option (`MONOCLOUD_AUTH_GROUPS_CLAIM`), used by client components such as `<Protected>` and client-side page protection.                                  |
+
 ## Constructors
 
 ### Constructor

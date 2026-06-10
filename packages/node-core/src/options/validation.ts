@@ -201,6 +201,7 @@ export const optionsSchema: Joi.ObjectSchema<MonoCloudOptionsBase> = Joi.object(
       'ES512'
     ),
     filteredIdTokenClaims: Joi.array<string>().items(stringRequired),
+    groupsClaim: stringRequired,
     debugger: stringRequired,
     userAgent: stringRequired,
     jwksCacheDuration: numOptional,

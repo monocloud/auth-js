@@ -839,7 +839,7 @@ export class MonoCloudCoreClient {
    * @param request - MonoCloud cookie request object.
    * @param response - MonoCloud cookie response object.
    * @param groups - List of group names or IDs to check.
-   * @param groupsClaim - Optional claim name that holds groups. Defaults to "groups".
+   * @param groupsClaim - Optional claim name that holds groups. Defaults to the configured `groupsClaim` option (`"groups"` unless overridden).
    * @param matchAll - If `true`, requires membership in all groups; otherwise any one group is sufficient.
    *
    * @returns `true` if the user satisfies the group condition, `false` otherwise.
@@ -857,7 +857,12 @@ export class MonoCloudCoreClient {
       return false;
     }
 
-    return isUserInGroup(session.user, groups, groupsClaim, matchAll);
+    return isUserInGroup(
+      session.user,
+      groups,
+      groupsClaim ?? this.options.groupsClaim,
+      matchAll
+    );
   }
 
   /**
