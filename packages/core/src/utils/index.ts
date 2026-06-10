@@ -15,7 +15,7 @@ import {
   stringToArrayBuffer,
 } from './internal';
 
-const PBKDF2_ITERATIONS = 310_000;
+const PBKDF2_ITERATIONS = 100_000;
 const SALT_LENGTH = 16;
 const GCM_IV_LENGTH = 12;
 
