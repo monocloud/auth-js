@@ -9,7 +9,6 @@ on:
       - main
 
 permissions:
-  checks: write
   contents: read
 
 concurrency:
@@ -118,16 +117,6 @@ jobs:
           path: "**/packages/core/coverage/junit*.xml"
           overwrite: true
 
-      - name: Report Test Results
-        if: success() || failure()
-        uses: dorny/test-reporter@v3
-        with:
-          artifact: "auth-core-tests-${{ matrix.node-version }}"
-          name: "Core SDK Tests (${{ matrix.node-version }})"
-          path: "**/packages/core/coverage/junit*.xml"
-          reporter: java-junit
-          fail-on-error: false
-
   node_core_test:
     name: Node Core SDK Tests
     runs-on: ubuntu-latest
@@ -172,16 +161,6 @@ jobs:
           name: "auth-node-core-tests-${{ matrix.node-version }}"
           path: "**/packages/node-core/coverage/junit*.xml"
           overwrite: true
-
-      - name: Report Test Results
-        if: success() || failure()
-        uses: dorny/test-reporter@v3
-        with:
-          artifact: "auth-node-core-tests-${{ matrix.node-version }}"
-          name: "Node Core SDK Tests (${{ matrix.node-version }})"
-          path: "**/packages/node-core/coverage/junit*.xml"
-          reporter: java-junit
-          fail-on-error: false
 
   nextjs_test:
     name: Next.js SDK Tests
@@ -228,16 +207,6 @@ jobs:
           path: "**/packages/nextjs/coverage/junit*.xml"
           overwrite: true
 
-      - name: Report Test Results
-        if: success() || failure()
-        uses: dorny/test-reporter@v3
-        with:
-          artifact: "auth-nextjs-tests-${{ matrix.node-version }}"
-          name: "Next.js SDK Tests (${{ matrix.node-version }})"
-          path: "**/packages/nextjs/coverage/junit*.xml"
-          reporter: java-junit
-          fail-on-error: false
-
   node_backend_test:
     name: Node Backend SDK Tests
     runs-on: ubuntu-latest
@@ -283,16 +252,6 @@ jobs:
           path: "**/packages/node-backend/coverage/junit*.xml"
           overwrite: true
 
-      - name: Report Test Results
-        if: success() || failure()
-        uses: dorny/test-reporter@v3
-        with:
-          artifact: "auth-node-backend-tests-${{ matrix.node-version }}"
-          name: "Node Backend SDK Tests (${{ matrix.node-version }})"
-          path: "**/packages/node-backend/coverage/junit*.xml"
-          reporter: java-junit
-          fail-on-error: false
-
   web_js_test:
     name: Web JS SDK Tests
     runs-on: ubuntu-latest
@@ -334,16 +293,6 @@ jobs:
           path: "**/packages/web-js/coverage/junit*.xml"
           overwrite: true
 
-      - name: Report Test Results
-        if: success() || failure()
-        uses: dorny/test-reporter@v3
-        with:
-          artifact: "auth-web-js-tests"
-          name: "Web JS SDK Tests"
-          path: "**/packages/web-js/coverage/junit*.xml"
-          reporter: java-junit
-          fail-on-error: false
-
   react_test:
     name: React SDK Tests
     runs-on: ubuntu-latest
@@ -384,13 +333,3 @@ jobs:
           name: "auth-react-tests"
           path: "**/packages/react/coverage/junit*.xml"
           overwrite: true
-
-      - name: Report Test Results
-        if: success() || failure()
-        uses: dorny/test-reporter@v3
-        with:
-          artifact: "auth-react-tests"
-          name: "React SDK Tests"
-          path: "**/packages/react/coverage/junit*.xml"
-          reporter: java-junit
-          fail-on-error: false

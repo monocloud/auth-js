@@ -66,7 +66,6 @@ jobs:
       contents: read
       id-token: write
       issues: write
-      pull-requests: write
 
     steps:
       - name: Limit to users with write access
@@ -96,12 +95,21 @@ jobs:
               repo: context.repo.repo,
               pull_number: context.issue.number,
             });
-            core.setOutput('head_ref', pr.head.ref);
+            const headRepo = pr.head.repo ? pr.head.repo.full_name : null;
+            const baseRepo = `${context.repo.owner}/${context.repo.repo}`;
+            if (headRepo !== baseRepo) {
+              core.setFailed(
+                `Snapshot releases are only supported for branches in ${baseRepo}, ` +
+                  `not forks (PR head repo: ${headRepo}). Refusing to build and publish untrusted code.`
+              );
+              return;
+            }
+            core.setOutput('head_sha', pr.head.sha);
 
       - name: Checkout Repo
         uses: actions/checkout@v5
         with:
-          ref: ${{ steps.pr_info.outputs.head_ref }}
+          ref: ${{ steps.pr_info.outputs.head_sha }}
           fetch-depth: 0
 
       - name: Install PNPM

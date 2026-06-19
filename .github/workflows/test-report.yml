@@ -1,0 +1,81 @@
+name: Test Report
+
+on:
+  workflow_run:
+    workflows: ["Build & Test"]
+    types:
+      - completed
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.workflow_run.id }}
+  cancel-in-progress: true
+
+jobs:
+  report:
+    name: Publish Test Report
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+      checks: write
+      pull-requests: write
+    if: >
+      github.event.workflow_run.event == 'pull_request' ||
+      github.event.workflow_run.event == 'push'
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - artifact: auth-core-tests-20
+            name: "Core SDK Tests (20)"
+            path: "**/packages/core/coverage/junit*.xml"
+          - artifact: auth-core-tests-22
+            name: "Core SDK Tests (22)"
+            path: "**/packages/core/coverage/junit*.xml"
+          - artifact: auth-core-tests-24
+            name: "Core SDK Tests (24)"
+            path: "**/packages/core/coverage/junit*.xml"
+          - artifact: auth-node-core-tests-20
+            name: "Node Core SDK Tests (20)"
+            path: "**/packages/node-core/coverage/junit*.xml"
+          - artifact: auth-node-core-tests-22
+            name: "Node Core SDK Tests (22)"
+            path: "**/packages/node-core/coverage/junit*.xml"
+          - artifact: auth-node-core-tests-24
+            name: "Node Core SDK Tests (24)"
+            path: "**/packages/node-core/coverage/junit*.xml"
+          - artifact: auth-nextjs-tests-20
+            name: "Next.js SDK Tests (20)"
+            path: "**/packages/nextjs/coverage/junit*.xml"
+          - artifact: auth-nextjs-tests-22
+            name: "Next.js SDK Tests (22)"
+            path: "**/packages/nextjs/coverage/junit*.xml"
+          - artifact: auth-nextjs-tests-24
+            name: "Next.js SDK Tests (24)"
+            path: "**/packages/nextjs/coverage/junit*.xml"
+          - artifact: auth-node-backend-tests-20
+            name: "Node Backend SDK Tests (20)"
+            path: "**/packages/node-backend/coverage/junit*.xml"
+          - artifact: auth-node-backend-tests-22
+            name: "Node Backend SDK Tests (22)"
+            path: "**/packages/node-backend/coverage/junit*.xml"
+          - artifact: auth-node-backend-tests-24
+            name: "Node Backend SDK Tests (24)"
+            path: "**/packages/node-backend/coverage/junit*.xml"
+          - artifact: auth-web-js-tests
+            name: "Web JS SDK Tests"
+            path: "**/packages/web-js/coverage/junit*.xml"
+          - artifact: auth-react-tests
+            name: "React SDK Tests"
+            path: "**/packages/react/coverage/junit*.xml"
+    steps:
+      - name: Publish ${{ matrix.name }}
+        uses: dorny/test-reporter@v3
+        with:
+          artifact: ${{ matrix.artifact }}
+          name: ${{ matrix.name }}
+          path: ${{ matrix.path }}
+          reporter: java-junit
+          fail-on-error: false
