@@ -246,6 +246,60 @@ export interface AuthorizationParams {
 }
 
 /**
+ * Parameters used to construct an OAuth 2.0 / OpenID Connect device authorization request.
+ *
+ * @category Types
+ */
+export interface DeviceAuthorizationParams {
+  /**
+   * Space-separated list of scopes requested during authentication.
+   */
+  scopes?: string;
+
+  /**
+   * Space-separated list of resource indicators that scope the issued access token.
+   */
+  resource?: string;
+}
+
+/**
+ * Response from the Device Authorization Request.
+ *
+ * @category Types
+ */
+export interface DeviceAuthorizationResponse {
+  /**
+   * The device verification code.
+   */
+  device_code: string;
+
+  /**
+   * The end-user verification code.
+   */
+  user_code: string;
+
+  /**
+   * The end-user verification URI.
+   */
+  verification_uri: string;
+
+  /**
+   * A verification URI that includes the "user_code" in the query parameter.
+   */
+  verification_uri_complete?: string;
+
+  /**
+   * The lifetime in seconds of the "device_code" and "user_code".
+   */
+  expires_in: number;
+
+  /**
+   * The minimum amount of time in seconds that the client SHOULD wait between polling requests to the token endpoint.
+   */
+  interval?: number;
+}
+
+/**
  * Parameters returned to the application after the authorization server redirects the user back to the callback URL.
  *
  * @category Types

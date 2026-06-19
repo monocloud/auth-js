@@ -270,6 +270,56 @@ export class AuthorizationServerFetchBuilder {
     return this;
   }
 
+  configureDeviceAuthorization(options?: {
+    responseCode?: number;
+    body?: string;
+    error?: string | null;
+    error_description?: string | null;
+  }): AuthorizationServerFetchBuilder {
+    let body;
+    let responseCode = options?.responseCode ?? 200;
+    if (
+      typeof options?.error !== 'undefined' ||
+      typeof options?.error_description !== 'undefined'
+    ) {
+      responseCode = 400;
+      body = {
+        error: options.error ?? null,
+        error_description: options.error_description ?? null,
+      };
+    } else {
+      body = {
+        device_code: 'device_code',
+        user_code: 'user_code',
+        verification_uri: 'https://example.com/device',
+        verification_uri_complete:
+          'https://example.com/device?user_code=user_code',
+        expires_in: 1800,
+        interval: 5,
+      };
+    }
+
+    this.expectations.push({
+      url: `${this.authServerUrl}/connect/deviceauthorization`,
+      headers: {
+        authorization: 'Basic Y2xpZW50SWQ6',
+        'content-type': 'application/x-www-form-urlencoded',
+        accept: 'application/json',
+      },
+      method: 'POST',
+      body: options?.body,
+      response: {
+        status: responseCode,
+        headers: {
+          'content-type': 'application/json',
+        },
+        body: JSON.stringify(body),
+      },
+    });
+
+    return this;
+  }
+
   configureTokenEndpoint(options?: {
     responseCode?: number;
     idToken?: string;
