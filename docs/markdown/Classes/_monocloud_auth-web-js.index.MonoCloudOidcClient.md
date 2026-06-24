@@ -150,6 +150,65 @@ Decoded payload.
 
 ---
 
+### deviceAuthorizationGrant()
+
+> **deviceAuthorizationGrant**(`deviceCode`: `string`): `Promise`\<[`Tokens`](/sdks/web-js/api-reference/types/tokens)\>
+
+Exchanges a device code for tokens.
+
+#### Parameters
+
+| Parameter    | Type     | Description                                                    |
+| ------------ | -------- | -------------------------------------------------------------- |
+| `deviceCode` | `string` | The device code received from the device authorization server. |
+
+#### Returns
+
+`Promise`\<[`Tokens`](/sdks/web-js/api-reference/types/tokens)\>
+
+Tokens obtained by exchanging a device code at the token endpoint.
+
+#### Throws
+
+[MonoCloudOPError](/sdks/web-js/api-reference/error-classes/monocloudoperror) - When the authorization server returns a standardized
+OAuth 2.0 error response.
+
+#### Throws
+
+[MonoCloudHttpError](/sdks/web-js/api-reference/error-classes/monocloudhttperror) - Thrown if there is a network error during the request or
+unexpected status code during the request or a serialization error while processing the response.
+
+---
+
+### deviceAuthorizationRequest()
+
+> **deviceAuthorizationRequest**(`params`: [`DeviceAuthorizationParams`](/sdks/nodejs/api-reference/types/deviceauthorizationparams)): `Promise`\<[`DeviceAuthorizationResponse`](/sdks/nodejs/api-reference/types/deviceauthorizationresponse)\>
+
+Performs a device authorization request.
+
+#### Parameters
+
+| Parameter | Type                                                                                            | Description                      |
+| --------- | ----------------------------------------------------------------------------------------------- | -------------------------------- |
+| `params`  | [`DeviceAuthorizationParams`](/sdks/nodejs/api-reference/types/deviceauthorizationparams) | Device Authorization Parameters. |
+
+#### Returns
+
+`Promise`\<[`DeviceAuthorizationResponse`](/sdks/nodejs/api-reference/types/deviceauthorizationresponse)\>
+
+Response from Device Authorization endpoint.
+
+#### Throws
+
+[MonoCloudOPError](/sdks/web-js/api-reference/error-classes/monocloudoperror) - When the request is invalid.
+
+#### Throws
+
+[MonoCloudHttpError](/sdks/web-js/api-reference/error-classes/monocloudhttperror) - Thrown if there is a network error during the request or
+unexpected status code during the request or a serialization error while processing the response.
+
+---
+
 ### endSessionUrl()
 
 > **endSessionUrl**(`params`: [`EndSessionParameters`](/sdks/web-js/api-reference/types/endsessionparameters)): `Promise`\<`string`\>

@@ -29,6 +29,8 @@ category: Other
 - [AuthorizationParams](/sdks/nodejs/api-reference/types/authorizationparams)
 - [AuthState](/sdks/nodejs/api-reference/types/authstate)
 - [CallbackParams](/sdks/nodejs/api-reference/types/callbackparams)
+- [DeviceAuthorizationParams](/sdks/nodejs/api-reference/types/deviceauthorizationparams)
+- [DeviceAuthorizationResponse](/sdks/nodejs/api-reference/types/deviceauthorizationresponse)
 - [EndSessionParameters](/sdks/nodejs/api-reference/types/endsessionparameters)
 - [Group](/sdks/nodejs/api-reference/types/group)
 - [IdTokenClaims](/sdks/nodejs/api-reference/types/idtokenclaims)
