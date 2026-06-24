@@ -28,6 +28,8 @@ import {
   RefreshSessionOptions,
   Tokens,
   UserinfoResponse,
+  DeviceAuthorizationParams,
+  DeviceAuthorizationResponse,
 } from './types';
 import { MonoCloudOPError } from './errors/monocloud-op-error';
 import { MonoCloudHttpError } from './errors/monocloud-http-error';
@@ -1142,5 +1144,154 @@ export class MonoCloudOidcClient extends MonoCloudOidcClientBase {
     }
 
     return claims;
+  }
+
+  /**
+   * Performs a device authorization request.
+   *
+   * @param params - Device Authorization Parameters.
+   *
+   * @returns Response from Device Authorization endpoint.
+   *
+   * @throws {@link MonoCloudOPError} - When the request is invalid.
+   *
+   * @throws {@link MonoCloudHttpError} - Thrown if there is a network error during the request or
+   * unexpected status code during the request or a serialization error while processing the response.
+   *
+   */
+  async deviceAuthorizationRequest(
+    params: DeviceAuthorizationParams
+  ): Promise<DeviceAuthorizationResponse> {
+    const body = new URLSearchParams();
+
+    body.set('client_id', this.clientId);
+
+    const scopes = parseSpaceSeparated(params.scopes) ?? [];
+
+    if (scopes.length > 0) {
+      body.set('scope', scopes.join(' '));
+    }
+
+    const resource = parseSpaceSeparated(params?.resource) ?? [];
+
+    if (resource.length > 0) {
+      for (const r of resource) {
+        body.append('resource', r);
+      }
+    }
+
+    const headers = {
+      'content-type': 'application/x-www-form-urlencoded',
+      accept: 'application/json',
+    };
+
+    await clientAuth(
+      this.clientId,
+      this.clientSecret,
+      this.authMethod,
+      this.tenantDomain,
+      headers,
+      body,
+      JWT_ASSERTION_CLOCK_SKEW
+    );
+
+    const metadata = await this.getMetadata();
+
+    assertMetadataProperty(metadata, 'device_authorization_endpoint');
+
+    const response = await innerFetch(
+      metadata.device_authorization_endpoint,
+      {
+        body: body.toString(),
+        method: 'POST',
+        headers,
+      },
+      this.fetcher
+    );
+
+    if (response.status === 400) {
+      const standardBodyError = await deserializeJson(response);
+
+      throw new MonoCloudOPError(
+        standardBodyError.error ?? 'device_authorization_failed',
+        standardBodyError.error_description ??
+          'Device Authorization Request Failed'
+      );
+    }
+
+    if (response.status !== 200) {
+      throw new MonoCloudHttpError(
+        `Error while performing device authorization request. Unexpected status code: ${response.status}`
+      );
+    }
+
+    return await deserializeJson<DeviceAuthorizationResponse>(response);
+  }
+
+  /**
+   * Exchanges a device code for tokens.
+   *
+   * @param deviceCode - The device code received from the device authorization server.
+   *
+   * @returns Tokens obtained by exchanging a device code at the token endpoint.
+   *
+   * @throws {@link MonoCloudOPError} - When the authorization server returns a standardized
+   * OAuth 2.0 error response.
+   *
+   * @throws {@link MonoCloudHttpError} - Thrown if there is a network error during the request or
+   * unexpected status code during the request or a serialization error while processing the response.
+   *
+   */
+  async deviceAuthorizationGrant(deviceCode: string): Promise<Tokens> {
+    const body = new URLSearchParams();
+
+    body.set('grant_type', 'urn:ietf:params:oauth:grant-type:device_code');
+    body.set('device_code', deviceCode);
+
+    const headers = {
+      'content-type': 'application/x-www-form-urlencoded',
+      accept: 'application/json',
+    };
+
+    await clientAuth(
+      this.clientId,
+      this.clientSecret,
+      this.authMethod,
+      this.tenantDomain,
+      headers,
+      body,
+      JWT_ASSERTION_CLOCK_SKEW
+    );
+
+    const metadata = await this.getMetadata();
+
+    assertMetadataProperty(metadata, 'token_endpoint');
+
+    const response = await innerFetch(
+      metadata.token_endpoint,
+      {
+        method: 'POST',
+        body: body.toString(),
+        headers,
+      },
+      this.fetcher
+    );
+
+    if (response.status === 400) {
+      const standardBodyError = await deserializeJson(response);
+
+      throw new MonoCloudOPError(
+        standardBodyError.error ?? 'device_token_failed',
+        standardBodyError.error_description ?? 'Device code token grant failed'
+      );
+    }
+
+    if (response.status !== 200) {
+      throw new MonoCloudHttpError(
+        `Error while performing token grant. Unexpected status code: ${response.status}`
+      );
+    }
+
+    return await deserializeJson<Tokens>(response);
   }
 }

@@ -39,6 +39,8 @@ export type {
   TokenValidationOptionsBase,
   ValidateJwtAccessTokenOptions,
   IsUserInGroupOptions,
+  DeviceAuthorizationParams,
+  DeviceAuthorizationResponse,
 } from './types';
 
 export { MonoCloudAuthBaseError } from './errors/monocloud-auth-base-error';
