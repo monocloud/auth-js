@@ -1235,7 +1235,7 @@ export class MonoCloudOidcClient extends MonoCloudOidcClientBase {
    *
    * @returns Tokens obtained by exchanging a device code at the token endpoint.
    *
-   * @throws {@link MonoCloudOPError} - When the OpenID Provider returns a standardized
+   * @throws {@link MonoCloudOPError} - When the authorization server returns a standardized
    * OAuth 2.0 error response.
    *
    * @throws {@link MonoCloudHttpError} - Thrown if there is a network error during the request or
