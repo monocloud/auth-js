@@ -1,5 +1,11 @@
 # @monocloud/auth-core
 
+## 0.1.15
+
+### Patch Changes
+
+- 69ff518: - Added Device Authorization Flow
+
 ## 0.1.14
 
 ### Patch Changes

@@ -1,6 +1,6 @@
 {
   "name": "@monocloud/backend-node",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "description": "MonoCloud NodeJS Backend SDK",
   "keywords": [
     "monocloud",
