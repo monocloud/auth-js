@@ -127,25 +127,21 @@ jobs:
       - name: Build Packages
         run: pnpm build
 
-      - name: Force Patch Snapshot Changeset
+      - name: Ensure Snapshot Changeset
         run: |
-          echo "Clearing existing changesets to force patch snapshot..."
-          find .changeset -name "*.md" ! -name "README.md" -delete
-
-          echo "Creating temporary patch changeset."
-
-          cat <<EOF > .changeset/temp-snapshot.md
-          ---
-          '@monocloud/auth-core': patch
-          '@monocloud/auth-node-core': patch
-          '@monocloud/auth-web-js': patch
-          '@monocloud/auth-react': patch
-          '@monocloud/auth-nextjs': patch
-          '@monocloud/backend-node': patch
-          ---
-
-          Snapshot release.
-          EOF
+          if [ -z "$(find .changeset -name '*.md' ! -name 'README.md' -print -quit)" ]; then
+            echo "No pending changesets; creating a temporary patch changeset."
+            printf '%s\n' "---" \
+              "'@monocloud/auth-core': patch" \
+              "'@monocloud/auth-node-core': patch" \
+              "'@monocloud/auth-web-js': patch" \
+              "'@monocloud/auth-react': patch" \
+              "'@monocloud/auth-nextjs': patch" \
+              "'@monocloud/backend-node': patch" \
+              "---" "" "Snapshot release." > .changeset/temp-snapshot.md
+          else
+            echo "Using existing changesets to compute the snapshot version."
+          fi
 
       - name: Create Snapshot Version
         run: pnpm changeset version --snapshot canary
