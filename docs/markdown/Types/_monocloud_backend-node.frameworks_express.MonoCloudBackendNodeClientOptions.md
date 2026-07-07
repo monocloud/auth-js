@@ -71,9 +71,11 @@ The expected audience URI for access token validation (e.g. `https://api.example
 ---
 
 ## cache
-> `optional` **cache**: [`ICache`](/sdks/express-backend/api-reference/types/icache)
+> `optional` **cache**: [`IIntrospectionCache`](/sdks/express-backend/api-reference/types/iintrospectioncache)
 
-Optional cache implementation for storing validated access token claims.
+Optional cache for access token introspection results. Only tokens validated via
+introspection are cached (opaque tokens, and JWTs when `introspectJwtTokens` is `true`);
+locally-validated JWTs are not cached.
 
 ---
 

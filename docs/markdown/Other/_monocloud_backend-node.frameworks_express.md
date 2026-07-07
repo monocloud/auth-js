@@ -28,7 +28,7 @@ framework: Express
 
 - [AccessTokenClaims](/sdks/express-backend/api-reference/types/accesstokenclaims)
 - [AuthenticatedExpressRequest](/sdks/express-backend/api-reference/types/authenticatedexpressrequest)
-- [ICache](/sdks/express-backend/api-reference/types/icache)
+- [IIntrospectionCache](/sdks/express-backend/api-reference/types/iintrospectioncache)
 - [IntrospectOptions](/sdks/express-backend/api-reference/types/introspectoptions)
 - [IssuerMetadata](/sdks/express-backend/api-reference/types/issuermetadata)
 - [IsUserInGroupOptions](/sdks/express-backend/api-reference/types/isuseringroupoptions)

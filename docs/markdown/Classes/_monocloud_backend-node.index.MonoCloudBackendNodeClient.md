@@ -9,8 +9,8 @@ description: "Backend client for validating access tokens in Node.js server appl
 
 Backend client for validating access tokens in Node.js server applications.
 
-Extends the core OIDC backend client with caching support and automatic
-detection of JWT vs. opaque token formats.
+Extends the core OIDC backend client with introspection caching and
+automatic detection of JWT vs. opaque token formats.
 
 ## Extends
 

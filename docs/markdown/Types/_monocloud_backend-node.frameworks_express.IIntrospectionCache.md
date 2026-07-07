@@ -1,16 +1,16 @@
 ---
 rootSdk: Node.js Backend
-title: "ICache"
+title: "IIntrospectionCache"
 category: Types
-framework: Fastify
-description: "Cache adapter for storing validated access token claims."
+framework: Express
+description: "Cache adapter for storing access token introspection results."
 ---
 
-# Type: ICache
+# Type: IIntrospectionCache
 
-Cache adapter for storing validated access token claims.
+Cache adapter for storing access token introspection results.
 
-Implement this interface to persist validated claims in an external store such as
+Implement this interface to persist introspection results in an external store such as
 Redis, Memcached, or an in-memory cache.
 
 ## delete()
@@ -33,7 +33,7 @@ Removes an entry from the cache.
 
 ## get()
 
-> **get**(`key`: `string`): `Promise`\<[`AccessTokenClaims`](/sdks/fastify-backend/api-reference/types/accesstokenclaims) \| `null` \| `undefined`\>
+> **get**(`key`: `string`): `Promise`\<[`AccessTokenClaims`](/sdks/express-backend/api-reference/types/accesstokenclaims) \| `null` \| `undefined`\>
 
 Retrieves cached claims by key.
 
@@ -45,7 +45,7 @@ Retrieves cached claims by key.
 
 ### Returns
 
-`Promise`\<[`AccessTokenClaims`](/sdks/fastify-backend/api-reference/types/accesstokenclaims) \| `null` \| `undefined`\>
+`Promise`\<[`AccessTokenClaims`](/sdks/express-backend/api-reference/types/accesstokenclaims) \| `null` \| `undefined`\>
 
 The cached claims, or `null`/`undefined` if the entry does not exist or has expired.
 
@@ -53,16 +53,16 @@ The cached claims, or `null`/`undefined` if the entry does not exist or has expi
 
 ## set()
 
-> **set**(`key`: `string`, `claims`: [`AccessTokenClaims`](/sdks/fastify-backend/api-reference/types/accesstokenclaims), `expiresAt`: `number`): `Promise`\<`void`\>
+> **set**(`key`: `string`, `claims`: [`AccessTokenClaims`](/sdks/express-backend/api-reference/types/accesstokenclaims), `expiresAt`: `number`): `Promise`\<`void`\>
 
-Stores validated claims in the cache.
+Stores introspected access token claims in the cache.
 
 ### Parameters
 
 | Parameter   | Type                                                                      | Description                                                      |
 | ----------- | ------------------------------------------------------------------------- | ---------------------------------------------------------------- |
 | `key`       | `string`                                                                  | The cache key (access token).                                    |
-| `claims`    | [`AccessTokenClaims`](/sdks/fastify-backend/api-reference/types/accesstokenclaims) | The validated access token claims to cache.                      |
+| `claims`    | [`AccessTokenClaims`](/sdks/express-backend/api-reference/types/accesstokenclaims) | The introspected access token claims to cache.                   |
 | `expiresAt` | `number`                                                                  | The token's expiration time as a Unix epoch timestamp (seconds). |
 
 ### Returns

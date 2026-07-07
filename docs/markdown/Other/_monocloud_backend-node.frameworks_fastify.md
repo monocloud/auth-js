@@ -28,7 +28,7 @@ framework: Fastify
 
 - [AccessTokenClaims](/sdks/fastify-backend/api-reference/types/accesstokenclaims)
 - [AuthenticatedFastifyRequest](/sdks/fastify-backend/api-reference/types/authenticatedfastifyrequest)
-- [ICache](/sdks/fastify-backend/api-reference/types/icache)
+- [IIntrospectionCache](/sdks/fastify-backend/api-reference/types/iintrospectioncache)
 - [IntrospectOptions](/sdks/fastify-backend/api-reference/types/introspectoptions)
 - [IssuerMetadata](/sdks/fastify-backend/api-reference/types/issuermetadata)
 - [IsUserInGroupOptions](/sdks/fastify-backend/api-reference/types/isuseringroupoptions)
