@@ -2,7 +2,7 @@ export type { ProtectMiddleware, AuthenticatedExpressRequest } from './types';
 export type {
   ProtectApiRequestOptions,
   ClientCertificateResolver,
-  ICache,
+  IIntrospectionCache,
   MonoCloudBackendNodeClientOptions,
   ProtectOptions,
   TokenResolver,

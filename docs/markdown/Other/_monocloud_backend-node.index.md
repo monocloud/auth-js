@@ -22,7 +22,7 @@ category: Other
 ## Types
 
 - [AccessTokenClaims](/sdks/nodejs-backend/api-reference/types/accesstokenclaims)
-- [ICache](/sdks/nodejs-backend/api-reference/types/icache)
+- [IIntrospectionCache](/sdks/nodejs-backend/api-reference/types/iintrospectioncache)
 - [IntrospectOptions](/sdks/nodejs-backend/api-reference/types/introspectoptions)
 - [IssuerMetadata](/sdks/nodejs-backend/api-reference/types/issuermetadata)
 - [IsUserInGroupOptions](/sdks/nodejs-backend/api-reference/types/isuseringroupoptions)

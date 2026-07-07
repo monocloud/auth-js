@@ -4,7 +4,7 @@ import {
   MonoCloudValidationError,
 } from '@monocloud/auth-core';
 import {
-  ICache,
+  IIntrospectionCache,
   MonoCloudBackendNodeClientOptions,
   ValidateAccessTokenOptions,
 } from './types';
@@ -14,13 +14,13 @@ import { getOptions } from './options/get-options';
 /**
  * Backend client for validating access tokens in Node.js server applications.
  *
- * Extends the core OIDC backend client with caching support and automatic
- * detection of JWT vs. opaque token formats.
+ * Extends the core OIDC backend client with introspection caching and
+ * automatic detection of JWT vs. opaque token formats.
  *
  * @category Classes
  */
 export class MonoCloudBackendNodeClient extends MonoCloudOidcBackendClient {
-  private readonly cache: ICache | undefined;
+  private readonly cache: IIntrospectionCache | undefined;
 
   private readonly introspectJwtToken: boolean | undefined;
 
@@ -79,17 +79,6 @@ export class MonoCloudBackendNodeClient extends MonoCloudOidcBackendClient {
       );
     }
 
-    if (this.cache) {
-      const cached = await this.cache.get(accessToken);
-      if (
-        cached &&
-        typeof cached.exp === 'number' &&
-        cached.exp > now() + this.clockSkew - this.clockTolerance
-      ) {
-        return cached;
-      }
-    }
-
     let claims: AccessTokenClaims;
 
     if (accessToken.split('.').length === 3 && !this.introspectJwtToken) {
@@ -100,16 +89,27 @@ export class MonoCloudBackendNodeClient extends MonoCloudOidcBackendClient {
         clientCertificate: options?.clientCertificate,
       });
     } else {
+      if (this.cache) {
+        const cached = await this.cache.get(accessToken);
+        if (
+          cached &&
+          typeof cached.exp === 'number' &&
+          cached.exp > now() + this.clockSkew - this.clockTolerance
+        ) {
+          return cached;
+        }
+      }
+
       claims = await this.introspectAccessToken(accessToken, {
         scopes: options?.scopes,
         groups: options?.groups,
         validateCertificateBinding: options?.validateCertificateBinding,
         clientCertificate: options?.clientCertificate,
       });
-    }
 
-    if (this.cache && typeof claims.exp === 'number') {
-      await this.cache.set(accessToken, claims, claims.exp);
+      if (this.cache && typeof claims.exp === 'number') {
+        await this.cache.set(accessToken, claims, claims.exp);
+      }
     }
 
     return claims;

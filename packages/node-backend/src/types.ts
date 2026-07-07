@@ -119,9 +119,11 @@ export interface MonoCloudBackendNodeClientOptions extends MonoCloudOidcBackendC
    */
   audience: string;
   /**
-   * Optional cache implementation for storing validated access token claims.
+   * Optional cache for access token introspection results. Only tokens validated via
+   * introspection are cached (opaque tokens, and JWTs when `introspectJwtTokens` is `true`);
+   * locally-validated JWTs are not cached.
    */
-  cache?: ICache;
+  cache?: IIntrospectionCache;
   /**
    * When `true`, JWT access tokens are introspected instead of locally validated.
    *
@@ -133,19 +135,19 @@ export interface MonoCloudBackendNodeClientOptions extends MonoCloudOidcBackendC
 }
 
 /**
- * Cache adapter for storing validated access token claims.
+ * Cache adapter for storing access token introspection results.
  *
- * Implement this interface to persist validated claims in an external store such as
+ * Implement this interface to persist introspection results in an external store such as
  * Redis, Memcached, or an in-memory cache.
  *
  * @category Types
  */
-export interface ICache {
+export interface IIntrospectionCache {
   /**
-   * Stores validated claims in the cache.
+   * Stores introspected access token claims in the cache.
    *
    * @param key - The cache key (access token).
-   * @param claims - The validated access token claims to cache.
+   * @param claims - The introspected access token claims to cache.
    * @param expiresAt - The token's expiration time as a Unix epoch timestamp (seconds).
    */
   set(key: string, claims: AccessTokenClaims, expiresAt: number): Promise<void>;

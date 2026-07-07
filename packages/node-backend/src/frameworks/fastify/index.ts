@@ -2,7 +2,7 @@ export type { ProtectHook, AuthenticatedFastifyRequest } from './types';
 export type {
   ProtectApiRequestOptions,
   ClientCertificateResolver,
-  ICache,
+  IIntrospectionCache,
   MonoCloudBackendNodeClientOptions,
   ProtectOptions,
   TokenResolver,

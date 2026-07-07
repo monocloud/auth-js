@@ -1,5 +1,5 @@
 export type {
-  ICache,
+  IIntrospectionCache,
   MonoCloudBackendNodeClientOptions,
   ValidateAccessTokenOptions,
   ProtectApiRequestOptions,
