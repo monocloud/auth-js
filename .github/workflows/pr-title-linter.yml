@@ -1,0 +1,44 @@
+name: PR Title Lint
+
+on:
+  pull_request:
+    types:
+      - opened
+      - edited
+      - reopened
+      - synchronize
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  pr-title-lint:
+    name: Lint PR Title
+    runs-on: ubuntu-latest
+    if: github.head_ref != 'changeset-release/main'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      - name: Install PNPM
+        uses: pnpm/action-setup@v6
+
+      - name: NodeJS Setup
+        uses: actions/setup-node@v6
+        with:
+          cache: pnpm
+          node-version: 24
+
+      - name: Install Dependencies
+        run: pnpm install
+
+      - name: Lint PR title
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: echo "$PR_TITLE" | pnpm exec commitlint
