@@ -1,5 +1,11 @@
 # @monocloud/backend-node
 
+## 0.2.0
+
+### Minor Changes
+
+- 3299765: - Rename the `ICache` interface to `IIntrospectionCache` and cache only introspection results.
+
 ## 0.1.9
 
 ### Patch Changes
