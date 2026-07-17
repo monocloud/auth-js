@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "eslint"
   },
   "dependencies": {
     "@monocloud/auth-nextjs": "file:../../",
@@ -15,14 +15,13 @@
     "next": "file:../../node_modules/next"
   },
   "devDependencies": {
-    "typescript": "^5",
-    "@types/node": "^22",
+    "@tailwindcss/postcss": "^4.3.3",
+    "@types/node": "^26.1.1",
     "@types/react": "file:../../node_modules/@types/react",
     "@types/react-dom": "file:../../node_modules/@types/react-dom",
-    "autoprefixer": "^10",
-    "postcss": "^8",
-    "tailwindcss": "^3",
-    "eslint": "^8",
-    "eslint-config-next": "^14"
+    "eslint": "^9.39.5",
+    "eslint-config-next": "^16.2.10",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^5"
   }
 }

@@ -10,13 +10,13 @@
   },
   "dependencies": {
     "@monocloud/backend-node": "file:../../",
-    "dotenv": "^17.2.1",
-    "express": "^5.1.0"
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1"
   },
   "devDependencies": {
     "@types/express": "file:../../node_modules/@types/express",
-    "@types/node": "^24.10.1",
-    "tsx": "^4.20.0",
+    "@types/node": "^26.1.1",
+    "tsx": "^4.23.1",
     "typescript": "~6.0.3"
   }
 }
