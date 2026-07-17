@@ -19,6 +19,8 @@ const validClientAuthMethods: ClientAuthMethod[] = [
   'private_key_jwt',
   'tls_client_auth',
   'self_signed_tls_client_auth',
+  'spiffe_jwt',
+  'spiffe_x509',
 ];
 
 export const groupOptionsSchema: Joi.ObjectSchema<IsUserInGroupOptions> =

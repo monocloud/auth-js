@@ -96,20 +96,40 @@ describe('clientAuth()', () => {
     expect(body.get('client_secret')).toBe('secret');
   });
 
-  ['tls_client_auth', 'self_signed_tls_client_auth'].forEach(mtlsAuth => {
-    it(`should add client id to the body if auth method is mtls ${mtlsAuth}`, async () => {
-      await clientAuth(
-        'clientId',
-        undefined,
-        mtlsAuth as ClientAuthMethod,
-        undefined,
-        undefined,
-        body,
-        undefined
-      );
+  ['tls_client_auth', 'self_signed_tls_client_auth', 'spiffe_x509'].forEach(
+    mtlsAuth => {
+      it(`should add client id to the body if auth method is mtls ${mtlsAuth}`, async () => {
+        await clientAuth(
+          'clientId',
+          undefined,
+          mtlsAuth as ClientAuthMethod,
+          undefined,
+          undefined,
+          body,
+          undefined
+        );
 
-      expect(body.get('client_id')).toBe('clientId');
-    });
+        expect(body.get('client_id')).toBe('clientId');
+      });
+    }
+  );
+
+  it('should support spiffe_jwt by forwarding the provided JWT-SVID as the client assertion', async () => {
+    await clientAuth(
+      'clientId',
+      'spiffe-jwt-svid',
+      'spiffe_jwt',
+      undefined,
+      undefined,
+      body,
+      undefined
+    );
+
+    expect(body.get('client_id')).toBe('clientId');
+    expect(body.get('client_assertion_type')).toBe(
+      'urn:ietf:params:oauth:client-assertion-type:jwt-spiffe'
+    );
+    expect(body.get('client_assertion')).toBe('spiffe-jwt-svid');
   });
 
   it('should throw an error for invalid authentication method', async () => {
