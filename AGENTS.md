@@ -56,6 +56,18 @@ Per-package `test` = `eslint tests && rimraf coverage && vitest && pnpm report`,
 
 Every package builds with **tsdown** emitting **dual output** — `cjs` (`dts: false`) + `es` (`dts: true`), `unbundle: true`, against `tsconfig.build.json`. Browser packages mirror web‑js's tsconfig (`moduleResolution: bundler`, `target ES2020`); React/JSX packages add `jsx`. Peer deps (`express`, `fastify`, `next`, `react`) are marked `external`.
 
+## Dependency version ceilings
+
+Some pins are deliberate — do **not** "fix" them to latest without re-checking the constraint:
+
+- **`typescript` 6.0.x** (root): `typedoc` and `typescript-eslint` don't support TS 7 yet (`gen:docs` and `lint` break).
+- **`typescript` `^5`** in the Next.js example apps: Next 16's build-time type check fails on TS 6.
+- **`cookie` 1.x** (node-core, nextjs): v2 is ESM-only (breaks the dual CJS/ESM build) and removed the `serialize` named export / 3-arg overload the SDKs use.
+- **`nock` 15.0.0** (node-core, nextjs): intentionally **ahead** of npm's lagging `latest` dist-tag (14.x) — `pnpm up nock@latest` would silently downgrade it.
+- **`prettier` 3.8.x** (root): the docs config sets `formatWithPrettier: true`, so `typedoc-plugin-markdown` runs the installed prettier over every page. prettier 3.9.x mangles the escaped generic close `\>` into `>\>` (renders as a stray `>`) across the generated docs — stay on 3.8.x until that regression is fixed upstream.
+
+After a bump pass: run `pnpm dedupe`, and regenerate each Next example's `package-lock.json` from scratch (`rm -rf node_modules package-lock.json && npm install`) so the `file:`-linked metadata stays accurate.
+
 ## Docs & JSDoc
 
 The website API reference is generated from JSDoc — **every export needs house-style docs**: summary → `@remarks` → `@example` (fenced, client examples start with `"use client"`, full public import paths) → `@param`/`@returns` → `@category` last. Valid `@category` values map to `CATEGORY_MAP` in [docs-gen/post-generate.mjs](docs-gen/post-generate.mjs). `docs/markdown` is tracked but regenerated at release — **don't commit generated docs in feature PRs**.
