@@ -243,6 +243,10 @@ jobs:
       - name: Test Node Backend
         run: pnpm --filter @monocloud/backend-node run test
 
+      - name: Peer Type Compatibility
+        if: matrix.node-version == 24
+        run: pnpm --filter @monocloud/backend-node run test:peers
+
       - name: Upload test results
         id: upload_artifact
         if: success() || failure()

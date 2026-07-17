@@ -24,3 +24,5 @@ Depends on `@monocloud/auth-core` (+ `joi`); `express`/`fastify` are **optional 
 ## Build / test
 
 `pnpm --filter @monocloud/backend-node build` · `... test` (vitest + `node`). Tested on Node `[20, 22, 24]`. 100% coverage enforced (framework `index.ts`/`types.ts` glue files are excluded in the vitest config).
+
+`... test:peers` ([scripts/peer-typecheck.mjs](scripts/peer-typecheck.mjs), CI runs it on Node 24) packs the built package and type-checks a throwaway consumer against the oldest and latest supported peer majors (`fastify` 4/5, `@types/express` 4/5) — the devDependencies only cover the latest, so this is what enforces the `||` claims in `peerDependencies`. Requires `dist/` (build first).
