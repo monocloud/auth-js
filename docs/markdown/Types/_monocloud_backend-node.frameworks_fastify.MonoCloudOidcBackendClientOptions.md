@@ -47,6 +47,8 @@ When `clientAuthMethod` is `client_secret_jwt` and a plain-text secret is provid
 
 To use a different algorithm, provide a symmetric JSON Web Key (JWK) (`kty: "oct"`) with the desired algorithm specified in its `alg` property.
 
+When `clientAuthMethod` is `spiffe_jwt`, provide the SPIFFE JWT-SVID (obtained from the SPIFFE Workload API) as the plain-text string; it is sent as the `client_assertion`.
+
 ### Inherited from
 
 [`MonoCloudClientOptionsBase`](/sdks/nodejs/api-reference/types/monocloudclientoptionsbase).[`clientSecret`](/sdks/nodejs/api-reference/types/monocloudclientoptionsbase#clientsecret)
