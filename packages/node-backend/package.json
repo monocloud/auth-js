@@ -81,6 +81,7 @@
     "lint:ts": "tsc",
     "lint": "pnpm run lint:es && pnpm run lint:ts",
     "test": "eslint tests && rimraf coverage && vitest && pnpm report",
+    "test:peers": "node scripts/peer-typecheck.mjs",
     "report": "nyc report --reporter json-summary --reporter html --reporter text -t ./coverage --report-dir ./coverage/summary && npx @monocloud/auth-test-utils check-coverage"
   },
   "dependencies": {

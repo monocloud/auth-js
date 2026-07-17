@@ -1,0 +1,21 @@
+{
+  "name": "fastify-example",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "start": "tsx src/index.ts",
+    "get-token": "tsx scripts/get-token.ts"
+  },
+  "dependencies": {
+    "@monocloud/backend-node": "file:../../",
+    "dotenv": "^17.2.1",
+    "fastify": "file:../../node_modules/fastify"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "tsx": "^4.20.0",
+    "typescript": "~6.0.3"
+  }
+}
