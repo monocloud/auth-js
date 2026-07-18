@@ -16,7 +16,7 @@
 <div class="tsd-comment tsd-typography"><p>Options for configuring page protection.</p>
 </div></section>
 <div class="tsd-signature"><span class="tsd-signature-keyword">interface</span> <span class="tsd-kind-interface">ProtectClientPageOptions</span> <span class="tsd-signature-symbol">{</span><br/>    <a class="tsd-kind-property" href="#authparams">authParams</a><span class="tsd-signature-symbol">?:</span> <a href="_monocloud_auth-nextjs.index.ExtraAuthParams.html" class="tsd-signature-type tsd-kind-interface">ExtraAuthParams</a><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#groups">groups</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#groupsclaim">groupsClaim</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#matchall">matchAll</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#onaccessdenied">onAccessDenied</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-symbol">()</span> <span class="tsd-signature-symbol">=&gt;</span> <span class="tsd-signature-type">ReactNode</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#onerror">onError</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">error</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Error</span><span class="tsd-signature-symbol">)</span> <span class="tsd-signature-symbol">=&gt;</span> <span class="tsd-signature-type">ReactNode</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#ongroupaccessdenied">onGroupAccessDenied</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">user</span><span class="tsd-signature-symbol">:</span> <a href="_monocloud_auth-nextjs.index.MonoCloudUser.html" class="tsd-signature-type tsd-kind-interface">MonoCloudUser</a><span class="tsd-signature-symbol">)</span> <span class="tsd-signature-symbol">=&gt;</span> <span class="tsd-signature-type">ReactNode</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#returnurl">returnUrl</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">;</span><br/><span class="tsd-signature-symbol">}</span></div>
-<section class="tsd-panel tsd-hierarchy" data-refl="6744">
+<section class="tsd-panel tsd-hierarchy" data-refl="6834">
 <h4>Hierarchy</h4>
 <ul class="tsd-hierarchy">
 <li class="tsd-hierarchy-item"><a href="_monocloud_auth-nextjs.index.GroupOptions.html" class="tsd-signature-type tsd-kind-interface">GroupOptions</a>
@@ -58,7 +58,7 @@
 </div><aside class="tsd-sources">
 <p>Inherited from <a href="_monocloud_auth-nextjs.index.GroupOptions.html">GroupOptions</a>.<a href="_monocloud_auth-nextjs.index.GroupOptions.html#groups">groups</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/nextjs/src/types.ts#L672">packages/nextjs/src/types.ts:672</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/nextjs/src/types.ts#L674">packages/nextjs/src/types.ts:674</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="groupsclaim"><code class="tsd-tag">Optional</code><span>groups<wbr/>Claim</span><a href="#groupsclaim" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">groupsClaim</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span></div>
@@ -72,7 +72,7 @@
 </div></div><aside class="tsd-sources">
 <p>Inherited from <a href="_monocloud_auth-nextjs.index.GroupOptions.html">GroupOptions</a>.<a href="_monocloud_auth-nextjs.index.GroupOptions.html#groupsclaim">groupsClaim</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/nextjs/src/types.ts#L651">packages/nextjs/src/types.ts:651</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/nextjs/src/types.ts#L653">packages/nextjs/src/types.ts:653</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="matchall"><code class="tsd-tag">Optional</code><span>match<wbr/>All</span><a href="#matchall" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">matchAll</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span></div>
@@ -86,7 +86,7 @@
 </div></div><aside class="tsd-sources">
 <p>Inherited from <a href="_monocloud_auth-nextjs.index.GroupOptions.html">GroupOptions</a>.<a href="_monocloud_auth-nextjs.index.GroupOptions.html#matchall">matchAll</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/nextjs/src/types.ts#L658">packages/nextjs/src/types.ts:658</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/nextjs/src/types.ts#L660">packages/nextjs/src/types.ts:660</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="onaccessdenied"><code class="tsd-tag">Optional</code><span>on<wbr/>Access<wbr/>Denied</span><a href="#onaccessdenied" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">onAccessDenied</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-symbol">()</span> <span class="tsd-signature-symbol">=&gt;</span> <span class="tsd-signature-type">ReactNode</span></div>
