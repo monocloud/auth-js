@@ -296,6 +296,8 @@ export interface ExtraAuthParams extends Pick<
   | 'authenticatorHint'
   | 'maxAge'
   | 'loginHint'
+  | 'audience'
+  | 'idTokenHint'
 > {}
 
 /**

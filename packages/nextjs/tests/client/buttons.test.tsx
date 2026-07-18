@@ -30,6 +30,8 @@ describe('<SignIn/>', () => {
         scopes={'email profile'}
         uiLocales="en-US"
         prompt="select_account"
+        audience="my-api"
+        idTokenHint="eyhint"
         maxAge={3600}
         returnUrl="/test"
         loginHint="username"
@@ -44,7 +46,7 @@ describe('<SignIn/>', () => {
     expect(anchorElements.length).toBe(1);
     expect(anchor.attributes.length).toBe(1);
     expect(href).toBe(
-      '/api/auth/signin?authenticator_hint=google&prompt=select_account&display=page&ui_locales=en-US&scope=email+profile&acr_values=test&resource=https%3A%2F%2Fapi.example.com&max_age=3600&login_hint=username&return_url=%2Ftest'
+      '/api/auth/signin?authenticator_hint=google&prompt=select_account&display=page&ui_locales=en-US&scope=email+profile&acr_values=test&resource=https%3A%2F%2Fapi.example.com&audience=my-api&id_token_hint=eyhint&max_age=3600&login_hint=username&return_url=%2Ftest'
     );
     expect(anchor.text).toBe('Sign In');
   });
@@ -89,6 +91,8 @@ describe('<SignUp/>', () => {
         resource={'https://api.example.com'}
         scopes={'email profile'}
         uiLocales="en-US"
+        audience="my-api"
+        idTokenHint="eyhint"
         maxAge={3600}
         returnUrl="/test"
       >
@@ -102,7 +106,7 @@ describe('<SignUp/>', () => {
     expect(anchorElements.length).toBe(1);
     expect(anchor.attributes.length).toBe(1);
     expect(href).toBe(
-      '/api/auth/signin?prompt=create&return_url=%2Ftest&display=page&ui_locales=en-US&scope=email+profile&acr_values=test&resource=https%3A%2F%2Fapi.example.com&max_age=3600'
+      '/api/auth/signin?prompt=create&return_url=%2Ftest&display=page&ui_locales=en-US&scope=email+profile&acr_values=test&resource=https%3A%2F%2Fapi.example.com&audience=my-api&id_token_hint=eyhint&max_age=3600'
     );
     expect(anchor.text).toBe('Sign Up');
   });
@@ -162,6 +166,20 @@ describe('<SignOut/>', () => {
     expect(anchorElements.length).toBe(1);
     expect(anchor.attributes.length).toBe(1);
     expect(href).toBe('/api/auth/signout?federated=true');
+    expect(anchor.text).toBe('Sign Out');
+  });
+
+  it('can set idTokenHint through props', () => {
+    const { container } = render(
+      <SignOut idTokenHint="eyhint">Sign Out</SignOut>
+    );
+    const anchorElements = container.querySelectorAll('a');
+    const anchor = anchorElements.item(0);
+    const href = anchor.getAttribute('href');
+
+    expect(anchorElements.length).toBe(1);
+    expect(anchor.attributes.length).toBe(1);
+    expect(href).toBe('/api/auth/signout?id_token_hint=eyhint');
     expect(anchor.text).toBe('Sign Out');
   });
 

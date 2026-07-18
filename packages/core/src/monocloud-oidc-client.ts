@@ -175,6 +175,14 @@ export class MonoCloudOidcClient extends MonoCloudOidcClientBase {
       queryParams.set('prompt', params.prompt);
     }
 
+    if (params.audience) {
+      queryParams.set('audience', params.audience);
+    }
+
+    if (params.idTokenHint) {
+      queryParams.set('id_token_hint', params.idTokenHint);
+    }
+
     const resource = parseSpaceSeparated(params.resource) ?? [];
 
     if (resource.length > 0) {
@@ -428,8 +436,8 @@ export class MonoCloudOidcClient extends MonoCloudOidcClientBase {
 
     queryParams.set('client_id', this.clientId);
 
-    if (params.idToken) {
-      queryParams.set('id_token_hint', params.idToken);
+    if (params.idTokenHint) {
+      queryParams.set('id_token_hint', params.idTokenHint);
     }
 
     if (params.postLogoutRedirectUri) {

@@ -55,6 +55,7 @@ export interface SignOutProps
  */
 export const SignOut = ({
   children,
+  idTokenHint,
   postLogoutRedirectUri,
   mode,
   federatedSignOut,
@@ -69,6 +70,7 @@ export const SignOut = ({
       type="button"
       onClick={() => {
         void signOut({
+          idTokenHint,
           postLogoutRedirectUri,
           mode,
           federatedSignOut,

@@ -204,6 +204,8 @@ export class MonoCloudCoreClient {
             acrValues: request.getQuery('acr_values') as string,
             loginHint: request.getQuery('login_hint') as string,
             prompt: request.getQuery('prompt') as Prompt,
+            audience: request.getQuery('audience') as string,
+            idTokenHint: request.getQuery('id_token_hint') as string,
             maxAge: parseInt(request.getQuery('max_age') as string, 10),
           }
         : {};
@@ -312,6 +314,18 @@ export class MonoCloudCoreClient {
       const loginHint = query.loginHint ?? opt.authParams.loginHint;
       if (typeof loginHint === 'string' && loginHint) {
         params.loginHint = loginHint;
+      }
+
+      // Set the audience if passed down
+      const audience = query.audience ?? opt.authParams.audience;
+      if (typeof audience === 'string' && audience) {
+        params.audience = audience;
+      }
+
+      // Set the id token hint if passed down
+      const idTokenHint = query.idTokenHint ?? opt.authParams.idTokenHint;
+      if (typeof idTokenHint === 'string' && idTokenHint) {
+        params.idTokenHint = idTokenHint;
       }
 
       // Set the prompt if passed down
@@ -686,6 +700,7 @@ export class MonoCloudCoreClient {
         ? {
             postLogoutUrl: request.getQuery('post_logout_url') as string,
             federated: getBoolean(request.getQuery('federated') as string),
+            idTokenHint: request.getQuery('id_token_hint') as string,
           }
         : {};
 
@@ -737,9 +752,18 @@ export class MonoCloudCoreClient {
         return response.done();
       }
 
+      // Use a manually supplied id token hint (query or options) over the
+      // one from the current session.
+      const idTokenHint =
+        (typeof query.idTokenHint === 'string' && query.idTokenHint
+          ? query.idTokenHint
+          : undefined) ??
+        signOutOptions?.idTokenHint ??
+        session.idToken;
+
       // Build the end session Url
       const url = await this.oidcClient.endSessionUrl({
-        idToken: session.idToken,
+        idTokenHint,
         postLogoutRedirectUri: returnUrl,
         state: signOutOptions?.state,
       });

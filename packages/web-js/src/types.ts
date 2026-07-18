@@ -92,6 +92,8 @@ export type DefaultAuthParams = Pick<
   | 'maxAge'
   | 'loginHint'
   | 'authenticatorHint'
+  | 'audience'
+  | 'idTokenHint'
 >;
 
 /**
@@ -433,6 +435,16 @@ export interface SignInOptions {
   resource?: string;
 
   /**
+   * Identifies the target API (audience) that the issued access token is intended for.
+   */
+  audience?: string;
+
+  /**
+   * A previously issued ID token sent as the `id_token_hint`. Commonly used alongside `prompt: 'none'` for silent re-authentication.
+   */
+  idTokenHint?: string;
+
+  /**
    * Custom application state preserved across the authentication round-trip.
    *
    * The value is provided to the {@link OnSessionCreating} hook when the session is constructed.
@@ -446,6 +458,13 @@ export interface SignInOptions {
  * @category Types
  */
 export interface SignOutOptions {
+  /**
+   * A previously issued ID token to send as the `id_token_hint` on the logout request.
+   *
+   * When provided, this overrides the ID token from the current session. Use it to supply the hint manually.
+   */
+  idTokenHint?: string;
+
   /**
    * URL to redirect the user to after sign-out completes.
    *

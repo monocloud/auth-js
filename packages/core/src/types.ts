@@ -87,7 +87,12 @@ export type DisplayOptions =
   /**
    * Authentication optimized for legacy mobile or constrained browsers.
    */
-  | 'wap';
+  | 'wap'
+
+  /**
+   * Any other display value supported by the authorization server.
+   */
+  | (string & {});
 
 /**
  * Supported OAuth 2.0 / OpenID Connect `response_mode` values.
@@ -143,7 +148,12 @@ export type Prompt =
   /**
    * Prompts the user to create a new account (sign-up flow).
    */
-  | 'create';
+  | 'create'
+
+  /**
+   * Any other prompt value supported by the authorization server.
+   */
+  | (string & {});
 
 /**
  * Parameters used to construct an OAuth 2.0 / OpenID Connect authorization request.
@@ -243,6 +253,16 @@ export interface AuthorizationParams {
    * Space-separated list of resource indicators that scope the issued access token.
    */
   resource?: string;
+
+  /**
+   * Identifies the target API (audience) that the issued access token is intended for.
+   */
+  audience?: string;
+
+  /**
+   * A previously issued ID token used as a hint about the user's current or past authenticated session.
+   */
+  idTokenHint?: string;
 }
 
 /**
@@ -949,54 +969,11 @@ export type Authenticators =
   | 'phone'
 
   /**
-   * Google identity provider.
+   * Any other authenticator or identity provider configured for your MonoCloud
+   * application (for example a social or enterprise connection), identified by
+   * its name.
    */
-  | 'google'
-
-  /**
-   * Apple identity provider.
-   */
-  | 'apple'
-
-  /**
-   * Facebook identity provider.
-   */
-  | 'facebook'
-
-  /**
-   * Microsoft identity provider.
-   */
-  | 'microsoft'
-
-  /**
-   * GitHub identity provider.
-   */
-  | 'github'
-
-  /**
-   * GitLab identity provider.
-   */
-  | 'gitlab'
-
-  /**
-   * Discord identity provider.
-   */
-  | 'discord'
-
-  /**
-   * Twitter (X) identity provider.
-   */
-  | 'twitter'
-
-  /**
-   * LinkedIn identity provider.
-   */
-  | 'linkedin'
-
-  /**
-   * Xero identity provider.
-   */
-  | 'xero';
+  | (string & {});
 
 /**
  * Supported JSON Web Signature (JWS) algorithms used to sign tokens.
@@ -1135,9 +1112,9 @@ export interface EndSessionParameters {
   /**
    * ID token hint identifying the session to terminate.
    *
-   * When provided, the authorization server can use this value to determine which user session should be signed out.
+   * Sent as the `id_token_hint` parameter. When provided, the authorization server can use this value to determine which user session should be signed out.
    */
-  idToken?: string;
+  idTokenHint?: string;
 
   /**
    * The URL the authorization server should redirect the user to after a successful sign-out.

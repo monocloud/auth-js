@@ -64,6 +64,8 @@ export const SignIn = ({
   scopes,
   acrValues,
   resource,
+  audience,
+  idTokenHint,
   maxAge,
   returnUrl,
   ...props
@@ -105,6 +107,14 @@ export const SignIn = ({
 
   if (resource) {
     query.set('resource', resource);
+  }
+
+  if (audience) {
+    query.set('audience', audience);
+  }
+
+  if (idTokenHint) {
+    query.set('id_token_hint', idTokenHint);
   }
 
   if (maxAge) {

@@ -375,6 +375,8 @@ describe('MonoCloud Base Instance', () => {
         await instance.signIn(req, res, {
           authParams: {
             loginHint: 'usernaaaame',
+            audience: 'my-audience',
+            idTokenHint: 'my-id-token-hint',
           },
         });
 
@@ -385,12 +387,14 @@ describe('MonoCloud Base Instance', () => {
         );
 
         const search = Object.fromEntries(url.searchParams.entries());
-        expect(Object.keys(search).length).toBe(9);
+        expect(Object.keys(search).length).toBe(11);
         expect(search.state.length).toBeGreaterThan(0);
         expect(search.code_challenge.length).toBeGreaterThan(0);
         expect(search.nonce.length).toBeGreaterThan(0);
         expect(search.code_challenge_method).toBe('S256');
         expect(search.login_hint).toBe('usernaaaame');
+        expect(search.audience).toBe('my-audience');
+        expect(search.id_token_hint).toBe('my-id-token-hint');
         expect(search.client_id).toBe('__test_client_id__');
         expect(search.response_type).toBe('code');
         expect(search.scope).toBe('openid profile read:customer');
@@ -490,6 +494,8 @@ describe('MonoCloud Base Instance', () => {
             ui_locales: 'en-IN',
             login_hint: 'email',
             prompt: 'create',
+            audience: 'aud-from-query',
+            id_token_hint: 'idhint-from-query',
           },
           method: 'GET',
         });
@@ -506,6 +512,8 @@ describe('MonoCloud Base Instance', () => {
             uiLocales: 'en-US',
             loginHint: 'username',
             prompt: 'consent',
+            audience: 'shouldbeoverridden',
+            idTokenHint: 'shouldbeoverridden',
           },
         });
 
@@ -516,7 +524,7 @@ describe('MonoCloud Base Instance', () => {
         );
 
         const search = Object.fromEntries(url.searchParams.entries());
-        expect(Object.keys(search).length).toBe(16);
+        expect(Object.keys(search).length).toBe(18);
         expect(search.state.length).toBeGreaterThan(0);
         expect(search.code_challenge.length).toBeGreaterThan(0);
         expect(search.nonce.length).toBeGreaterThan(0);
@@ -530,6 +538,8 @@ describe('MonoCloud Base Instance', () => {
         expect(search.ui_locales).toBe('en-IN');
         expect(search.login_hint).toBe('email');
         expect(search.prompt).toBe('create');
+        expect(search.audience).toBe('aud-from-query');
+        expect(search.id_token_hint).toBe('idhint-from-query');
         expect(search.authenticator_hint).toBe('thisshouldbepickedup');
         expect(search.client_id).toBe('__test_client_id__');
         expect(search.response_type).toBe('code');
@@ -2819,6 +2829,69 @@ describe('MonoCloud Base Instance', () => {
             secure: true,
           },
         });
+      });
+
+      it('should use a manually supplied idTokenHint over the session id token', async () => {
+        setupDiscovery({
+          end_session_endpoint: 'https://example.com/connect/endsession',
+        });
+
+        const cookies = {} as any;
+
+        await setSessionCookieValue(cookies, {
+          session: {
+            idToken: 'a.b.c',
+          },
+          lifetime: { c: now(), e: now() + 86400, u: now() },
+        });
+
+        const instance = getConfiguredInstance({
+          postLogoutRedirectUri: '/test',
+        });
+
+        const req = new TestReq({
+          cookies,
+          method: 'GET',
+        });
+        const res = new TestRes(cookies);
+
+        await instance.signOut(req, res, { idTokenHint: 'manual.id.token' });
+
+        expect(res.res.redirectedUrl).toBe(
+          `https://example.com/connect/endsession?client_id=__test_client_id__&id_token_hint=${encodeURIComponent('manual.id.token')}&post_logout_redirect_uri=${encodeURIComponent('https://example.org/test')}`
+        );
+      });
+
+      it('should use idTokenHint from the query when overrides are allowed', async () => {
+        setupDiscovery({
+          end_session_endpoint: 'https://example.com/connect/endsession',
+        });
+
+        const cookies = {} as any;
+
+        await setSessionCookieValue(cookies, {
+          session: {
+            idToken: 'a.b.c',
+          },
+          lifetime: { c: now(), e: now() + 86400, u: now() },
+        });
+
+        const instance = getConfiguredInstance({
+          postLogoutRedirectUri: '/test',
+        });
+
+        const req = new TestReq({
+          cookies,
+          query: { id_token_hint: 'query.id.token' },
+          method: 'GET',
+        });
+        const res = new TestRes(cookies);
+
+        await instance.signOut(req, res);
+
+        expect(res.res.redirectedUrl).toBe(
+          `https://example.com/connect/endsession?client_id=__test_client_id__&id_token_hint=${encodeURIComponent('query.id.token')}&post_logout_redirect_uri=${encodeURIComponent('https://example.org/test')}`
+        );
       });
 
       it('should redirect to endSessionUrl with post logout redirect uri and id token hint (with base path)', async () => {
