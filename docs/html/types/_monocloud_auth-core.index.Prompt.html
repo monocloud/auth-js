@@ -12,7 +12,7 @@
 <li><a href="../modules/_monocloud_auth-core.index.html">index</a></li>
 <li><a href="" aria-current="page">Prompt</a></li></ul>
 <h1>Type Alias Prompt</h1></div>
-<div class="tsd-signature"><span class="tsd-kind-type-alias">Prompt</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">&quot;none&quot;</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;login&quot;</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;consent&quot;</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;select_account&quot;</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;create&quot;</span></div>
+<div class="tsd-signature"><span class="tsd-kind-type-alias">Prompt</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">&quot;none&quot;</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;login&quot;</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;consent&quot;</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;select_account&quot;</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;create&quot;</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">string</span> <span class="tsd-signature-symbol">&amp;</span> <span class="tsd-signature-symbol">{}</span></div>
 <div class="tsd-comment tsd-typography"><p>Supported OpenID Connect <code>prompt</code> parameter values.</p>
 <p>The <code>prompt</code> parameter controls whether the authorization server should force specific user interactions during authentication.</p>
 </div>
@@ -33,9 +33,12 @@
 </div></li>
 <li><span class="tsd-signature-type">&quot;create&quot;</span>
 <div class="tsd-comment tsd-typography"><p>Prompts the user to create a new account (sign-up flow).</p>
+</div></li>
+<li><span class="tsd-signature-type">string</span> <span class="tsd-signature-symbol">&amp;</span> <span class="tsd-signature-symbol">{}</span>
+<div class="tsd-comment tsd-typography"><p>Any other prompt value supported by the authorization server.</p>
 </div></li></ul></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/core/src/types.ts#L122">packages/core/src/types.ts:122</a></li></ul></aside></div>
+<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/core/src/types.ts#L127">packages/core/src/types.ts:127</a></li></ul></aside></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">

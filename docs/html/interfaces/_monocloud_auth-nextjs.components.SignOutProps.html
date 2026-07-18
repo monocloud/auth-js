@@ -15,7 +15,7 @@
 <section class="tsd-panel tsd-comment">
 <div class="tsd-comment tsd-typography"><p>Props for the <code>&lt;SignOut /&gt;</code> component.</p>
 </div></section>
-<div class="tsd-signature"><span class="tsd-signature-keyword">interface</span> <span class="tsd-kind-interface">SignOutProps</span> <span class="tsd-signature-symbol">{</span><br/>    <a class="tsd-kind-property" href="#children">children</a><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">ReactNode</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#federated">federated</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#postlogouturl">postLogoutUrl</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">;</span><br/><span class="tsd-signature-symbol">}</span></div><aside class="tsd-sources">
+<div class="tsd-signature"><span class="tsd-signature-keyword">interface</span> <span class="tsd-kind-interface">SignOutProps</span> <span class="tsd-signature-symbol">{</span><br/>    <a class="tsd-kind-property" href="#children">children</a><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">ReactNode</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#federated">federated</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#idtokenhint">idTokenHint</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#postlogouturl">postLogoutUrl</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">;</span><br/><span class="tsd-signature-symbol">}</span></div><aside class="tsd-sources">
 <ul>
 <li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/nextjs/src/components/signout.tsx#L8">packages/nextjs/src/components/signout.tsx:8</a></li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
@@ -27,6 +27,7 @@
 <h3 class="tsd-index-heading tsd-anchor-link" id="properties">Properties<a href="#properties" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-index-list"><a href="#children" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>children</span></a>
 <a href="#federated" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>federated?</span></a>
+<a href="#idtokenhint" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>id<wbr/>Token<wbr/>Hint?</span></a>
 <a href="#postlogouturl" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>post<wbr/>Logout<wbr/>Url?</span></a>
 </div></section></div></details></section></section>
 <details class="tsd-panel-group tsd-member-group tsd-accordion" open><summary class="tsd-accordion-summary" data-key="section-Properties"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
@@ -47,6 +48,13 @@
 <ul>
 <li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/nextjs/src/components/signout.tsx#L16">packages/nextjs/src/components/signout.tsx:16</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
+<h3 class="tsd-anchor-link" id="idtokenhint"><code class="tsd-tag">Optional</code><span>id<wbr/>Token<wbr/>Hint</span><a href="#idtokenhint" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<div class="tsd-signature"><span class="tsd-kind-property">idTokenHint</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span></div>
+<div class="tsd-comment tsd-typography"><p>A previously issued ID token to send as the <code>id_token_hint</code> on the logout request, overriding the ID token from the current session.</p>
+</div><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/nextjs/src/components/signout.tsx#L19">packages/nextjs/src/components/signout.tsx:19</a></li></ul></aside></section>
+<section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="postlogouturl"><code class="tsd-tag">Optional</code><span>post<wbr/>Logout<wbr/>Url</span><a href="#postlogouturl" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">postLogoutUrl</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span></div>
 <div class="tsd-comment tsd-typography"><p>URL to redirect the user to after they have been signed out.</p>
@@ -64,7 +72,7 @@
 <h3>On This Page</h3></summary>
 <div class="tsd-accordion-details">
 <details open class="tsd-accordion tsd-page-navigation-section"><summary class="tsd-accordion-summary" data-key="section-Properties"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>Properties</summary>
-<div><a href="#children"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>children</span></a><a href="#federated"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>federated</span></a><a href="#postlogouturl"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>post<wbr/>Logout<wbr/>Url</span></a></div></details></div></details></div>
+<div><a href="#children"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>children</span></a><a href="#federated"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>federated</span></a><a href="#idtokenhint"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>id<wbr/>Token<wbr/>Hint</span></a><a href="#postlogouturl"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>post<wbr/>Logout<wbr/>Url</span></a></div></details></div></details></div>
 <div class="site-menu">
 <nav class="tsd-navigation"><a href="../modules.html">MonoCloud Authentication SDK</a>
 <ul class="tsd-small-nested-navigation" id="tsd-nav-container">

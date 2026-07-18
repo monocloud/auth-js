@@ -1,6 +1,25 @@
 import { MarkdownPageEvent } from 'typedoc-plugin-markdown';
-import { ReflectionKind, Converter } from 'typedoc';
+import { ReflectionKind, Converter, IntrinsicType } from 'typedoc';
 import { registerInlineReferences } from './inline-references.mjs';
+
+// Open enums are authored as `'a' | 'b' | (string & {})` — the intersection
+// keeps literal autocomplete in editors but is a rendering artifact in docs
+// (`` `string` & \{ \} `` in signatures, `undefined` in the enum listing).
+// Collapse any `(string & {})` union member back to the plain `string`
+// intrinsic so every rendering shows `string`.
+const isOpenStringMember = type =>
+  type?.type === 'intersection' &&
+  Array.isArray(type.types) &&
+  type.types.some(t => t.type === 'intrinsic' && t.name === 'string');
+
+const collapseOpenStringUnions = reflection => {
+  const type = reflection?.type;
+  if (type?.type === 'union' && Array.isArray(type.types)) {
+    type.types = type.types.map(t =>
+      isOpenStringMember(t) ? new IntrinsicType('string') : t
+    );
+  }
+};
 
 // typedoc-plugin-markdown >= 4.12 renders a named block tag's caption as a
 // bold heading — so `@example Basic usage` emits `**Basic usage**` above the
@@ -218,6 +237,7 @@ export const load = app => {
       reflection.signatures?.forEach(sig => stripExampleCaptions(sig.comment));
       stripExampleCaptions(reflection.getSignature?.comment);
       stripExampleCaptions(reflection.setSignature?.comment);
+      collapseOpenStringUnions(reflection);
     });
   });
 
@@ -291,7 +311,10 @@ export const load = app => {
           }
 
           const item = {
-            value: page.model.type.types[i].value,
+            // Literal members have a `.value`; non-literal members (e.g. the
+            // `string` intrinsic of an open enum) render their type name.
+            value:
+              page.model.type.types[i].value ?? page.model.type.types[i].name,
             type: page.model.type.types[i].type,
             description: text.replace(/\n\n/g, ' '),
           };

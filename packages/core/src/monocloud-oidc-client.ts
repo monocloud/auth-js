@@ -286,6 +286,14 @@ export class MonoCloudOidcClient extends MonoCloudOidcClientBase {
       body.set('prompt', params.prompt);
     }
 
+    if (params.audience) {
+      body.set('audience', params.audience);
+    }
+
+    if (params.idTokenHint) {
+      body.set('id_token_hint', params.idTokenHint);
+    }
+
     const resource = parseSpaceSeparated(params.resource) ?? [];
 
     if (resource.length > 0) {

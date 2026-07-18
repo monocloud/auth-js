@@ -15,15 +15,17 @@ Internally, it behaves like `<SignIn>` but sets `prompt=create` to start the reg
 
 ## Props
 
-| Property                            | Type                                                                                  | Description                                                                                                                     |
-| ----------------------------------- | ------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| `acrValues?` | `string`[]                                                                            | Authentication Context Class Reference (ACR) values requesting specific authentication assurance levels or methods.             |
-| `display?`     | [`DisplayOptions`](/sdks/nextjs/api-reference/enums/displayoptions) | Preferred display mode for the authentication UI.                                                                               |
-| `maxAge?`       | `number`                                                                              | Maximum acceptable time (in seconds) since the user last authenticated. If exceeded, the user may be required to sign in again. |
-| `resource?`   | `string`                                                                              | Space-separated list of resource indicators that scope the issued access token.                                                 |
-| `returnUrl?` | `string`                                                                              | URL to redirect to after successful sign-up.                                                                                    |
-| `scopes?`       | `string`                                                                              | Space-separated list of scopes requested during authentication.                                                                 |
-| `uiLocales?` | `string`                                                                              | Preferred UI language.                                                                                                          |
+| Property                                | Type                                                                                  | Description                                                                                                                     |
+| --------------------------------------- | ------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `acrValues?`     | `string`[]                                                                            | Authentication Context Class Reference (ACR) values requesting specific authentication assurance levels or methods.             |
+| `audience?`       | `string`                                                                              | Identifies the target API (audience) that the issued access token is intended for.                                              |
+| `display?`         | [`DisplayOptions`](/sdks/nextjs/api-reference/enums/displayoptions) | Preferred display mode for the authentication UI.                                                                               |
+| `idTokenHint?` | `string`                                                                              | A previously issued ID token used as a hint about the user's current or past authenticated session.                             |
+| `maxAge?`           | `number`                                                                              | Maximum acceptable time (in seconds) since the user last authenticated. If exceeded, the user may be required to sign in again. |
+| `resource?`       | `string`                                                                              | Space-separated list of resource indicators that scope the issued access token.                                                 |
+| `returnUrl?`     | `string`                                                                              | URL to redirect to after successful sign-up.                                                                                    |
+| `scopes?`           | `string`                                                                              | Space-separated list of scopes requested during authentication.                                                                 |
+| `uiLocales?`     | `string`                                                                              | Preferred UI language.                                                                                                          |
 
 
 ## Examples

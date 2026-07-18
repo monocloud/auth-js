@@ -7,7 +7,7 @@ description: "Subset of AuthorizationParams that can be pre-configured as defaul
 
 # Type: DefaultAuthParams
 
-> **DefaultAuthParams** = `Pick`\<[`AuthorizationParams`](/sdks/react/api-reference/types/authorizationparams), `"scopes"` \| `"resource"` \| `"responseType"` \| `"prompt"` \| `"display"` \| `"uiLocales"` \| `"acrValues"` \| `"maxAge"` \| `"loginHint"` \| `"authenticatorHint"`\>
+> **DefaultAuthParams** = `Pick`\<[`AuthorizationParams`](/sdks/react/api-reference/types/authorizationparams), `"scopes"` \| `"resource"` \| `"responseType"` \| `"prompt"` \| `"display"` \| `"uiLocales"` \| `"acrValues"` \| `"maxAge"` \| `"loginHint"` \| `"authenticatorHint"` \| `"audience"` \| `"idTokenHint"`\>
 
 Subset of [AuthorizationParams](/sdks/react/api-reference/types/authorizationparams) that can be pre-configured as defaults for every authentication request.
 
