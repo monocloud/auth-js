@@ -30,11 +30,11 @@ When both are provided, **constructor options override environment variables**.
 
 ### Introspection
 
-| Environment Variable                   | Description                                                                                                                                                                        |
-| -------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `MONOCLOUD_BACKEND_CLIENT_ID`          | Unique identifier for your application/client.                                                                                                                                     |
-| `MONOCLOUD_BACKEND_CLIENT_SECRET`      | Application/client secret used for authentication.                                                                                                                                 |
-| `MONOCLOUD_BACKEND_CLIENT_AUTH_METHOD` | Client authentication method (for example, `client_secret_basic`, `client_secret_post`, `client_secret_jwt`, `private_key_jwt`, `tls_client_auth`, `self_signed_tls_client_auth`). |
+| Environment Variable                   | Description                                                                                                                                                                                                     |
+| -------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `MONOCLOUD_BACKEND_CLIENT_ID`          | Unique identifier for your application/client.                                                                                                                                                                  |
+| `MONOCLOUD_BACKEND_CLIENT_SECRET`      | Application/client secret used for authentication.                                                                                                                                                              |
+| `MONOCLOUD_BACKEND_CLIENT_AUTH_METHOD` | Client authentication method (for example, `client_secret_basic`, `client_secret_post`, `client_secret_jwt`, `private_key_jwt`, `tls_client_auth`, `self_signed_tls_client_auth`, `spiffe_jwt`, `spiffe_x509`). |
 
 ### Token Validation
 
@@ -115,6 +115,8 @@ Client secret or key material used for client authentication.
 When `clientAuthMethod` is `client_secret_jwt` and a plain-text secret is provided, the default signing algorithm is `HS256`.
 
 To use a different algorithm, provide a symmetric JSON Web Key (JWK) (`kty: "oct"`) with the desired algorithm specified in its `alg` property.
+
+When `clientAuthMethod` is `spiffe_jwt`, provide the SPIFFE JWT-SVID (obtained from the SPIFFE Workload API) as the plain-text string; it is sent as the `client_assertion`.
 
 ### Inherited from
 

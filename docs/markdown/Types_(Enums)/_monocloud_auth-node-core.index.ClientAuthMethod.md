@@ -7,7 +7,7 @@ description: "Supported OAuth 2.0 client authentication methods. These methods d
 
 # Enum: ClientAuthMethod
 
-> **ClientAuthMethod** = `"client_secret_basic"` \| `"client_secret_post"` \| `"client_secret_jwt"` \| `"private_key_jwt"` \| `"tls_client_auth"` \| `"self_signed_tls_client_auth"`
+> **ClientAuthMethod** = `"client_secret_basic"` \| `"client_secret_post"` \| `"client_secret_jwt"` \| `"private_key_jwt"` \| `"tls_client_auth"` \| `"self_signed_tls_client_auth"` \| `"spiffe_jwt"` \| `"spiffe_x509"`
 
 Supported OAuth 2.0 client authentication methods.
 
@@ -21,3 +21,5 @@ These methods define how a client authenticates itself when calling the authoriz
 - `private_key_jwt` - Client authenticates using a signed JWT created with a private key.
 - `tls_client_auth` - Client authenticates using a TLS client certificate issued by a trusted certificate authority.
 - `self_signed_tls_client_auth` - Client authenticates using a self-signed TLS client certificate.
+- `spiffe_jwt` - Client authenticates using a SPIFFE JWT-SVID sent as a JWT client assertion.
+- `spiffe_x509` - Client authenticates using a SPIFFE X.509-SVID via mutual TLS.

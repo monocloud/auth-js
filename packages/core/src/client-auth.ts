@@ -286,9 +286,22 @@ export const clientAuth = async (
     }
 
     case (method === 'tls_client_auth' ||
-      method === 'self_signed_tls_client_auth') &&
+      method === 'self_signed_tls_client_auth' ||
+      method === 'spiffe_x509') &&
       !!body: {
       body.set('client_id', clientId);
+      break;
+    }
+
+    case method === 'spiffe_jwt' &&
+      typeof clientSecret === 'string' &&
+      !!body: {
+      body.set('client_id', clientId);
+      body.set(
+        'client_assertion_type',
+        'urn:ietf:params:oauth:client-assertion-type:jwt-spiffe'
+      );
+      body.set('client_assertion', clientSecret);
       break;
     }
 

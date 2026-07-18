@@ -1,5 +1,5 @@
 import { getSession, MonoCloudUser } from '@monocloud/auth-nextjs';
-import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
+import { GetServerSideProps } from 'next';
 
 type Props = { user: MonoCloudUser | null };
 

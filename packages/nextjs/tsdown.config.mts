@@ -12,6 +12,7 @@ const common = {
   unbundle: true,
   clean: true,
   sourcemap: true,
+  external: [/^next\/.*/],
   define: {
     SDK_NAME: `"${pkg.name}"`,
     SDK_VERSION: `"${pkg.version}"`,

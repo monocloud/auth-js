@@ -1,6 +1,20 @@
 import { MarkdownPageEvent } from 'typedoc-plugin-markdown';
-import { ReflectionKind } from 'typedoc';
+import { ReflectionKind, Converter } from 'typedoc';
 import { registerInlineReferences } from './inline-references.mjs';
+
+// typedoc-plugin-markdown >= 4.12 renders a named block tag's caption as a
+// bold heading — so `@example Basic usage` emits `**Basic usage**` above the
+// code block. We keep the caption in the source JSDoc (it documents intent and
+// the code fence carries its own `title="..."`) but drop it from the generated
+// markdown by clearing the tag name during conversion; the plugin only renders
+// the caption when the tag has a name.
+const stripExampleCaptions = comment => {
+  comment?.blockTags?.forEach(tag => {
+    if (tag.tag === '@example' && tag.name) {
+      delete tag.name;
+    }
+  });
+};
 
 // Target length for meta descriptions — Google's desktop snippet display tops
 // out around 160 chars. Above this we try to truncate at a sentence boundary.
@@ -197,6 +211,15 @@ const processDescription = (model, type, rootPackage) => {
 /** @param {import('typedoc').Application} app */
 export const load = app => {
   registerInlineReferences(app);
+
+  app.converter.on(Converter.EVENT_RESOLVE_END, context => {
+    Object.values(context.project.reflections).forEach(reflection => {
+      stripExampleCaptions(reflection.comment);
+      reflection.signatures?.forEach(sig => stripExampleCaptions(sig.comment));
+      stripExampleCaptions(reflection.getSignature?.comment);
+      stripExampleCaptions(reflection.setSignature?.comment);
+    });
+  });
 
   app.renderer.on(MarkdownPageEvent.END, page => {
     if (!page.contents) return;

@@ -1497,7 +1497,17 @@ export type ClientAuthMethod =
   /**
    * Client authenticates using a self-signed TLS client certificate.
    */
-  | 'self_signed_tls_client_auth';
+  | 'self_signed_tls_client_auth'
+
+  /**
+   * Client authenticates using a SPIFFE JWT-SVID sent as a JWT client assertion.
+   */
+  | 'spiffe_jwt'
+
+  /**
+   * Client authenticates using a SPIFFE X.509-SVID via mutual TLS.
+   */
+  | 'spiffe_x509';
 
 /**
  * Parameters used when creating a Pushed Authorization Request (PAR).
@@ -1529,6 +1539,8 @@ export interface MonoCloudClientOptionsBase {
    * When `clientAuthMethod` is `client_secret_jwt` and a plain-text secret is provided, the default signing algorithm is `HS256`.
    *
    * To use a different algorithm, provide a symmetric JSON Web Key (JWK) (`kty: "oct"`) with the desired algorithm specified in its `alg` property.
+   *
+   * When `clientAuthMethod` is `spiffe_jwt`, provide the SPIFFE JWT-SVID (obtained from the SPIFFE Workload API) as the plain-text string; it is sent as the `client_assertion`.
    */
   clientSecret?: string | Jwk;
 
