@@ -13,7 +13,7 @@ describe('MonoCloudOidcClient.pushedAuthorizationRequest()', () => {
     const fetchSpy = fetchBuilder()
       .configureMetadata()
       .configurePar({
-        body: 'client_id=clientId&redirect_uri=redirectUri&scope=openid+api&response_type=code&authenticator_hint=google&login_hint=username&request=request&response_mode=form_post&acr_values=some&nonce=nonce&ui_locales=locale&display=page&max_age=100&prompt=none&resource=resource1&resource=resource2&code_challenge=challenge&code_challenge_method=S256&state=state',
+        body: 'client_id=clientId&redirect_uri=redirectUri&scope=openid+api&response_type=code&authenticator_hint=google&login_hint=username&request=request&response_mode=form_post&acr_values=some&nonce=nonce&ui_locales=locale&display=page&max_age=100&prompt=none&audience=audience&id_token_hint=idTokenHint&resource=resource1&resource=resource2&code_challenge=challenge&code_challenge_method=S256&state=state',
       })
       .createSpy();
 
@@ -28,6 +28,8 @@ describe('MonoCloudOidcClient.pushedAuthorizationRequest()', () => {
       maxAge: 100,
       nonce: 'nonce',
       prompt: 'none',
+      audience: 'audience',
+      idTokenHint: 'idTokenHint',
       redirectUri: 'redirectUri',
       request: 'request',
       responseMode: 'form_post',
