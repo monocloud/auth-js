@@ -1,6 +1,6 @@
 {
   "name": "@monocloud/auth-nextjs",
-  "version": "0.1.20",
+  "version": "0.2.0",
   "description": "MonoCloud Next.js Authentication SDK",
   "keywords": [
     "monocloud",

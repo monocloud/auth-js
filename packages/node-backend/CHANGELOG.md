@@ -1,5 +1,23 @@
 # @monocloud/backend-node
 
+## 0.3.0
+
+### Minor Changes
+
+- c462f08: Require Node.js >= 20. This matches the minimum Node version already required by the SDKs' dependencies (e.g. `joi` 18) and the versions tested in CI.
+- c462f08: Add SPIFFE client authentication methods `spiffe_jwt` and `spiffe_x509` to `clientAuthMethod`.
+
+  - `spiffe_x509` authenticates via mutual TLS using an X.509-SVID (presented at the TLS transport layer, the same as `tls_client_auth`).
+  - `spiffe_jwt` sends a SPIFFE JWT-SVID (obtained from the SPIFFE Workload API and provided as the `clientSecret` string) as the `client_assertion`, with `client_assertion_type=urn:ietf:params:oauth:client-assertion-type:jwt-spiffe`.
+
+### Patch Changes
+
+- c462f08: Update dependency package versions
+- Updated dependencies [34e8a50]
+- Updated dependencies [c462f08]
+- Updated dependencies [c462f08]
+  - @monocloud/auth-core@0.2.0
+
 ## 0.2.0
 
 ### Minor Changes
