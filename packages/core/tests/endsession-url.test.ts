@@ -10,7 +10,7 @@ describe('MonoCloudOidcClient.endsessionUrl()', () => {
     const client = new MonoCloudOidcClient('example.com', 'clientId');
 
     const endSessionUrl = await client.endSessionUrl({
-      idToken: 'idtoken',
+      idTokenHint: 'idtoken',
       postLogoutRedirectUri: 'postLogoutRedirectUri',
       state: 'state',
     });
@@ -40,7 +40,7 @@ describe('MonoCloudOidcClient.endsessionUrl()', () => {
     const client = new MonoCloudOidcClient('example.com', 'clientId');
 
     const endSessionUrl = await client.endSessionUrl({
-      idToken: 'idtoken',
+      idTokenHint: 'idtoken',
       postLogoutRedirectUri: 'postLogoutRedirectUri',
     });
 

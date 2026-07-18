@@ -26,12 +26,14 @@ describe('MonoCloudOidcClient.authorizeUrl()', () => {
       uiLocales: 'uiLocales',
       display: 'page',
       prompt: 'consent',
+      audience: 'audience',
+      idTokenHint: 'idTokenHint',
       requestUri: 'requestUri',
       resource: 'resource1 resource2',
     });
 
     expect(authUrl).toBe(
-      'https://example.com/connect/authorize?client_id=clientId&redirect_uri=redirectUri&request_uri=requestUri&scope=scopes+openid&response_type=code+id_token&authenticator_hint=google&login_hint=loginHint&request=request&response_mode=query&acr_values=some+acr&nonce=nonce&ui_locales=uiLocales&display=page&max_age=100&prompt=consent&resource=resource1&resource=resource2&code_challenge=codeChallenge&code_challenge_method=plain&state=state'
+      'https://example.com/connect/authorize?client_id=clientId&redirect_uri=redirectUri&request_uri=requestUri&scope=scopes+openid&response_type=code+id_token&authenticator_hint=google&login_hint=loginHint&request=request&response_mode=query&acr_values=some+acr&nonce=nonce&ui_locales=uiLocales&display=page&max_age=100&prompt=consent&audience=audience&id_token_hint=idTokenHint&resource=resource1&resource=resource2&code_challenge=codeChallenge&code_challenge_method=plain&state=state'
     );
     fetchSpy.assert();
   });

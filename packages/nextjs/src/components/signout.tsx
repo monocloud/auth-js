@@ -14,6 +14,9 @@ export interface SignOutProps {
 
   /** If `true`, also signs the user out of the MonoCloud server session, ensuring the user is fully logged out of MonoCloud and not just your application. */
   federated?: boolean;
+
+  /** A previously issued ID token to send as the `id_token_hint` on the logout request, overriding the ID token from the current session. */
+  idTokenHint?: string;
 }
 
 /**
@@ -50,6 +53,7 @@ export const SignOut = ({
   children,
   postLogoutUrl,
   federated,
+  idTokenHint,
   ...props
 }: SignOutProps &
   React.AnchorHTMLAttributes<HTMLAnchorElement>): React.ReactNode => {
@@ -66,6 +70,10 @@ export const SignOut = ({
 
   if (typeof federated === 'boolean') {
     query.set('federated', federated.toString());
+  }
+
+  if (idTokenHint) {
+    query.set('id_token_hint', idTokenHint);
   }
 
   return (

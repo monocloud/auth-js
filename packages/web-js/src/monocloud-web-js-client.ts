@@ -426,6 +426,8 @@ export class MonoCloudWebJSClient {
       acrValues: signInOptions?.acrValues,
       scopes: signInOptions?.scopes,
       resource: signInOptions?.resource,
+      audience: signInOptions?.audience,
+      idTokenHint: signInOptions?.idTokenHint,
     };
 
     const callbackStateOverrides: Partial<CallbackState> = {
@@ -512,7 +514,7 @@ export class MonoCloudWebJSClient {
       const state = generateState();
 
       const url = await this.oidcClient.endSessionUrl({
-        idToken: session?.idToken,
+        idTokenHint: signOutOptions?.idTokenHint ?? session?.idToken,
         postLogoutRedirectUri,
         state,
       });

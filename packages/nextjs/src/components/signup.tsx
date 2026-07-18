@@ -64,6 +64,8 @@ export const SignUp = ({
   display,
   maxAge,
   resource,
+  audience,
+  idTokenHint,
   scopes,
   uiLocales,
   ...props
@@ -103,6 +105,14 @@ export const SignUp = ({
 
   if (resource) {
     query.set('resource', resource);
+  }
+
+  if (audience) {
+    query.set('audience', audience);
+  }
+
+  if (idTokenHint) {
+    query.set('id_token_hint', idTokenHint);
   }
 
   if (maxAge) {

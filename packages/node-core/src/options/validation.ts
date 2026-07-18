@@ -235,7 +235,7 @@ export const userInfoOptionsSchema: Joi.ObjectSchema<UserInfoOptions> =
 export const signOutOptionsSchema: Joi.ObjectSchema<SignOutOptions> =
   Joi.object({
     postLogoutRedirectUri: stringOptional.uri({ allowRelative: true }),
-    idToken: stringOptional,
+    idTokenHint: stringOptional,
     state: stringOptional,
     federatedSignOut: boolOptional,
     onError: funcOptional,
