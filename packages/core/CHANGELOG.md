@@ -1,5 +1,26 @@
 # @monocloud/auth-core
 
+## 0.2.0
+
+### Minor Changes
+
+- 34e8a50: Add `audience` and `idTokenHint` authorization parameters and allow a manual `idTokenHint` on sign-out.
+
+  - `AuthorizationParams` gains `audience` (sent as `audience`) and `idTokenHint` (sent as `id_token_hint`); both are exposed on the sign-in/sign-up flows and on the `<SignIn>`/`<SignUp>` components, and are accepted as query-param overrides on the Next.js sign-in route.
+  - Sign-out now accepts a manual `idTokenHint` (on `signOut()` options, the `<SignOut>` components, and the Next.js sign-out route) which overrides the ID token from the current session as the `id_token_hint`.
+  - `Authenticators`, `Prompt`, and `DisplayOptions` now accept any string in addition to the documented values (open string unions), so custom authenticators/prompts/display modes can be passed.
+
+  **Breaking:** `EndSessionParameters.idToken` is renamed to `idTokenHint` for consistency; node-core's `SignOutOptions` exposes `idTokenHint` (the previously inherited, no-op `idToken` field is removed).
+
+- c462f08: Add SPIFFE client authentication methods `spiffe_jwt` and `spiffe_x509` to `clientAuthMethod`.
+
+  - `spiffe_x509` authenticates via mutual TLS using an X.509-SVID (presented at the TLS transport layer, the same as `tls_client_auth`).
+  - `spiffe_jwt` sends a SPIFFE JWT-SVID (obtained from the SPIFFE Workload API and provided as the `clientSecret` string) as the `client_assertion`, with `client_assertion_type=urn:ietf:params:oauth:client-assertion-type:jwt-spiffe`.
+
+### Patch Changes
+
+- c462f08: Update dependency package versions
+
 ## 0.1.15
 
 ### Patch Changes
