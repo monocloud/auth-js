@@ -25,6 +25,8 @@
 
 This SDK is designed specifically for **Next.js**, providing first-class integration with both the **App Router** and **Pages Router**. It leverages **Next.js Middleware**, **Server Components**, and **Edge-compatible APIs** to deliver secure, server-side authentication with minimal configuration.
 
+> This package builds on **`@monocloud/auth-node-core`** and adds Next.js-specific middleware, route protection, and React components and hooks.
+
 ## 📘 Documentation
 
 - **Documentation:** [https://www.monocloud.com/docs](https://www.monocloud.com/docs?utm_source=github&utm_medium=auth_js)
@@ -34,8 +36,8 @@ This SDK is designed specifically for **Next.js**, providing first-class integra
 
 ## Supported Platforms
 
-- **Next.js ≥ 13.0.0** (App Router & Pages Router)
-- **Node.js ≥ 16.0.0**
+- **Next.js ≥ 13.5.11** (App Router & Pages Router; latest patch releases of 13.5, 14.2, 15.x, and 16 — see the package's `peerDependencies` for exact ranges)
+- **Node.js ≥ 20.0.0**
 - **Edge Runtime** (where supported by Next.js)
 
 ## 🚀 Getting Started

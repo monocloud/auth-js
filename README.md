@@ -31,6 +31,7 @@ This SDK provides a typed JavaScript client for implementing **OAuth 2.0** and *
 - React applications
 - Next.js applications (App Router & Pages Router)
 - Node.js backends performing server-side auth flows
+- Node.js API servers (Express, Fastify) validating access tokens
 - Applications that need secure redirects, token handling, and session management
 
 ## 📘 Documentation
