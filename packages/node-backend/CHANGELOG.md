@@ -1,5 +1,13 @@
 # @monocloud/backend-node
 
+## 0.3.2
+
+### Patch Changes
+
+- a214087: Correct stale README content: supported Node.js/Next.js/React version floors now match the enforced `engines`/`peerDependencies` ranges, the core feature list includes the Device Authorization Grant, the backend caching bullet is scoped to introspection results, `getSession()` is documented as returning `undefined` when signed out, and the web-js README gains Quickstart/SDK Reference links.
+- Updated dependencies [a214087]
+  - @monocloud/auth-core@0.2.2
+
 ## 0.3.1
 
 ### Patch Changes
