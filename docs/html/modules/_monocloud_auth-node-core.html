@@ -49,7 +49,7 @@
 </ul>
 <h2 id="supported-platforms" class="tsd-anchor-link">Supported Platforms<a href="#supported-platforms" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2>
 <ul>
-<li><strong>Node.js &gt;= 16.0.0</strong></li>
+<li><strong>Node.js &gt;= 20.0.0</strong></li>
 </ul>
 <h2 id="requirements" class="tsd-anchor-link">Requirements<a href="#requirements" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2>
 <ul>
@@ -93,12 +93,15 @@
 <p>Use <strong><code>@monocloud/auth-node-core</code></strong> if you are building a <strong>Node.js backend</strong> and want a secure authentication solution without tying yourself to a specific framework.</p>
 <p>This package is a good fit if you:</p>
 <ul>
-<li>Are building an <strong>API or server-rendered application</strong> in Node.js</li>
+<li>Are building a <strong>server-rendered application or backend</strong> in Node.js that signs users in with cookie sessions</li>
 <li>Want <strong>cookie-based sessions</strong> with encryption handled for you</li>
 <li>Need built-in handling for <strong>OIDC redirects, state validation, and token exchange</strong></li>
-<li>Want to manage authentication in a <strong>custom servers</strong></li>
+<li>Want to manage authentication in a <strong>custom server</strong></li>
 <li>Prefer a <strong>framework-agnostic</strong> solution with sensible security defaults</li>
 </ul>
+<blockquote>
+<p>If you only need to <strong>validate access tokens</strong> on an API server (Express or Fastify), use <a href="https://www.npmjs.com/package/@monocloud/backend-node"><code>@monocloud/backend-node</code></a> instead.</p>
+</blockquote>
 <p><code>auth-node-core</code> builds on top of <code>@monocloud/auth-core</code> and adds Node-specific features such as encrypted session cookies and refresh token rotation.</p>
 <p>Higher-level packages reuse the same underlying OIDC implementation but provide framework-specific ergonomics.</p>
 <h2 id="🤝-contributing-support" class="tsd-anchor-link">🤝 Contributing &amp; Support<a href="#🤝-contributing-support" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2>

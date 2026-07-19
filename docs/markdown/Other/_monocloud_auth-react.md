@@ -44,7 +44,7 @@ This SDK provides **React-friendly authentication** for single-page applications
 
 ## Supported Platforms
 
-- **React** v18+
+- **React** `^18.0.0` (with `react-dom` ≥ 18.3.1) or `^19.2.3`
 - **Modern Browsers** (Chrome, Edge, Firefox, Safari)
 
 ## 🚀 Getting Started

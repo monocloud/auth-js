@@ -31,7 +31,7 @@ category: Other
 
 [MonoCloud](https://www.monocloud.com?utm_source=github&utm_medium=auth_js) is a modern, developer-friendly Identity & Access Management platform.
 
-This package provides a **framework-agnostic OpenID Connect (OIDC) client** for interacting with MonoCloud. It supports industry-standard authentication flows including **Authorization Code Flow**, **PKCE**, **Pushed Authorization Requests (PAR)**, and token lifecycle management.
+This package provides a **framework-agnostic OpenID Connect (OIDC) client** for interacting with MonoCloud. It supports industry-standard authentication flows including **Authorization Code Flow**, **PKCE**, **Pushed Authorization Requests (PAR)**, **Device Authorization Grant**, and token lifecycle management.
 
 > This package focuses on **core OIDC primitives**. Framework-specific integrations (such as Next.js) are provided by higher-level packages built on top of `auth-core`.
 
