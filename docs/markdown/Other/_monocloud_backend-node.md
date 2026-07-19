@@ -39,7 +39,7 @@ The SDK handles:
 - **Opaque token introspection** via the OpenID Connect introspection endpoint
 - **Automatic token format detection** (JWT vs. opaque)
 - **Scope and group-based authorization**
-- **Optional caching** of validated token claims
+- **Optional caching** of token introspection results
 - **mTLS certificate-bound token validation**
 
 > This package builds on **`@monocloud/auth-core`** and adds Node.js-specific API protection features.
@@ -55,7 +55,7 @@ The SDK handles:
 
 ## Supported Platforms
 
-- **Node.js >= 18.0.0**
+- **Node.js >= 20.0.0**
 
 ## Requirements
 

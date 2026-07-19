@@ -27,7 +27,7 @@ Resolved options are read **once at client construction** (`getOptions()` return
 ## Rules specific to this package
 
 - **Delegate OIDC to `@monocloud/auth-core`**; this layer adds Node session/cookie/state handling only.
-- Server-only (Node ≥ 16). Keep browser concerns out.
+- Server-only (Node ≥ 20). Keep browser concerns out.
 
 ## Build / test
 

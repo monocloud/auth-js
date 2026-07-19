@@ -41,7 +41,7 @@ The SDK handles:
 
 ## Supported Platforms
 
-- **Node.js >= 16.0.0**
+- **Node.js >= 20.0.0**
 
 ## Requirements
 
@@ -135,11 +135,13 @@ Use **`@monocloud/auth-node-core`** if you are building a **Node.js backend** an
 
 This package is a good fit if you:
 
-- Are building an **API or server-rendered application** in Node.js
+- Are building a **server-rendered application or backend** in Node.js that signs users in with cookie sessions
 - Want **cookie-based sessions** with encryption handled for you
 - Need built-in handling for **OIDC redirects, state validation, and token exchange**
-- Want to manage authentication in a **custom servers**
+- Want to manage authentication in a **custom server**
 - Prefer a **framework-agnostic** solution with sensible security defaults
+
+> If you only need to **validate access tokens** on an API server (Express or Fastify), use [`@monocloud/backend-node`](https://www.npmjs.com/package/@monocloud/backend-node) instead.
 
 `auth-node-core` builds on top of `@monocloud/auth-core` and adds Node-specific features such as encrypted session cookies and refresh token rotation.
 

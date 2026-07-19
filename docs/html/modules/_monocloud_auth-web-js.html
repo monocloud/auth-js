@@ -35,6 +35,8 @@
 <h2 id="📘-documentation" class="tsd-anchor-link">📘 Documentation<a href="#📘-documentation" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2>
 <ul>
 <li><strong>Documentation:</strong> <a href="https://www.monocloud.com/docs?utm_source=github&amp;utm_medium=auth_js">https://www.monocloud.com/docs</a></li>
+<li><strong>Quickstart:</strong> <a href="https://www.monocloud.com/docs/quickstarts/web-js?utm_source=github&amp;utm_medium=auth_js">https://www.monocloud.com/docs/quickstarts/web-js</a></li>
+<li><strong>SDK Reference:</strong> <a href="https://www.monocloud.com/docs/sdks/web-js/index?utm_source=github&amp;utm_medium=auth_js">https://www.monocloud.com/docs/sdks/web-js</a></li>
 <li><strong>API Reference:</strong> <a href="https://monocloud.github.io/auth-js?utm_source=github&amp;utm_medium=auth_js">https://monocloud.github.io/auth-js</a></li>
 </ul>
 <h2 id="supported-platforms" class="tsd-anchor-link">Supported Platforms<a href="#supported-platforms" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2>
@@ -73,7 +75,7 @@
 </code><button type="button">Copy</button></pre>
 
 <h3 id="get-the-current-session" class="tsd-anchor-link">Get the Current Session<a href="#get-the-current-session" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
-<p>Retrieve the active session, including the authenticated user's profile and tokens. Returns <code>null</code> when no user is signed in.</p>
+<p>Retrieve the active session, including the authenticated user's profile and tokens. Returns <code>undefined</code> when no user is signed in.</p>
 <pre><code class="typescript"><span class="hl-5">const</span><span class="hl-1"> </span><span class="hl-6">session</span><span class="hl-1"> = </span><span class="hl-3">await</span><span class="hl-1"> </span><span class="hl-4">client</span><span class="hl-1">.</span><span class="hl-0">getSession</span><span class="hl-1">();</span><br/><br/><span class="hl-3">if</span><span class="hl-1"> (</span><span class="hl-4">session</span><span class="hl-1">) {</span><br/><span class="hl-1">  </span><span class="hl-4">console</span><span class="hl-1">.</span><span class="hl-0">log</span><span class="hl-1">(</span><span class="hl-4">session</span><span class="hl-1">.</span><span class="hl-4">user</span><span class="hl-1">);</span><br/><span class="hl-1">}</span>
 </code><button type="button">Copy</button></pre>
 

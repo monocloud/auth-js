@@ -36,6 +36,8 @@ This SDK provides a **browser-side authentication client** for single-page apps 
 ## 📘 Documentation
 
 - **Documentation:** [https://www.monocloud.com/docs](https://www.monocloud.com/docs?utm_source=github&utm_medium=auth_js)
+- **Quickstart:** [https://www.monocloud.com/docs/quickstarts/web-js](https://www.monocloud.com/docs/quickstarts/web-js?utm_source=github&utm_medium=auth_js)
+- **SDK Reference:** [https://www.monocloud.com/docs/sdks/web-js](https://www.monocloud.com/docs/sdks/web-js/index?utm_source=github&utm_medium=auth_js)
 - **API Reference:** [https://monocloud.github.io/auth-js](https://monocloud.github.io/auth-js?utm_source=github&utm_medium=auth_js)
 
 ## Supported Platforms
@@ -108,7 +110,7 @@ try {
 
 ### Get the Current Session
 
-Retrieve the active session, including the authenticated user's profile and tokens. Returns `null` when no user is signed in.
+Retrieve the active session, including the authenticated user's profile and tokens. Returns `undefined` when no user is signed in.
 
 ```typescript
 const session = await client.getSession();
