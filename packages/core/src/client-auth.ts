@@ -5,6 +5,11 @@ import {
 } from './utils/internal';
 import { ClientAuthMethod, Jwk } from './types';
 
+export const isMtlsClientAuthMethod = (method?: ClientAuthMethod): boolean =>
+  method === 'tls_client_auth' ||
+  method === 'self_signed_tls_client_auth' ||
+  method === 'spiffe_x509';
+
 const algToSubtle = (
   alg?: string
 ): HmacImportParams | RsaHashedImportParams | EcKeyImportParams => {
@@ -285,10 +290,7 @@ export const clientAuth = async (
       break;
     }
 
-    case (method === 'tls_client_auth' ||
-      method === 'self_signed_tls_client_auth' ||
-      method === 'spiffe_x509') &&
-      !!body: {
+    case isMtlsClientAuthMethod(method) && !!body: {
       body.set('client_id', clientId);
       break;
     }

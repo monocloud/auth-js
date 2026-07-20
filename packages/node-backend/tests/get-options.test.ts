@@ -45,6 +45,7 @@ describe('Configuration Options', () => {
     addEnv('MONOCLOUD_BACKEND_INTROSPECT_JWT_TOKENS', 'true');
     addEnv('MONOCLOUD_BACKEND_GROUPS_CLAIM', 'roles');
     addEnv('MONOCLOUD_BACKEND_GROUPS_MATCH_ALL', 'true');
+    addEnv('MONOCLOUD_BACKEND_TRUST_STORE_ID', 'trust-store-1');
 
     const options = getOptions();
 
@@ -53,6 +54,7 @@ describe('Configuration Options', () => {
     expect(options.clientId).toBe('client_id');
     expect(options.clientSecret).toBe('client_secret');
     expect(options.clientAuthMethod).toBe('client_secret_basic');
+    expect(options.trustStoreId).toBe('trust-store-1');
     expect(options.clockSkew).toBe(5);
     expect(options.clockTolerance).toBe(120);
     expect(options.jwksCacheDuration).toBe(60);
@@ -84,13 +86,20 @@ describe('Configuration Options', () => {
     addEnv('MONOCLOUD_BACKEND_INTROSPECT_JWT_TOKENS', 'true');
     addEnv('MONOCLOUD_BACKEND_GROUPS_CLAIM', 'roles');
     addEnv('MONOCLOUD_BACKEND_GROUPS_MATCH_ALL', 'true');
+    addEnv('MONOCLOUD_BACKEND_TRUST_STORE_ID', 'env-trust-store');
+
+    const metadataResolver = vi.fn();
+    const jwksResolver = vi.fn();
 
     const options = getOptions({
       tenantDomain: 'https://opt.monocloud.com',
       audience: 'https://api.opt.example.com',
       clientId: 'opt_client_id',
       clientSecret: 'opt_client_secret',
-      clientAuthMethod: 'client_secret_post',
+      clientAuthMethod: 'tls_client_auth',
+      trustStoreId: 'opt-trust-store',
+      metadataResolver,
+      jwksResolver,
       clockSkew: 10,
       clockTolerance: 60,
       jwksCacheDuration: 30,
@@ -103,7 +112,10 @@ describe('Configuration Options', () => {
     expect(options.audience).toBe('https://api.opt.example.com');
     expect(options.clientId).toBe('opt_client_id');
     expect(options.clientSecret).toBe('opt_client_secret');
-    expect(options.clientAuthMethod).toBe('client_secret_post');
+    expect(options.clientAuthMethod).toBe('tls_client_auth');
+    expect(options.trustStoreId).toBe('opt-trust-store');
+    expect(options.metadataResolver).toBe(metadataResolver);
+    expect(options.jwksResolver).toBe(jwksResolver);
     expect(options.clockSkew).toBe(10);
     expect(options.clockTolerance).toBe(60);
     expect(options.jwksCacheDuration).toBe(30);

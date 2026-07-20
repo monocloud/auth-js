@@ -114,4 +114,47 @@ describe('MonoCloudOidcClient.getMetadata()', () => {
     expect(result).toEqual(defaultMetadata);
     expect(result2).toEqual({});
   });
+
+  it('should use metadataResolver instead of fetching the discovery document', async () => {
+    const fetchSpy = vi.spyOn(globalThis, 'fetch').mockImplementation(() => {
+      throw new Error('discovery should not be fetched');
+    });
+
+    const custom = { ...defaultMetadata, issuer: 'https://custom.example.com' };
+
+    const client = new MonoCloudOidcClient('example.com', 'clientId', {
+      metadataResolver: (): typeof custom => custom,
+    });
+
+    const result = await client.getMetadata();
+
+    expect(result).toEqual(custom);
+    expect(fetchSpy).not.toHaveBeenCalled();
+
+    fetchSpy.mockClear();
+  });
+
+  it('should cache metadata returned by metadataResolver', async () => {
+    let resolverCalls = 0;
+    const resolver = (): typeof defaultMetadata => {
+      resolverCalls += 1;
+      return defaultMetadata;
+    };
+    const dateSpy = vi.spyOn(Date, 'now').mockReturnValue(10_000);
+
+    const client = new MonoCloudOidcClient('example.com', 'clientId', {
+      metadataResolver: resolver,
+      metadataCacheDuration: 10,
+    });
+
+    await client.getMetadata();
+
+    dateSpy.mockReturnValue(10_000 + 9 * 1000);
+
+    await client.getMetadata();
+
+    expect(resolverCalls).toBe(1);
+
+    dateSpy.mockClear();
+  });
 });

@@ -2,8 +2,11 @@ import type {
   AccessToken,
   AuthorizationParams,
   AuthState,
+  ClientAuthMethod,
   EndSessionParameters,
   IdTokenClaims,
+  IssuerMetadata,
+  Jwks,
   MonoCloudSession,
   RefreshGrantOptions,
   SecurityAlgorithms,
@@ -360,6 +363,34 @@ export interface MonoCloudOptionsBase {
   clientSecret?: string;
 
   /**
+   * Client authentication method used when communicating with the token endpoint.
+   *
+   * @defaultValue 'client_secret_basic'
+   */
+  clientAuthMethod?: ClientAuthMethod;
+
+  /**
+   * Identifier of the trust store whose mTLS endpoint aliases should be used when
+   * authenticating with a mutual-TLS client authentication method.
+   */
+  trustStoreId?: string;
+
+  /**
+   * Optional custom `fetch` implementation used for requests to the authorization server.
+   */
+  fetcher?: typeof fetch;
+
+  /**
+   * Optional custom resolver for the issuer metadata.
+   */
+  metadataResolver?: () => IssuerMetadata | Promise<IssuerMetadata>;
+
+  /**
+   * Optional custom resolver for the JSON Web Key Set (JWKS).
+   */
+  jwksResolver?: () => Jwks | Promise<Jwks>;
+
+  /**
    * MonoCloud tenant domain (for example, `https://your-tenant.us.monocloud.com`).
    */
   tenantDomain: string;
@@ -593,6 +624,8 @@ export interface MonoCloudSessionOptions extends Partial<
  * |----------------------|-------------|
  * | `MONOCLOUD_AUTH_SCOPES` | Space-separated list of OIDC scopes to request (for example, `openid profile email`). |
  * | `MONOCLOUD_AUTH_RESOURCE` | Default resource (audience) identifier used when issuing access tokens. |
+ * | `MONOCLOUD_AUTH_CLIENT_AUTH_METHOD` | Client authentication method used at the token endpoint (for example, `client_secret_basic`, `client_secret_post`, `client_secret_jwt`, `private_key_jwt`, `tls_client_auth`, `self_signed_tls_client_auth`, `spiffe_jwt`, `spiffe_x509`). |
+ * | `MONOCLOUD_AUTH_TRUST_STORE_ID` | Identifier of the trust store whose mTLS endpoint aliases should be used when authenticating with a mutual-TLS client authentication method. |
  * | `MONOCLOUD_AUTH_USE_PAR` | Enables Pushed Authorization Requests (PAR) for authorization flows. |
  * | `MONOCLOUD_AUTH_CLOCK_SKEW` | Allowed clock drift (in seconds) when validating token timestamps. |
  * | `MONOCLOUD_AUTH_CLOCK_TOLERANCE` | Additional time tolerance (in seconds) applied when validating time-based token claims. |

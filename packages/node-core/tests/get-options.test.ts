@@ -111,6 +111,54 @@ describe('Configuration Options', () => {
     expect(options.groupsClaim).toBe('option_groups');
   });
 
+  it('should default clientAuthMethod to "client_secret_basic"', () => {
+    setRequiredEnv();
+
+    const options = getOptions();
+
+    expect(options.clientAuthMethod).toBe('client_secret_basic');
+    expect(options.trustStoreId).toBeUndefined();
+  });
+
+  it('should resolve clientAuthMethod and trustStoreId from environment variables', () => {
+    setRequiredEnv();
+    addEnv('MONOCLOUD_AUTH_CLIENT_AUTH_METHOD', 'tls_client_auth');
+    addEnv('MONOCLOUD_AUTH_TRUST_STORE_ID', 'trust-store-1');
+
+    const options = getOptions();
+
+    expect(options.clientAuthMethod).toBe('tls_client_auth');
+    expect(options.trustStoreId).toBe('trust-store-1');
+  });
+
+  it('should resolve clientAuthMethod and trustStoreId from explicit options', () => {
+    setRequiredEnv();
+    addEnv('MONOCLOUD_AUTH_CLIENT_AUTH_METHOD', 'client_secret_post');
+    addEnv('MONOCLOUD_AUTH_TRUST_STORE_ID', 'env-trust-store');
+
+    const options = getOptions({
+      clientAuthMethod: 'self_signed_tls_client_auth',
+      trustStoreId: 'option-trust-store',
+    });
+
+    expect(options.clientAuthMethod).toBe('self_signed_tls_client_auth');
+    expect(options.trustStoreId).toBe('option-trust-store');
+  });
+
+  it('should pass through fetcher and metadataResolver from explicit options', () => {
+    setRequiredEnv();
+
+    const fetcher = vi.fn();
+    const metadataResolver = vi.fn();
+    const jwksResolver = vi.fn();
+
+    const options = getOptions({ fetcher, metadataResolver, jwksResolver });
+
+    expect(options.fetcher).toBe(fetcher);
+    expect(options.metadataResolver).toBe(metadataResolver);
+    expect(options.jwksResolver).toBe(jwksResolver);
+  });
+
   it('should throw if clockSkew is negative', () => {
     setRequiredEnv();
 

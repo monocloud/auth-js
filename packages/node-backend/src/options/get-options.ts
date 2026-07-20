@@ -21,6 +21,8 @@ export const getOptions = (
     process.env.MONOCLOUD_BACKEND_CLIENT_SECRET;
   const MONOCLOUD_BACKEND_CLIENT_AUTH_METHOD =
     process.env.MONOCLOUD_BACKEND_CLIENT_AUTH_METHOD;
+  const MONOCLOUD_BACKEND_TRUST_STORE_ID =
+    process.env.MONOCLOUD_BACKEND_TRUST_STORE_ID;
   const MONOCLOUD_BACKEND_GROUPS_CLAIM =
     process.env.MONOCLOUD_BACKEND_GROUPS_CLAIM;
   const MONOCLOUD_BACKEND_GROUPS_MATCH_ALL =
@@ -59,6 +61,9 @@ export const getOptions = (
       options?.clientAuthMethod ??
       (MONOCLOUD_BACKEND_CLIENT_AUTH_METHOD as ClientAuthMethod) ??
       DEFAULT_OPTIONS.clientAuthMethod,
+    trustStoreId: options?.trustStoreId ?? MONOCLOUD_BACKEND_TRUST_STORE_ID,
+    metadataResolver: options?.metadataResolver,
+    jwksResolver: options?.jwksResolver,
     jwksCacheDuration:
       options?.jwksCacheDuration ??
       getNumber(MONOCLOUD_BACKEND_JWKS_CACHE_DURATION),

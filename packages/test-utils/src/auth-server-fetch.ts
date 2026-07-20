@@ -1,5 +1,5 @@
 import * as jose from 'jose';
-import { expect, vi } from 'vitest';
+import { expect, vi, type MockInstance } from 'vitest';
 
 export const idTokenPrivateKey = {
   kty: 'RSA',
@@ -181,6 +181,29 @@ export const defaultMetadata = {
   request_uri_parameter_supported: false,
   request_object_signing_alg_values_supported: ['RS256'],
   require_pushed_authorization_requests: true,
+  tls_client_certificate_bound_access_tokens: true,
+  mtls_endpoint_aliases: {
+    token_endpoint: 'https://mtls.example.com/connect/token',
+    revocation_endpoint: 'https://mtls.example.com/connect/revocation',
+    introspection_endpoint: 'https://mtls.example.com/connect/introspect',
+    device_authorization_endpoint:
+      'https://mtls.example.com/connect/deviceauthorization',
+    pushed_authorization_request_endpoint:
+      'https://mtls.example.com/connect/par',
+  },
+  mtls_additional_endpoint_aliases: {
+    'trust-store-1': {
+      token_endpoint: 'https://mtls.example.com/trust-store-1/connect/token',
+      revocation_endpoint:
+        'https://mtls.example.com/trust-store-1/connect/revocation',
+      introspection_endpoint:
+        'https://mtls.example.com/trust-store-1/connect/introspect',
+      device_authorization_endpoint:
+        'https://mtls.example.com/trust-store-1/connect/deviceauthorization',
+      pushed_authorization_request_endpoint:
+        'https://mtls.example.com/trust-store-1/connect/par',
+    },
+  },
 };
 
 export class AuthorizationServerFetchBuilder {
@@ -275,6 +298,7 @@ export class AuthorizationServerFetchBuilder {
     body?: string;
     error?: string | null;
     error_description?: string | null;
+    url?: string;
   }): AuthorizationServerFetchBuilder {
     let body;
     let responseCode = options?.responseCode ?? 200;
@@ -300,7 +324,7 @@ export class AuthorizationServerFetchBuilder {
     }
 
     this.expectations.push({
-      url: `${this.authServerUrl}/connect/deviceauthorization`,
+      url: options?.url ?? `${this.authServerUrl}/connect/deviceauthorization`,
       headers: {
         authorization: 'Basic Y2xpZW50SWQ6',
         'content-type': 'application/x-www-form-urlencoded',
@@ -332,6 +356,7 @@ export class AuthorizationServerFetchBuilder {
     skipIdToken?: boolean;
     skipScope?: boolean;
     skipExpiration?: boolean;
+    url?: string;
   }): AuthorizationServerFetchBuilder {
     let body;
     let responseCode = options?.responseCode ?? 200;
@@ -360,7 +385,7 @@ export class AuthorizationServerFetchBuilder {
     }
 
     this.expectations.push({
-      url: `${this.authServerUrl}/connect/token`,
+      url: options?.url ?? `${this.authServerUrl}/connect/token`,
       headers: {
         accept: 'application/json',
         'content-type': 'application/x-www-form-urlencoded',
@@ -393,9 +418,10 @@ export class AuthorizationServerFetchBuilder {
     skipExpiration?: boolean;
     skipScope?: boolean;
     skipRefreshToken?: boolean;
+    url?: string;
   }): AuthorizationServerFetchBuilder {
     this.expectations.push({
-      url: `${this.authServerUrl}/connect/token`,
+      url: options?.url ?? `${this.authServerUrl}/connect/token`,
       headers: {
         accept: 'application/json',
         'content-type': 'application/x-www-form-urlencoded',
@@ -442,9 +468,10 @@ export class AuthorizationServerFetchBuilder {
     accessToken?: string;
     tokenTypeHint?: string;
     headers?: Record<string, string>;
+    url?: string;
   }): AuthorizationServerFetchBuilder {
     this.expectations.push({
-      url: `${this.authServerUrl}/connect/introspect`,
+      url: options?.url ?? `${this.authServerUrl}/connect/introspect`,
       headers: {
         accept: 'application/json',
         'content-type': 'application/x-www-form-urlencoded',
@@ -512,10 +539,11 @@ export class AuthorizationServerFetchBuilder {
     tokenTypeHint?: boolean;
     error?: string | null;
     error_description?: string | null;
+    url?: string;
   }): AuthorizationServerFetchBuilder {
     if (options?.accessToken) {
       this.expectations.push({
-        url: `${this.authServerUrl}/connect/revocation`,
+        url: options?.url ?? `${this.authServerUrl}/connect/revocation`,
         headers: {
           'content-type': 'application/x-www-form-urlencoded',
           authorization: 'Basic Y2xpZW50SWQ6',
@@ -538,7 +566,7 @@ export class AuthorizationServerFetchBuilder {
 
     if (options?.refreshToken) {
       this.expectations.push({
-        url: `${this.authServerUrl}/connect/revocation`,
+        url: options?.url ?? `${this.authServerUrl}/connect/revocation`,
         headers: {
           'content-type': 'application/x-www-form-urlencoded',
           authorization: 'Basic Y2xpZW50SWQ6',
@@ -618,3 +646,30 @@ export const fetchBuilder = (
   authServerUrl?: string
 ): AuthorizationServerFetchBuilder =>
   new AuthorizationServerFetchBuilder(authServerUrl);
+
+export const mtlsFetchSpy = (options?: {
+  response?: unknown;
+  responseCode?: number;
+  metadata?: object;
+}): MockInstance<typeof fetch> =>
+  vi
+    .spyOn(globalThis, 'fetch')
+    .mockImplementation((input: string | URL | Request | RequestInit) => {
+      const isDiscovery = (input as string).endsWith(
+        '/.well-known/openid-configuration'
+      );
+
+      return Promise.resolve(
+        new Response(
+          JSON.stringify(
+            isDiscovery
+              ? (options?.metadata ?? defaultMetadata)
+              : (options?.response ?? {})
+          ),
+          {
+            status: isDiscovery ? 200 : (options?.responseCode ?? 200),
+            headers: { 'content-type': 'application/json' },
+          }
+        )
+      );
+    });

@@ -1132,6 +1132,39 @@ export interface EndSessionParameters {
  *
  * @category Types
  */
+/**
+ * Alternate endpoint URLs that a client authenticating with mutual-TLS (mTLS) must use in
+ * place of the regular endpoints.
+ *
+ * @category Types
+ */
+export interface MtlsEndpointAliases {
+  /**
+   * mTLS alias for the token endpoint.
+   */
+  token_endpoint?: string;
+
+  /**
+   * mTLS alias for the token introspection endpoint.
+   */
+  introspection_endpoint?: string;
+
+  /**
+   * mTLS alias for the token revocation endpoint.
+   */
+  revocation_endpoint?: string;
+
+  /**
+   * mTLS alias for the device authorization endpoint.
+   */
+  device_authorization_endpoint?: string;
+
+  /**
+   * mTLS alias for the pushed authorization request (PAR) endpoint.
+   */
+  pushed_authorization_request_endpoint?: string;
+}
+
 export interface IssuerMetadata {
   /**
    * The issuer identifier for the authorization server.
@@ -1272,6 +1305,23 @@ export interface IssuerMetadata {
    * Supported signing algorithms for request objects.
    */
   request_object_signing_alg_values_supported: string[];
+
+  /**
+   * Indicates whether the authorization server supports mutual-TLS client certificate-bound
+   * access tokens.
+   */
+  tls_client_certificate_bound_access_tokens?: boolean;
+
+  /**
+   * Alternate mTLS endpoint URLs to use when authenticating with a mutual-TLS client
+   * authentication method.
+   */
+  mtls_endpoint_aliases?: MtlsEndpointAliases;
+
+  /**
+   * Per-trust-store mTLS endpoint aliases, keyed by trust store id (a MonoCloud extension).
+   */
+  mtls_additional_endpoint_aliases?: Record<string, MtlsEndpointAliases>;
 }
 
 /**
@@ -1502,6 +1552,55 @@ export interface PushedAuthorizationParams extends Omit<
 > {}
 
 /**
+ * Constructor options for {@link MonoCloudOidcClientBase}.
+ *
+ * @category Types
+ */
+export interface MonoCloudOidcClientBaseOptions {
+  /**
+   * The tenant domain URL.
+   */
+  tenantDomain: string;
+
+  /**
+   * Duration (in seconds) to cache OpenID Connect discovery metadata.
+   * @defaultValue 300
+   */
+  metadataCacheDuration?: number;
+
+  /**
+   * Duration (in seconds) to cache the JSON Web Key Set (JWKS).
+   * @defaultValue 300
+   */
+  jwksCacheDuration?: number;
+
+  /**
+   * Custom `fetch` implementation used for making HTTP requests. Falls back to the global `fetch` if not provided.
+   */
+  fetcher?: typeof fetch;
+
+  /**
+   * Client authentication method. Determines whether mTLS-aliased endpoints are used.
+   */
+  clientAuthMethod?: ClientAuthMethod;
+
+  /**
+   * Identifier of the trust store whose mTLS endpoint aliases should be used.
+   */
+  trustStoreId?: string;
+
+  /**
+   * Optional custom resolver for the issuer metadata, replacing the default discovery request.
+   */
+  metadataResolver?: () => IssuerMetadata | Promise<IssuerMetadata>;
+
+  /**
+   * Optional custom resolver for the JSON Web Key Set (JWKS), replacing the default JWKS request.
+   */
+  jwksResolver?: () => Jwks | Promise<Jwks>;
+}
+
+/**
  * Shared configuration options for MonoCloud OIDC clients.
  *
  * These options are common to both {@link MonoCloudOidcClientOptions}
@@ -1543,6 +1642,22 @@ export interface MonoCloudClientOptionsBase {
    * Optional custom `fetch` implementation used for network requests.
    */
   fetcher?: typeof fetch;
+
+  /**
+   * Identifier of the trust store whose mTLS endpoint aliases should be used when
+   * authenticating with a mutual-TLS client authentication method.
+   */
+  trustStoreId?: string;
+
+  /**
+   * Optional custom resolver for the issuer metadata (OpenID Connect discovery document).
+   */
+  metadataResolver?: () => IssuerMetadata | Promise<IssuerMetadata>;
+
+  /**
+   * Optional custom resolver for the JSON Web Key Set (JWKS).
+   */
+  jwksResolver?: () => Jwks | Promise<Jwks>;
 }
 
 /**

@@ -91,6 +91,13 @@ export class MonoCloudCoreClient {
       {
         clientSecret: this.options.clientSecret,
         idTokenSigningAlgorithm: this.options.idTokenSigningAlg,
+        clientAuthMethod: this.options.clientAuthMethod,
+        trustStoreId: this.options.trustStoreId,
+        metadataResolver: this.options.metadataResolver,
+        jwksResolver: this.options.jwksResolver,
+        fetcher: this.options.fetcher,
+        jwksCacheDuration: this.options.jwksCacheDuration,
+        metadataCacheDuration: this.options.metadataCacheDuration,
       }
     );
     this.debug = dbug(this.options.debugger);

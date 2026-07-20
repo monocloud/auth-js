@@ -1,7 +1,7 @@
 /* eslint-disable import/no-extraneous-dependencies */
 import { describe, expect, it, vi } from 'vitest';
 import { MonoCloudOidcClient } from '../src/monocloud-oidc-client';
-import { fetchBuilder } from '@monocloud/auth-test-utils';
+import { fetchBuilder, mtlsFetchSpy } from '@monocloud/auth-test-utils';
 import { assertError } from './utils';
 import { MonoCloudHttpError, MonoCloudOPError } from '../src';
 
@@ -96,5 +96,24 @@ describe('MonoCloudOidcClient.refreshGrant()', () => {
     );
 
     fetchSpy.assert();
+  });
+
+  it('should perform the refresh at the mTLS token endpoint alias for mTLS auth methods', async () => {
+    const fetchSpy = mtlsFetchSpy({
+      response: { access_token: 'at', token_type: 'Bearer', expires_in: 999 },
+    });
+
+    const client = new MonoCloudOidcClient('example.com', 'clientId', {
+      clientAuthMethod: 'tls_client_auth',
+    });
+
+    await client.refreshGrant('rt');
+
+    expect(fetchSpy).toHaveBeenCalledWith(
+      'https://mtls.example.com/connect/token',
+      expect.objectContaining({ method: 'POST' })
+    );
+
+    fetchSpy.mockClear();
   });
 });

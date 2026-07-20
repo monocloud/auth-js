@@ -1,12 +1,12 @@
 /* eslint-disable import/no-extraneous-dependencies */
-import { describe, it, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import {
   MonoCloudHttpError,
   MonoCloudOidcClient,
   MonoCloudOPError,
   MonoCloudValidationError,
 } from '../src';
-import { fetchBuilder } from '@monocloud/auth-test-utils';
+import { fetchBuilder, mtlsFetchSpy } from '@monocloud/auth-test-utils';
 import { assertError } from './utils';
 
 describe('MonoCloudOidcClient.revokeToken()', () => {
@@ -100,6 +100,23 @@ describe('MonoCloudOidcClient.revokeToken()', () => {
     const promise = client.revokeToken('at');
 
     await assertError(promise, MonoCloudHttpError, 'fetch failed');
+
+    fetchSpy.mockClear();
+  });
+
+  it('should revoke at the mTLS revocation endpoint alias for mTLS auth methods', async () => {
+    const fetchSpy = mtlsFetchSpy();
+
+    const client = new MonoCloudOidcClient('example.com', 'clientId', {
+      clientAuthMethod: 'tls_client_auth',
+    });
+
+    await client.revokeToken('at', 'access_token');
+
+    expect(fetchSpy).toHaveBeenCalledWith(
+      'https://mtls.example.com/connect/revocation',
+      expect.objectContaining({ method: 'POST' })
+    );
 
     fetchSpy.mockClear();
   });

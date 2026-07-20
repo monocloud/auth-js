@@ -18,6 +18,8 @@ export type {
   Group,
   IdTokenClaims,
   IssuerMetadata,
+  MtlsEndpointAliases,
+  MonoCloudOidcClientBaseOptions,
   SecurityAlgorithms,
   Jwk,
   Jwks,
