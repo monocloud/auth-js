@@ -1,6 +1,6 @@
 {
   "name": "@monocloud/auth-react",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "MonoCloud React Authentication SDK",
   "keywords": [
     "monocloud",
