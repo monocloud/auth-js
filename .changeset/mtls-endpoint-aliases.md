@@ -1,7 +1,7 @@
 ---
-"@monocloud/auth-core": minor
-"@monocloud/backend-node": minor
-"@monocloud/auth-node-core": minor
+"@monocloud/auth-core": patch
+"@monocloud/backend-node": patch
+"@monocloud/auth-node-core": patch
 ---
 
 Add support for mTLS endpoint aliases and per-trust-store ("additional") mTLS endpoint aliases from the OpenID Connect discovery document (RFC 8705).
