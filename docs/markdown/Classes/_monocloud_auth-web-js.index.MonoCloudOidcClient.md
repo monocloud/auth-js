@@ -35,19 +35,6 @@ Creates a new instance of MonoCloudOidcClient.
 
 [`MonoCloudOidcClientBase`](/sdks/nodejs/api-reference/classes/monocloudoidcclientbase).[`constructor`](/sdks/nodejs/api-reference/classes/monocloudoidcclientbase#constructor)
 
-## Properties
-
-| Property                                                   | Type                                                                                 | Description                                                                                                  |
-| ---------------------------------------------------------- | ------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------ |
-| `fetcher?`                            | (`input`: `URL` \| `RequestInfo`, `init?`: `RequestInit`) => `Promise`\<`Response`\> | Custom fetch implementation used for making HTTP requests. Falls back to the global `fetch` if not provided. |
-| `jwks?`                                  | [`Jwks`](/sdks/web-js/api-reference/types/jwks)                              | Cached JSON Web Key Set retrieved from the issuer's JWKS endpoint.                                           |
-| `jwksCacheDuration`         | `number`                                                                             | Duration (in seconds) for which the JWKS is cached. Defaults to 300 (5 minutes).                             |
-| `jwksCacheExpiry`             | `number`                                                                             | Timestamp (in seconds) when the cached JWKS expires.                                                         |
-| `metadata?`                          | [`IssuerMetadata`](/sdks/web-js/api-reference/types/issuermetadata)          | Cached issuer metadata retrieved from the OpenID Connect discovery endpoint.                                 |
-| `metadataCacheDuration` | `number`                                                                             | Duration (in seconds) for which the metadata is cached. Defaults to 300 (5 minutes).                         |
-| `metadataCacheExpiry`     | `number`                                                                             | Timestamp (in seconds) when the cached metadata expires.                                                     |
-| `tenantDomain`                   | `string`                                                                             | The normalized tenant domain URL used as the base for discovery endpoints.                                   |
-
 ## Methods
 
 ### authenticate()

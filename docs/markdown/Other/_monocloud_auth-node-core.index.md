@@ -56,6 +56,7 @@ category: Other
 - [MonoCloudStatePartialOptions](/sdks/nodejs-core/api-reference/types/monocloudstatepartialoptions)
 - [MonoCloudTokens](/sdks/nodejs-core/api-reference/types/monocloudtokens)
 - [MonoCloudUser](/sdks/nodejs-core/api-reference/types/monoclouduser)
+- [MtlsEndpointAliases](/sdks/nodejs-core/api-reference/types/mtlsendpointaliases)
 - [ParResponse](/sdks/nodejs-core/api-reference/types/parresponse)
 - [PushedAuthorizationParams](/sdks/nodejs-core/api-reference/types/pushedauthorizationparams)
 - [RefetchUserInfoOptions](/sdks/nodejs-core/api-reference/types/refetchuserinfooptions)

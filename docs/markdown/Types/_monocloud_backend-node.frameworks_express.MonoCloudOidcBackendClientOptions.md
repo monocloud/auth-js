@@ -17,7 +17,7 @@ Configuration options used to initialize the MonoCloudOidcBackendClient.
 ## clientAuthMethod
 > `optional` **clientAuthMethod**: [`ClientAuthMethod`](/sdks/express-backend/api-reference/enums/clientauthmethod)
 
-Client authentication method used when communicating with the token endpoint.
+Client authentication method used when the client authenticates to the authorization server.
 
 ### Default Value
 
@@ -150,6 +150,21 @@ Duration (in seconds) to cache the JSON Web Key Set (JWKS) retrieved from the au
 
 ---
 
+## jwksResolver
+> `optional` **jwksResolver**: () => [`Jwks`](/sdks/express-backend/api-reference/types/jwks) \| `Promise`\<[`Jwks`](/sdks/express-backend/api-reference/types/jwks)\>
+
+Optional custom resolver for the JSON Web Key Set (JWKS).
+
+### Returns
+
+[`Jwks`](/sdks/express-backend/api-reference/types/jwks) \| `Promise`\<[`Jwks`](/sdks/express-backend/api-reference/types/jwks)\>
+
+### Inherited from
+
+[`MonoCloudClientOptionsBase`](/sdks/nodejs/api-reference/types/monocloudclientoptionsbase).[`jwksResolver`](/sdks/nodejs/api-reference/types/monocloudclientoptionsbase#jwksresolver)
+
+---
+
 ## metadataCacheDuration
 > `optional` **metadataCacheDuration**: `number`
 
@@ -164,3 +179,30 @@ Duration (in seconds) to cache OpenID Connect discovery metadata.
 ### Inherited from
 
 [`MonoCloudClientOptionsBase`](/sdks/nodejs/api-reference/types/monocloudclientoptionsbase).[`metadataCacheDuration`](/sdks/nodejs/api-reference/types/monocloudclientoptionsbase#metadatacacheduration)
+
+---
+
+## metadataResolver
+> `optional` **metadataResolver**: () => [`IssuerMetadata`](/sdks/express-backend/api-reference/types/issuermetadata) \| `Promise`\<[`IssuerMetadata`](/sdks/express-backend/api-reference/types/issuermetadata)\>
+
+Optional custom resolver for the issuer metadata (OpenID Connect discovery document).
+
+### Returns
+
+[`IssuerMetadata`](/sdks/express-backend/api-reference/types/issuermetadata) \| `Promise`\<[`IssuerMetadata`](/sdks/express-backend/api-reference/types/issuermetadata)\>
+
+### Inherited from
+
+[`MonoCloudClientOptionsBase`](/sdks/nodejs/api-reference/types/monocloudclientoptionsbase).[`metadataResolver`](/sdks/nodejs/api-reference/types/monocloudclientoptionsbase#metadataresolver)
+
+---
+
+## trustStoreId
+> `optional` **trustStoreId**: `string`
+
+Identifier of the trust store whose mTLS endpoint aliases should be used when
+authenticating with a mutual-TLS client authentication method.
+
+### Inherited from
+
+[`MonoCloudClientOptionsBase`](/sdks/nodejs/api-reference/types/monocloudclientoptionsbase).[`trustStoreId`](/sdks/nodejs/api-reference/types/monocloudclientoptionsbase#truststoreid)

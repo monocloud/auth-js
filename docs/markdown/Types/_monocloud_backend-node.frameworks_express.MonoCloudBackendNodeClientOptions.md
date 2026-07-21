@@ -33,8 +33,14 @@ When both are provided, **constructor options override environment variables**.
 | Environment Variable                   | Description                                                                                                                                                                                                     |
 | -------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `MONOCLOUD_BACKEND_CLIENT_ID`          | Unique identifier for your application/client.                                                                                                                                                                  |
-| `MONOCLOUD_BACKEND_CLIENT_SECRET`      | Application/client secret used for authentication.                                                                                                                                                              |
+| `MONOCLOUD_BACKEND_CLIENT_SECRET`      | Application/client secret used for authentication. When `clientAuthMethod` is `private_key_jwt`, provide the private key JWK as a JSON string (it is parsed automatically).                                     |
 | `MONOCLOUD_BACKEND_CLIENT_AUTH_METHOD` | Client authentication method (for example, `client_secret_basic`, `client_secret_post`, `client_secret_jwt`, `private_key_jwt`, `tls_client_auth`, `self_signed_tls_client_auth`, `spiffe_jwt`, `spiffe_x509`). |
+
+### mTLS
+
+| Environment Variable               | Description                                                                                                                                                                                                                                   |
+| ---------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `MONOCLOUD_BACKEND_TRUST_STORE_ID` | Identifier of the trust store whose mTLS endpoint aliases (`mtls_additional_endpoint_aliases`) should be used when authenticating with a mutual-TLS client authentication method. When omitted, the default `mtls_endpoint_aliases` are used. |
 
 ### Token Validation
 
@@ -82,7 +88,7 @@ locally-validated JWTs are not cached.
 ## clientAuthMethod
 > `optional` **clientAuthMethod**: [`ClientAuthMethod`](/sdks/express-backend/api-reference/enums/clientauthmethod)
 
-Client authentication method used when communicating with the token endpoint.
+Client authentication method used when the client authenticates to the authorization server.
 
 ### Default Value
 
@@ -246,6 +252,21 @@ Duration (in seconds) to cache the JSON Web Key Set (JWKS) retrieved from the au
 
 ---
 
+## jwksResolver
+> `optional` **jwksResolver**: () => [`Jwks`](/sdks/express-backend/api-reference/types/jwks) \| `Promise`\<[`Jwks`](/sdks/express-backend/api-reference/types/jwks)\>
+
+Optional custom resolver for the JSON Web Key Set (JWKS).
+
+### Returns
+
+[`Jwks`](/sdks/express-backend/api-reference/types/jwks) \| `Promise`\<[`Jwks`](/sdks/express-backend/api-reference/types/jwks)\>
+
+### Inherited from
+
+[`MonoCloudOidcBackendClientOptions`](/sdks/express-backend/api-reference/types/monocloudoidcbackendclientoptions).[`jwksResolver`](/sdks/express-backend/api-reference/types/monocloudoidcbackendclientoptions#jwksresolver)
+
+---
+
 ## metadataCacheDuration
 > `optional` **metadataCacheDuration**: `number`
 
@@ -263,8 +284,35 @@ Duration (in seconds) to cache OpenID Connect discovery metadata.
 
 ---
 
+## metadataResolver
+> `optional` **metadataResolver**: () => [`IssuerMetadata`](/sdks/express-backend/api-reference/types/issuermetadata) \| `Promise`\<[`IssuerMetadata`](/sdks/express-backend/api-reference/types/issuermetadata)\>
+
+Optional custom resolver for the issuer metadata (OpenID Connect discovery document).
+
+### Returns
+
+[`IssuerMetadata`](/sdks/express-backend/api-reference/types/issuermetadata) \| `Promise`\<[`IssuerMetadata`](/sdks/express-backend/api-reference/types/issuermetadata)\>
+
+### Inherited from
+
+[`MonoCloudOidcBackendClientOptions`](/sdks/express-backend/api-reference/types/monocloudoidcbackendclientoptions).[`metadataResolver`](/sdks/express-backend/api-reference/types/monocloudoidcbackendclientoptions#metadataresolver)
+
+---
+
 ## tenantDomain
 
 > **tenantDomain**: `string`
 
 The MonoCloud tenant domain URL (e.g. `https://example.monocloud.dev`).
+
+---
+
+## trustStoreId
+> `optional` **trustStoreId**: `string`
+
+Identifier of the trust store whose mTLS endpoint aliases should be used when
+authenticating with a mutual-TLS client authentication method.
+
+### Inherited from
+
+[`MonoCloudOidcBackendClientOptions`](/sdks/express-backend/api-reference/types/monocloudoidcbackendclientoptions).[`trustStoreId`](/sdks/express-backend/api-reference/types/monocloudoidcbackendclientoptions#truststoreid)

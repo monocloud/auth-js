@@ -17,30 +17,6 @@ automatic detection of JWT vs. opaque token formats.
 
 - [`MonoCloudOidcBackendClient`](/sdks/fastify-backend/api-reference/classes/monocloudoidcbackendclient)
 
-## clockSkew
-
-> `protected` **clockSkew**: `number` = `0`
-
-Number of seconds to adjust the current time to account for clock differences between the client and server during time-based claim validation. Defaults to 0.
-
-### Inherited from
-
-[`MonoCloudOidcBackendClient`](/sdks/fastify-backend/api-reference/classes/monocloudoidcbackendclient).[`clockSkew`](/sdks/fastify-backend/api-reference/classes/monocloudoidcbackendclient#clockskew)
-
----
-
-## clockTolerance
-
-> `protected` **clockTolerance**: `number` = `60`
-
-Additional time tolerance in seconds applied when validating time-based claims (`exp`, `nbf`). Defaults to 60 (1 minute).
-
-### Inherited from
-
-[`MonoCloudOidcBackendClient`](/sdks/fastify-backend/api-reference/classes/monocloudoidcbackendclient).[`clockTolerance`](/sdks/fastify-backend/api-reference/classes/monocloudoidcbackendclient#clocktolerance)
-
----
-
 ## Constructor
 
 > **new MonoCloudBackendNodeClient**(`options?`: `Partial`\<[`MonoCloudBackendNodeClientOptions`](/sdks/fastify-backend/api-reference/types/monocloudbackendnodeclientoptions)\>): [`MonoCloudBackendNodeClient`](/sdks/fastify-backend/api-reference/classes/monocloudbackendnodeclient)
@@ -90,51 +66,6 @@ Decoded payload.
 ### Inherited from
 
 [`MonoCloudOidcBackendClient`](/sdks/fastify-backend/api-reference/classes/monocloudoidcbackendclient).[`decodeJwt`](/sdks/fastify-backend/api-reference/classes/monocloudoidcbackendclient#decodejwt)
-
----
-
-## fetcher
-> `protected` `optional` **fetcher**: \{(`input`: `URL` \| `RequestInfo`, `init?`: `RequestInit`): `Promise`\<`Response`\>; (`input`: `string` \| `URL` \| `Request`, `init?`: `RequestInit`): `Promise`\<`Response`\>; \}
-
-Custom fetch implementation used for making HTTP requests. Falls back to the global `fetch` if not provided.
-
-### Call Signature
-
-> (`input`: `URL` \| `RequestInfo`, `init?`: `RequestInit`): `Promise`\<`Response`\>
-
-[MDN Reference](https://developer.mozilla.org/docs/Web/API/Window/fetch)
-
-#### Parameters
-
-| Parameter | Type                   |
-| --------- | ---------------------- |
-| `input`   | `URL` \| `RequestInfo` |
-| `init?`   | `RequestInit`          |
-
-#### Returns
-
-`Promise`\<`Response`\>
-
-### Call Signature
-
-> (`input`: `string` \| `URL` \| `Request`, `init?`: `RequestInit`): `Promise`\<`Response`\>
-
-[MDN Reference](https://developer.mozilla.org/docs/Web/API/Window/fetch)
-
-#### Parameters
-
-| Parameter | Type                           |
-| --------- | ------------------------------ |
-| `input`   | `string` \| `URL` \| `Request` |
-| `init?`   | `RequestInit`                  |
-
-#### Returns
-
-`Promise`\<`Response`\>
-
-### Inherited from
-
-[`MonoCloudOidcBackendClient`](/sdks/fastify-backend/api-reference/classes/monocloudoidcbackendclient).[`fetcher`](/sdks/fastify-backend/api-reference/classes/monocloudoidcbackendclient#fetcher)
 
 ---
 
@@ -242,76 +173,6 @@ endpoint is not available in the issuer metadata or claims validation fails.
 
 ---
 
-## jwks
-> `protected` `optional` **jwks**: [`Jwks`](/sdks/fastify-backend/api-reference/types/jwks)
-
-Cached JSON Web Key Set retrieved from the issuer's JWKS endpoint.
-
-### Inherited from
-
-[`MonoCloudOidcBackendClient`](/sdks/fastify-backend/api-reference/classes/monocloudoidcbackendclient).[`jwks`](/sdks/fastify-backend/api-reference/classes/monocloudoidcbackendclient#jwks)
-
----
-
-## jwksCacheDuration
-
-> `protected` **jwksCacheDuration**: `number` = `300`
-
-Duration (in seconds) for which the JWKS is cached. Defaults to 300 (5 minutes).
-
-### Inherited from
-
-[`MonoCloudOidcBackendClient`](/sdks/fastify-backend/api-reference/classes/monocloudoidcbackendclient).[`jwksCacheDuration`](/sdks/fastify-backend/api-reference/classes/monocloudoidcbackendclient#jwkscacheduration)
-
----
-
-## jwksCacheExpiry
-
-> `protected` **jwksCacheExpiry**: `number` = `0`
-
-Timestamp (in seconds) when the cached JWKS expires.
-
-### Inherited from
-
-[`MonoCloudOidcBackendClient`](/sdks/fastify-backend/api-reference/classes/monocloudoidcbackendclient).[`jwksCacheExpiry`](/sdks/fastify-backend/api-reference/classes/monocloudoidcbackendclient#jwkscacheexpiry)
-
----
-
-## metadata
-> `protected` `optional` **metadata**: [`IssuerMetadata`](/sdks/fastify-backend/api-reference/types/issuermetadata)
-
-Cached issuer metadata retrieved from the OpenID Connect discovery endpoint.
-
-### Inherited from
-
-[`MonoCloudOidcBackendClient`](/sdks/fastify-backend/api-reference/classes/monocloudoidcbackendclient).[`metadata`](/sdks/fastify-backend/api-reference/classes/monocloudoidcbackendclient#metadata)
-
----
-
-## metadataCacheDuration
-
-> `protected` **metadataCacheDuration**: `number` = `300`
-
-Duration (in seconds) for which the metadata is cached. Defaults to 300 (5 minutes).
-
-### Inherited from
-
-[`MonoCloudOidcBackendClient`](/sdks/fastify-backend/api-reference/classes/monocloudoidcbackendclient).[`metadataCacheDuration`](/sdks/fastify-backend/api-reference/classes/monocloudoidcbackendclient#metadatacacheduration)
-
----
-
-## metadataCacheExpiry
-
-> `protected` **metadataCacheExpiry**: `number` = `0`
-
-Timestamp (in seconds) when the cached metadata expires.
-
-### Inherited from
-
-[`MonoCloudOidcBackendClient`](/sdks/fastify-backend/api-reference/classes/monocloudoidcbackendclient).[`metadataCacheExpiry`](/sdks/fastify-backend/api-reference/classes/monocloudoidcbackendclient#metadatacacheexpiry)
-
----
-
 ## setClockSkew()
 
 > **setClockSkew**(`clockSkew`: `number`): `void`
@@ -353,18 +214,6 @@ Sets clock tolerance used for access token time-based claim validation.
 ### Inherited from
 
 [`MonoCloudOidcBackendClient`](/sdks/fastify-backend/api-reference/classes/monocloudoidcbackendclient).[`setClockTolerance`](/sdks/fastify-backend/api-reference/classes/monocloudoidcbackendclient#setclocktolerance)
-
----
-
-## tenantDomain
-
-> `protected` `readonly` **tenantDomain**: `string`
-
-The normalized tenant domain URL used as the base for discovery endpoints.
-
-### Inherited from
-
-[`MonoCloudOidcBackendClient`](/sdks/fastify-backend/api-reference/classes/monocloudoidcbackendclient).[`tenantDomain`](/sdks/fastify-backend/api-reference/classes/monocloudoidcbackendclient#tenantdomain)
 
 ---
 
