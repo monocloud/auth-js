@@ -3,6 +3,7 @@
 import {
   getBoolean,
   getNumber,
+  parseClientSecret,
   removeTrailingSlash,
 } from '@monocloud/auth-core/internal';
 import {
@@ -13,6 +14,7 @@ import {
 import { DEFAULT_OPTIONS } from './defaults';
 import { optionsSchema } from './validation';
 import {
+  ClientAuthMethod,
   MonoCloudValidationError,
   SecurityAlgorithms,
 } from '@monocloud/auth-core';
@@ -23,6 +25,10 @@ export const getOptions = (
 ): MonoCloudOptionsBase => {
   const MONOCLOUD_AUTH_CLIENT_ID = process.env.MONOCLOUD_AUTH_CLIENT_ID;
   const MONOCLOUD_AUTH_CLIENT_SECRET = process.env.MONOCLOUD_AUTH_CLIENT_SECRET;
+  const MONOCLOUD_AUTH_CLIENT_AUTH_METHOD =
+    process.env.MONOCLOUD_AUTH_CLIENT_AUTH_METHOD;
+  const MONOCLOUD_AUTH_TRUST_STORE_ID =
+    process.env.MONOCLOUD_AUTH_TRUST_STORE_ID;
   const MONOCLOUD_AUTH_TENANT_DOMAIN = process.env.MONOCLOUD_AUTH_TENANT_DOMAIN;
   const MONOCLOUD_AUTH_SCOPES = process.env.MONOCLOUD_AUTH_SCOPES;
   const MONOCLOUD_AUTH_COOKIE_SECRET = process.env.MONOCLOUD_AUTH_COOKIE_SECRET;
@@ -98,7 +104,17 @@ export const getOptions = (
 
   const opt: MonoCloudOptionsBase = {
     clientId: options?.clientId ?? MONOCLOUD_AUTH_CLIENT_ID!,
-    clientSecret: options?.clientSecret ?? MONOCLOUD_AUTH_CLIENT_SECRET,
+    clientSecret: parseClientSecret(
+      options?.clientSecret ?? MONOCLOUD_AUTH_CLIENT_SECRET
+    ),
+    clientAuthMethod:
+      options?.clientAuthMethod ??
+      (MONOCLOUD_AUTH_CLIENT_AUTH_METHOD as ClientAuthMethod) ??
+      DEFAULT_OPTIONS.clientAuthMethod,
+    trustStoreId: options?.trustStoreId ?? MONOCLOUD_AUTH_TRUST_STORE_ID,
+    fetcher: options?.fetcher,
+    metadataResolver: options?.metadataResolver,
+    jwksResolver: options?.jwksResolver,
     tenantDomain: options?.tenantDomain ?? MONOCLOUD_AUTH_TENANT_DOMAIN!,
     defaultAuthParams: {
       ...(options?.defaultAuthParams ?? {}),

@@ -5,7 +5,7 @@ import {
   MonoCloudOidcClient,
   MonoCloudOPError,
 } from '../src';
-import { fetchBuilder } from '@monocloud/auth-test-utils';
+import { fetchBuilder, mtlsFetchSpy } from '@monocloud/auth-test-utils';
 import { assertError } from './utils';
 
 describe('MonoCloudOidcClient.deviceAuthorizationRequest()', () => {
@@ -149,5 +149,30 @@ describe('MonoCloudOidcClient.deviceAuthorizationRequest()', () => {
     );
 
     fetchSpy.assert();
+  });
+
+  it('should request at the mTLS device authorization endpoint alias for mTLS auth methods', async () => {
+    const fetchSpy = mtlsFetchSpy({
+      response: {
+        device_code: 'device_code',
+        user_code: 'user_code',
+        verification_uri: 'https://example.com/device',
+        expires_in: 1800,
+        interval: 5,
+      },
+    });
+
+    const client = new MonoCloudOidcClient('example.com', 'clientId', {
+      clientAuthMethod: 'tls_client_auth',
+    });
+
+    await client.deviceAuthorizationRequest({ scopes: 'openid' });
+
+    expect(fetchSpy).toHaveBeenCalledWith(
+      'https://mtls.example.com/connect/deviceauthorization',
+      expect.objectContaining({ method: 'POST' })
+    );
+
+    fetchSpy.mockClear();
   });
 });

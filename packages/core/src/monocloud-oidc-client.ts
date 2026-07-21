@@ -80,12 +80,16 @@ export class MonoCloudOidcClient extends MonoCloudOidcClientBase {
     clientId: string,
     options?: MonoCloudOidcClientOptions
   ) {
-    super(
+    super({
       tenantDomain,
-      options?.metadataCacheDuration,
-      options?.jwksCacheDuration,
-      options?.fetcher
-    );
+      metadataCacheDuration: options?.metadataCacheDuration,
+      jwksCacheDuration: options?.jwksCacheDuration,
+      fetcher: options?.fetcher,
+      clientAuthMethod: options?.clientAuthMethod ?? 'client_secret_basic',
+      trustStoreId: options?.trustStoreId,
+      metadataResolver: options?.metadataResolver,
+      jwksResolver: options?.jwksResolver,
+    });
     this.clientId = clientId;
     this.clientSecret = options?.clientSecret;
     this.authMethod = options?.clientAuthMethod ?? 'client_secret_basic';
@@ -328,10 +332,13 @@ export class MonoCloudOidcClient extends MonoCloudOidcClientBase {
 
     const metadata = await this.getMetadata();
 
-    assertMetadataProperty(metadata, 'pushed_authorization_request_endpoint');
+    const pushedAuthorizationRequestEndpoint = this.resolveEndpoint(
+      metadata,
+      'pushed_authorization_request_endpoint'
+    );
 
     const response = await innerFetch(
-      metadata.pushed_authorization_request_endpoint,
+      pushedAuthorizationRequestEndpoint,
       {
         body: body.toString(),
         method: 'POST',
@@ -521,10 +528,10 @@ export class MonoCloudOidcClient extends MonoCloudOidcClientBase {
 
     const metadata = await this.getMetadata();
 
-    assertMetadataProperty(metadata, 'token_endpoint');
+    const tokenEndpoint = this.resolveEndpoint(metadata, 'token_endpoint');
 
     const response = await innerFetch(
-      metadata.token_endpoint,
+      tokenEndpoint,
       {
         method: 'POST',
         body: body.toString(),
@@ -606,10 +613,10 @@ export class MonoCloudOidcClient extends MonoCloudOidcClientBase {
 
     const metadata = await this.getMetadata();
 
-    assertMetadataProperty(metadata, 'token_endpoint');
+    const tokenEndpoint = this.resolveEndpoint(metadata, 'token_endpoint');
 
     const response = await innerFetch(
-      metadata.token_endpoint,
+      tokenEndpoint,
       {
         method: 'POST',
         body: body.toString(),
@@ -963,10 +970,13 @@ export class MonoCloudOidcClient extends MonoCloudOidcClientBase {
 
     const metadata = await this.getMetadata();
 
-    assertMetadataProperty(metadata, 'revocation_endpoint');
+    const revocationEndpoint = this.resolveEndpoint(
+      metadata,
+      'revocation_endpoint'
+    );
 
     const response = await innerFetch(
-      metadata.revocation_endpoint,
+      revocationEndpoint,
       {
         method: 'POST',
         body: body.toString(),
@@ -1213,10 +1223,13 @@ export class MonoCloudOidcClient extends MonoCloudOidcClientBase {
 
     const metadata = await this.getMetadata();
 
-    assertMetadataProperty(metadata, 'device_authorization_endpoint');
+    const deviceAuthorizationEndpoint = this.resolveEndpoint(
+      metadata,
+      'device_authorization_endpoint'
+    );
 
     const response = await innerFetch(
-      metadata.device_authorization_endpoint,
+      deviceAuthorizationEndpoint,
       {
         body: body.toString(),
         method: 'POST',
@@ -1281,10 +1294,10 @@ export class MonoCloudOidcClient extends MonoCloudOidcClientBase {
 
     const metadata = await this.getMetadata();
 
-    assertMetadataProperty(metadata, 'token_endpoint');
+    const tokenEndpoint = this.resolveEndpoint(metadata, 'token_endpoint');
 
     const response = await innerFetch(
-      metadata.token_endpoint,
+      tokenEndpoint,
       {
         method: 'POST',
         body: body.toString(),

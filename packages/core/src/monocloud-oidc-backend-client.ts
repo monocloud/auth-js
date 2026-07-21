@@ -24,7 +24,6 @@ import { MonoCloudValidationError } from './errors/monocloud-validation-error';
 import { MonoCloudTokenError } from './errors/monocloud-token-error';
 import { MonoCloudOidcClientBase } from './monocloud-oidc-client-base';
 import {
-  assertMetadataProperty,
   deserializeJson,
   innerFetch,
   JWT_ASSERTION_CLOCK_SKEW,
@@ -66,12 +65,16 @@ export class MonoCloudOidcBackendClient extends MonoCloudOidcClientBase {
     audience: string,
     options?: MonoCloudOidcBackendClientOptions
   ) {
-    super(
+    super({
       tenantDomain,
-      options?.metadataCacheDuration,
-      options?.jwksCacheDuration,
-      options?.fetcher
-    );
+      metadataCacheDuration: options?.metadataCacheDuration,
+      jwksCacheDuration: options?.jwksCacheDuration,
+      fetcher: options?.fetcher,
+      clientAuthMethod: options?.clientAuthMethod ?? 'client_secret_basic',
+      trustStoreId: options?.trustStoreId,
+      metadataResolver: options?.metadataResolver,
+      jwksResolver: options?.jwksResolver,
+    });
     this.audience = audience;
 
     if (options?.clientId) {
@@ -128,7 +131,10 @@ export class MonoCloudOidcBackendClient extends MonoCloudOidcClientBase {
 
     const metadata = await this.getMetadata();
 
-    assertMetadataProperty(metadata, 'introspection_endpoint');
+    const introspectionEndpoint = this.resolveEndpoint(
+      metadata,
+      'introspection_endpoint'
+    );
 
     const body = new URLSearchParams();
     body.set('token', accessToken);
@@ -150,7 +156,7 @@ export class MonoCloudOidcBackendClient extends MonoCloudOidcClientBase {
     );
 
     const response = await innerFetch(
-      metadata.introspection_endpoint,
+      introspectionEndpoint,
       {
         method: 'POST',
         body: body.toString(),

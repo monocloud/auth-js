@@ -40,6 +40,7 @@ import {
   isPresent,
   isSameHost,
   now,
+  parseClientSecret,
   parseSpaceSeparated,
   parseSpaceSeparatedSet,
   randomBytes,
@@ -107,6 +108,48 @@ describe('getNumber', () => {
   it('should ignore leading and trailing whitespace', () => {
     const result = getNumber('  456  ');
     expect(result).toBe(456);
+  });
+});
+
+describe('parseClientSecret', () => {
+  it('should parse a JSON object string into an object', () => {
+    const jwk = { kty: 'RSA', kid: 'id', alg: 'RS256', n: 'n', e: 'AQAB' };
+    const result = parseClientSecret(JSON.stringify(jwk));
+    expect(result).toEqual(jwk);
+  });
+
+  it('should parse a JSON object string with surrounding whitespace', () => {
+    const result = parseClientSecret('  { "kty": "oct", "k": "secret" }  ');
+    expect(result).toEqual({ kty: 'oct', k: 'secret' });
+  });
+
+  it('should return a plain string secret unchanged', () => {
+    expect(parseClientSecret('super-secret')).toBe('super-secret');
+  });
+
+  it('should return the original string when it looks like JSON but is malformed', () => {
+    expect(parseClientSecret('{ not valid json')).toBe('{ not valid json');
+  });
+
+  it('should return the original string when the JSON is not an object', () => {
+    expect(parseClientSecret('12345')).toBe('12345');
+  });
+
+  it('should return the original string when the JSON parses to null', () => {
+    expect(parseClientSecret('null')).toBe('null');
+  });
+
+  it('should return the original string when the JSON object is not a JWK (no kty)', () => {
+    expect(parseClientSecret('{"foo":"bar"}')).toBe('{"foo":"bar"}');
+  });
+
+  it('should return an object value unchanged', () => {
+    const jwk: Jwk = { kty: 'RSA', kid: 'id', alg: 'RS256' };
+    expect(parseClientSecret(jwk)).toBe(jwk);
+  });
+
+  it('should return undefined when value is undefined', () => {
+    expect(parseClientSecret(undefined)).toBeUndefined();
   });
 });
 

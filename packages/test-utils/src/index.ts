@@ -1,5 +1,6 @@
 export {
   fetchBuilder,
+  mtlsFetchSpy,
   defaultMetadata,
   generateIdToken,
   generateTokenHash,

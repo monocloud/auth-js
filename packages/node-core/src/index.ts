@@ -59,6 +59,7 @@ export type {
   Group,
   IdTokenClaims,
   IssuerMetadata,
+  MtlsEndpointAliases,
   Jwk,
   Jwks,
   MonoCloudSession,

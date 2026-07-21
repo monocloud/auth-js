@@ -45,6 +45,7 @@ describe('Configuration Options', () => {
     addEnv('MONOCLOUD_BACKEND_INTROSPECT_JWT_TOKENS', 'true');
     addEnv('MONOCLOUD_BACKEND_GROUPS_CLAIM', 'roles');
     addEnv('MONOCLOUD_BACKEND_GROUPS_MATCH_ALL', 'true');
+    addEnv('MONOCLOUD_BACKEND_TRUST_STORE_ID', 'trust-store-1');
 
     const options = getOptions();
 
@@ -53,6 +54,7 @@ describe('Configuration Options', () => {
     expect(options.clientId).toBe('client_id');
     expect(options.clientSecret).toBe('client_secret');
     expect(options.clientAuthMethod).toBe('client_secret_basic');
+    expect(options.trustStoreId).toBe('trust-store-1');
     expect(options.clockSkew).toBe(5);
     expect(options.clockTolerance).toBe(120);
     expect(options.jwksCacheDuration).toBe(60);
@@ -84,13 +86,20 @@ describe('Configuration Options', () => {
     addEnv('MONOCLOUD_BACKEND_INTROSPECT_JWT_TOKENS', 'true');
     addEnv('MONOCLOUD_BACKEND_GROUPS_CLAIM', 'roles');
     addEnv('MONOCLOUD_BACKEND_GROUPS_MATCH_ALL', 'true');
+    addEnv('MONOCLOUD_BACKEND_TRUST_STORE_ID', 'env-trust-store');
+
+    const metadataResolver = vi.fn();
+    const jwksResolver = vi.fn();
 
     const options = getOptions({
       tenantDomain: 'https://opt.monocloud.com',
       audience: 'https://api.opt.example.com',
       clientId: 'opt_client_id',
       clientSecret: 'opt_client_secret',
-      clientAuthMethod: 'client_secret_post',
+      clientAuthMethod: 'tls_client_auth',
+      trustStoreId: 'opt-trust-store',
+      metadataResolver,
+      jwksResolver,
       clockSkew: 10,
       clockTolerance: 60,
       jwksCacheDuration: 30,
@@ -103,7 +112,10 @@ describe('Configuration Options', () => {
     expect(options.audience).toBe('https://api.opt.example.com');
     expect(options.clientId).toBe('opt_client_id');
     expect(options.clientSecret).toBe('opt_client_secret');
-    expect(options.clientAuthMethod).toBe('client_secret_post');
+    expect(options.clientAuthMethod).toBe('tls_client_auth');
+    expect(options.trustStoreId).toBe('opt-trust-store');
+    expect(options.metadataResolver).toBe(metadataResolver);
+    expect(options.jwksResolver).toBe(jwksResolver);
     expect(options.clockSkew).toBe(10);
     expect(options.clockTolerance).toBe(60);
     expect(options.jwksCacheDuration).toBe(30);
@@ -225,5 +237,36 @@ describe('Configuration Options', () => {
 
     expect(options.groupOptions?.groupsClaim).toBe('roles');
     expect(options.groupOptions?.matchAll).toBeUndefined();
+  });
+
+  it('should parse a JWK client secret from a JSON string for private_key_jwt', () => {
+    setRequiredEnv();
+    addEnv('MONOCLOUD_BACKEND_CLIENT_ID', 'client_id');
+    addEnv('MONOCLOUD_BACKEND_CLIENT_AUTH_METHOD', 'private_key_jwt');
+    const jwk = {
+      kty: 'RSA',
+      kid: 'id',
+      alg: 'RS256',
+      n: 'n',
+      e: 'AQAB',
+      d: 'd',
+    };
+    addEnv('MONOCLOUD_BACKEND_CLIENT_SECRET', JSON.stringify(jwk));
+
+    const options = getOptions();
+
+    expect(options.clientAuthMethod).toBe('private_key_jwt');
+    expect(options.clientSecret).toEqual(jwk);
+  });
+
+  it('should throw when clientAuthMethod is private_key_jwt but the client secret is a plain string', () => {
+    setRequiredEnv();
+    addEnv('MONOCLOUD_BACKEND_CLIENT_AUTH_METHOD', 'private_key_jwt');
+    addEnv('MONOCLOUD_BACKEND_CLIENT_SECRET', 'plain-secret');
+
+    expect(() => getOptions()).toThrow(MonoCloudValidationError);
+    expect(() => getOptions()).toThrow(
+      "clientSecret must be a valid JWK when clientAuthMethod is 'private_key_jwt'"
+    );
   });
 });

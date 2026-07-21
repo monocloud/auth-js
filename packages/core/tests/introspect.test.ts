@@ -6,7 +6,11 @@ import {
   MonoCloudHttpError,
   MonoCloudOPError,
 } from '../src';
-import { defaultMetadata, fetchBuilder } from '@monocloud/auth-test-utils';
+import {
+  defaultMetadata,
+  fetchBuilder,
+  mtlsFetchSpy,
+} from '@monocloud/auth-test-utils';
 import { assertError, assertTokenError } from './utils';
 import { now } from '../src/utils/internal';
 
@@ -1047,6 +1051,104 @@ AQIDBAUGBwg=
       });
 
       expect(result.sub).toBe('user123');
+
+      fetchSpy.assert();
+    });
+  });
+
+  describe('mTLS endpoint aliases', () => {
+    const activeResponse = {
+      active: true,
+      iss: 'https://example.com',
+      aud: 'https://api.example.com',
+      sub: 'sub',
+      exp: 9999999999,
+    };
+
+    it('should introspect against the default mTLS endpoint alias for mTLS auth methods', async () => {
+      const fetchSpy = mtlsFetchSpy({ response: activeResponse });
+
+      const client = new MonoCloudOidcBackendClient(
+        'example.com',
+        'https://api.example.com',
+        { clientId: 'clientId', clientAuthMethod: 'tls_client_auth' }
+      );
+
+      const result = await client.introspectAccessToken('some-token');
+
+      expect(result.sub).toBe('sub');
+      expect(fetchSpy).toHaveBeenCalledWith(
+        'https://mtls.example.com/connect/introspect',
+        expect.objectContaining({ method: 'POST' })
+      );
+
+      fetchSpy.mockClear();
+    });
+
+    it('should introspect against the trust store mTLS endpoint alias when a trustStoreId is configured', async () => {
+      const fetchSpy = mtlsFetchSpy({ response: activeResponse });
+
+      const client = new MonoCloudOidcBackendClient(
+        'example.com',
+        'https://api.example.com',
+        {
+          clientId: 'clientId',
+          clientAuthMethod: 'tls_client_auth',
+          trustStoreId: 'trust-store-1',
+        }
+      );
+
+      const result = await client.introspectAccessToken('some-token');
+
+      expect(result.sub).toBe('sub');
+      expect(fetchSpy).toHaveBeenCalledWith(
+        'https://mtls.example.com/trust-store-1/connect/introspect',
+        expect.objectContaining({ method: 'POST' })
+      );
+
+      fetchSpy.mockClear();
+    });
+
+    it('should throw if no mTLS endpoint alias is available for an mTLS auth method', async () => {
+      const fetchSpy = fetchBuilder()
+        .configureMetadata({
+          metadata: { ...defaultMetadata, mtls_endpoint_aliases: undefined },
+        })
+        .createSpy();
+
+      const client = new MonoCloudOidcBackendClient(
+        'example.com',
+        'https://api.example.com',
+        { clientId: 'clientId', clientAuthMethod: 'tls_client_auth' }
+      );
+
+      await assertError(
+        client.introspectAccessToken('some-token'),
+        MonoCloudValidationError,
+        'mTLS introspection_endpoint is required but not available in the issuer metadata'
+      );
+
+      fetchSpy.assert();
+    });
+
+    it('should throw if the configured trust store has no mTLS endpoint alias', async () => {
+      const fetchSpy = fetchBuilder().configureMetadata().createSpy();
+
+      const client = new MonoCloudOidcBackendClient(
+        'example.com',
+        'https://api.example.com',
+        {
+          clientId: 'clientId',
+          clientAuthMethod: 'tls_client_auth',
+          trustStoreId: 'nonexistent',
+        }
+      );
+
+      await assertError(
+        client.introspectAccessToken('some-token'),
+        MonoCloudValidationError,
+        "mTLS introspection_endpoint is required but not available for trust store 'nonexistent' in the issuer metadata"
+      );
 
       fetchSpy.assert();
     });

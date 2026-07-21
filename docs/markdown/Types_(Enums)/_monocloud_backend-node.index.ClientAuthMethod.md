@@ -2,7 +2,7 @@
 rootSdk: Node.js Backend
 title: "ClientAuthMethod"
 category: Enums
-description: "Supported OAuth 2.0 client authentication methods. These methods define how a client authenticates itself when calling the authorization server token endpoint."
+description: "Supported OAuth 2.0 client authentication methods. These methods define how a client authenticates itself to the authorization server."
 ---
 
 # Enum: ClientAuthMethod
@@ -11,7 +11,7 @@ description: "Supported OAuth 2.0 client authentication methods. These methods d
 
 Supported OAuth 2.0 client authentication methods.
 
-These methods define how a client authenticates itself when calling the authorization server token endpoint.
+These methods define how a client authenticates itself to the authorization server.
 
 ## Type Declaration
 

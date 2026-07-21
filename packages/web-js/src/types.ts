@@ -222,7 +222,7 @@ export interface MonoCloudWebJSClientOptions {
   clientSecret?: string | Jwk;
 
   /**
-   * Method used for client authentication when calling the token endpoint.
+   * Method used for client authentication when the client authenticates to the authorization server.
    */
   clientAuthMethod?: ClientAuthMethod;
 

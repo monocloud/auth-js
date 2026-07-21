@@ -1,8 +1,16 @@
 import { decodeBase64Url, now } from './utils/internal';
-import { JwtClaims, IssuerMetadata, Jwks } from './types';
+import {
+  JwtClaims,
+  IssuerMetadata,
+  Jwks,
+  MonoCloudOidcClientBaseOptions,
+  MtlsEndpointAliases,
+} from './types';
 import { MonoCloudHttpError } from './errors/monocloud-http-error';
 import { MonoCloudTokenError } from './errors/monocloud-token-error';
 import { MonoCloudAuthBaseError } from './errors/monocloud-auth-base-error';
+import { MonoCloudValidationError } from './errors/monocloud-validation-error';
+import { isMtlsClientAuthMethod } from './client-auth';
 import { assertMetadataProperty, deserializeJson, innerFetch } from './helper';
 
 /**
@@ -50,33 +58,52 @@ export class MonoCloudOidcClientBase {
   protected fetcher?: typeof fetch;
 
   /**
+   * Identifier of the trust store whose mTLS endpoint aliases should be used, if any.
+   */
+  protected readonly trustStoreId?: string;
+
+  /**
+   * Optional custom resolver for the issuer metadata, used instead of the discovery request.
+   */
+  protected readonly metadataResolver?: () =>
+    | IssuerMetadata
+    | Promise<IssuerMetadata>;
+
+  /**
+   * Optional custom resolver for the JSON Web Key Set, used instead of the JWKS request.
+   */
+  protected readonly jwksResolver?: () => Jwks | Promise<Jwks>;
+
+  /**
+   * Whether the configured client authentication method uses mutual TLS, and therefore requires
+   * the mTLS endpoint aliases from the issuer metadata.
+   */
+  protected readonly usesMtlsEndpoints: boolean;
+
+  /**
    * Creates a new instance of MonoCloudOidcClientBase.
    *
-   * @param tenantDomain - The tenant domain URL.
-   * @param metadataCacheDuration - Duration (in seconds) to cache OpenID Connect discovery metadata. Defaults to 300 (5 minutes).
-   * @param jwksCacheDuration - Duration (in seconds) to cache the JSON Web Key Set (JWKS). Defaults to 300 (5 minutes).
-   * @param fetcher - Custom `fetch` implementation used for making HTTP requests. Falls back to the global `fetch` if not provided.
+   * @param options - Base client configuration options.
    */
-  constructor(
-    tenantDomain: string,
-    metadataCacheDuration?: number,
-    jwksCacheDuration?: number,
-    fetcher?: typeof fetch
-  ) {
-    // eslint-disable-next-line no-param-reassign
+  constructor(options: MonoCloudOidcClientBaseOptions) {
+    let { tenantDomain } = options;
     tenantDomain ??= '';
     /* v8 ignore next -- @preserve */
     this.tenantDomain = `${!tenantDomain.startsWith('https://') ? 'https://' : ''}${tenantDomain.endsWith('/') ? tenantDomain.slice(0, -1) : tenantDomain}`;
 
-    if (metadataCacheDuration !== undefined) {
-      this.metadataCacheDuration = metadataCacheDuration;
+    if (options.metadataCacheDuration !== undefined) {
+      this.metadataCacheDuration = options.metadataCacheDuration;
     }
 
-    if (jwksCacheDuration !== undefined) {
-      this.jwksCacheDuration = jwksCacheDuration;
+    if (options.jwksCacheDuration !== undefined) {
+      this.jwksCacheDuration = options.jwksCacheDuration;
     }
 
-    this.fetcher = fetcher;
+    this.fetcher = options.fetcher;
+    this.trustStoreId = options.trustStoreId;
+    this.metadataResolver = options.metadataResolver;
+    this.jwksResolver = options.jwksResolver;
+    this.usesMtlsEndpoints = isMtlsClientAuthMethod(options.clientAuthMethod);
   }
 
   /**
@@ -98,19 +125,25 @@ export class MonoCloudOidcClientBase {
 
     this.metadata = undefined;
 
-    const response = await innerFetch(
-      `${this.tenantDomain}/.well-known/openid-configuration`,
-      undefined,
-      this.fetcher
-    );
+    let metadata: IssuerMetadata;
 
-    if (response.status !== 200) {
-      throw new MonoCloudHttpError(
-        `Error while fetching metadata. Unexpected status code: ${response.status}`
+    if (this.metadataResolver) {
+      metadata = await this.metadataResolver();
+    } else {
+      const response = await innerFetch(
+        `${this.tenantDomain}/.well-known/openid-configuration`,
+        undefined,
+        this.fetcher
       );
-    }
 
-    const metadata = await deserializeJson<IssuerMetadata>(response);
+      if (response.status !== 200) {
+        throw new MonoCloudHttpError(
+          `Error while fetching metadata. Unexpected status code: ${response.status}`
+        );
+      }
+
+      metadata = await deserializeJson<IssuerMetadata>(response);
+    }
 
     this.metadata = metadata;
     this.metadataCacheExpiry = now() + this.metadataCacheDuration;
@@ -137,27 +170,72 @@ export class MonoCloudOidcClientBase {
 
     this.jwks = undefined;
 
-    const metadata = await this.getMetadata();
+    let jwks: Jwks;
 
-    assertMetadataProperty(metadata, 'jwks_uri');
+    if (this.jwksResolver) {
+      jwks = await this.jwksResolver();
+    } else {
+      const metadata = await this.getMetadata();
 
-    const response = await innerFetch(
-      metadata.jwks_uri,
-      undefined,
-      this.fetcher
-    );
+      assertMetadataProperty(metadata, 'jwks_uri');
 
-    if (response.status !== 200) {
-      throw new MonoCloudHttpError(
-        `Error while fetching JWKS. Unexpected status code: ${response.status}`
+      const response = await innerFetch(
+        metadata.jwks_uri,
+        undefined,
+        this.fetcher
       );
+
+      if (response.status !== 200) {
+        throw new MonoCloudHttpError(
+          `Error while fetching JWKS. Unexpected status code: ${response.status}`
+        );
+      }
+
+      jwks = await deserializeJson<Jwks>(response);
     }
-    const jwks = await deserializeJson<Jwks>(response);
 
     this.jwks = jwks;
     this.jwksCacheExpiry = now() + this.jwksCacheDuration;
 
     return jwks;
+  }
+
+  /**
+   * Resolves an endpoint URL from the issuer metadata, preferring the mutual-TLS alias when the
+   * client authenticates over mTLS.
+   *
+   * @param metadata - The issuer metadata.
+   * @param endpoint - The endpoint to resolve.
+   *
+   * @returns The resolved endpoint URL.
+   *
+   * @throws {@link MonoCloudValidationError} - When the required endpoint is not available in the issuer metadata.
+   */
+  protected resolveEndpoint(
+    metadata: IssuerMetadata,
+    endpoint: keyof MtlsEndpointAliases
+  ): string {
+    if (this.usesMtlsEndpoints) {
+      const aliases = this.trustStoreId
+        ? metadata.mtls_additional_endpoint_aliases?.[this.trustStoreId]
+        : metadata.mtls_endpoint_aliases;
+
+      const url = aliases?.[endpoint];
+
+      if (typeof url !== 'string' || url.length === 0) {
+        throw new MonoCloudValidationError(
+          this.trustStoreId
+            ? `mTLS ${endpoint} is required but not available for trust store '${this.trustStoreId}' in the issuer metadata`
+            : `mTLS ${endpoint} is required but not available in the issuer metadata`
+        );
+      }
+
+      return url;
+    }
+
+    assertMetadataProperty(metadata, endpoint);
+
+    return metadata[endpoint];
   }
 
   /**

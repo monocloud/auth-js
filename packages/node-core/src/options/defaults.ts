@@ -42,6 +42,7 @@ export const DEFAULT_OPTIONS = {
     },
   },
   idTokenSigningAlg: 'RS256',
+  clientAuthMethod: 'client_secret_basic',
   filteredIdTokenClaims: [
     'iss',
     'exp',

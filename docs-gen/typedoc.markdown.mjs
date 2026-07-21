@@ -35,6 +35,7 @@ const config = {
     excludeExternals: true,
     excludeInternal: true,
     excludePrivate: true,
+    excludeProtected: true,
     excludeNotDocumented: false,
     sortEntryPoints: true,
     disableGit: true,

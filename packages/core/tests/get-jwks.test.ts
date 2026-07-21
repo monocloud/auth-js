@@ -142,4 +142,45 @@ describe('MonoCloudOidcClient.getJwks()', () => {
 
     fetchSpy.assert();
   });
+
+  it('should use jwksResolver instead of fetching the JWKS', async () => {
+    const fetchSpy = vi.spyOn(globalThis, 'fetch').mockImplementation(() => {
+      throw new Error('jwks should not be fetched');
+    });
+
+    const client = new MonoCloudOidcClient('example.com', 'clientId', {
+      jwksResolver: (): Jwks => jwks,
+    });
+
+    const result = await client.getJwks();
+
+    expect(result).toEqual(jwks);
+    expect(fetchSpy).not.toHaveBeenCalled();
+
+    fetchSpy.mockClear();
+  });
+
+  it('should cache the key set returned by jwksResolver', async () => {
+    let resolverCalls = 0;
+    const jwksResolver = (): Jwks => {
+      resolverCalls += 1;
+      return jwks;
+    };
+    const dateSpy = vi.spyOn(Date, 'now').mockReturnValue(10_000);
+
+    const client = new MonoCloudOidcClient('example.com', 'clientId', {
+      jwksResolver,
+      jwksCacheDuration: 10,
+    });
+
+    await client.getJwks();
+
+    dateSpy.mockReturnValue(10_000 + 9 * 1000);
+
+    await client.getJwks();
+
+    expect(resolverCalls).toBe(1);
+
+    dateSpy.mockClear();
+  });
 });

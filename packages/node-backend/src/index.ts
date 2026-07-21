@@ -27,6 +27,7 @@ export type {
   JwsHeaderParameters,
   JwtClaims,
   IssuerMetadata,
+  MtlsEndpointAliases,
   Jwks,
 } from '@monocloud/auth-core';
 

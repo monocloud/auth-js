@@ -1,5 +1,8 @@
 import Joi from 'joi';
-import type { AuthorizationParams } from '@monocloud/auth-core';
+import type {
+  AuthorizationParams,
+  ClientAuthMethod,
+} from '@monocloud/auth-core';
 import {
   CallbackOptions,
   GetSessionOptions,
@@ -22,6 +25,17 @@ const numRequired = Joi.number().required();
 const numOptional = Joi.number().optional();
 const objectOptional = Joi.object().optional();
 const funcOptional = Joi.function().optional();
+
+const validClientAuthMethods: ClientAuthMethod[] = [
+  'client_secret_basic',
+  'client_secret_post',
+  'client_secret_jwt',
+  'private_key_jwt',
+  'tls_client_auth',
+  'self_signed_tls_client_auth',
+  'spiffe_jwt',
+  'spiffe_x509',
+];
 
 const sessionCookieSchema = Joi.object({
   name: stringRequired,
@@ -170,7 +184,19 @@ export const indicatorOptionsSchema: Joi.ObjectSchema<Indicator> = Joi.object({
 export const optionsSchema: Joi.ObjectSchema<MonoCloudOptionsBase> = Joi.object(
   {
     clientId: stringRequired,
-    clientSecret: stringRequired,
+    clientSecret: Joi.alternatives().conditional('clientAuthMethod', {
+      is: 'private_key_jwt',
+      then: Joi.object().required().messages({
+        'object.base':
+          "clientSecret must be a valid JWK when clientAuthMethod is 'private_key_jwt'",
+      }),
+      otherwise: stringRequired,
+    }),
+    clientAuthMethod: Joi.string().valid(...validClientAuthMethods),
+    trustStoreId: stringOptional,
+    fetcher: funcOptional,
+    metadataResolver: funcOptional,
+    jwksResolver: funcOptional,
     tenantDomain: stringRequired.uri(),
     cookieSecret: stringRequired.min(8),
     appUrl: stringRequired.uri(),

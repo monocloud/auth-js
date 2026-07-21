@@ -130,6 +130,21 @@ JSON Web Key Set (JWKS) endpoint used to obtain signing keys.
 
 ---
 
+## mtls_additional_endpoint_aliases
+> `optional` **mtls_additional_endpoint_aliases**: `Record`\<`string`, [`MtlsEndpointAliases`](/sdks/nodejs-backend/api-reference/types/mtlsendpointaliases)\>
+
+Per-trust-store mTLS endpoint aliases, keyed by trust store id (a MonoCloud extension).
+
+---
+
+## mtls_endpoint_aliases
+> `optional` **mtls_endpoint_aliases**: [`MtlsEndpointAliases`](/sdks/nodejs-backend/api-reference/types/mtlsendpointaliases)
+
+Alternate mTLS endpoint URLs to use when authenticating with a mutual-TLS client
+authentication method.
+
+---
+
 ## pushed_authorization_request_endpoint
 > `optional` **pushed_authorization_request_endpoint**: `string`
 
@@ -206,6 +221,14 @@ OAuth scopes supported by the authorization server.
 > **subject_types_supported**: `string`[]
 
 Supported subject identifier types.
+
+---
+
+## tls_client_certificate_bound_access_tokens
+> `optional` **tls_client_certificate_bound_access_tokens**: `boolean`
+
+Indicates whether the authorization server supports mutual-TLS client certificate-bound
+access tokens.
 
 ---
 

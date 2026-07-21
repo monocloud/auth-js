@@ -473,6 +473,42 @@ export const isJsonObject = <T>(input: unknown): input is T => {
 
 /**
  * @ignore
+ * Resolves a client secret supplied as a string.
+ *
+ * When the string parses to a JWK — a JSON object with a string `kty` member, such as the
+ * private key used with the `private_key_jwt` client authentication method — the parsed object
+ * is returned. Any other value (a plain-text secret, non-JWK JSON, or a value already provided
+ * as an object) is returned unchanged.
+ *
+ * @param value - The raw client secret (a string, a JWK object, or `undefined`).
+ *
+ * @returns The parsed JWK object, the original string secret, or `undefined`.
+ */
+export const parseClientSecret = (
+  value?: string | Jwk
+): string | Jwk | undefined => {
+  if (typeof value !== 'string') {
+    return value;
+  }
+
+  try {
+    const parsed: unknown = JSON.parse(value);
+    if (
+      typeof parsed === 'object' &&
+      parsed !== null &&
+      typeof (parsed as Record<string, unknown>).kty === 'string'
+    ) {
+      return parsed as Jwk;
+    }
+  } catch {
+    // Not JSON — fall through and treat the value as a plain-text secret.
+  }
+
+  return value;
+};
+
+/**
+ * @ignore
  * Parses a space-separated string into an array of strings.
  *
  * @param s - The space-separated string.

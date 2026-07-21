@@ -82,8 +82,14 @@ export interface ProtectApiRequestOptions<T> {
  * | Environment Variable | Description |
  * |----------------------|-------------|
  * | `MONOCLOUD_BACKEND_CLIENT_ID` | Unique identifier for your application/client. |
- * | `MONOCLOUD_BACKEND_CLIENT_SECRET` | Application/client secret used for authentication. |
- * | `MONOCLOUD_BACKEND_CLIENT_AUTH_METHOD` | Client authentication method (for example, `client_secret_basic`, `client_secret_post`, `client_secret_jwt`, `private_key_jwt`, `tls_client_auth`, `self_signed_tls_client_auth`, `spiffe_jwt`, `spiffe_x509`). |
+ * | `MONOCLOUD_BACKEND_CLIENT_SECRET` | Application/client secret used for authentication. When `clientAuthMethod` is `private_key_jwt`, provide the private key JWK as a JSON string (it is parsed automatically). |
+ * | `MONOCLOUD_BACKEND_CLIENT_AUTH_METHOD` | Client authentication method. |
+ *
+ * ### mTLS
+ *
+ * | Environment Variable | Description |
+ * |----------------------|-------------|
+ * | `MONOCLOUD_BACKEND_TRUST_STORE_ID` | Identifier of the trust store whose mTLS endpoint aliases (`mtls_additional_endpoint_aliases`) should be used when authenticating with a mutual-TLS client authentication method. When omitted, the default `mtls_endpoint_aliases` are used. |
  *
  * ### Token Validation
  *

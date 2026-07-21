@@ -49,6 +49,7 @@ category: Other
 - [MonoCloudTokens](/sdks/web-js/api-reference/types/monocloudtokens)
 - [MonoCloudUser](/sdks/web-js/api-reference/types/monoclouduser)
 - [MonoCloudWebJSClientOptions](/sdks/web-js/api-reference/types/monocloudwebjsclientoptions)
+- [MtlsEndpointAliases](/sdks/web-js/api-reference/types/mtlsendpointaliases)
 - [ParResponse](/sdks/web-js/api-reference/types/parresponse)
 - [PushedAuthorizationParams](/sdks/web-js/api-reference/types/pushedauthorizationparams)
 - [RefetchUserInfoOptions](/sdks/web-js/api-reference/types/refetchuserinfooptions)

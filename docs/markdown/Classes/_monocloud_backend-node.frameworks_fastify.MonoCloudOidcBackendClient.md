@@ -12,22 +12,6 @@ description: "MonoCloudOidcBackendClient is a class in the MonoCloud Node.js Bac
 
 - [`MonoCloudOidcClientBase`](/sdks/nodejs/api-reference/classes/monocloudoidcclientbase)
 
-## clockSkew
-
-> `protected` **clockSkew**: `number` = `0`
-
-Number of seconds to adjust the current time to account for clock differences between the client and server during time-based claim validation. Defaults to 0.
-
----
-
-## clockTolerance
-
-> `protected` **clockTolerance**: `number` = `60`
-
-Additional time tolerance in seconds applied when validating time-based claims (`exp`, `nbf`). Defaults to 60 (1 minute).
-
----
-
 ## Constructor
 
 > **new MonoCloudOidcBackendClient**(`tenantDomain`: `string`, `audience`: `string`, `options?`: [`MonoCloudOidcBackendClientOptions`](/sdks/fastify-backend/api-reference/types/monocloudoidcbackendclientoptions)): [`MonoCloudOidcBackendClient`](/sdks/fastify-backend/api-reference/classes/monocloudoidcbackendclient)
@@ -79,51 +63,6 @@ Decoded payload.
 ### Inherited from
 
 [`MonoCloudOidcClientBase`](/sdks/nodejs/api-reference/classes/monocloudoidcclientbase).[`decodeJwt`](/sdks/nodejs/api-reference/classes/monocloudoidcclientbase#decodejwt)
-
----
-
-## fetcher
-> `protected` `optional` **fetcher**: \{(`input`: `URL` \| `RequestInfo`, `init?`: `RequestInit`): `Promise`\<`Response`\>; (`input`: `string` \| `URL` \| `Request`, `init?`: `RequestInit`): `Promise`\<`Response`\>; \}
-
-Custom fetch implementation used for making HTTP requests. Falls back to the global `fetch` if not provided.
-
-### Call Signature
-
-> (`input`: `URL` \| `RequestInfo`, `init?`: `RequestInit`): `Promise`\<`Response`\>
-
-[MDN Reference](https://developer.mozilla.org/docs/Web/API/Window/fetch)
-
-#### Parameters
-
-| Parameter | Type                   |
-| --------- | ---------------------- |
-| `input`   | `URL` \| `RequestInfo` |
-| `init?`   | `RequestInit`          |
-
-#### Returns
-
-`Promise`\<`Response`\>
-
-### Call Signature
-
-> (`input`: `string` \| `URL` \| `Request`, `init?`: `RequestInit`): `Promise`\<`Response`\>
-
-[MDN Reference](https://developer.mozilla.org/docs/Web/API/Window/fetch)
-
-#### Parameters
-
-| Parameter | Type                           |
-| --------- | ------------------------------ |
-| `input`   | `string` \| `URL` \| `Request` |
-| `init?`   | `RequestInit`                  |
-
-#### Returns
-
-`Promise`\<`Response`\>
-
-### Inherited from
-
-[`MonoCloudOidcClientBase`](/sdks/nodejs/api-reference/classes/monocloudoidcclientbase).[`fetcher`](/sdks/nodejs/api-reference/classes/monocloudoidcclientbase#fetcher)
 
 ---
 
@@ -227,76 +166,6 @@ endpoint is not available in the issuer metadata or claims validation fails.
 
 ---
 
-## jwks
-> `protected` `optional` **jwks**: [`Jwks`](/sdks/fastify-backend/api-reference/types/jwks)
-
-Cached JSON Web Key Set retrieved from the issuer's JWKS endpoint.
-
-### Inherited from
-
-[`MonoCloudOidcClientBase`](/sdks/nodejs/api-reference/classes/monocloudoidcclientbase).[`jwks`](/sdks/nodejs/api-reference/classes/monocloudoidcclientbase#jwks)
-
----
-
-## jwksCacheDuration
-
-> `protected` **jwksCacheDuration**: `number` = `300`
-
-Duration (in seconds) for which the JWKS is cached. Defaults to 300 (5 minutes).
-
-### Inherited from
-
-[`MonoCloudOidcClientBase`](/sdks/nodejs/api-reference/classes/monocloudoidcclientbase).[`jwksCacheDuration`](/sdks/nodejs/api-reference/classes/monocloudoidcclientbase#jwkscacheduration)
-
----
-
-## jwksCacheExpiry
-
-> `protected` **jwksCacheExpiry**: `number` = `0`
-
-Timestamp (in seconds) when the cached JWKS expires.
-
-### Inherited from
-
-[`MonoCloudOidcClientBase`](/sdks/nodejs/api-reference/classes/monocloudoidcclientbase).[`jwksCacheExpiry`](/sdks/nodejs/api-reference/classes/monocloudoidcclientbase#jwkscacheexpiry)
-
----
-
-## metadata
-> `protected` `optional` **metadata**: [`IssuerMetadata`](/sdks/fastify-backend/api-reference/types/issuermetadata)
-
-Cached issuer metadata retrieved from the OpenID Connect discovery endpoint.
-
-### Inherited from
-
-[`MonoCloudOidcClientBase`](/sdks/nodejs/api-reference/classes/monocloudoidcclientbase).[`metadata`](/sdks/nodejs/api-reference/classes/monocloudoidcclientbase#metadata)
-
----
-
-## metadataCacheDuration
-
-> `protected` **metadataCacheDuration**: `number` = `300`
-
-Duration (in seconds) for which the metadata is cached. Defaults to 300 (5 minutes).
-
-### Inherited from
-
-[`MonoCloudOidcClientBase`](/sdks/nodejs/api-reference/classes/monocloudoidcclientbase).[`metadataCacheDuration`](/sdks/nodejs/api-reference/classes/monocloudoidcclientbase#metadatacacheduration)
-
----
-
-## metadataCacheExpiry
-
-> `protected` **metadataCacheExpiry**: `number` = `0`
-
-Timestamp (in seconds) when the cached metadata expires.
-
-### Inherited from
-
-[`MonoCloudOidcClientBase`](/sdks/nodejs/api-reference/classes/monocloudoidcclientbase).[`metadataCacheExpiry`](/sdks/nodejs/api-reference/classes/monocloudoidcclientbase#metadatacacheexpiry)
-
----
-
 ## setClockSkew()
 
 > **setClockSkew**(`clockSkew`: `number`): `void`
@@ -330,18 +199,6 @@ Sets clock tolerance used for access token time-based claim validation.
 ### Returns
 
 `void`
-
----
-
-## tenantDomain
-
-> `protected` `readonly` **tenantDomain**: `string`
-
-The normalized tenant domain URL used as the base for discovery endpoints.
-
-### Inherited from
-
-[`MonoCloudOidcClientBase`](/sdks/nodejs/api-reference/classes/monocloudoidcclientbase).[`tenantDomain`](/sdks/nodejs/api-reference/classes/monocloudoidcclientbase#tenantdomain)
 
 ---
 

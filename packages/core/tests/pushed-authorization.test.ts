@@ -5,7 +5,7 @@ import {
   MonoCloudOidcClient,
   MonoCloudOPError,
 } from '../src';
-import { fetchBuilder } from '@monocloud/auth-test-utils';
+import { fetchBuilder, mtlsFetchSpy } from '@monocloud/auth-test-utils';
 import { assertError } from './utils';
 
 describe('MonoCloudOidcClient.pushedAuthorizationRequest()', () => {
@@ -110,5 +110,25 @@ describe('MonoCloudOidcClient.pushedAuthorizationRequest()', () => {
     );
 
     fetchSpy.assert();
+  });
+
+  it('should perform PAR at the mTLS endpoint alias for mTLS auth methods', async () => {
+    const fetchSpy = mtlsFetchSpy({
+      response: { request_uri: 'some uri', expires_in: 2000 },
+      responseCode: 201,
+    });
+
+    const client = new MonoCloudOidcClient('example.com', 'clientId', {
+      clientAuthMethod: 'tls_client_auth',
+    });
+
+    await client.pushedAuthorizationRequest({ scopes: 'openid' });
+
+    expect(fetchSpy).toHaveBeenCalledWith(
+      'https://mtls.example.com/connect/par',
+      expect.objectContaining({ method: 'POST' })
+    );
+
+    fetchSpy.mockClear();
   });
 });

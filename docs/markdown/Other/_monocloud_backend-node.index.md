@@ -32,6 +32,7 @@ category: Other
 - [JwtClaims](/sdks/nodejs-backend/api-reference/types/jwtclaims)
 - [MonoCloudBackendNodeClientOptions](/sdks/nodejs-backend/api-reference/types/monocloudbackendnodeclientoptions)
 - [MonoCloudOidcBackendClientOptions](/sdks/nodejs-backend/api-reference/types/monocloudoidcbackendclientoptions)
+- [MtlsEndpointAliases](/sdks/nodejs-backend/api-reference/types/mtlsendpointaliases)
 - [ProtectApiRequestOptions](/sdks/nodejs-backend/api-reference/types/protectapirequestoptions)
 - [ProtectOptions](/sdks/nodejs-backend/api-reference/types/protectoptions)
 - [ValidateAccessTokenOptions](/sdks/nodejs-backend/api-reference/types/validateaccesstokenoptions)
