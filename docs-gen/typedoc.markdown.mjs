@@ -1,34 +1,22 @@
-/** @type {import("typedoc-plugin-markdown").PluginOptions} */
-const typedocPluginMarkdownOptions = {
-  hideBreadcrumbs: true,
-  hidePageHeader: true,
-  parametersFormat: 'table',
-  hidePageTitle: true,
-  interfacePropertiesFormat: 'table',
-  classPropertiesFormat: 'table',
-  enumMembersFormat: 'table',
-  propertyMembersFormat: 'table',
-  typeDeclarationFormat: 'table',
-  typeDeclarationVisibility: 'compact',
-  typeAliasPropertiesFormat: 'table',
-  useHTMLAnchors: false,
-  tableColumnSettings: {
-    hideSources: true,
-    hideModifiers: true,
-    hideDefaults: true,
-    hideInherited: true,
-    hideOverrides: true,
-  },
-  excludeScopesInPaths: true,
-  expandObjects: true,
-  formatWithPrettier: true,
-  expandParameters: true,
-};
+// TypeDoc config driving the controlled markdown emitter (emitter.mjs).
+//
+// The markdown docs are produced entirely by our own emitter + render/* layer
+// (see manifest.mjs for the knobs). typedoc-plugin-markdown is no longer used.
+// Reflection options below mirror what the old pipeline used so the converted
+// project is identical; only the rendering (output) layer is ours.
 
 /** @type {import("typedoc").TypeDocOptions} */
 const config = {
-  plugin: ['typedoc-plugin-markdown', './hook.mjs'],
-  router: 'category',
+  plugin: ['./emitter.mjs'],
+  entryPoints: [
+    '../packages/core',
+    '../packages/web-js',
+    '../packages/react',
+    '../packages/node-core',
+    '../packages/nextjs',
+    '../packages/node-backend',
+  ],
+  entryPointStrategy: 'packages',
   packageOptions: {
     gitRevision: 'main',
     includeVersion: false,
@@ -41,14 +29,6 @@ const config = {
     disableSources: true,
     sort: 'alphabetical',
   },
-  entryPoints: [
-    '../packages/core',
-    '../packages/web-js',
-    '../packages/react',
-    '../packages/node-core',
-    '../packages/nextjs',
-    '../packages/node-backend',
-  ],
   exclude: [
     '**/dist/**',
     '**/node_modules/**',
@@ -57,27 +37,11 @@ const config = {
     '**/examples/**',
     '**/packages/test-utils',
   ],
-  visibilityFilters: [],
-  includeHierarchySummary: false,
-  headings: true,
-  sortEntryPoints: false,
-  entryPointStrategy: 'packages',
-  out: '../docs/markdown',
+  outputs: [{ name: 'monocloud-markdown', path: '../docs/markdown' }],
   name: 'MonoCloud Authentication SDK',
   readme: '../README.md',
   hideGenerator: true,
-  disableSources: false,
-  categorizeByGroup: false,
-  navigation: {
-    includeCategories: true,
-  },
-  theme: 'default',
-  validation: {
-    notExported: true,
-    invalidLink: true,
-    notDocumented: false,
-  },
-  ...typedocPluginMarkdownOptions,
+  validation: { notExported: false, invalidLink: false, notDocumented: false },
 };
 
 export default config;
