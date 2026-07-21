@@ -34,7 +34,14 @@ export const optionsSchema: Joi.ObjectSchema<MonoCloudBackendNodeClientOptions> 
     tenantDomain: stringRequired.uri(),
     audience: stringRequired.uri(),
     clientId: stringOptional,
-    clientSecret: stringOptional,
+    clientSecret: Joi.alternatives().conditional('clientAuthMethod', {
+      is: 'private_key_jwt',
+      then: Joi.object().messages({
+        'object.base':
+          "clientSecret must be a valid JWK when clientAuthMethod is 'private_key_jwt'",
+      }),
+      otherwise: stringOptional,
+    }),
     clientAuthMethod: stringOptional.valid(...validClientAuthMethods),
     trustStoreId: stringOptional,
     metadataResolver: funcOptional,

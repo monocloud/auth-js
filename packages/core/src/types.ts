@@ -1128,11 +1128,6 @@ export interface EndSessionParameters {
 }
 
 /**
- * OpenID Connect Discovery metadata published by the authorization server.
- *
- * @category Types
- */
-/**
  * Alternate endpoint URLs that a client authenticating with mutual-TLS (mTLS) must use in
  * place of the regular endpoints.
  *
@@ -1165,6 +1160,11 @@ export interface MtlsEndpointAliases {
   pushed_authorization_request_endpoint?: string;
 }
 
+/**
+ * OpenID Connect Discovery metadata published by the authorization server.
+ *
+ * @category Types
+ */
 export interface IssuerMetadata {
   /**
    * The issuer identifier for the authorization server.
@@ -1491,7 +1491,7 @@ export interface RefetchUserInfoOptions {
 /**
  * Supported OAuth 2.0 client authentication methods.
  *
- * These methods define how a client authenticates itself when calling the authorization server token endpoint.
+ * These methods define how a client authenticates itself to the authorization server.
  *
  * @category Types (Enums)
  */
@@ -1621,7 +1621,7 @@ export interface MonoCloudClientOptionsBase {
   clientSecret?: string | Jwk;
 
   /**
-   * Client authentication method used when communicating with the token endpoint.
+   * Client authentication method used when the client authenticates to the authorization server.
    * @defaultValue 'client_secret_basic'
    */
   clientAuthMethod?: ClientAuthMethod;

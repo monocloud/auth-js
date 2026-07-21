@@ -3,6 +3,7 @@
 import {
   getBoolean,
   getNumber,
+  parseClientSecret,
   removeTrailingSlash,
 } from '@monocloud/auth-core/internal';
 import {
@@ -103,7 +104,9 @@ export const getOptions = (
 
   const opt: MonoCloudOptionsBase = {
     clientId: options?.clientId ?? MONOCLOUD_AUTH_CLIENT_ID!,
-    clientSecret: options?.clientSecret ?? MONOCLOUD_AUTH_CLIENT_SECRET,
+    clientSecret: parseClientSecret(
+      options?.clientSecret ?? MONOCLOUD_AUTH_CLIENT_SECRET
+    ),
     clientAuthMethod:
       options?.clientAuthMethod ??
       (MONOCLOUD_AUTH_CLIENT_AUTH_METHOD as ClientAuthMethod) ??

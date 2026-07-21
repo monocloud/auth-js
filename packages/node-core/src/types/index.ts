@@ -6,6 +6,7 @@ import type {
   EndSessionParameters,
   IdTokenClaims,
   IssuerMetadata,
+  Jwk,
   Jwks,
   MonoCloudSession,
   RefreshGrantOptions,
@@ -358,12 +359,12 @@ export interface MonoCloudOptionsBase {
   clientId: string;
 
   /**
-   * Optional client secret used for confidential clients.
+   * Client secret used for confidential clients.
    */
-  clientSecret?: string;
+  clientSecret?: string | Jwk;
 
   /**
-   * Client authentication method used when communicating with the token endpoint.
+   * Client authentication method used when the client authenticates to the authorization server.
    *
    * @defaultValue 'client_secret_basic'
    */
@@ -613,7 +614,7 @@ export interface MonoCloudSessionOptions extends Partial<
  * | Environment Variable | Description |
  * |----------------------|-------------|
  * | `MONOCLOUD_AUTH_CLIENT_ID` | Unique identifier for your application/client. |
- * | `MONOCLOUD_AUTH_CLIENT_SECRET` | Application/client secret used for authentication. |
+ * | `MONOCLOUD_AUTH_CLIENT_SECRET` | Application/client secret used for authentication. When `clientAuthMethod` is `private_key_jwt`, provide the private key JWK as a JSON string (it is parsed automatically). |
  * | `MONOCLOUD_AUTH_TENANT_DOMAIN` | The domain of your MonoCloud tenant (for example, `https://your-tenant.us.monocloud.com`). |
  * | `MONOCLOUD_AUTH_APP_URL` | The base URL where your application is hosted. |
  * | `MONOCLOUD_AUTH_COOKIE_SECRET` | A long, random string used to encrypt and sign session cookies. |
@@ -624,7 +625,7 @@ export interface MonoCloudSessionOptions extends Partial<
  * |----------------------|-------------|
  * | `MONOCLOUD_AUTH_SCOPES` | Space-separated list of OIDC scopes to request (for example, `openid profile email`). |
  * | `MONOCLOUD_AUTH_RESOURCE` | Default resource (audience) identifier used when issuing access tokens. |
- * | `MONOCLOUD_AUTH_CLIENT_AUTH_METHOD` | Client authentication method used at the token endpoint (for example, `client_secret_basic`, `client_secret_post`, `client_secret_jwt`, `private_key_jwt`, `tls_client_auth`, `self_signed_tls_client_auth`, `spiffe_jwt`, `spiffe_x509`). |
+ * | `MONOCLOUD_AUTH_CLIENT_AUTH_METHOD` | Client authentication method used when the client authenticates to the authorization server. |
  * | `MONOCLOUD_AUTH_TRUST_STORE_ID` | Identifier of the trust store whose mTLS endpoint aliases should be used when authenticating with a mutual-TLS client authentication method. |
  * | `MONOCLOUD_AUTH_USE_PAR` | Enables Pushed Authorization Requests (PAR) for authorization flows. |
  * | `MONOCLOUD_AUTH_CLOCK_SKEW` | Allowed clock drift (in seconds) when validating token timestamps. |

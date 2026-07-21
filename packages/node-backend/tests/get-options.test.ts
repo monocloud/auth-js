@@ -238,4 +238,35 @@ describe('Configuration Options', () => {
     expect(options.groupOptions?.groupsClaim).toBe('roles');
     expect(options.groupOptions?.matchAll).toBeUndefined();
   });
+
+  it('should parse a JWK client secret from a JSON string for private_key_jwt', () => {
+    setRequiredEnv();
+    addEnv('MONOCLOUD_BACKEND_CLIENT_ID', 'client_id');
+    addEnv('MONOCLOUD_BACKEND_CLIENT_AUTH_METHOD', 'private_key_jwt');
+    const jwk = {
+      kty: 'RSA',
+      kid: 'id',
+      alg: 'RS256',
+      n: 'n',
+      e: 'AQAB',
+      d: 'd',
+    };
+    addEnv('MONOCLOUD_BACKEND_CLIENT_SECRET', JSON.stringify(jwk));
+
+    const options = getOptions();
+
+    expect(options.clientAuthMethod).toBe('private_key_jwt');
+    expect(options.clientSecret).toEqual(jwk);
+  });
+
+  it('should throw when clientAuthMethod is private_key_jwt but the client secret is a plain string', () => {
+    setRequiredEnv();
+    addEnv('MONOCLOUD_BACKEND_CLIENT_AUTH_METHOD', 'private_key_jwt');
+    addEnv('MONOCLOUD_BACKEND_CLIENT_SECRET', 'plain-secret');
+
+    expect(() => getOptions()).toThrow(MonoCloudValidationError);
+    expect(() => getOptions()).toThrow(
+      "clientSecret must be a valid JWK when clientAuthMethod is 'private_key_jwt'"
+    );
+  });
 });

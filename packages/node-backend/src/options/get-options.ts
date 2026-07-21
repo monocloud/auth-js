@@ -1,6 +1,10 @@
 /* eslint-disable prefer-destructuring */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { getBoolean, getNumber } from '@monocloud/auth-core/internal';
+import {
+  getBoolean,
+  getNumber,
+  parseClientSecret,
+} from '@monocloud/auth-core/internal';
 import { DEFAULT_OPTIONS } from './defaults';
 import { optionsSchema } from './validation';
 import {
@@ -41,7 +45,9 @@ export const getOptions = (
     tenantDomain: options?.tenantDomain ?? MONOCLOUD_BACKEND_TENANT_DOMAIN!,
     audience: options?.audience ?? MONOCLOUD_BACKEND_AUDIENCE!,
     clientId: options?.clientId ?? MONOCLOUD_BACKEND_CLIENT_ID!,
-    clientSecret: options?.clientSecret ?? MONOCLOUD_BACKEND_CLIENT_SECRET,
+    clientSecret: parseClientSecret(
+      options?.clientSecret ?? MONOCLOUD_BACKEND_CLIENT_SECRET
+    ),
     groupOptions: {
       groupsClaim:
         options?.groupOptions?.groupsClaim ?? MONOCLOUD_BACKEND_GROUPS_CLAIM,

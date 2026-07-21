@@ -184,7 +184,14 @@ export const indicatorOptionsSchema: Joi.ObjectSchema<Indicator> = Joi.object({
 export const optionsSchema: Joi.ObjectSchema<MonoCloudOptionsBase> = Joi.object(
   {
     clientId: stringRequired,
-    clientSecret: stringRequired,
+    clientSecret: Joi.alternatives().conditional('clientAuthMethod', {
+      is: 'private_key_jwt',
+      then: Joi.object().required().messages({
+        'object.base':
+          "clientSecret must be a valid JWK when clientAuthMethod is 'private_key_jwt'",
+      }),
+      otherwise: stringRequired,
+    }),
     clientAuthMethod: Joi.string().valid(...validClientAuthMethods),
     trustStoreId: stringOptional,
     fetcher: funcOptional,
