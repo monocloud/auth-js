@@ -1,7 +1,11 @@
 // Emit-time link resolution. URLs are computed up front (no post-processing
 // pass over the markdown) and a reference is always resolved to the copy that
-// lives in the *current* SDK when one exists — matching the previous
-// post-generate behaviour, which linked within the source page's SDK.
+// lives in the *current* SDK. The emitter now materialises a local copy of
+// every referenced type inside each SDK that references it (see
+// `expandWithReferencedCopies` in emitter.mjs), so a same-SDK copy exists for
+// essentially every reference and links never jump to another SDK. `byId`
+// (canonical fallback) is only reached for the rare reflection that has no
+// page at all.
 
 import { ReferenceReflection } from 'typedoc';
 import { categoryMeta } from './manifest.mjs';
@@ -23,9 +27,10 @@ export function urlForUnit(unit) {
  * current SDK — so prefer a same-SDK copy, falling back to the exact target.
  *
  * `resolveExact` (inline `{@link}` tags): TypeDoc resolves these to the actual
- * target declaration (e.g. an error class defined in auth-core), and the
- * previous pipeline linked there — so use the exact target, with a same-SDK
- * fallback only when it isn't itself an emitted page.
+ * target declaration (e.g. a base class defined in auth-core). Prefer the copy
+ * of that declaration in the current SDK so inline links stay in-SDK too,
+ * falling back to the canonical page (and then to a member anchor on its
+ * owner's page) only when no same-SDK copy exists.
  */
 export function buildLinkResolver(units) {
   const byId = new Map();
@@ -33,7 +38,10 @@ export function buildLinkResolver(units) {
 
   for (const u of units) {
     const url = urlForUnit(u);
-    byId.set(u.ref.id, { unit: u, url });
+    // Copies share their canonical reflection's id; keep `byId` pointing at the
+    // canonical (non-copy) page so the cross-SDK fallback stays deterministic.
+    // Same-SDK copies are found through `byContent` (sameSdkCopy) instead.
+    if (!u.isCopy) byId.set(u.ref.id, { unit: u, url });
     const key = `${u.ref.name}::${u.meta.label}`;
     if (!byContent.has(key)) byContent.set(key, []);
     byContent.get(key).push({ unit: u, url });
@@ -69,14 +77,13 @@ export function buildLinkResolver(units) {
     const r = deref(reflection);
     if (!r) return null;
     if (selfId != null && r.id === selfId) return null;
+    // Prefer the current SDK's own copy of the target (post-closure this almost
+    // always exists), so inline links don't jump packages either.
+    const same = sameSdkCopy(r, curPkg, curFw);
+    if (same) return same;
+    // No same-SDK copy: link to the canonical page for the exact target.
     const hit = byId.get(r.id);
-    if (hit) {
-      // Same package as the page -> prefer the copy in the current SDK/framework
-      // (e.g. the express-backend copy). Different package -> link to the exact
-      // target (e.g. an error class in auth-core).
-      if (hit.unit.pkgName === curPkg) return sameSdkCopy(r, curPkg, curFw) ?? hit.url;
-      return hit.url;
-    }
+    if (hit) return hit.url;
     // A `{@link}` to a class/interface member (method/property/accessor) links
     // to that member's anchor on its owner's page — or just `#anchor` when the
     // owner is the current page.
@@ -84,10 +91,10 @@ export function buildLinkResolver(units) {
     if (owner) {
       const anchor = `#${r.name.toLowerCase()}`;
       if (selfId != null && owner.id === selfId) return anchor;
-      const ownerUrl = byId.get(owner.id)?.url ?? sameSdkCopy(owner, curPkg, curFw);
+      const ownerUrl = sameSdkCopy(owner, curPkg, curFw) ?? byId.get(owner.id)?.url;
       if (ownerUrl) return ownerUrl + anchor;
     }
-    return sameSdkCopy(r, curPkg, curFw);
+    return null;
   }
 
   return { resolve, resolveExact };

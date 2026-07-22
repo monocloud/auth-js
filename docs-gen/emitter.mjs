@@ -15,7 +15,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import prettier from 'prettier';
-import { ReflectionKind } from 'typedoc';
+import { ReflectionKind, ReferenceReflection } from 'typedoc';
 import { registerInlineReferences } from './inline-references.mjs';
 import {
   PACKAGES,
@@ -150,6 +150,8 @@ async function emit(project, outDir, logger) {
     }
   }
 
+  const copied = expandWithReferencedCopies(typeUnits);
+
   const resolver = buildLinkResolver(typeUnits);
 
   fs.mkdirSync(outDir, { recursive: true });
@@ -160,9 +162,158 @@ async function emit(project, outDir, logger) {
   await writeModulesIndex(outDir, logger);
 
   logger.info(
-    `[emitter] wrote ${typeUnits.length} type pages, ${modulePages.length} module pages, ` +
+    `[emitter] wrote ${typeUnits.length} type pages (${copied} in-SDK copies of ` +
+      `referenced types), ${modulePages.length} module pages, ` +
       `${packagePages.length} package pages, README.md, modules.md`
   );
+}
+
+// ---------------------------------------------------------------------------
+// Referenced-type closure
+// ---------------------------------------------------------------------------
+//
+// A page links out of its SDK whenever it references a type that the SDK does
+// not itself export (mostly internal base types like `MonoCloudOidcClientBase`
+// and base interfaces such as `IMonoCloudCookieRequest`, which live only under
+// their owner package). To keep every link inside the current SDK, we
+// materialise a local copy of each such referenced page in the SDK that
+// references it, then repeat for the copies' own references until closure.
+//
+// The set of reflections a page would link to is exactly the set the renderers
+// hand to `ctx.linkFor` / `ctx.linkForExact`, so we discover references by
+// rendering each page with a recording context — no separate (and drift-prone)
+// type-AST walker. Copies mirror only reflections that are already a documented
+// page in their owner package (`originalRefIds`), so nothing is fabricated.
+
+/** Reflections that get their own page. */
+function derefTarget(reflection) {
+  let r = reflection;
+  if (r instanceof ReferenceReflection) r = r.tryGetTargetReflectionDeep?.() ?? r;
+  return r;
+}
+
+/** Map a referenced reflection to the documentable page it belongs to (or null). */
+function pageTarget(reflection) {
+  const r = derefTarget(reflection);
+  if (!r) return null;
+  if (DOCUMENTABLE.has(r.kind)) return r;
+  // A referenced member (method/property/accessor) belongs to its owner's page.
+  const owner = r.parent ? derefTarget(r.parent) : null;
+  if (owner && DOCUMENTABLE.has(owner.kind)) return owner;
+  return null;
+}
+
+/** Render a page with a recording context and return every reflection it links. */
+function collectReferencedReflections(ref, categoryTag) {
+  const seen = [];
+  const rec = r => {
+    if (r) seen.push(r);
+    return null;
+  };
+  try {
+    renderPage({ ref, categoryTag, rootSdk: '', framework: undefined, description: '', ctx: { linkFor: rec, linkForExact: rec } });
+  } catch {
+    // A malformed reflection shouldn't abort the whole closure; a missed
+    // reference just leaves that one link pointing at the canonical page.
+  }
+  return seen;
+}
+
+/**
+ * Grow `typeUnits` in place with in-SDK copies of every transitively referenced
+ * page. Returns the number of copies added.
+ */
+function expandWithReferencedCopies(typeUnits) {
+  const ctxKeyOf = u => `${u.pkgName}|${u.framework ?? ''}`;
+  const ctxInfo = new Map(); // ctxKey -> { pkgName, framework, slug, rootSdk, pkgFileSlug }
+  const ctxSeg = new Map(); // ctxKey -> representative module segment (for filenames)
+  const segsByCtx = new Map();
+  const originalRefIds = new Set();
+  const coveredKeys = new Set(); // `${ctxKey}|${name}::${label}`
+
+  for (const u of typeUnits) {
+    originalRefIds.add(u.ref.id);
+    const ck = ctxKeyOf(u);
+    if (!ctxInfo.has(ck)) {
+      ctxInfo.set(ck, {
+        pkgName: u.pkgName,
+        framework: u.framework,
+        slug: u.slug,
+        rootSdk: u.rootSdk,
+        pkgFileSlug: u.pkgFileSlug,
+      });
+    }
+    if (!segsByCtx.has(ck)) segsByCtx.set(ck, []);
+    segsByCtx.get(ck).push(u.seg);
+    coveredKeys.add(`${ck}|${u.ref.name}::${u.meta.label}`);
+  }
+
+  // Copies need a module segment only for their on-disk filename; pick a stable
+  // representative per context (prefer `index`, else the most common segment).
+  for (const [ck, segs] of segsByCtx) {
+    if (segs.includes('index')) {
+      ctxSeg.set(ck, 'index');
+      continue;
+    }
+    const counts = new Map();
+    for (const s of segs) counts.set(s, (counts.get(s) ?? 0) + 1);
+    let best = segs[0] ?? null;
+    let bestN = -1;
+    for (const [s, n] of [...counts.entries()].sort((a, b) => String(a[0]).localeCompare(String(b[0])))) {
+      if (n > bestN) {
+        best = s;
+        bestN = n;
+      }
+    }
+    ctxSeg.set(ck, best);
+  }
+
+  const makeCopy = (targetRef, ck) => {
+    const info = ctxInfo.get(ck);
+    const seg = ctxSeg.get(ck);
+    const categoryTag = readCategoryTag(targetRef);
+    const meta = categoryMeta(categoryTag);
+    const fileName = seg
+      ? `${info.pkgFileSlug}.${seg}.${targetRef.name}.md`
+      : `${info.pkgFileSlug}.${targetRef.name}.md`;
+    return {
+      ref: targetRef,
+      pkgName: info.pkgName,
+      pkgFileSlug: info.pkgFileSlug,
+      moduleName: null,
+      seg,
+      framework: info.framework,
+      slug: info.slug,
+      rootSdk: info.rootSdk,
+      categoryTag,
+      meta,
+      fileName,
+      folder: meta.folder,
+      isCopy: true,
+    };
+  };
+
+  const worklist = [...typeUnits];
+  let added = 0;
+  while (worklist.length > 0) {
+    const u = worklist.pop();
+    const ck = ctxKeyOf(u);
+    for (const raw of collectReferencedReflections(u.ref, u.categoryTag)) {
+      const target = pageTarget(raw);
+      if (!target) continue;
+      if (target.id === u.ref.id) continue; // self-reference
+      if (!originalRefIds.has(target.id)) continue; // only mirror real pages
+      const label = categoryMeta(readCategoryTag(target)).label;
+      const coverKey = `${ck}|${target.name}::${label}`;
+      if (coveredKeys.has(coverKey)) continue; // SDK already has this page
+      coveredKeys.add(coverKey);
+      const copy = makeCopy(target, ck);
+      typeUnits.push(copy);
+      worklist.push(copy);
+      added += 1;
+    }
+  }
+  return added;
 }
 
 // ---------------------------------------------------------------------------
