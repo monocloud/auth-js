@@ -57,7 +57,6 @@ describe('MonoCloudBackendNodeClient', () => {
       const cache: IIntrospectionCache = {
         get: vi.fn(),
         set: vi.fn(),
-        delete: vi.fn(),
       };
 
       expect(
@@ -191,7 +190,6 @@ describe('MonoCloudBackendNodeClient', () => {
         const cache: IIntrospectionCache = {
           get: vi.fn().mockResolvedValue(cached),
           set: vi.fn(),
-          delete: vi.fn(),
         };
 
         const client = getClient(cache);
@@ -212,7 +210,6 @@ describe('MonoCloudBackendNodeClient', () => {
         const cache: IIntrospectionCache = {
           get: vi.fn().mockResolvedValue(cached),
           set: vi.fn(),
-          delete: vi.fn(),
         };
         const client = getClient(cache);
 
@@ -232,7 +229,6 @@ describe('MonoCloudBackendNodeClient', () => {
         const cache: IIntrospectionCache = {
           get: vi.fn().mockResolvedValue(cached),
           set: vi.fn(),
-          delete: vi.fn(),
         };
         const client = getClient(cache);
 
@@ -252,7 +248,6 @@ describe('MonoCloudBackendNodeClient', () => {
         const cache: IIntrospectionCache = {
           get: vi.fn().mockResolvedValue(cached),
           set: vi.fn(),
-          delete: vi.fn(),
         };
         const client = getClient(cache);
 
@@ -276,7 +271,6 @@ describe('MonoCloudBackendNodeClient', () => {
         const cache: IIntrospectionCache = {
           get: vi.fn().mockResolvedValue(undefined),
           set: vi.fn(),
-          delete: vi.fn(),
         };
         const client = getClient(cache);
 
@@ -292,7 +286,6 @@ describe('MonoCloudBackendNodeClient', () => {
         const cache: IIntrospectionCache = {
           get: vi.fn().mockResolvedValue(undefined),
           set: vi.fn(),
-          delete: vi.fn(),
         };
         const client = getClient(cache);
 
@@ -308,7 +301,6 @@ describe('MonoCloudBackendNodeClient', () => {
         const cache: IIntrospectionCache = {
           get: vi.fn().mockRejectedValue(new Error('cache offline')),
           set: vi.fn(),
-          delete: vi.fn(),
         };
         const client = getClient(cache);
 
@@ -325,7 +317,6 @@ describe('MonoCloudBackendNodeClient', () => {
         const cache: IIntrospectionCache = {
           get: vi.fn().mockResolvedValue(undefined),
           set: vi.fn(),
-          delete: vi.fn(),
         };
         const client = getClient(cache);
 

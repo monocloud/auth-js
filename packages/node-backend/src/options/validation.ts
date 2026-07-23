@@ -56,6 +56,5 @@ export const optionsSchema: Joi.ObjectSchema<MonoCloudBackendNodeClientOptions> 
     cache: Joi.object({
       set: Joi.function().required(),
       get: Joi.function().required(),
-      delete: Joi.function().required(),
     }).optional(),
   });

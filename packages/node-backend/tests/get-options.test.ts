@@ -132,7 +132,6 @@ describe('Configuration Options', () => {
     const cache = {
       get: vi.fn(),
       set: vi.fn(),
-      delete: vi.fn(),
     };
 
     const options = getOptions({ fetcher, cache });
