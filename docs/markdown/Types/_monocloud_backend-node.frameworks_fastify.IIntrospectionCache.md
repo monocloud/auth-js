@@ -13,24 +13,6 @@ Cache adapter for storing access token introspection results.
 Implement this interface to persist introspection results in an external store such as
 Redis, Memcached, or an in-memory cache.
 
-## delete()
-
-> **delete**(`key`: `string`): `Promise`\<`void`\>
-
-Removes an entry from the cache.
-
-### Parameters
-
-| Parameter | Type     | Description              |
-| --------- | -------- | ------------------------ |
-| `key`     | `string` | The cache key to delete. |
-
-### Returns
-
-`Promise`\<`void`\>
-
----
-
 ## get()
 
 > **get**(`key`: `string`): `Promise`\<[`AccessTokenClaims`](/sdks/fastify-backend/api-reference/types/accesstokenclaims) \| `null` \| `undefined`\>

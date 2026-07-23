@@ -14,24 +14,6 @@ Redis, Memcached, or an in-memory cache.
 
 ## Methods
 
-### delete()
-
-> **delete**(`key`: `string`): `Promise`\<`void`\>
-
-Removes an entry from the cache.
-
-#### Parameters
-
-| Parameter | Type     | Description              |
-| --------- | -------- | ------------------------ |
-| `key`     | `string` | The cache key to delete. |
-
-#### Returns
-
-`Promise`\<`void`\>
-
----
-
 ### get()
 
 > **get**(`key`: `string`): `Promise`\<[`AccessTokenClaims`](/sdks/nodejs-backend/api-reference/types/accesstokenclaims) \| `null` \| `undefined`\>
