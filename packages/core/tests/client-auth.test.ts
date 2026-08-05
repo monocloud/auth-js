@@ -67,6 +67,43 @@ describe('clientAuth()', () => {
     expect(headers.authorization).toBe('Basic Y2xpZW50SWQ6c2VjcmV0');
   });
 
+  it('should support basic auth with a secret outside latin-1', async () => {
+    await clientAuth(
+      'clientId',
+      'pässwörd✓',
+      'client_secret_basic',
+      undefined,
+      headers,
+      body,
+      undefined
+    );
+
+    const credentials = headers.authorization.slice('Basic '.length);
+
+    expect(
+      new TextDecoder().decode(
+        Uint8Array.from(atob(credentials), c => c.charCodeAt(0))
+      )
+    ).toBe('clientId:pässwörd✓');
+  });
+
+  it('should reject a jwk client secret with basic auth', async () => {
+    const promise = clientAuth(
+      'clientId',
+      { kty: 'RSA', kid: 'kid' },
+      'client_secret_basic',
+      undefined,
+      headers,
+      body,
+      undefined
+    );
+
+    await expect(promise).rejects.toThrow(
+      'Invalid Client Authentication Method'
+    );
+    expect(headers.authorization).toBeUndefined();
+  });
+
   it('should support secret post auth without secret', async () => {
     await clientAuth(
       'clientId',

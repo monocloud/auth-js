@@ -175,6 +175,22 @@ export const arrayBufferToString = (buffer: ArrayBuffer): string => {
 
 /**
  * @ignore
+ * Encodes a string as standard (padded) Base64 from its UTF-8 bytes.
+ *
+ * @param input - The string to encode.
+ *
+ * @returns The Base64 encoded string.
+ */
+export const encodeBase64 = (input: string): string =>
+  btoa(
+    stringToArrayBuffer(input).reduce(
+      (acc, byte) => acc + String.fromCharCode(byte),
+      ''
+    )
+  );
+
+/**
+ * @ignore
  * Converts a Base64URL string back to a standard Base64 string with padding.
  *
  * @param input - The Base64URL string.
