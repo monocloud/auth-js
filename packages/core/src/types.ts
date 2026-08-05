@@ -1717,8 +1717,10 @@ export interface MonoCloudOidcBackendClientOptions extends MonoCloudClientOption
   clockSkew?: number;
 
   /**
-   * Additional time tolerance in seconds for time-based claim validation.
-   * @defaultValue 300
+   * Additional time tolerance (in seconds) applied when validating time-based claims
+   * (`exp` and `nbf`) on access tokens.
+   *
+   * @defaultValue 60
    */
   clockTolerance?: number;
 
