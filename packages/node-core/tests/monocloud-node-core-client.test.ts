@@ -1224,10 +1224,10 @@ describe('MonoCloud Base Instance', () => {
         expect(res.res.redirectedUrl).toBe('https://example.org');
         await assertStateCookieCleared(cookies);
 
-        expect(cookies[await stateCookieName('newer')].value).not.toBe('');
+        expect(cookies[await stateCookieName('newer')].value).toBe('');
       });
 
-      it('should remove the transactions which can no longer be completed', async () => {
+      it('should discard every pending transaction after a successful callback', async () => {
         nock('https://example.com')
           .get('/.well-known/openid-configuration')
           .reply(200, defaultMetadata);
@@ -1240,6 +1240,7 @@ describe('MonoCloud Base Instance', () => {
         await setStateCookieValue(cookies, { state: 'valid' });
 
         cookies[await stateCookieName('garbage')] = { value: 'not_a_state' };
+        cookies.unrelated = { value: 'keep_me' };
 
         const instance = getConfiguredInstance({
           idTokenSigningAlg: 'ES256',
@@ -1256,8 +1257,10 @@ describe('MonoCloud Base Instance', () => {
           res
         );
 
+        await assertStateCookieCleared(cookies);
         expect(cookies[await stateCookieName('garbage')].value).toBe('');
-        expect(cookies[await stateCookieName('valid')].value).not.toBe('');
+        expect(cookies[await stateCookieName('valid')].value).toBe('');
+        expect(cookies.unrelated.value).toBe('keep_me');
       });
 
       it('should perform a successful callback (with base path)', async () => {

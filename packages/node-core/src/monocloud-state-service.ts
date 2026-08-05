@@ -64,17 +64,6 @@ export class MonoCloudStateService {
     return decryptedResult;
   }
 
-  async removeStaleStates(
-    req: IMonoCloudCookieRequest,
-    res: IMonoCloudCookieResponse
-  ): Promise<void> {
-    await this.pruneStates(
-      res,
-      await this.getStateCookies(req),
-      this.options.state.maxConcurrent
-    );
-  }
-
   async removeAllStates(
     req: IMonoCloudCookieRequest,
     res: IMonoCloudCookieResponse

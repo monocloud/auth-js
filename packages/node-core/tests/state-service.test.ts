@@ -424,47 +424,18 @@ describe('State Service', () => {
       expect(cookies[await cookieName('state_1')].value).not.toBe('');
       expect(cookies[await cookieName('state_2')].value).not.toBe('');
     });
-
-    it('should prune to a configured maxConcurrent when removing stale states', async () => {
-      const service = await getService({ state: { maxConcurrent: 2 } });
-
-      const cookies: any = {};
-      for (let i = 0; i < 3; i++) {
-        cookies[await cookieName(`state_${i}`)] = {
-          value: await encryptAuthState(
-            getState(`state_${i}`),
-            defaultConfig.cookieSecret!
-          ),
-        };
-      }
-
-      await service.removeStaleStates(
-        new TestReq({ cookies }),
-        new TestRes(cookies)
-      );
-
-      expect(cookies[await cookieName('state_0')].value).toBe('');
-      expect(cookies[await cookieName('state_1')].value).not.toBe('');
-      expect(cookies[await cookieName('state_2')].value).not.toBe('');
-    });
   });
 
   describe('cleanup', () => {
-    it('should remove only the unusable states when removing stale states', async () => {
+    it('should remove every state when removing all states', async () => {
       const service = await getService();
 
       // Seed the jar directly so the clearing can only come from the sweep
       // itself, and not from the eviction a setState would perform.
       const cookies: any = {
         unrelated: { value: 'keep_me' },
+        state: { value: 'legacy' },
         [await cookieName('garbage')]: { value: 'not_a_state' },
-        state: {
-          value: await encryptAuthState(
-            getState(),
-            defaultConfig.cookieSecret!,
-            -1
-          ),
-        },
         [await cookieName('valid_state')]: {
           value: await encryptAuthState(
             getState('valid_state'),
@@ -473,37 +444,13 @@ describe('State Service', () => {
         },
       };
 
-      await service.removeStaleStates(
-        new TestReq({ cookies }),
-        new TestRes(cookies)
-      );
-
-      expect(cookies[await cookieName('garbage')].value).toBe('');
-      expect(cookies.state.value).toBe('');
-      expect(cookies.unrelated.value).toBe('keep_me');
-      expect(cookies[await cookieName('valid_state')].value).not.toBe('');
-    });
-
-    it('should remove every state when removing all states', async () => {
-      const service = await getService();
-
-      const cookies: any = {
-        unrelated: { value: 'keep_me' },
-        state: { value: 'legacy' },
-      };
-
-      await service.setState(
-        new TestReq({ cookies }),
-        new TestRes(cookies),
-        getState('valid_state')
-      );
-
       await service.removeAllStates(
         new TestReq({ cookies }),
         new TestRes(cookies)
       );
 
       expect(cookies.state.value).toBe('');
+      expect(cookies[await cookieName('garbage')].value).toBe('');
       expect(cookies[await cookieName('valid_state')].value).toBe('');
       expect(cookies.unrelated.value).toBe('keep_me');
     });

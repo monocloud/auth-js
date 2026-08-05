@@ -522,8 +522,9 @@ export class MonoCloudCoreClient {
       // Set the user session
       await this.sessionService.setSession(request, response, session);
 
-      // Clean up the transactions which can no longer be completed
-      await this.stateService.removeStaleStates(request, response);
+      // The session is shared by every tab, so the sign ins still in progress
+      // are discarded along with the one which was just completed.
+      await this.stateService.removeAllStates(request, response);
 
       // Return to base url if no return url was set
       if (!monoCloudState.returnUrl) {
