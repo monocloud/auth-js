@@ -5,6 +5,7 @@ import {
   now,
   parseSpaceSeparated,
   stringToArrayBuffer,
+  timingSafeEqual,
 } from './utils/internal';
 import { isUserInGroup } from './utils';
 import { clientAuth, keyToSubtle } from './client-auth';
@@ -476,7 +477,7 @@ export class MonoCloudOidcBackendClient extends MonoCloudOidcClientBase {
       );
     }
 
-    if (certHash !== clientCertHash) {
+    if (!timingSafeEqual(certHash, clientCertHash)) {
       throw new MonoCloudTokenError(
         'The certificate hash in the access token does not match the presented client certificate (certificate binding validation failed)'
       );

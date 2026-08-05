@@ -191,6 +191,32 @@ export const encodeBase64 = (input: string): string =>
 
 /**
  * @ignore
+ * Compares two strings without leaking their contents through timing.
+ *
+ * @param a - The first string.
+ * @param b - The second string.
+ *
+ * @returns `true` if the strings are equal.
+ */
+export const timingSafeEqual = (a: string, b: string): boolean => {
+  const aBytes = stringToArrayBuffer(a);
+  const bBytes = stringToArrayBuffer(b);
+
+  if (aBytes.length !== bBytes.length) {
+    return false;
+  }
+
+  let result = 0;
+
+  for (let i = 0; i < aBytes.length; i++) {
+    result |= aBytes[i] ^ bBytes[i];
+  }
+
+  return result === 0;
+};
+
+/**
+ * @ignore
  * Converts a Base64URL string back to a standard Base64 string with padding.
  *
  * @param input - The Base64URL string.
@@ -458,7 +484,8 @@ export const validateTokenHash = async (
   value: string,
   expectedHash: string,
   alg: SecurityAlgorithms
-): Promise<boolean> => (await hashTokenValue(value, alg)) === expectedHash;
+): Promise<boolean> =>
+  timingSafeEqual(await hashTokenValue(value, alg), expectedHash);
 
 /**
  * @ignore
