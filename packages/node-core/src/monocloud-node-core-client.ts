@@ -380,6 +380,7 @@ export class MonoCloudCoreClient {
 
       // Set the state cookie
       await this.stateService.setState(
+        request,
         response,
         monoCloudState,
         params.responseMode === 'form_post' ? 'none' : undefined
@@ -440,17 +441,6 @@ export class MonoCloudCoreClient {
         }
       }
 
-      // Get the state value
-      const monoCloudState = await this.stateService.getState(
-        request,
-        response
-      );
-
-      // Handle invalid state
-      if (!monoCloudState) {
-        throw new MonoCloudValidationError('Invalid Authentication State');
-      }
-
       let fullUrl = url;
 
       // check if the url is a relative url
@@ -466,6 +456,22 @@ export class MonoCloudCoreClient {
 
       // Get the parameters returned from the server
       const callbackParams = parseCallbackParams(payload);
+
+      // Get the state value for the transaction being completed. Each transaction
+      // is stored in its own cookie, so a callback which does not identify one
+      // cannot belong to a sign in started by this client.
+      const monoCloudState = callbackParams.state
+        ? await this.stateService.getState(
+            request,
+            response,
+            callbackParams.state
+          )
+        : undefined;
+
+      // Handle invalid state
+      if (!monoCloudState) {
+        throw new MonoCloudValidationError('Invalid Authentication State');
+      }
 
       if (callbackParams.state !== monoCloudState.state) {
         throw new MonoCloudValidationError('Invalid state');
@@ -515,6 +521,9 @@ export class MonoCloudCoreClient {
 
       // Set the user session
       await this.sessionService.setSession(request, response, session);
+
+      // Clean up the transactions which can no longer be completed
+      await this.stateService.removeStaleStates(request, response);
 
       // Return to base url if no return url was set
       if (!monoCloudState.returnUrl) {
@@ -747,6 +756,10 @@ export class MonoCloudCoreClient {
       }
 
       await this.sessionService.removeSession(request, response);
+
+      // Signing out ends the session for every tab, so the sign ins in progress
+      // are discarded as well to keep them from restoring it.
+      await this.stateService.removeAllStates(request, response);
 
       // Handle Federated Sign Out
       const isFederatedSignOut =

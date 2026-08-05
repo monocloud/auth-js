@@ -16,7 +16,7 @@ import {
   MonoCloudValidationError,
 } from '@monocloud/auth-core';
 import { decrypt, encrypt } from '@monocloud/auth-core/utils';
-import { now } from '@monocloud/auth-core/internal';
+import { now, sha256 } from '@monocloud/auth-core/internal';
 import { getOptions } from '../src/options/get-options';
 import {
   MonoCloudOptions,
@@ -50,6 +50,9 @@ const getConfiguredInstance = (
   return new MonoCloudCoreClient(getOptions({ ...defaultConfig, ...options }));
 };
 
+const stateCookieName = async (state: string): Promise<string> =>
+  `state.${await sha256(state)}`;
+
 const setStateCookieValue = async (
   cookies: any,
   authState?: Partial<MonoCloudState>,
@@ -64,7 +67,7 @@ const setStateCookieValue = async (
     scopes: 'openid profile read:customer',
     ...(authState ?? {}),
   };
-  cookies[cookieName ?? 'state'] = {
+  cookies[cookieName ?? (await stateCookieName(authState.state!))] = {
     value: await encrypt(
       JSON.stringify({ authState }),
       secret ?? testConfig.cookieSecret
@@ -72,17 +75,48 @@ const setStateCookieValue = async (
   };
 };
 
+const getStateCookie = (
+  res: TestRes
+): { name: string; value: string; options: any } => {
+  const entries = Object.entries(res.cookies).filter(
+    ([name]) => name === 'state' || name.startsWith('state.')
+  );
+
+  expect(entries.length).toBe(1);
+
+  return { name: entries[0][0], ...entries[0][1] };
+};
+
+const assertStateCookieCleared = async (
+  cookies: any,
+  state = 'peace'
+): Promise<void> => {
+  expect(cookies[await stateCookieName(state)]).toEqual({
+    value: '',
+    options: {
+      domain: undefined,
+      expires: new Date(0),
+      httpOnly: true,
+      path: '/',
+      sameSite: 'lax',
+      secure: true,
+    },
+  });
+};
+
 const assertStateCookieValue = async (
   res: TestRes,
   valueCheck: Record<string, any> = {}
 ): Promise<void> => {
-  const cookieValue = res.cookies.state.value;
+  const { name, value } = getStateCookie(res);
 
   const cookie = JSON.parse(
-    (await decrypt(cookieValue, testConfig.cookieSecret))!
+    (await decrypt(value, testConfig.cookieSecret))!
   ).authState;
 
   expect(cookie.codeVerifier.length).toBeGreaterThan(0);
+
+  expect(name).toBe(await stateCookieName(cookie.state));
 
   for (const key of Object.keys(valueCheck)) {
     expect(cookie[key]).toEqual(valueCheck[key]);
@@ -180,7 +214,7 @@ describe('MonoCloud Base Instance', () => {
           'https://example.org/api/auth/callback'
         );
 
-        assertStateCookieValue(res, {
+        await assertStateCookieValue(res, {
           nonce: search.nonce,
           state: search.state,
           returnUrl: encodeURIComponent(testConfig.appUrl),
@@ -214,7 +248,7 @@ describe('MonoCloud Base Instance', () => {
         expect(Object.keys(search).length).toBe(8);
         expect(search.scope).toBe('openid');
 
-        assertStateCookieValue(res, {
+        await assertStateCookieValue(res, {
           nonce: search.nonce,
           state: search.state,
           returnUrl: encodeURIComponent(testConfig.appUrl),
@@ -265,7 +299,7 @@ describe('MonoCloud Base Instance', () => {
           'https://three.com',
         ]);
 
-        assertStateCookieValue(res, {
+        await assertStateCookieValue(res, {
           nonce: url.searchParams.get('nonce'),
           state: url.searchParams.get('state'),
           returnUrl: encodeURIComponent(testConfig.appUrl),
@@ -308,7 +342,7 @@ describe('MonoCloud Base Instance', () => {
           'https://example.org/basepath/api/auth/callback'
         );
 
-        assertStateCookieValue(res, {
+        await assertStateCookieValue(res, {
           nonce: search.nonce,
           state: search.state,
           returnUrl: encodeURIComponent('https://example.org/basepath'),
@@ -354,7 +388,7 @@ describe('MonoCloud Base Instance', () => {
         expect(search.redirect_uri).toBe('testredirect');
         expect(search.max_age).toBe('10');
 
-        assertStateCookieValue(res, {
+        await assertStateCookieValue(res, {
           nonce: search.nonce,
           state: search.state,
           returnUrl: encodeURIComponent(testConfig.appUrl),
@@ -789,7 +823,7 @@ describe('MonoCloud Base Instance', () => {
 
         await instance.signIn(req, res);
 
-        assertStateCookieValue(res, {
+        await assertStateCookieValue(res, {
           appState: '{"customState":"something"}',
         });
       });
@@ -929,7 +963,7 @@ describe('MonoCloud Base Instance', () => {
           returnUrl: '/custom',
         });
 
-        assertStateCookieValue(res, {
+        await assertStateCookieValue(res, {
           returnUrl: encodeURIComponent('/custom'),
         });
       });
@@ -952,7 +986,7 @@ describe('MonoCloud Base Instance', () => {
 
           await instance.signIn(req, res);
 
-          assertStateCookieValue(res, {
+          await assertStateCookieValue(res, {
             returnUrl: encodeURIComponent(return_url),
           });
         }
@@ -975,7 +1009,36 @@ describe('MonoCloud Base Instance', () => {
 
         await instance.signIn(req, res);
 
-        expect(cookies.state.options.sameSite).toBe('none');
+        expect(getStateCookie(res).options.sameSite).toBe('none');
+      });
+
+      it('should discard the previous transaction when maxConcurrent is 1', async () => {
+        setupDiscovery({
+          authorization_endpoint: 'https://example.com/connect/authorize',
+        });
+        const instance = getConfiguredInstance({
+          state: { maxConcurrent: 1 },
+        });
+
+        const cookies = {} as any;
+
+        await instance.signIn(
+          new TestReq({ cookies, method: 'GET' }),
+          new TestRes(cookies)
+        );
+        await instance.signIn(
+          new TestReq({ cookies, method: 'GET' }),
+          new TestRes(cookies)
+        );
+
+        const stateNames = Object.keys(cookies).filter(name =>
+          name.startsWith('state.')
+        );
+
+        expect(stateNames.length).toBe(2);
+        expect(
+          stateNames.filter(name => cookies[name].value !== '')
+        ).toHaveLength(1);
       });
 
       ['DELETE', 'PUT', 'POST', 'PATCH', 'OPTIONS', 'TRACE', 'HEAD'].forEach(
@@ -1097,17 +1160,7 @@ describe('MonoCloud Base Instance', () => {
             await instance.callback(req, res);
 
             expect(res.res.redirectedUrl).toBe('https://example.org');
-            expect(cookies.state).toEqual({
-              value: '',
-              options: {
-                domain: undefined,
-                expires: new Date(0),
-                httpOnly: true,
-                path: '/',
-                sameSite: 'lax',
-                secure: true,
-              },
-            });
+            await assertStateCookieCleared(cookies);
           });
 
           it('should perform a successful callback (Body)', async () => {
@@ -1136,20 +1189,76 @@ describe('MonoCloud Base Instance', () => {
             await instance.callback(req, res);
 
             expect(res.res.redirectedUrl).toBe('https://example.org');
-            expect(cookies.state).toEqual({
-              value: '',
-              options: {
-                domain: undefined,
-                expires: new Date(0),
-                httpOnly: true,
-                path: '/',
-                sameSite: 'lax',
-                secure: true,
-              },
-            });
+            await assertStateCookieCleared(cookies);
           });
         }
       );
+
+      it('should complete a sign in started before another concurrent sign in', async () => {
+        nock('https://example.com')
+          .get('/.well-known/openid-configuration')
+          .reply(200, defaultMetadata);
+
+        setupTokenEndpoint();
+
+        const cookies = {} as any;
+
+        await setStateCookieValue(cookies);
+        await setStateCookieValue(cookies, { state: 'newer' });
+
+        const instance = getConfiguredInstance({
+          idTokenSigningAlg: 'ES256',
+        });
+
+        const res = new TestRes(cookies);
+
+        await instance.callback(
+          new TestReq({
+            cookies,
+            url: 'https://example.org/api/auth/callback?state=peace&code=code',
+            method: 'GET',
+          }),
+          res
+        );
+
+        expect(res.res.redirectedUrl).toBe('https://example.org');
+        await assertStateCookieCleared(cookies);
+
+        expect(cookies[await stateCookieName('newer')].value).not.toBe('');
+      });
+
+      it('should remove the transactions which can no longer be completed', async () => {
+        nock('https://example.com')
+          .get('/.well-known/openid-configuration')
+          .reply(200, defaultMetadata);
+
+        setupTokenEndpoint();
+
+        const cookies = {} as any;
+
+        await setStateCookieValue(cookies);
+        await setStateCookieValue(cookies, { state: 'valid' });
+
+        cookies[await stateCookieName('garbage')] = { value: 'not_a_state' };
+
+        const instance = getConfiguredInstance({
+          idTokenSigningAlg: 'ES256',
+        });
+
+        const res = new TestRes(cookies);
+
+        await instance.callback(
+          new TestReq({
+            cookies,
+            url: 'https://example.org/api/auth/callback?state=peace&code=code',
+            method: 'GET',
+          }),
+          res
+        );
+
+        expect(cookies[await stateCookieName('garbage')].value).toBe('');
+        expect(cookies[await stateCookieName('valid')].value).not.toBe('');
+      });
 
       it('should perform a successful callback (with base path)', async () => {
         nock('https://example.com')
@@ -1356,17 +1465,7 @@ describe('MonoCloud Base Instance', () => {
         await instance.callback(req, res);
 
         expect(res.res.redirectedUrl).toBe('https://example.org');
-        expect(cookies.state).toEqual({
-          value: '',
-          options: {
-            domain: undefined,
-            expires: new Date(0),
-            httpOnly: true,
-            path: '/',
-            sameSite: 'lax',
-            secure: true,
-          },
-        });
+        await assertStateCookieCleared(cookies);
 
         assertSessionCookieValue(cookies, {
           lifetime: { c: now(), u: now(), e: now() + 86400 },
@@ -1458,17 +1557,7 @@ describe('MonoCloud Base Instance', () => {
         });
 
         expect(res.res.redirectedUrl).toBe('https://example.org');
-        expect(cookies.state).toEqual({
-          value: '',
-          options: {
-            domain: undefined,
-            expires: new Date(0),
-            httpOnly: true,
-            path: '/',
-            sameSite: 'lax',
-            secure: true,
-          },
-        });
+        await assertStateCookieCleared(cookies);
 
         assertSessionCookieValue(cookies, {
           lifetime: { c: now(), u: now(), e: now() + 86400 },
@@ -1499,6 +1588,32 @@ describe('MonoCloud Base Instance', () => {
         const cookies = {} as any;
 
         await setStateCookieValue(cookies);
+
+        const instance = getConfiguredInstance();
+
+        const req = new TestReq({
+          cookies,
+          url: '/api/auth/callback?state=wrong&code=code',
+          method: 'GET',
+        });
+        const res = new TestRes(cookies);
+
+        await instance.callback(req, res);
+
+        expect(res.res.statusCode).toBe(500);
+      });
+
+      it('should return internal server error if the state cookie holds another transaction', async () => {
+        setupDiscovery();
+
+        const cookies = {} as any;
+
+        await setStateCookieValue(
+          cookies,
+          undefined,
+          undefined,
+          await stateCookieName('wrong')
+        );
 
         const instance = getConfiguredInstance();
 
@@ -1614,17 +1729,7 @@ describe('MonoCloud Base Instance', () => {
         await instance.callback(req, res);
 
         expect(res.res.redirectedUrl).toBe('https://example.org');
-        expect(cookies.state).toEqual({
-          value: '',
-          options: {
-            domain: undefined,
-            expires: new Date(0),
-            httpOnly: true,
-            path: '/',
-            sameSite: 'lax',
-            secure: true,
-          },
-        });
+        await assertStateCookieCleared(cookies);
 
         assertSessionCookieValue(cookies, {
           lifetime: { c: now(), u: now(), e: now() + 86400 },
@@ -2728,6 +2833,49 @@ describe('MonoCloud Base Instance', () => {
             secure: true,
           },
         });
+      });
+
+      it('should discard the in-flight sign in transactions', async () => {
+        setupDiscovery({
+          end_session_endpoint: 'https://example.com/connect/endsession',
+        });
+
+        const cookies = {} as any;
+
+        await setSessionCookieValue(cookies, {
+          session: {},
+          lifetime: { c: now(), e: now() + 86400, u: now() },
+        });
+
+        await setStateCookieValue(cookies);
+        await setStateCookieValue(cookies, { state: 'another' });
+
+        const instance = getConfiguredInstance();
+
+        const req = new TestReq({ cookies, method: 'GET' });
+
+        await instance.signOut(req, new TestRes(cookies));
+
+        await assertStateCookieCleared(cookies);
+        await assertStateCookieCleared(cookies, 'another');
+      });
+
+      it('should not discard the in-flight sign in transactions without a session', async () => {
+        setupDiscovery({
+          end_session_endpoint: 'https://example.com/connect/endsession',
+        });
+
+        const cookies = {} as any;
+
+        await setStateCookieValue(cookies);
+
+        const instance = getConfiguredInstance();
+
+        const req = new TestReq({ cookies, method: 'GET' });
+
+        await instance.signOut(req, new TestRes(cookies));
+
+        expect(cookies[await stateCookieName('peace')].value).not.toBe('');
       });
 
       it('should execute custom onError function if provided', async () => {

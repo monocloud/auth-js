@@ -22,6 +22,7 @@ export type {
   SameSiteValues,
   SessionLifetime,
   MonoCloudCookieOptions,
+  MonoCloudStateCookieOptions,
   MonoCloudSessionOptions,
 } from './types';
 
