@@ -65,7 +65,7 @@
 <div class="tsd-comment tsd-typography"><p>List of ID token claims to remove before storing the session.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/core/src/types.ts#L1403">packages/core/src/types.ts:1403</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/core/src/types.ts#L1406">packages/core/src/types.ts:1406</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="idtokenclockskew"><code class="tsd-tag">Optional</code><span>id<wbr/>Token<wbr/>Clock<wbr/>Skew</span><a href="#idtokenclockskew" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">idTokenClockSkew</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span></div>
@@ -76,10 +76,17 @@
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="idtokenclocktolerance"><code class="tsd-tag">Optional</code><span>id<wbr/>Token<wbr/>Clock<wbr/>Tolerance</span><a href="#idtokenclocktolerance" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">idTokenClockTolerance</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span></div>
-<div class="tsd-comment tsd-typography"><p>Additional allowed clock tolerance (in seconds) when validating time-based ID token claims such as <code>exp</code>, <code>iat</code>, and <code>nbf</code>.</p>
-</div><aside class="tsd-sources">
+<div class="tsd-comment tsd-typography"><p>Additional allowed clock tolerance (in seconds) when validating time-based ID token claims
+(<code>exp</code> and <code>nbf</code>) and the elapsed-authentication (<code>max_age</code>) check.</p>
+</div>
+<div class="tsd-comment tsd-typography">
+<div class="tsd-tag-defaultValue">
+<h4 class="tsd-anchor-link" id="default-value-1">Default Value<a href="#default-value-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h4><pre><code class="ts"><span class="hl-8">60</span><span class="hl-1"> (</span><span class="hl-4">seconds</span><span class="hl-1">)</span>
+</code><button type="button">Copy</button></pre>
+
+</div></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/core/src/types.ts#L1398">packages/core/src/types.ts:1398</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/core/src/types.ts#L1401">packages/core/src/types.ts:1401</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="idtokenmaxage"><code class="tsd-tag">Optional</code><span>id<wbr/>Token<wbr/>Max<wbr/>Age</span><a href="#idtokenmaxage" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">idTokenMaxAge</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span></div>
@@ -108,7 +115,7 @@
 <div class="tsd-comment tsd-typography"><p>Callback invoked before a session is created or updated. Allows customization or enrichment of the session.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/core/src/types.ts#L1408">packages/core/src/types.ts:1408</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/core/src/types.ts#L1411">packages/core/src/types.ts:1411</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="validateidtoken"><code class="tsd-tag">Optional</code><span>validate<wbr/>Id<wbr/>Token</span><a href="#validateidtoken" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">validateIdToken</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span></div>
@@ -116,7 +123,7 @@
 </div>
 <div class="tsd-comment tsd-typography">
 <div class="tsd-tag-defaultValue">
-<h4 class="tsd-anchor-link" id="default-value-1">Default Value<a href="#default-value-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h4><pre><code class="ts"><span class="hl-5">true</span>
+<h4 class="tsd-anchor-link" id="default-value-2">Default Value<a href="#default-value-2" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h4><pre><code class="ts"><span class="hl-5">true</span>
 </code><button type="button">Copy</button></pre>
 
 </div></div><aside class="tsd-sources">

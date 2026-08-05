@@ -52,6 +52,7 @@ category: Other
 - [MonoCloudSessionOptions](/sdks/nodejs-core/api-reference/types/monocloudsessionoptions)
 - [MonoCloudSessionOptionsBase](/sdks/nodejs-core/api-reference/types/monocloudsessionoptionsbase)
 - [MonoCloudSessionStore](/sdks/nodejs-core/api-reference/types/monocloudsessionstore)
+- [MonoCloudStateCookieOptions](/sdks/nodejs-core/api-reference/types/monocloudstatecookieoptions)
 - [MonoCloudStateOptions](/sdks/nodejs-core/api-reference/types/monocloudstateoptions)
 - [MonoCloudStatePartialOptions](/sdks/nodejs-core/api-reference/types/monocloudstatepartialoptions)
 - [MonoCloudTokens](/sdks/nodejs-core/api-reference/types/monocloudtokens)

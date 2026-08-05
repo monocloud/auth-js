@@ -150,12 +150,13 @@ Number of seconds to adjust the current time to account for clock differences.
 ## clockTolerance
 > `optional` **clockTolerance**: `number`
 
-Additional time tolerance in seconds for time-based claim validation.
+Additional time tolerance (in seconds) applied when validating time-based claims
+(`exp` and `nbf`) on access tokens.
 
 ### Default Value
 
 ```ts
-300;
+60;
 ```
 
 ### Inherited from
