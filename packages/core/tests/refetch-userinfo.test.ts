@@ -107,6 +107,64 @@ describe('MonoCloudOidcClient.refetchUserInfo()', () => {
     });
   });
 
+  it('should reject scopes that only contain openid as a substring', async () => {
+    const client = new MonoCloudOidcClient('example.com', 'clientId');
+
+    const promise = client.refetchUserInfo(
+      {
+        accessToken: 'at',
+        scopes: 'openid-federation profile',
+        accessTokenExpiration: 9999999999,
+      },
+      {
+        user: { sub: 'subject_id' },
+        accessTokens: [
+          {
+            accessToken: 'at',
+            scopes: 'openid-federation profile',
+            accessTokenExpiration: 9999999999,
+          },
+        ],
+      }
+    );
+
+    await assertError(
+      promise,
+      MonoCloudValidationError,
+      'Fetching userinfo requires the openid scope'
+    );
+  });
+
+  it('should accept openid when it is not the first scope', async () => {
+    const fetchSpy = fetchBuilder()
+      .configureMetadata()
+      .configureUserinfo({ claims: { sub: 'subject', name: 'user' } })
+      .createSpy();
+
+    const client = new MonoCloudOidcClient('example.com', 'clientId');
+
+    const result = await client.refetchUserInfo(
+      {
+        accessToken: 'at',
+        scopes: 'profile openid',
+        accessTokenExpiration: 9999999999,
+      },
+      {
+        user: { sub: 'subject' },
+        accessTokens: [
+          {
+            accessToken: 'at',
+            scopes: 'profile openid',
+            accessTokenExpiration: 9999999999,
+          },
+        ],
+      }
+    );
+
+    fetchSpy.assert();
+    expect(result.user).toEqual({ sub: 'subject', name: 'user' });
+  });
+
   it('should give a failed response when the session does not contain scope openid', async () => {
     const client = new MonoCloudOidcClient('example.com', 'clientId');
 

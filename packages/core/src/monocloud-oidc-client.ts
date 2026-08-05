@@ -5,6 +5,7 @@ import {
   getPublicSigKeyFromIssuerJwks,
   now,
   parseSpaceSeparated,
+  parseSpaceSeparatedSet,
   stringToArrayBuffer,
 } from './utils/internal';
 import { clientAuth, keyToSubtle } from './client-auth';
@@ -697,7 +698,10 @@ export class MonoCloudOidcClient extends MonoCloudOidcClientBase {
 
     let userinfo: MonoCloudUser | undefined;
 
-    if (options?.fetchUserInfo && tokens.scope?.includes('openid')) {
+    if (
+      options?.fetchUserInfo &&
+      parseSpaceSeparatedSet(tokens.scope).has('openid')
+    ) {
       userinfo = await this.userinfo(tokens.access_token);
     }
 
@@ -756,7 +760,7 @@ export class MonoCloudOidcClient extends MonoCloudOidcClientBase {
    *
    * @returns Updated session with the latest userinfo.
    *
-   * @throws {@link MonoCloudValidationError} - When the token scope does not contain openid scope
+   * @throws {@link MonoCloudValidationError} - When the token scope does not contain `openid` scope
    *
    * @throws {@link MonoCloudOPError} - When the OpenID Provider returns a standardized
    * OAuth 2.0 error response.
@@ -772,7 +776,7 @@ export class MonoCloudOidcClient extends MonoCloudOidcClientBase {
     session: MonoCloudSession,
     options?: RefetchUserInfoOptions
   ): Promise<MonoCloudSession> {
-    if (!accessToken.scopes?.includes('openid')) {
+    if (!parseSpaceSeparatedSet(accessToken.scopes).has('openid')) {
       throw new MonoCloudValidationError(
         'Fetching userinfo requires the openid scope'
       );
@@ -849,7 +853,10 @@ export class MonoCloudOidcClient extends MonoCloudOidcClientBase {
 
     let userinfo: MonoCloudUser | undefined;
 
-    if (options?.fetchUserInfo && tokens.scope?.includes('openid')) {
+    if (
+      options?.fetchUserInfo &&
+      parseSpaceSeparatedSet(tokens.scope).has('openid')
+    ) {
       userinfo = await this.userinfo(tokens.access_token);
     }
 
