@@ -1142,14 +1142,18 @@ export class MonoCloudOidcClient extends MonoCloudOidcClientBase {
       }
     }
 
-    if (
-      typeof claims.auth_time === 'number' &&
-      typeof maxAge === 'number' &&
-      claims.auth_time + maxAge < current - clockTolerance
-    ) {
-      throw new MonoCloudTokenError(
-        'Too much time has elapsed since the last End-User authentication'
-      );
+    if (typeof maxAge === 'number') {
+      if (typeof claims.auth_time !== 'number') {
+        throw new MonoCloudTokenError(
+          'Missing or invalid JWT "auth_time" (authentication time) claim, required when max_age is requested'
+        );
+      }
+
+      if (claims.auth_time + maxAge < current - clockTolerance) {
+        throw new MonoCloudTokenError(
+          'Too much time has elapsed since the last End-User authentication'
+        );
+      }
     }
 
     if (claims.iss !== this.tenantDomain) {
