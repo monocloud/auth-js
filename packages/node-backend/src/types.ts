@@ -164,6 +164,12 @@ export interface IIntrospectionCache {
    * @returns The cached claims, or `null`/`undefined` if the entry does not exist or has expired.
    */
   get(key: string): Promise<AccessTokenClaims | null | undefined>;
+  /**
+   * Removes an entry from the cache.
+   *
+   * @param key - The cache key to delete.
+   */
+  delete(key: string): Promise<void>;
 }
 
 /**
