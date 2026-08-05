@@ -258,10 +258,6 @@ export class MonoCloudOidcBackendClient extends MonoCloudOidcClientBase {
       throw new MonoCloudTokenError('Unexpected JWT "crit" header parameter');
     }
 
-    if (header.typ && header.typ !== 'at+jwt') {
-      throw new MonoCloudTokenError('Invalid token type');
-    }
-
     const binary = decodeBase64Url(encodedSignature);
 
     const signature = new Uint8Array(binary.length);

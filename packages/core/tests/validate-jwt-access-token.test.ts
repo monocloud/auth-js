@@ -129,65 +129,42 @@ describe('MonoCloudOidcBackendClient.validateJwtAccessToken()', () => {
       );
     });
 
-    it('should not validate a JWT with an unsupported typ header', async () => {
-      const client = new MonoCloudOidcBackendClient(
-        'example.com',
-        'https://api.example.com',
-        defaultClientOptions
-      );
+    it.each(['at+jwt', 'JWT'])(
+      'should allow typ header value %s',
+      async typ => {
+        const cryptoSpy = vi
+          .spyOn(crypto.subtle, 'verify')
+          .mockReturnValue(Promise.resolve(true));
 
-      const jwt = buildJwt(
-        {
-          alg: 'RS256',
-          typ: 'JWT',
-        },
-        {
-          iss: 'https://example.com',
-          aud: 'https://api.example.com',
-          sub: 'user123',
-          exp: now() + 60,
-        }
-      );
+        const jwt = buildJwt(
+          {
+            alg: 'RS256',
+            typ,
+          },
+          {
+            iss: 'https://example.com',
+            aud: 'https://api.example.com',
+            sub: 'sub',
+            exp: now() + 60,
+          }
+        );
 
-      await assertTokenError(
-        client.validateJwtAccessToken(jwt),
-        'Invalid token type'
-      );
-    });
+        const client = new MonoCloudOidcBackendClient(
+          'example.com',
+          'https://api.example.com',
+          defaultClientOptions
+        );
 
-    it('should allow typ header value at+jwt', async () => {
-      const cryptoSpy = vi
-        .spyOn(crypto.subtle, 'verify')
-        .mockReturnValue(Promise.resolve(true));
+        const result = await client.validateJwtAccessToken(jwt, {
+          jwks: { keys: [idTokenPublicKey] },
+        });
 
-      const jwt = buildJwt(
-        {
-          alg: 'RS256',
-          typ: 'at+jwt',
-        },
-        {
-          iss: 'https://example.com',
-          aud: 'https://api.example.com',
-          sub: 'sub',
-          exp: now() + 60,
-        }
-      );
+        expect(result.sub).toBe('sub');
+        expect(result.iss).toBe('https://example.com');
 
-      const client = new MonoCloudOidcBackendClient(
-        'example.com',
-        'https://api.example.com',
-        defaultClientOptions
-      );
-
-      const result = await client.validateJwtAccessToken(jwt, {
-        jwks: { keys: [idTokenPublicKey] },
-      });
-
-      expect(result.sub).toBe('sub');
-      expect(result.iss).toBe('https://example.com');
-
-      cryptoSpy.mockRestore();
-    });
+        cryptoSpy.mockRestore();
+      }
+    );
   });
 
   describe('signature validation', () => {
