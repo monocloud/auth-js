@@ -123,6 +123,34 @@ describe('MonoCloudOidcClient.getJwks()', () => {
     });
   });
 
+  it('should keep the cached jwks when a forced refresh fails', async () => {
+    const fetchSpy = fetchBuilder()
+      .configureMetadata()
+      .configureJwks({ jwks })
+      .configureJwks({ responseCode: 500 })
+      .createSpy();
+
+    const dateSpy = vi.spyOn(Date, 'now').mockReturnValue(10_000);
+
+    const client = new MonoCloudOidcClient('example.com', 'clientId');
+
+    const result = await client.getJwks();
+    expect(result).toEqual(jwks);
+
+    await assertError(
+      client.getJwks(true),
+      MonoCloudHttpError,
+      'Error while fetching JWKS. Unexpected status code: 500'
+    );
+
+    const result2 = await client.getJwks();
+
+    dateSpy.mockClear();
+
+    fetchSpy.assert();
+    expect(result2).toEqual(jwks);
+  });
+
   it('should throw an error if the jwks endpoint is not found in the metadata', async () => {
     const fetchSpy = fetchBuilder()
       .configureMetadata({
