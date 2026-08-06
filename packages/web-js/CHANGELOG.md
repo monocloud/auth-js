@@ -1,5 +1,20 @@
 # @monocloud/auth-web-js
 
+## 0.2.4
+
+### Patch Changes
+
+- 7687569: - Compare the certificate binding hash (`cnf` / `x5t#S256`) during access token validation and the ID token `at_hash` / `c_hash` values using a timing safe, non-short-circuiting comparison (matching the semantics of .NET's `CryptographicOperations.FixedTimeEquals` and Go's `crypto/subtle.ConstantTimeCompare`) instead of `===`.
+- 7687569: - Match the `openid` scope exactly instead of substring-testing the granted scope string.
+- Updated dependencies [7687569]
+- Updated dependencies [7687569]
+- Updated dependencies [7687569]
+- Updated dependencies [7687569]
+- Updated dependencies [7687569]
+- Updated dependencies [7687569]
+- Updated dependencies [7687569]
+  - @monocloud/auth-core@0.2.4
+
 ## 0.2.3
 
 ### Patch Changes

@@ -1,5 +1,13 @@
 # @monocloud/auth-react
 
+## 0.2.4
+
+### Patch Changes
+
+- Updated dependencies [7687569]
+- Updated dependencies [7687569]
+  - @monocloud/auth-web-js@0.2.4
+
 ## 0.2.3
 
 ### Patch Changes

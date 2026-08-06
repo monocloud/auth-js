@@ -1,5 +1,22 @@
 # @monocloud/backend-node
 
+## 0.3.5
+
+### Patch Changes
+
+- 7687569: - Correct the documented default for `MonoCloudOidcBackendClientOptions.clockTolerance`.
+- 7687569: - JWT access token validation no longer rejects tokens based on the `typ` header. Previously any token with a `typ` other than `at+jwt` was rejected with an `Invalid token type` error. This relaxes the tokens accepted by `protectApi()`; all other validation (issuer, audience, expiry, algorithm and signature) is unchanged.
+- 7687569: - Compare the certificate binding hash (`cnf` / `x5t#S256`) during access token validation and the ID token `at_hash` / `c_hash` values using a timing safe, non-short-circuiting comparison (matching the semantics of .NET's `CryptographicOperations.FixedTimeEquals` and Go's `crypto/subtle.ConstantTimeCompare`) instead of `===`.
+- 7687569: - Restore the `delete(key: string): Promise<void>` method on the `IIntrospectionCache` interface, removed in 0.3.4. Custom cache adapters must implement `delete` again — options validation enforces it at client construction. Adapters that kept their `delete` method are unaffected.
+- Updated dependencies [7687569]
+- Updated dependencies [7687569]
+- Updated dependencies [7687569]
+- Updated dependencies [7687569]
+- Updated dependencies [7687569]
+- Updated dependencies [7687569]
+- Updated dependencies [7687569]
+  - @monocloud/auth-core@0.2.4
+
 ## 0.3.4
 
 ### Patch Changes
