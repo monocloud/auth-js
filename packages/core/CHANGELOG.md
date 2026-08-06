@@ -1,5 +1,18 @@
 # @monocloud/auth-core
 
+## 0.2.4
+
+### Patch Changes
+
+- 7687569: - Build the `client_secret_basic` `Authorization` header from the credential's UTF-8 bytes instead of calling `btoa` directly, which threw `InvalidCharacterError` for any client id or secret containing a character outside Latin-1.
+  - Supplying a JWK as the client secret together with `client_secret_basic` now throws instead of silently sending `[object Object]` as the password.
+- 7687569: - Correct the documented default for `MonoCloudOidcBackendClientOptions.clockTolerance`.
+- 7687569: - Enforce `max_age` when the ID token omits `auth_time`.
+- 7687569: - JWT access token validation no longer rejects tokens based on the `typ` header. Previously any token with a `typ` other than `at+jwt` was rejected with an `Invalid token type` error. This relaxes the tokens accepted by `protectApi()`; all other validation (issuer, audience, expiry, algorithm and signature) is unchanged.
+- 7687569: - Compare the certificate binding hash (`cnf` / `x5t#S256`) during access token validation and the ID token `at_hash` / `c_hash` values using a timing safe, non-short-circuiting comparison (matching the semantics of .NET's `CryptographicOperations.FixedTimeEquals` and Go's `crypto/subtle.ConstantTimeCompare`) instead of `===`.
+- 7687569: - Keep the cached issuer metadata and JSON Web Key Set when a forced refresh (`getMetadata(true)` / `getJwks(true)`) fails.
+- 7687569: - Match the `openid` scope exactly instead of substring-testing the granted scope string.
+
 ## 0.2.3
 
 ### Patch Changes
