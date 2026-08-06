@@ -1,4 +1,5 @@
 import {
+  encodeBase64,
   encodeBase64Url,
   randomBytes,
   stringToArrayBuffer,
@@ -238,9 +239,13 @@ export const clientAuth = async (
   jwtAssertionSkew?: number
 ): Promise<void> => {
   switch (true) {
-    case method === 'client_secret_basic' && !!headers: {
+    case method === 'client_secret_basic' &&
+      !!headers &&
+      (clientSecret === undefined || typeof clientSecret === 'string'): {
       // eslint-disable-next-line no-param-reassign
-      headers.authorization = `Basic ${btoa(`${clientId}:${clientSecret ?? ''}`)}`;
+      headers.authorization = `Basic ${encodeBase64(
+        `${clientId}:${clientSecret ?? ''}`
+      )}`;
       break;
     }
 

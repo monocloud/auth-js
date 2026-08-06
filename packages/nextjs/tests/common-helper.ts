@@ -3,6 +3,7 @@ import { UrlWithParsedQuery, parse } from 'url';
 import { NextRequest, NextResponse } from 'next/server';
 import type { MonoCloudSession } from '@monocloud/auth-node-core';
 import { encrypt, decrypt } from '@monocloud/auth-node-core/utils';
+import { sha256 } from '@monocloud/auth-node-core/internal';
 
 export const now = (): number => Math.floor(Date.now() / 1000);
 
@@ -25,6 +26,9 @@ export const deleteDefaultConfig = (): void => {
   process.env.MONOCLOUD_AUTH_SCOPES = undefined;
   process.env.MONOCLOUD_AUTH_ALLOW_QUERY_PARAM_OVERRIDES = undefined;
 };
+
+export const isStateCookie = (name: string): boolean =>
+  name === 'state' || name.startsWith('state.');
 
 export interface ParsedCookie {
   value: string | undefined;
@@ -71,7 +75,7 @@ export class TestPageRes implements TestResponse {
   get stateCookie(): ParsedCookie {
     const stateCookie = this.cookieJar
       .getCookiesSync(this.baseUrl)
-      .find(x => x.key === 'state');
+      .find(x => isStateCookie(x.key));
 
     return {
       value: stateCookie?.value,
@@ -141,7 +145,9 @@ export class TestAppRes implements TestResponse {
   }
 
   get stateCookie(): ParsedCookie {
-    const stateCookie = this.res.cookies.get('state');
+    const stateCookie = this.res.cookies
+      .getAll()
+      .find(x => isStateCookie(x.name));
 
     return {
       value: stateCookie?.value,
@@ -212,13 +218,15 @@ export const setStateCookie = async (
     process.env.MONOCLOUD_AUTH_COOKIE_SECRET ?? ''
   );
 
+  const name = `state.${await sha256(authState.state)}`;
+
   if (reqOrCookieJar instanceof CookieJar) {
-    reqOrCookieJar.setCookieSync(`state=${value}`, currentUrl);
+    reqOrCookieJar.setCookieSync(`${name}=${value}`, currentUrl);
 
     return;
   }
 
-  reqOrCookieJar.cookies.set('state', value);
+  reqOrCookieJar.cookies.set(name, value);
 };
 
 export const defaultSessionCookieValue = {

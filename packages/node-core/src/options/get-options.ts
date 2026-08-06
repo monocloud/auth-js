@@ -88,8 +88,10 @@ export const getOptions = (
     process.env.MONOCLOUD_AUTH_STATE_COOKIE_SECURE;
   const MONOCLOUD_AUTH_STATE_COOKIE_SAME_SITE =
     process.env.MONOCLOUD_AUTH_STATE_COOKIE_SAME_SITE;
-  const MONOCLOUD_AUTH_STATE_COOKIE_PERSISTENT =
-    process.env.MONOCLOUD_AUTH_STATE_COOKIE_PERSISTENT;
+  const MONOCLOUD_AUTH_STATE_DURATION =
+    process.env.MONOCLOUD_AUTH_STATE_DURATION;
+  const MONOCLOUD_AUTH_STATE_MAX_CONCURRENT =
+    process.env.MONOCLOUD_AUTH_STATE_MAX_CONCURRENT;
   const MONOCLOUD_AUTH_ID_TOKEN_SIGNING_ALG =
     process.env.MONOCLOUD_AUTH_ID_TOKEN_SIGNING_ALG;
   const MONOCLOUD_AUTH_FILTERED_ID_TOKEN_CLAIMS =
@@ -260,11 +262,15 @@ export const getOptions = (
           options?.state?.cookie?.sameSite ??
           (MONOCLOUD_AUTH_STATE_COOKIE_SAME_SITE as SameSiteValues) ??
           DEFAULT_OPTIONS.state.cookie.sameSite,
-        persistent:
-          options?.state?.cookie?.persistent ??
-          getBoolean(MONOCLOUD_AUTH_STATE_COOKIE_PERSISTENT) ??
-          DEFAULT_OPTIONS.state.cookie.persistent,
       },
+      duration:
+        options?.state?.duration ??
+        getNumber(MONOCLOUD_AUTH_STATE_DURATION) ??
+        DEFAULT_OPTIONS.state.duration,
+      maxConcurrent:
+        options?.state?.maxConcurrent ??
+        getNumber(MONOCLOUD_AUTH_STATE_MAX_CONCURRENT) ??
+        DEFAULT_OPTIONS.state.maxConcurrent,
     },
     idTokenSigningAlg:
       options?.idTokenSigningAlg ??

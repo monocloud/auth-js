@@ -123,8 +123,6 @@ export class MonoCloudOidcClientBase {
       return this.metadata;
     }
 
-    this.metadata = undefined;
-
     let metadata: IssuerMetadata;
 
     if (this.metadataResolver) {
@@ -167,8 +165,6 @@ export class MonoCloudOidcClientBase {
     if (!forceRefresh && this.jwks && this.jwksCacheExpiry > now()) {
       return this.jwks;
     }
-
-    this.jwks = undefined;
 
     let jwks: Jwks;
 

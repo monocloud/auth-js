@@ -1393,7 +1393,10 @@ export interface AuthenticateOptions {
   idTokenClockSkew?: number;
 
   /**
-   * Additional allowed clock tolerance (in seconds) when validating time-based ID token claims such as `exp`, `iat`, and `nbf`.
+   * Additional allowed clock tolerance (in seconds) when validating time-based ID token claims
+   * (`exp` and `nbf`) and the elapsed-authentication (`max_age`) check.
+   *
+   * @defaultValue 60 (seconds)
    */
   idTokenClockTolerance?: number;
 
@@ -1439,7 +1442,10 @@ export interface RefreshSessionOptions {
   idTokenClockSkew?: number;
 
   /**
-   * Additional allowed clock tolerance (in seconds) when validating time-based ID token claims such as `exp`, `iat`, and `nbf`.
+   * Additional allowed clock tolerance (in seconds) when validating time-based ID token claims
+   * (`exp` and `nbf`) and the elapsed-authentication (`max_age`) check.
+   *
+   * @defaultValue 60 (seconds)
    */
   idTokenClockTolerance?: number;
 
@@ -1711,8 +1717,10 @@ export interface MonoCloudOidcBackendClientOptions extends MonoCloudClientOption
   clockSkew?: number;
 
   /**
-   * Additional time tolerance in seconds for time-based claim validation.
-   * @defaultValue 300
+   * Additional time tolerance (in seconds) applied when validating time-based claims
+   * (`exp` and `nbf`) on access tokens.
+   *
+   * @defaultValue 60
    */
   clockTolerance?: number;
 

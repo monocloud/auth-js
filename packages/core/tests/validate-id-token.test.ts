@@ -593,4 +593,84 @@ describe('MonoCloudOidcClient.validateIdToken() clock tolerance', () => {
       'Too much time has elapsed since the last End-User authentication'
     );
   });
+
+  it('should reject an id token without auth_time when max_age was requested', async () => {
+    const idToken = await generateIdToken({ nonce: 'nonce' });
+
+    const client = new MonoCloudOidcClient('example.com', 'clientId');
+
+    const promise = client.validateIdToken(
+      idToken,
+      [idTokenPublicKey],
+      0,
+      60,
+      60,
+      'nonce'
+    );
+
+    await assertTokenError(
+      promise,
+      'Missing or invalid JWT "auth_time" (authentication time) claim, required when max_age is requested'
+    );
+  });
+
+  it('should reject an id token with a non-numeric auth_time when max_age was requested', async () => {
+    const idToken = await generateIdToken({
+      claims: { auth_time: 'yesterday' },
+      nonce: 'nonce',
+    });
+
+    const client = new MonoCloudOidcClient('example.com', 'clientId');
+
+    const promise = client.validateIdToken(
+      idToken,
+      [idTokenPublicKey],
+      0,
+      60,
+      60,
+      'nonce'
+    );
+
+    await assertTokenError(
+      promise,
+      'Missing or invalid JWT "auth_time" (authentication time) claim, required when max_age is requested'
+    );
+  });
+
+  it('should ignore a missing auth_time when max_age was not requested', async () => {
+    const idToken = await generateIdToken({ nonce: 'nonce' });
+
+    const client = new MonoCloudOidcClient('example.com', 'clientId');
+
+    const result = await client.validateIdToken(
+      idToken,
+      [idTokenPublicKey],
+      0,
+      60,
+      undefined,
+      'nonce'
+    );
+
+    expect(result.sub).toBe('sub');
+  });
+
+  it('should ignore a non-numeric auth_time when max_age was not requested', async () => {
+    const idToken = await generateIdToken({
+      claims: { auth_time: 'yesterday' },
+      nonce: 'nonce',
+    });
+
+    const client = new MonoCloudOidcClient('example.com', 'clientId');
+
+    const result = await client.validateIdToken(
+      idToken,
+      [idTokenPublicKey],
+      0,
+      60,
+      undefined,
+      'nonce'
+    );
+
+    expect(result.sub).toBe('sub');
+  });
 });

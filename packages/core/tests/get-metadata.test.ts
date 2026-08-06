@@ -115,6 +115,42 @@ describe('MonoCloudOidcClient.getMetadata()', () => {
     expect(result2).toEqual({});
   });
 
+  it('should keep the cached metadata when a forced refresh fails', async () => {
+    const fetchSpy = vi
+      .spyOn(globalThis, 'fetch')
+      .mockImplementationOnce(() =>
+        Promise.resolve(
+          new Response(JSON.stringify(defaultMetadata), {
+            headers: { 'content-type': 'application/json' },
+          })
+        )
+      )
+      .mockImplementationOnce(() =>
+        Promise.resolve(new Response('', { status: 500 }))
+      );
+
+    const dateSpy = vi.spyOn(Date, 'now').mockReturnValue(10_000);
+
+    const client = new MonoCloudOidcClient('example.com', 'clientId');
+
+    const result = await client.getMetadata();
+    expect(result).toEqual(defaultMetadata);
+
+    await assertError(
+      client.getMetadata(true),
+      MonoCloudHttpError,
+      'Error while fetching metadata. Unexpected status code: 500'
+    );
+
+    const result2 = await client.getMetadata();
+
+    expect(result2).toEqual(defaultMetadata);
+    expect(fetchSpy).toHaveBeenCalledTimes(2);
+
+    dateSpy.mockClear();
+    fetchSpy.mockRestore();
+  });
+
   it('should use metadataResolver instead of fetching the discovery document', async () => {
     const fetchSpy = vi.spyOn(globalThis, 'fetch').mockImplementation(() => {
       throw new Error('discovery should not be fetched');

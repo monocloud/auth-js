@@ -60,6 +60,7 @@ category: Other
 - [MonoCloudSessionOptions](/sdks/nextjs/api-reference/types/monocloudsessionoptions)
 - [MonoCloudSessionOptionsBase](/sdks/nextjs/api-reference/types/monocloudsessionoptionsbase)
 - [MonoCloudSessionStore](/sdks/nextjs/api-reference/types/monocloudsessionstore)
+- [MonoCloudStateCookieOptions](/sdks/nextjs/api-reference/types/monocloudstatecookieoptions)
 - [MonoCloudStateOptions](/sdks/nextjs/api-reference/types/monocloudstateoptions)
 - [MonoCloudStatePartialOptions](/sdks/nextjs/api-reference/types/monocloudstatepartialoptions)
 - [MonoCloudTokens](/sdks/nextjs/api-reference/types/monocloudtokens)

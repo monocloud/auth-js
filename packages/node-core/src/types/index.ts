@@ -188,10 +188,21 @@ export interface MonoCloudCookieOptions {
 
   /**
    * Determines whether the cookie persists across browser restarts.
-   * Defaults to `true` for session cookies and `false` for state cookies.
+   *
+   * @defaultValue true
    */
   persistent: boolean;
 }
+
+/**
+ * Configuration options for the authentication state cookie.
+ *
+ * @category Types
+ */
+export type MonoCloudStateCookieOptions = Omit<
+  MonoCloudCookieOptions,
+  'persistent'
+>;
 
 /**
  * Configuration options for authentication sessions.
@@ -259,7 +270,23 @@ export interface MonoCloudStatePartialOptions {
    *
    * This cookie temporarily stores authorization transaction data required to validate the callback response and prevent replay or CSRF attacks.
    */
-  cookie?: Partial<MonoCloudCookieOptions>;
+  cookie?: Partial<MonoCloudStateCookieOptions>;
+
+  /**
+   * The lifetime of an authorization transaction in seconds.
+   *
+   * @defaultValue 900 (15 minutes)
+   */
+  duration?: number;
+
+  /**
+   * The maximum number of concurrent sign-in transactions retained.
+   *
+   * When a new sign in would exceed the limit, the earliest pending transactions are evicted first. Set to `1` for sequential sign-ins, where starting a new sign in discards the previous pending one. Must be between 1 and 20.
+   *
+   * @defaultValue 5
+   */
+  maxConcurrent?: number;
 }
 
 /**
@@ -273,7 +300,23 @@ export interface MonoCloudStateOptions {
    *
    * This cookie temporarily stores authorization transaction data required to validate the callback response and prevent replay or CSRF attacks.
    */
-  cookie: MonoCloudCookieOptions;
+  cookie: MonoCloudStateCookieOptions;
+
+  /**
+   * The lifetime of an authorization transaction in seconds.
+   *
+   * @defaultValue 900 (15 minutes)
+   */
+  duration: number;
+
+  /**
+   * The maximum number of concurrent sign-in transactions retained.
+   *
+   * When a new sign in would exceed the limit, the earliest pending transactions are evicted first. Set to `1` for sequential sign-ins, where starting a new sign in discards the previous pending one. Must be between 1 and 20.
+   *
+   * @defaultValue 5
+   */
+  maxConcurrent: number;
 }
 
 /**
@@ -675,7 +718,8 @@ export interface MonoCloudSessionOptions extends Partial<
  * | `MONOCLOUD_AUTH_STATE_COOKIE_DOMAIN` | Domain scope for which the state cookie is valid. |
  * | `MONOCLOUD_AUTH_STATE_COOKIE_SECURE` | Ensures the state cookie is only sent over HTTPS connections. |
  * | `MONOCLOUD_AUTH_STATE_COOKIE_SAME_SITE` | SameSite policy applied to the state cookie (`lax`, `strict`, or `none`). |
- * | `MONOCLOUD_AUTH_STATE_COOKIE_PERSISTENT` | Determines whether the state cookie persists beyond the current browser session. |
+ * | `MONOCLOUD_AUTH_STATE_DURATION` | Lifetime of an authorization transaction in seconds. Minimum `300` (5 minutes). |
+ * | `MONOCLOUD_AUTH_STATE_MAX_CONCURRENT` | Maximum number of concurrent sign-in transactions retained (`1`–`20`, default `5`). |
  *
  * ### Caching
  *

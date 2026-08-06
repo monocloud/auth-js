@@ -5,6 +5,7 @@ import {
   now,
   parseSpaceSeparated,
   stringToArrayBuffer,
+  timingSafeEqual,
 } from './utils/internal';
 import { isUserInGroup } from './utils';
 import { clientAuth, keyToSubtle } from './client-auth';
@@ -257,10 +258,6 @@ export class MonoCloudOidcBackendClient extends MonoCloudOidcClientBase {
       throw new MonoCloudTokenError('Unexpected JWT "crit" header parameter');
     }
 
-    if (header.typ && header.typ !== 'at+jwt') {
-      throw new MonoCloudTokenError('Invalid token type');
-    }
-
     const binary = decodeBase64Url(encodedSignature);
 
     const signature = new Uint8Array(binary.length);
@@ -476,7 +473,7 @@ export class MonoCloudOidcBackendClient extends MonoCloudOidcClientBase {
       );
     }
 
-    if (certHash !== clientCertHash) {
+    if (!timingSafeEqual(certHash, clientCertHash)) {
       throw new MonoCloudTokenError(
         'The certificate hash in the access token does not match the presented client certificate (certificate binding validation failed)'
       );

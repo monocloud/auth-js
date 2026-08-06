@@ -120,6 +120,39 @@ describe('MonoCloudOidcClient.refreshSession()', () => {
     );
   });
 
+  it('should not fetch userinfo when the granted scope only contains openid as a substring', async () => {
+    const fetchSpy = fetchBuilder()
+      .configureMetadata()
+      .configureRefreshToken({
+        skipIdToken: true,
+        scope: 'openid-federation profile',
+        body: 'grant_type=refresh_token&refresh_token=rt_old',
+      })
+      .createSpy();
+
+    const client = new MonoCloudOidcClient('example.com', 'clientId');
+
+    const session: MonoCloudSession = {
+      user: { sub: 'subject' },
+      accessTokens: [
+        {
+          accessToken: 'at_old',
+          scopes: 'openid-federation profile',
+          requestedScopes: 'openid-federation profile',
+          accessTokenExpiration: 9999999999,
+        },
+      ],
+      refreshToken: 'rt_old',
+    };
+
+    const result = await client.refreshSession(session, {
+      fetchUserInfo: true,
+    });
+
+    fetchSpy.assert();
+    expect(result.user).toEqual({ sub: 'subject' });
+  });
+
   it('should sync the session when strictProfileSync is true', async () => {
     const fetchSpy = fetchBuilder()
       .configureMetadata()

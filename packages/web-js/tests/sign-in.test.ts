@@ -1245,6 +1245,51 @@ describe('signIn() Tests', () => {
     fetchSpy.assert();
   });
 
+  it('Redirect Mode - should throw an error if the scope only contains openid as a substring', async () => {
+    const idToken = await generateIdToken({
+      nonce: 'nonce',
+      claims: { sub: 'some', at_hash: await generateTokenHash('at') },
+    });
+
+    const fetchSpy = fetchBuilder()
+      .configureMetadata()
+      .configureJwks()
+      .createSpy();
+
+    mockWindow
+      .setHash(
+        `#state=state&id_token=${idToken}&access_token=at&scope=openid-federation&expires_in=600`
+      )
+      .setPathname('/callback')
+      .assert();
+
+    const state: CallbackState = {
+      nonce: 'nonce',
+      state: 'state',
+      mode: 'redirect',
+      scopes: 'openid-federation',
+      responseType: 'id_token token',
+    };
+
+    mockStorage.setCallbackState(state);
+
+    const instance = testInstance({ storage: mockStorage });
+
+    const processCallbackPromise = instance.processCallback();
+
+    await expect(processCallbackPromise).rejects.toBeInstanceOf(
+      MonoCloudValidationError
+    );
+
+    await expect(processCallbackPromise).rejects.toThrow(
+      'Fetching userinfo requires the openid scope'
+    );
+
+    mockStorage.expectCallbackStateRemoved();
+
+    fetchSpy.assert();
+  });
+
   it('Redirect Mode - should throw an error if expires_in is not present in implicit flow', async () => {
     const idToken = await generateIdToken({
       nonce: 'nonce',

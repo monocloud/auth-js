@@ -185,6 +185,55 @@ describe('MonoCloudOidcClient.authenticate()', () => {
     fetchSpy.assert();
   });
 
+  it('should not fetch userinfo when the granted scope only contains openid as a substring', async () => {
+    const fetchSpy = fetchBuilder()
+      .configureMetadata()
+      .configureTokenEndpoint({
+        scope: 'openid-federation email',
+        skipIdToken: true,
+        body: 'grant_type=authorization_code&code=code&redirect_uri=redirect_uri',
+      })
+      .createSpy();
+
+    const client = new MonoCloudOidcClient('example.com', 'clientId');
+
+    const session = await client.authenticate(
+      'code',
+      'redirect_uri',
+      'requested scope',
+      undefined,
+      { fetchUserInfo: true }
+    );
+
+    fetchSpy.assert();
+    expect(session.user).toEqual({});
+  });
+
+  it('should fetch userinfo when openid is the trailing scope', async () => {
+    const fetchSpy = fetchBuilder()
+      .configureMetadata()
+      .configureTokenEndpoint({
+        scope: 'email openid',
+        skipIdToken: true,
+        body: 'grant_type=authorization_code&code=code&redirect_uri=redirect_uri',
+      })
+      .configureUserinfo({ claims: { sub: 'user123' } })
+      .createSpy();
+
+    const client = new MonoCloudOidcClient('example.com', 'clientId');
+
+    const session = await client.authenticate(
+      'code',
+      'redirect_uri',
+      'requested scope',
+      undefined,
+      { fetchUserInfo: true }
+    );
+
+    fetchSpy.assert();
+    expect(session.user).toEqual(expect.objectContaining({ sub: 'user123' }));
+  });
+
   it('should fail if userinfo fails', async () => {
     const fetchSpy = fetchBuilder()
       .configureMetadata()

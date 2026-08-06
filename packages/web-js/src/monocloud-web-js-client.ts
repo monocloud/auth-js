@@ -1147,7 +1147,7 @@ export class MonoCloudWebJSClient {
         const scopes = callbackParams.scope ?? callbackState.scopes;
 
         if (this.fetchUserinfo) {
-          if (!scopes.includes('openid')) {
+          if (!parseSpaceSeparatedSet(scopes).has('openid')) {
             throw new MonoCloudValidationError(
               'Fetching userinfo requires the openid scope'
             );

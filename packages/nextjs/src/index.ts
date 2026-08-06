@@ -25,6 +25,7 @@ export type {
   MonoCloudSessionOptionsBase,
   MonoCloudSessionStore,
   MonoCloudCookieOptions,
+  MonoCloudStateCookieOptions,
   SessionLifetime,
   SameSiteValues,
   UserinfoResponse,

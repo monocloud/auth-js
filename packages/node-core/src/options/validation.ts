@@ -37,7 +37,7 @@ const validClientAuthMethods: ClientAuthMethod[] = [
   'spiffe_x509',
 ];
 
-const sessionCookieSchema = Joi.object({
+const cookieSchema = Joi.object({
   name: stringRequired,
   path: stringRequired.uri({ relativeOnly: true }),
   domain: stringOptional,
@@ -51,8 +51,11 @@ const sessionCookieSchema = Joi.object({
     otherwise: Joi.valid(false),
   }),
   sameSite: stringRequired.valid('strict', 'lax', 'none'),
-  persistent: boolRequired,
 }).required();
+
+const sessionCookieSchema = cookieSchema.keys({
+  persistent: boolRequired,
+});
 
 const resourceSchema = stringRequired.custom((value, helpers) => {
   let valid: boolean;
@@ -109,7 +112,9 @@ const sessionSchema: Joi.ObjectSchema<MonoCloudSessionOptionsBase> = Joi.object(
 ).required();
 
 const stateSchema: Joi.ObjectSchema<MonoCloudStateOptions> = Joi.object({
-  cookie: sessionCookieSchema,
+  cookie: cookieSchema,
+  duration: numRequired.integer().min(300),
+  maxConcurrent: numRequired.integer().min(1).max(20),
 }).required();
 
 const scopesSchema = stringRequired
@@ -236,7 +241,31 @@ export const optionsSchema: Joi.ObjectSchema<MonoCloudOptionsBase> = Joi.object(
     onSetApplicationState: funcOptional,
     onSessionCreating: funcOptional,
   }
-);
+).custom((value, helpers) => {
+  const sessionName = value.session.cookie.name;
+  const stateName = value.state.cookie.name;
+
+  if (stateName === sessionName) {
+    return helpers.message({
+      custom:
+        'The state cookie name must be different from the session cookie name',
+    });
+  }
+
+  if (stateName.startsWith(`${sessionName}.`)) {
+    return helpers.message({
+      custom: `The state cookie name must not start with "${sessionName}." as it would be read as part of the session cookie`,
+    });
+  }
+
+  if (sessionName.startsWith(`${stateName}.`)) {
+    return helpers.message({
+      custom: `The session cookie name must not start with "${stateName}." as it would be discarded as a sign-in transaction`,
+    });
+  }
+
+  return value;
+});
 
 export const signInOptionsSchema: Joi.ObjectSchema<SignInOptions> = Joi.object({
   returnUrl: stringOptional.uri({ allowRelative: true }),

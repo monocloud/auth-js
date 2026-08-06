@@ -368,7 +368,7 @@ Updated session with the latest userinfo.
 
 #### Throws
 
-[MonoCloudValidationError](/sdks/web-js/api-reference/error-classes/monocloudvalidationerror) - When the token scope does not contain openid scope
+[MonoCloudValidationError](/sdks/web-js/api-reference/error-classes/monocloudvalidationerror) - When the token scope does not contain `openid` scope
 
 #### Throws
 

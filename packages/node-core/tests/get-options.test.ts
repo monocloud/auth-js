@@ -85,6 +85,132 @@ describe('Configuration Options', () => {
     expect(options.clockTolerance).toBe(30);
   });
 
+  it('should default the state duration to 15 minutes', () => {
+    setRequiredEnv();
+
+    const options = getOptions();
+
+    expect(options.state.duration).toBe(900);
+  });
+
+  it('should resolve the state duration from environment variables', () => {
+    setRequiredEnv();
+    addEnv('MONOCLOUD_AUTH_STATE_DURATION', '1800');
+
+    const options = getOptions();
+
+    expect(options.state.duration).toBe(1800);
+  });
+
+  it('should resolve the state duration from explicit options', () => {
+    setRequiredEnv();
+    addEnv('MONOCLOUD_AUTH_STATE_DURATION', '1800');
+
+    const options = getOptions({ state: { duration: 3600 } });
+
+    expect(options.state.duration).toBe(3600);
+  });
+
+  it('should throw if the state duration is less than 5 minutes', () => {
+    setRequiredEnv();
+
+    expect(() => getOptions({ state: { duration: 299 } })).toThrow(
+      MonoCloudValidationError
+    );
+
+    expect(getOptions({ state: { duration: 300 } }).state.duration).toBe(300);
+  });
+
+  it('should default the state max concurrent transactions to 5', () => {
+    setRequiredEnv();
+
+    const options = getOptions();
+
+    expect(options.state.maxConcurrent).toBe(5);
+  });
+
+  it('should resolve the state max concurrent from environment variables', () => {
+    setRequiredEnv();
+    addEnv('MONOCLOUD_AUTH_STATE_MAX_CONCURRENT', '3');
+
+    const options = getOptions();
+
+    expect(options.state.maxConcurrent).toBe(3);
+  });
+
+  it('should resolve the state max concurrent from explicit options', () => {
+    setRequiredEnv();
+    addEnv('MONOCLOUD_AUTH_STATE_MAX_CONCURRENT', '3');
+
+    const options = getOptions({ state: { maxConcurrent: 7 } });
+
+    expect(options.state.maxConcurrent).toBe(7);
+  });
+
+  it('should enforce the state max concurrent bounds', () => {
+    setRequiredEnv();
+
+    expect(() => getOptions({ state: { maxConcurrent: 0 } })).toThrow(
+      MonoCloudValidationError
+    );
+    expect(() => getOptions({ state: { maxConcurrent: 21 } })).toThrow(
+      MonoCloudValidationError
+    );
+    expect(() => getOptions({ state: { maxConcurrent: 2.5 } })).toThrow(
+      MonoCloudValidationError
+    );
+
+    expect(
+      getOptions({ state: { maxConcurrent: 1 } }).state.maxConcurrent
+    ).toBe(1);
+    expect(
+      getOptions({ state: { maxConcurrent: 20 } }).state.maxConcurrent
+    ).toBe(20);
+  });
+
+  it('should reject a state cookie name that collides with the session cookie name', () => {
+    setRequiredEnv();
+
+    expect(() =>
+      getOptions({
+        session: { cookie: { name: 'sid' } },
+        state: { cookie: { name: 'sid' } },
+      })
+    ).toThrow(MonoCloudValidationError);
+
+    expect(() =>
+      getOptions({
+        session: { cookie: { name: 'sid' } },
+        state: { cookie: { name: 'sid.x' } },
+      })
+    ).toThrow(MonoCloudValidationError);
+
+    expect(() =>
+      getOptions({
+        session: { cookie: { name: 'sid.x' } },
+        state: { cookie: { name: 'sid' } },
+      })
+    ).toThrow(MonoCloudValidationError);
+  });
+
+  it('should allow state and session cookie names that only share a prefix', () => {
+    setRequiredEnv();
+
+    expect(
+      getOptions({
+        session: { cookie: { name: 'session' } },
+        state: { cookie: { name: 'session_state' } },
+      }).state.cookie.name
+    ).toBe('session_state');
+
+    expect(
+      getOptions({
+        session: { cookie: { name: 'session' } },
+        state: { cookie: { name: 'sessions' } },
+      }).state.cookie.name
+    ).toBe('sessions');
+  });
+
   it('should default groupsClaim to "groups"', () => {
     setRequiredEnv();
 

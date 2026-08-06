@@ -79,14 +79,15 @@ When both are provided, **constructor options override environment variables**.
 
 ### State Cookie Settings
 
-| Environment Variable                     | Description                                                                                   |
-| ---------------------------------------- | --------------------------------------------------------------------------------------------- |
-| `MONOCLOUD_AUTH_STATE_COOKIE_NAME`       | Name of the cookie used to store OpenID Connect state and nonce values during authentication. |
-| `MONOCLOUD_AUTH_STATE_COOKIE_PATH`       | Path scope for which the state cookie is valid.                                               |
-| `MONOCLOUD_AUTH_STATE_COOKIE_DOMAIN`     | Domain scope for which the state cookie is valid.                                             |
-| `MONOCLOUD_AUTH_STATE_COOKIE_SECURE`     | Ensures the state cookie is only sent over HTTPS connections.                                 |
-| `MONOCLOUD_AUTH_STATE_COOKIE_SAME_SITE`  | SameSite policy applied to the state cookie (`lax`, `strict`, or `none`).                     |
-| `MONOCLOUD_AUTH_STATE_COOKIE_PERSISTENT` | Determines whether the state cookie persists beyond the current browser session.              |
+| Environment Variable                    | Description                                                                                   |
+| --------------------------------------- | --------------------------------------------------------------------------------------------- |
+| `MONOCLOUD_AUTH_STATE_COOKIE_NAME`      | Name of the cookie used to store OpenID Connect state and nonce values during authentication. |
+| `MONOCLOUD_AUTH_STATE_COOKIE_PATH`      | Path scope for which the state cookie is valid.                                               |
+| `MONOCLOUD_AUTH_STATE_COOKIE_DOMAIN`    | Domain scope for which the state cookie is valid.                                             |
+| `MONOCLOUD_AUTH_STATE_COOKIE_SECURE`    | Ensures the state cookie is only sent over HTTPS connections.                                 |
+| `MONOCLOUD_AUTH_STATE_COOKIE_SAME_SITE` | SameSite policy applied to the state cookie (`lax`, `strict`, or `none`).                     |
+| `MONOCLOUD_AUTH_STATE_DURATION`         | Lifetime of an authorization transaction in seconds. Minimum `300` (5 minutes).               |
+| `MONOCLOUD_AUTH_STATE_MAX_CONCURRENT`   | Maximum number of concurrent sign-in transactions retained (`1`–`20`, default `5`).           |
 
 ### Caching
 

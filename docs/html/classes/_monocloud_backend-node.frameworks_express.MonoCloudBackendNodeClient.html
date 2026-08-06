@@ -17,7 +17,7 @@
 <p>Extends the core OIDC backend client with introspection caching and
 automatic detection of JWT vs. opaque token formats.</p>
 </div></section>
-<section class="tsd-panel tsd-hierarchy" data-refl="8218">
+<section class="tsd-panel tsd-hierarchy" data-refl="8272">
 <h4>Hierarchy</h4>
 <ul class="tsd-hierarchy">
 <li class="tsd-hierarchy-item"><a href="_monocloud_backend-node.index.MonoCloudOidcBackendClient.html" class="tsd-signature-type tsd-kind-class">MonoCloudOidcBackendClient</a>
@@ -64,7 +64,7 @@ automatic detection of JWT vs. opaque token formats.</p>
 </div><aside class="tsd-sources">
 <p>Inherited from <a href="_monocloud_backend-node.index.MonoCloudOidcBackendClient.html">MonoCloudOidcBackendClient</a>.<a href="_monocloud_backend-node.index.MonoCloudOidcBackendClient.html#clockskew">clockSkew</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/core/src/monocloud-oidc-backend-client.ts#L49">packages/core/src/monocloud-oidc-backend-client.ts:49</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/core/src/monocloud-oidc-backend-client.ts#L50">packages/core/src/monocloud-oidc-backend-client.ts:50</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="clocktolerance"><code class="tsd-tag">Protected</code><span>clock<wbr/>Tolerance</span><a href="#clocktolerance" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">clockTolerance</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = 60</span></div>
@@ -72,7 +72,7 @@ automatic detection of JWT vs. opaque token formats.</p>
 </div><aside class="tsd-sources">
 <p>Inherited from <a href="_monocloud_backend-node.index.MonoCloudOidcBackendClient.html">MonoCloudOidcBackendClient</a>.<a href="_monocloud_backend-node.index.MonoCloudOidcBackendClient.html#clocktolerance">clockTolerance</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/core/src/monocloud-oidc-backend-client.ts#L54">packages/core/src/monocloud-oidc-backend-client.ts:54</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/core/src/monocloud-oidc-backend-client.ts#L55">packages/core/src/monocloud-oidc-backend-client.ts:55</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="constructor"><span>constructor</span><a href="#constructor" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -116,7 +116,7 @@ automatic detection of JWT vs. opaque token formats.</p>
 </div></div><aside class="tsd-sources">
 <p>Inherited from <a href="_monocloud_backend-node.index.MonoCloudOidcBackendClient.html">MonoCloudOidcBackendClient</a>.<a href="_monocloud_backend-node.index.MonoCloudOidcBackendClient.html#decodejwt">decodeJwt</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/core/src/monocloud-oidc-client-base.ts#L253">packages/core/src/monocloud-oidc-client-base.ts:253</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/core/src/monocloud-oidc-client-base.ts#L249">packages/core/src/monocloud-oidc-client-base.ts:249</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="fetcher"><code class="tsd-tag">Protected</code> <code class="tsd-tag">Optional</code><span>fetcher</span><a href="#fetcher" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">fetcher</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-symbol">{</span><br/>    <span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">input</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">URL</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">RequestInfo</span><span class="tsd-signature-symbol">,</span> <span class="tsd-kind-parameter">init</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">RequestInit</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Response</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">;</span><br/>    <span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">input</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">URL</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">Request</span><span class="tsd-signature-symbol">,</span> <span class="tsd-kind-parameter">init</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">RequestInit</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Response</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">;</span><br/><span class="tsd-signature-symbol">}</span></div>
@@ -174,7 +174,7 @@ unexpected status code during the request or a serialization error while process
 </div></div><aside class="tsd-sources">
 <p>Inherited from <a href="_monocloud_backend-node.index.MonoCloudOidcBackendClient.html">MonoCloudOidcBackendClient</a>.<a href="_monocloud_backend-node.index.MonoCloudOidcBackendClient.html#getjwks">getJwks</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/core/src/monocloud-oidc-client-base.ts#L166">packages/core/src/monocloud-oidc-client-base.ts:166</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/core/src/monocloud-oidc-client-base.ts#L164">packages/core/src/monocloud-oidc-client-base.ts:164</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="getmetadata"><span>get<wbr/>Metadata</span><a href="#getmetadata" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -237,7 +237,7 @@ endpoint is not available in the issuer metadata or claims validation fails.</p>
 </div></div><aside class="tsd-sources">
 <p>Inherited from <a href="_monocloud_backend-node.index.MonoCloudOidcBackendClient.html">MonoCloudOidcBackendClient</a>.<a href="_monocloud_backend-node.index.MonoCloudOidcBackendClient.html#introspectaccesstoken">introspectAccessToken</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/core/src/monocloud-oidc-backend-client.ts#L116">packages/core/src/monocloud-oidc-backend-client.ts:116</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/core/src/monocloud-oidc-backend-client.ts#L117">packages/core/src/monocloud-oidc-backend-client.ts:117</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="jwks"><code class="tsd-tag">Protected</code> <code class="tsd-tag">Optional</code><span>jwks</span><a href="#jwks" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">jwks</span><span class="tsd-signature-symbol">?:</span> <a href="../interfaces/_monocloud_backend-node.index.Jwks.html" class="tsd-signature-type tsd-kind-interface">Jwks</a></div>
@@ -328,7 +328,7 @@ client authenticates over mTLS.</p>
 </div></div><aside class="tsd-sources">
 <p>Inherited from <a href="_monocloud_backend-node.index.MonoCloudOidcBackendClient.html">MonoCloudOidcBackendClient</a>.<a href="_monocloud_backend-node.index.MonoCloudOidcBackendClient.html#resolveendpoint">resolveEndpoint</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/core/src/monocloud-oidc-client-base.ts#L214">packages/core/src/monocloud-oidc-client-base.ts:214</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/core/src/monocloud-oidc-client-base.ts#L210">packages/core/src/monocloud-oidc-client-base.ts:210</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="setclockskew"><span>set<wbr/>Clock<wbr/>Skew</span><a href="#setclockskew" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -346,7 +346,7 @@ client authenticates over mTLS.</p>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
 <p>Inherited from <a href="_monocloud_backend-node.index.MonoCloudOidcBackendClient.html">MonoCloudOidcBackendClient</a>.<a href="_monocloud_backend-node.index.MonoCloudOidcBackendClient.html#setclockskew">setClockSkew</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/core/src/monocloud-oidc-backend-client.ts#L319">packages/core/src/monocloud-oidc-backend-client.ts:319</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/core/src/monocloud-oidc-backend-client.ts#L316">packages/core/src/monocloud-oidc-backend-client.ts:316</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="setclocktolerance"><span>set<wbr/>Clock<wbr/>Tolerance</span><a href="#setclocktolerance" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -364,7 +364,7 @@ client authenticates over mTLS.</p>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
 <p>Inherited from <a href="_monocloud_backend-node.index.MonoCloudOidcBackendClient.html">MonoCloudOidcBackendClient</a>.<a href="_monocloud_backend-node.index.MonoCloudOidcBackendClient.html#setclocktolerance">setClockTolerance</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/core/src/monocloud-oidc-backend-client.ts#L328">packages/core/src/monocloud-oidc-backend-client.ts:328</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/core/src/monocloud-oidc-backend-client.ts#L325">packages/core/src/monocloud-oidc-backend-client.ts:325</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="tenantdomain"><code class="tsd-tag">Protected</code> <code class="tsd-tag">Readonly</code><span>tenant<wbr/>Domain</span><a href="#tenantdomain" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">tenantDomain</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
@@ -458,7 +458,7 @@ unexpected status code during the request or a serialization error while process
 </div></div><aside class="tsd-sources">
 <p>Inherited from <a href="_monocloud_backend-node.index.MonoCloudOidcBackendClient.html">MonoCloudOidcBackendClient</a>.<a href="_monocloud_backend-node.index.MonoCloudOidcBackendClient.html#validatejwtaccesstoken">validateJwtAccessToken</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/core/src/monocloud-oidc-backend-client.ts#L218">packages/core/src/monocloud-oidc-backend-client.ts:218</a></li></ul></aside></div></li></ul></section></section></div>
+<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/core/src/monocloud-oidc-backend-client.ts#L219">packages/core/src/monocloud-oidc-backend-client.ts:219</a></li></ul></aside></div></li></ul></section></section></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">

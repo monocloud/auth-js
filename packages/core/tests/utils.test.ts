@@ -27,6 +27,7 @@ import {
   arrayBufferToString,
   profileSync,
   decodeBase64Url,
+  encodeBase64,
   encodeBase64Url,
   ensureLeadingSlash,
   findToken,
@@ -47,6 +48,7 @@ import {
   removeTrailingSlash,
   setsEqual,
   stringToArrayBuffer,
+  timingSafeEqual,
   toB64Url,
   validateTokenHash,
 } from '../src/utils/internal';
@@ -1125,6 +1127,55 @@ describe('parseSpaceSeparatedSet', () => {
   it('should handle whitespace-only string', () => {
     const result = parseSpaceSeparatedSet('   ');
     expect(result.size).toBe(0);
+  });
+});
+
+describe('encodeBase64', () => {
+  it('should encode an ascii string as padded base64', () => {
+    expect(encodeBase64('clientId:secret')).toBe('Y2xpZW50SWQ6c2VjcmV0');
+  });
+
+  it('should pad the encoded output', () => {
+    expect(encodeBase64('clientId:')).toBe('Y2xpZW50SWQ6');
+    expect(encodeBase64('a')).toBe('YQ==');
+    expect(encodeBase64('ab')).toBe('YWI=');
+  });
+
+  it('should encode characters outside latin-1 using their utf-8 bytes', () => {
+    expect(encodeBase64('π')).toBe('z4A=');
+    expect(encodeBase64('clientId:sécret☃')).toBe(
+      'Y2xpZW50SWQ6c8OpY3JldOKYgw=='
+    );
+  });
+
+  it('should encode an empty string', () => {
+    expect(encodeBase64('')).toBe('');
+  });
+});
+
+describe('timingSafeEqual', () => {
+  it('should return true for identical strings', () => {
+    expect(timingSafeEqual('abc123', 'abc123')).toBe(true);
+  });
+
+  it('should return true for two empty strings', () => {
+    expect(timingSafeEqual('', '')).toBe(true);
+  });
+
+  it('should return false for different strings of the same length', () => {
+    expect(timingSafeEqual('abc123', 'abc124')).toBe(false);
+    expect(timingSafeEqual('abc123', 'zbc123')).toBe(false);
+  });
+
+  it('should return false for strings of different lengths', () => {
+    expect(timingSafeEqual('abc', 'abcd')).toBe(false);
+    expect(timingSafeEqual('abcd', 'abc')).toBe(false);
+    expect(timingSafeEqual('', 'a')).toBe(false);
+  });
+
+  it('should compare utf-8 bytes rather than code units', () => {
+    expect(timingSafeEqual('π', 'π')).toBe(true);
+    expect(timingSafeEqual('π', 'σ')).toBe(false);
   });
 });
 

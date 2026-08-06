@@ -732,8 +732,13 @@ describe('MonoCloud Middleware', () => {
       secure: true,
       httpOnly: true,
       domain: 'localhost',
-      expires: 'Infinity',
+      expires: expect.any(Date),
     });
+
+    const expiresIn = ((options.expires as Date).getTime() - Date.now()) / 1000;
+
+    expect(expiresIn).toBeGreaterThan(890);
+    expect(expiresIn).toBeLessThanOrEqual(900);
   });
 
   it('should set the custom return url in the state', async () => {
