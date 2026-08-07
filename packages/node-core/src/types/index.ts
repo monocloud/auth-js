@@ -199,10 +199,11 @@ export interface MonoCloudCookieOptions {
  *
  * @category Types
  */
-export type MonoCloudStateCookieOptions = Omit<
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export interface MonoCloudStateCookieOptions extends Omit<
   MonoCloudCookieOptions,
   'persistent'
->;
+> {}
 
 /**
  * Configuration options for authentication sessions.
