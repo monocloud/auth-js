@@ -1,5 +1,11 @@
 # @monocloud/auth-node-core
 
+## 0.2.5
+
+### Patch Changes
+
+- 649e777: - changed MonoCloudStateCookieOptions from type to interface
+
 ## 0.2.4
 
 ### Patch Changes
