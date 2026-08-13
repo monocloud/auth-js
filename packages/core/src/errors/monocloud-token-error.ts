@@ -1,3 +1,4 @@
+import { MonoCloudTokenErrorCode } from '../types';
 import { MonoCloudAuthBaseError } from './monocloud-auth-base-error';
 
 /**
@@ -5,4 +6,15 @@ import { MonoCloudAuthBaseError } from './monocloud-auth-base-error';
  *
  * @category Error Classes
  */
-export class MonoCloudTokenError extends MonoCloudAuthBaseError {}
+export class MonoCloudTokenError extends MonoCloudAuthBaseError {
+  /** Code identifying why the token operation failed. */
+  readonly code: MonoCloudTokenErrorCode;
+
+  constructor(
+    message?: string,
+    code: MonoCloudTokenErrorCode = 'invalid_token'
+  ) {
+    super(message);
+    this.code = code;
+  }
+}

@@ -5,6 +5,7 @@ import {
   MonoCloudAuthBaseError,
   MonoCloudValidationError,
   MonoCloudTokenError,
+  MonoCloudTokenErrorCode,
   MonoCloudOPError,
 } from '../src';
 
@@ -32,7 +33,34 @@ export const assertError = async (
   }
 };
 
+export const assertHttpError = async (
+  promise: Promise<unknown>,
+  error: string,
+  status?: number,
+  statusText?: string
+): Promise<void> => {
+  try {
+    await promise;
+    throw new Error();
+  } catch (e) {
+    expect(e).toBeInstanceOf(MonoCloudHttpError);
+    expect((e as MonoCloudHttpError).message).toBe(error);
+    expect((e as MonoCloudHttpError).status).toBe(status);
+    expect((e as MonoCloudHttpError).statusText).toBe(statusText);
+  }
+};
+
 export const assertTokenError = async (
   promise: Promise<unknown>,
-  error: string
-): Promise<void> => await assertError(promise, MonoCloudTokenError, error);
+  error: string,
+  code: MonoCloudTokenErrorCode = 'invalid_token'
+): Promise<void> => {
+  try {
+    await promise;
+    throw new Error();
+  } catch (e) {
+    expect(e).toBeInstanceOf(MonoCloudTokenError);
+    expect((e as MonoCloudTokenError).message).toBe(error);
+    expect((e as MonoCloudTokenError).code).toBe(code);
+  }
+};

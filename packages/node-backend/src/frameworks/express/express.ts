@@ -1,4 +1,3 @@
-import { MonoCloudTokenError } from '@monocloud/auth-core';
 import type { NextFunction, Request, RequestHandler, Response } from 'express';
 import type {
   ClientCertificateResolver,
@@ -8,6 +7,7 @@ import type {
 } from '../../types';
 import { MonoCloudBackendNodeClient } from '../../monocloud-backend-node-client';
 import { getBearerToken } from '../../get-bearer-token';
+import { mapProtectError } from '../map-protect-error';
 import { AuthenticatedExpressRequest, ProtectMiddleware } from './types';
 
 /**
@@ -69,12 +69,13 @@ export function protectApi(
           clientCertificate = await certificateResolver?.(request);
         }
 
-        const accessToken =
+        const accessToken = (
           (await tokenResolver?.(request)) ??
-          getBearerToken(request.headers.authorization);
+          getBearerToken(request.headers.authorization)
+        )?.trim();
 
         if (!accessToken) {
-          response.status(401).json({
+          response.status(401).set('WWW-Authenticate', 'Bearer').json({
             message: 'unauthorized',
           });
           return;
@@ -91,19 +92,13 @@ export function protectApi(
           });
         next();
       } catch (error) {
-        let statusCode = 401;
-        let message = 'unauthorized';
+        const { status, message, wwwAuthenticate } = mapProtectError(error);
 
-        if (
-          error instanceof MonoCloudTokenError &&
-          (error.message === 'Token is missing required scopes' ||
-            error.message === 'Token is missing required groups')
-        ) {
-          statusCode = 403;
-          message = 'forbidden';
+        if (wwwAuthenticate) {
+          response.set('WWW-Authenticate', wwwAuthenticate);
         }
 
-        response.status(statusCode).json({
+        response.status(status).json({
           message,
         });
       }

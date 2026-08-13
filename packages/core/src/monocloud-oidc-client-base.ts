@@ -136,7 +136,9 @@ export class MonoCloudOidcClientBase {
 
       if (response.status !== 200) {
         throw new MonoCloudHttpError(
-          `Error while fetching metadata. Unexpected status code: ${response.status}`
+          `Error while fetching metadata. Unexpected status code: ${response.status}`,
+          response.status,
+          response.statusText
         );
       }
 
@@ -183,7 +185,9 @@ export class MonoCloudOidcClientBase {
 
       if (response.status !== 200) {
         throw new MonoCloudHttpError(
-          `Error while fetching JWKS. Unexpected status code: ${response.status}`
+          `Error while fetching JWKS. Unexpected status code: ${response.status}`,
+          response.status,
+          response.statusText
         );
       }
 

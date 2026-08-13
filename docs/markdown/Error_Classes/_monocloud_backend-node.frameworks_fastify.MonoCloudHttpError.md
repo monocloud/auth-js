@@ -18,18 +18,36 @@ This error typically indicates a network failure, an unexpected HTTP response, o
 
 ## Constructor
 
-> **new MonoCloudHttpError**(`message?`: `string`): [`MonoCloudHttpError`](/sdks/fastify-backend/api-reference/error-classes/monocloudhttperror)
+> **new MonoCloudHttpError**(`message?`: `string`, `status?`: `number`, `statusText?`: `string`): [`MonoCloudHttpError`](/sdks/fastify-backend/api-reference/error-classes/monocloudhttperror)
 
 ### Parameters
 
-| Parameter  | Type     |
-| ---------- | -------- |
-| `message?` | `string` |
+| Parameter     | Type     |
+| ------------- | -------- |
+| `message?`    | `string` |
+| `status?`     | `number` |
+| `statusText?` | `string` |
 
 ### Returns
 
 [`MonoCloudHttpError`](/sdks/fastify-backend/api-reference/error-classes/monocloudhttperror)
 
-### Inherited from
+### Overrides
 
 [`MonoCloudAuthBaseError`](/sdks/fastify-backend/api-reference/error-classes/monocloudauthbaseerror).[`constructor`](/sdks/fastify-backend/api-reference/error-classes/monocloudauthbaseerror#constructor)
+
+---
+
+## status
+> `readonly` `optional` **status**: `number`
+
+HTTP status code of the response that caused the error.
+
+Undefined when no response was received, such as a network failure.
+
+---
+
+## statusText
+> `readonly` `optional` **statusText**: `string`
+
+HTTP status text of the response that caused the error.

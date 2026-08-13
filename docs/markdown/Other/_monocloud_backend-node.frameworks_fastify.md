@@ -46,6 +46,7 @@ framework: Fastify
 ## Types (Enums)
 
 - [ClientAuthMethod](/sdks/fastify-backend/api-reference/enums/clientauthmethod)
+- [MonoCloudTokenErrorCode](/sdks/fastify-backend/api-reference/enums/monocloudtokenerrorcode)
 
 ## Types (Handler)
 

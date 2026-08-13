@@ -17,18 +17,25 @@ Error thrown when a token operation fails.
 
 ### Constructor
 
-> **new MonoCloudTokenError**(`message?`: `string`): `MonoCloudTokenError`
+> **new MonoCloudTokenError**(`message?`: `string`, `code?`: [`MonoCloudTokenErrorCode`](/sdks/nodejs/api-reference/enums/monocloudtokenerrorcode)): `MonoCloudTokenError`
 
 #### Parameters
 
-| Parameter  | Type     |
-| ---------- | -------- |
-| `message?` | `string` |
+| Parameter  | Type                                                                                                  |
+| ---------- | ----------------------------------------------------------------------------------------------------- |
+| `message?` | `string`                                                                                              |
+| `code?`    | [`MonoCloudTokenErrorCode`](/sdks/nodejs/api-reference/enums/monocloudtokenerrorcode) |
 
 #### Returns
 
 `MonoCloudTokenError`
 
-#### Inherited from
+#### Overrides
 
 [`MonoCloudAuthBaseError`](/sdks/web-js/api-reference/error-classes/monocloudauthbaseerror).[`constructor`](/sdks/web-js/api-reference/error-classes/monocloudauthbaseerror#constructor)
+
+## Properties
+
+| Property                 | Type                                                                                                  | Description                                      |
+| ------------------------ | ----------------------------------------------------------------------------------------------------- | ------------------------------------------------ |
+| `code` | [`MonoCloudTokenErrorCode`](/sdks/nodejs/api-reference/enums/monocloudtokenerrorcode) | Code identifying why the token operation failed. |

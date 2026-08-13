@@ -1825,3 +1825,16 @@ export interface ValidateJwtAccessTokenOptions extends TokenValidationOptionsBas
  */
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface IntrospectOptions extends TokenValidationOptionsBase {}
+
+/**
+ * Machine-readable code identifying why a token operation failed.
+ *
+ * @category Types (Enums)
+ */
+export type MonoCloudTokenErrorCode =
+  /** The token is missing, malformed, expired, revoked, or otherwise failed validation. */
+  | 'invalid_token'
+  /** The token does not contain the scopes required for the request. */
+  | 'insufficient_scope'
+  /** The token's subject is not a member of the groups required for the request. */
+  | 'insufficient_groups';

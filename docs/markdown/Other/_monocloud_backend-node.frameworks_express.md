@@ -46,6 +46,7 @@ framework: Express
 ## Types (Enums)
 
 - [ClientAuthMethod](/sdks/express-backend/api-reference/enums/clientauthmethod)
+- [MonoCloudTokenErrorCode](/sdks/express-backend/api-reference/enums/monocloudtokenerrorcode)
 
 ## Types (Handler)
 

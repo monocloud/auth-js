@@ -429,7 +429,8 @@ describe('MonoCloudOidcBackendClient.validateJwtAccessToken()', () => {
         client.validateJwtAccessToken(jwt, {
           scopes: ['read', 'write'],
         }),
-        'Token is missing required scopes'
+        'Token is missing required scopes',
+        'insufficient_scope'
       );
 
       fetchSpy.assert();
@@ -460,7 +461,8 @@ describe('MonoCloudOidcBackendClient.validateJwtAccessToken()', () => {
         client.validateJwtAccessToken(jwt, {
           groups: ['admins'],
         }),
-        'Token is missing required groups'
+        'Token is missing required groups',
+        'insufficient_groups'
       );
 
       fetchSpy.assert();

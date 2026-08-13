@@ -19,18 +19,27 @@ This error typically indicates a network failure, an unexpected HTTP response, o
 
 ### Constructor
 
-> **new MonoCloudHttpError**(`message?`: `string`): `MonoCloudHttpError`
+> **new MonoCloudHttpError**(`message?`: `string`, `status?`: `number`, `statusText?`: `string`): `MonoCloudHttpError`
 
 #### Parameters
 
-| Parameter  | Type     |
-| ---------- | -------- |
-| `message?` | `string` |
+| Parameter     | Type     |
+| ------------- | -------- |
+| `message?`    | `string` |
+| `status?`     | `number` |
+| `statusText?` | `string` |
 
 #### Returns
 
 `MonoCloudHttpError`
 
-#### Inherited from
+#### Overrides
 
 [`MonoCloudAuthBaseError`](/sdks/nodejs/api-reference/error-classes/monocloudauthbaseerror).[`constructor`](/sdks/nodejs/api-reference/error-classes/monocloudauthbaseerror#constructor)
+
+## Properties
+
+| Property                              | Type     | Description                                                                                                                 |
+| ------------------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `status?`         | `number` | HTTP status code of the response that caused the error. Undefined when no response was received, such as a network failure. |
+| `statusText?` | `string` | HTTP status text of the response that caused the error.                                                                     |

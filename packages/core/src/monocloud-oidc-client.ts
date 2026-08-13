@@ -360,7 +360,9 @@ export class MonoCloudOidcClient extends MonoCloudOidcClientBase {
 
     if (response.status !== 201) {
       throw new MonoCloudHttpError(
-        `Error while performing pushed authorization request. Unexpected status code: ${response.status}`
+        `Error while performing pushed authorization request. Unexpected status code: ${response.status}`,
+        response.status,
+        response.statusText
       );
     }
 
@@ -427,7 +429,9 @@ export class MonoCloudOidcClient extends MonoCloudOidcClientBase {
 
     if (response.status !== 200) {
       throw new MonoCloudHttpError(
-        `Error while fetching userinfo. Unexpected status code: ${response.status}`
+        `Error while fetching userinfo. Unexpected status code: ${response.status}`,
+        response.status,
+        response.statusText
       );
     }
 
@@ -552,7 +556,9 @@ export class MonoCloudOidcClient extends MonoCloudOidcClientBase {
 
     if (response.status !== 200) {
       throw new MonoCloudHttpError(
-        `Error while performing token grant. Unexpected status code: ${response.status}`
+        `Error while performing token grant. Unexpected status code: ${response.status}`,
+        response.status,
+        response.statusText
       );
     }
 
@@ -637,7 +643,9 @@ export class MonoCloudOidcClient extends MonoCloudOidcClientBase {
 
     if (response.status !== 200) {
       throw new MonoCloudHttpError(
-        `Error while performing refresh token grant. Unexpected status code: ${response.status}`
+        `Error while performing refresh token grant. Unexpected status code: ${response.status}`,
+        response.status,
+        response.statusText
       );
     }
 
@@ -1003,7 +1011,9 @@ export class MonoCloudOidcClient extends MonoCloudOidcClientBase {
 
     if (response.status !== 200) {
       throw new MonoCloudHttpError(
-        `Error while performing revocation request. Unexpected status code: ${response.status}`
+        `Error while performing revocation request. Unexpected status code: ${response.status}`,
+        response.status,
+        response.statusText
       );
     }
   }
@@ -1261,7 +1271,9 @@ export class MonoCloudOidcClient extends MonoCloudOidcClientBase {
 
     if (response.status !== 200) {
       throw new MonoCloudHttpError(
-        `Error while performing device authorization request. Unexpected status code: ${response.status}`
+        `Error while performing device authorization request. Unexpected status code: ${response.status}`,
+        response.status,
+        response.statusText
       );
     }
 
@@ -1328,7 +1340,9 @@ export class MonoCloudOidcClient extends MonoCloudOidcClientBase {
 
     if (response.status !== 200) {
       throw new MonoCloudHttpError(
-        `Error while performing token grant. Unexpected status code: ${response.status}`
+        `Error while performing token grant. Unexpected status code: ${response.status}`,
+        response.status,
+        response.statusText
       );
     }
 

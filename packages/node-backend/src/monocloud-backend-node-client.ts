@@ -8,7 +8,7 @@ import {
   MonoCloudBackendNodeClientOptions,
   ValidateAccessTokenOptions,
 } from './types';
-import { now } from '@monocloud/auth-core/internal';
+import { isPresent, now } from '@monocloud/auth-core/internal';
 import { getOptions } from './options/get-options';
 
 /**
@@ -23,6 +23,8 @@ export class MonoCloudBackendNodeClient extends MonoCloudOidcBackendClient {
   private readonly cache: IIntrospectionCache | undefined;
 
   private readonly introspectJwtToken: boolean | undefined;
+
+  private readonly introspectionConfigured: boolean;
 
   /**
    * Creates a new instance of MonoCloudBackendNodeClient.
@@ -47,6 +49,7 @@ export class MonoCloudBackendNodeClient extends MonoCloudOidcBackendClient {
     });
 
     this.introspectJwtToken = validatedOptions?.introspectJwtTokens;
+    this.introspectionConfigured = isPresent(validatedOptions.clientId);
 
     if (validatedOptions.cache) {
       this.cache = validatedOptions.cache;
@@ -61,7 +64,8 @@ export class MonoCloudBackendNodeClient extends MonoCloudOidcBackendClient {
    *
    * @returns Validated access token claims.
    *
-   * @throws {@link MonoCloudValidationError} - When the access token is empty.
+   * @throws {@link MonoCloudValidationError} - When the access token is empty, or when the
+   * token must be introspected and no introspection credentials are configured.
    *
    * @throws {@link MonoCloudTokenError} - If token validation fails.
    *
@@ -92,6 +96,12 @@ export class MonoCloudBackendNodeClient extends MonoCloudOidcBackendClient {
         clientCertificate: options?.clientCertificate,
       });
     } else {
+      if (!this.introspectionConfigured) {
+        throw new MonoCloudValidationError(
+          'Token introspection is not configured'
+        );
+      }
+
       if (this.cache) {
         const cached = await this.cache.get(accessToken);
         if (
@@ -99,6 +109,19 @@ export class MonoCloudBackendNodeClient extends MonoCloudOidcBackendClient {
           typeof cached.exp === 'number' &&
           cached.exp > now() + this.clockSkew - this.clockTolerance
         ) {
+          this.validateAccessTokenClaims(
+            cached,
+            options?.scopes,
+            options?.groups
+          );
+
+          if (options?.validateCertificateBinding) {
+            await this.validateCertificateBinding(
+              cached,
+              options.clientCertificate
+            );
+          }
+
           return cached;
         }
       }

@@ -37,7 +37,9 @@ export const deserializeJson = async <T = any>(res: Response): Promise<T> => {
   } catch (e) {
     throw new MonoCloudHttpError(
       /* v8 ignore next -- @preserve */
-      `Failed to parse response body as JSON ${(e as any).message ? `: ${(e as any).message}` : ''}`
+      `Failed to parse response body as JSON ${(e as any).message ? `: ${(e as any).message}` : ''}`,
+      res.status,
+      res.statusText
     );
   }
 };

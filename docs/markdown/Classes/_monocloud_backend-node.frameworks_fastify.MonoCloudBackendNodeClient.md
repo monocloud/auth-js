@@ -238,7 +238,8 @@ Validated access token claims.
 
 ### Throws
 
-[MonoCloudValidationError](/sdks/fastify-backend/api-reference/error-classes/monocloudvalidationerror) - When the access token is empty.
+[MonoCloudValidationError](/sdks/fastify-backend/api-reference/error-classes/monocloudvalidationerror) - When the access token is empty, or when the
+token must be introspected and no introspection credentials are configured.
 
 ### Throws
 

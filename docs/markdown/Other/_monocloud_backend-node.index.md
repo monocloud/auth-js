@@ -41,6 +41,7 @@ category: Other
 ## Types (Enums)
 
 - [ClientAuthMethod](/sdks/nodejs-backend/api-reference/enums/clientauthmethod)
+- [MonoCloudTokenErrorCode](/sdks/nodejs-backend/api-reference/enums/monocloudtokenerrorcode)
 
 ## Types (Handler)
 

@@ -3,7 +3,6 @@ import { describe, expect, it, vi } from 'vitest';
 import {
   MonoCloudOidcBackendClient,
   MonoCloudValidationError,
-  MonoCloudHttpError,
   MonoCloudOPError,
 } from '../src';
 import {
@@ -11,7 +10,7 @@ import {
   fetchBuilder,
   mtlsFetchSpy,
 } from '@monocloud/auth-test-utils';
-import { assertError, assertTokenError } from './utils';
+import { assertError, assertHttpError, assertTokenError } from './utils';
 import { now } from '../src/utils/internal';
 
 const defaultClientOptions = {
@@ -170,10 +169,36 @@ describe('MonoCloudOidcBackendClient.introspectAccessToken()', () => {
         defaultClientOptions
       );
 
-      await assertError(
+      await assertHttpError(
         client.introspectAccessToken('some-token'),
-        MonoCloudHttpError,
-        'Error while performing token introspection. Unexpected status code: 500'
+        'Error while performing token introspection. Unexpected status code: 500',
+        500,
+        'Internal Server Error'
+      );
+
+      fetchSpy.assert();
+    });
+
+    it('should expose the status of an unexpected introspection response', async () => {
+      const fetchSpy = fetchBuilder()
+        .configureMetadata()
+        .configureIntrospection({
+          responseBody: {},
+          responseCode: 404,
+        })
+        .createSpy();
+
+      const client = new MonoCloudOidcBackendClient(
+        'example.com',
+        'https://api.example.com',
+        defaultClientOptions
+      );
+
+      await assertHttpError(
+        client.introspectAccessToken('some-token'),
+        'Error while performing token introspection. Unexpected status code: 404',
+        404,
+        'Not Found'
       );
 
       fetchSpy.assert();
@@ -190,10 +215,11 @@ describe('MonoCloudOidcBackendClient.introspectAccessToken()', () => {
         defaultClientOptions
       );
 
-      await assertError(
+      await assertHttpError(
         client.introspectAccessToken('some-token'),
-        MonoCloudHttpError,
-        'fetch failed'
+        'fetch failed',
+        undefined,
+        undefined
       );
 
       fetchSpy.mockClear();
@@ -506,7 +532,8 @@ describe('MonoCloudOidcBackendClient.introspectAccessToken()', () => {
         client.introspectAccessToken('some-token', {
           scopes: ['read', 'write'],
         }),
-        'Token is missing required scopes'
+        'Token is missing required scopes',
+        'insufficient_scope'
       );
 
       fetchSpy.assert();
@@ -660,7 +687,8 @@ describe('MonoCloudOidcBackendClient.introspectAccessToken()', () => {
         client.introspectAccessToken('some-token', {
           groups: ['admins'],
         }),
-        'Token is missing required groups'
+        'Token is missing required groups',
+        'insufficient_groups'
       );
 
       fetchSpy.assert();
@@ -761,7 +789,8 @@ describe('MonoCloudOidcBackendClient.introspectAccessToken()', () => {
         client.introspectAccessToken('some-token', {
           groups: ['admins', 'writers'],
         }),
-        'Token is missing required groups'
+        'Token is missing required groups',
+        'insufficient_groups'
       );
 
       fetchSpy.assert();

@@ -43,6 +43,7 @@ export type {
   IsUserInGroupOptions,
   DeviceAuthorizationParams,
   DeviceAuthorizationResponse,
+  MonoCloudTokenErrorCode,
 } from './types';
 
 export { MonoCloudAuthBaseError } from './errors/monocloud-auth-base-error';

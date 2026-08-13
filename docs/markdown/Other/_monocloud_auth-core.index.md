@@ -64,6 +64,7 @@ category: Other
 - [ClientAuthMethod](/sdks/nodejs/api-reference/enums/clientauthmethod)
 - [CodeChallengeMethod](/sdks/nodejs/api-reference/enums/codechallengemethod)
 - [DisplayOptions](/sdks/nodejs/api-reference/enums/displayoptions)
+- [MonoCloudTokenErrorCode](/sdks/nodejs/api-reference/enums/monocloudtokenerrorcode)
 - [Prompt](/sdks/nodejs/api-reference/enums/prompt)
 - [ResponseModes](/sdks/nodejs/api-reference/enums/responsemodes)
 - [ResponseTypes](/sdks/nodejs/api-reference/enums/responsetypes)
