@@ -1,6 +1,6 @@
 {
   "name": "@monocloud/auth-web-js",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "description": "MonoCloud Web Authentication SDK",
   "keywords": [
     "monocloud",
