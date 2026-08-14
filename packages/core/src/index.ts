@@ -44,6 +44,7 @@ export type {
   DeviceAuthorizationParams,
   DeviceAuthorizationResponse,
   MonoCloudTokenErrorCode,
+  MonoCloudRawResponse,
 } from './types';
 
 export { MonoCloudAuthBaseError } from './errors/monocloud-auth-base-error';

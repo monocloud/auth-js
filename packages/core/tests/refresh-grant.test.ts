@@ -116,4 +116,27 @@ describe('MonoCloudOidcClient.refreshGrant()', () => {
 
     fetchSpy.mockClear();
   });
+
+  it('should surface the oauth error when the server returns a 401', async () => {
+    const fetchSpy = fetchBuilder()
+      .configureMetadata()
+      .configureRefreshToken({
+        responseCode: 401,
+        body: 'grant_type=refresh_token&refresh_token=rt',
+        error: 'invalid_client',
+        error_description: 'Client authentication failed',
+      })
+      .createSpy();
+
+    const client = new MonoCloudOidcClient('example.com', 'clientId');
+
+    await assertError(
+      client.refreshGrant('rt'),
+      MonoCloudOPError,
+      'invalid_client',
+      'Client authentication failed'
+    );
+
+    fetchSpy.assert();
+  });
 });

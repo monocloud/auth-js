@@ -45,6 +45,7 @@ category: Other
 - [MonoCloudOidcBackendClientOptions](/sdks/nodejs/api-reference/types/monocloudoidcbackendclientoptions)
 - [MonoCloudOidcClientBaseOptions](/sdks/nodejs/api-reference/types/monocloudoidcclientbaseoptions)
 - [MonoCloudOidcClientOptions](/sdks/nodejs/api-reference/types/monocloudoidcclientoptions)
+- [MonoCloudRawResponse](/sdks/nodejs/api-reference/types/monocloudrawresponse)
 - [MonoCloudSession](/sdks/nodejs/api-reference/types/monocloudsession)
 - [MonoCloudUser](/sdks/nodejs/api-reference/types/monoclouduser)
 - [MtlsEndpointAliases](/sdks/nodejs/api-reference/types/mtlsendpointaliases)

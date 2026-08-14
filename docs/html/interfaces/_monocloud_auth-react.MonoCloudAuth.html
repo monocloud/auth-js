@@ -15,14 +15,14 @@
 <div class="tsd-comment tsd-typography"><p>The current authentication state and the authentication actions.</p>
 </div></section>
 <div class="tsd-signature"><span class="tsd-signature-keyword">interface</span> <span class="tsd-kind-interface">MonoCloudAuth</span> <span class="tsd-signature-symbol">{</span><br/>    <a class="tsd-kind-property" href="#error">error</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">Error</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#gettokens">getTokens</a><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">options</span><span class="tsd-signature-symbol">?:</span> <a href="_monocloud_auth-react.GetTokensOptions.html" class="tsd-signature-type tsd-kind-interface">GetTokensOptions</a><span class="tsd-signature-symbol">)</span> <span class="tsd-signature-symbol">=&gt;</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="_monocloud_auth-react.MonoCloudTokens.html" class="tsd-signature-type tsd-kind-interface">MonoCloudTokens</a><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#isauthenticated">isAuthenticated</a><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#isloading">isLoading</a><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#refetchuserinfo">refetchUserInfo</a><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">()</span> <span class="tsd-signature-symbol">=&gt;</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#refreshsession">refreshSession</a><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">refreshOptions</span><span class="tsd-signature-symbol">?:</span> <a href="_monocloud_auth-react.RefreshOptions.html" class="tsd-signature-type tsd-kind-interface">RefreshOptions</a><span class="tsd-signature-symbol">)</span> <span class="tsd-signature-symbol">=&gt;</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#session">session</a><span class="tsd-signature-symbol">?:</span> <a href="_monocloud_auth-react.MonoCloudSession.html" class="tsd-signature-type tsd-kind-interface">MonoCloudSession</a><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#signin">signIn</a><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">signInOptions</span><span class="tsd-signature-symbol">?:</span> <a href="_monocloud_auth-react.SignInOptions.html" class="tsd-signature-type tsd-kind-interface">SignInOptions</a><span class="tsd-signature-symbol">)</span> <span class="tsd-signature-symbol">=&gt;</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#signinsilent">signInSilent</a><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">(</span><br/>        <span class="tsd-kind-parameter">signInSilentOptions</span><span class="tsd-signature-symbol">?:</span> <a href="_monocloud_auth-react.SignInSilentOptions.html" class="tsd-signature-type tsd-kind-interface">SignInSilentOptions</a><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-signature-symbol">)</span> <span class="tsd-signature-symbol">=&gt;</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="_monocloud_auth-react.MonoCloudSession.html" class="tsd-signature-type tsd-kind-interface">MonoCloudSession</a><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#signout">signOut</a><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">signOutOptions</span><span class="tsd-signature-symbol">?:</span> <a href="_monocloud_auth-react.SignOutOptions.html" class="tsd-signature-type tsd-kind-interface">SignOutOptions</a><span class="tsd-signature-symbol">)</span> <span class="tsd-signature-symbol">=&gt;</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#user">user</a><span class="tsd-signature-symbol">?:</span> <a href="_monocloud_auth-react.MonoCloudUser.html" class="tsd-signature-type tsd-kind-interface">MonoCloudUser</a><span class="tsd-signature-symbol">;</span><br/><span class="tsd-signature-symbol">}</span></div>
-<section class="tsd-panel tsd-hierarchy" data-refl="6329">
+<section class="tsd-panel tsd-hierarchy" data-refl="6427">
 <h4>Hierarchy</h4>
 <ul class="tsd-hierarchy">
 <li class="tsd-hierarchy-item"><a href="_monocloud_auth-react.AuthState.html" class="tsd-signature-type tsd-kind-interface">AuthState</a>
 <ul class="tsd-hierarchy">
 <li class="tsd-hierarchy-item"><span class="tsd-hierarchy-target">MonoCloudAuth</span></li></ul></li></ul></section><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/react/src/types.ts#L51">packages/react/src/types.ts:51</a></li></ul></aside>
+<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/react/src/types.ts#L51">react/src/types.ts:51</a></li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-accordion" open><summary class="tsd-accordion-summary tsd-index-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
@@ -52,14 +52,14 @@
 </div><aside class="tsd-sources">
 <p>Inherited from <a href="_monocloud_auth-react.AuthState.html">AuthState</a>.<a href="_monocloud_auth-react.AuthState.html#error">error</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/react/src/types.ts#L33">packages/react/src/types.ts:33</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/react/src/types.ts#L33">react/src/types.ts:33</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="gettokens"><span>get<wbr/>Tokens</span><a href="#gettokens" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">getTokens</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">options</span><span class="tsd-signature-symbol">?:</span> <a href="_monocloud_auth-react.GetTokensOptions.html" class="tsd-signature-type tsd-kind-interface">GetTokensOptions</a><span class="tsd-signature-symbol">)</span> <span class="tsd-signature-symbol">=&gt;</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="_monocloud_auth-react.MonoCloudTokens.html" class="tsd-signature-type tsd-kind-interface">MonoCloudTokens</a><span class="tsd-signature-symbol">&gt;</span></div>
 <div class="tsd-comment tsd-typography"><p>Retrieves the active tokens, refreshing them if they have expired.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/react/src/types.ts#L82">packages/react/src/types.ts:82</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/react/src/types.ts#L82">react/src/types.ts:82</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="isauthenticated"><span>is<wbr/>Authenticated</span><a href="#isauthenticated" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">isAuthenticated</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
@@ -67,7 +67,7 @@
 </div><aside class="tsd-sources">
 <p>Inherited from <a href="_monocloud_auth-react.AuthState.html">AuthState</a>.<a href="_monocloud_auth-react.AuthState.html#isauthenticated">isAuthenticated</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/react/src/types.ts#L28">packages/react/src/types.ts:28</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/react/src/types.ts#L28">react/src/types.ts:28</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="isloading"><span>is<wbr/>Loading</span><a href="#isloading" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">isLoading</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
@@ -75,21 +75,21 @@
 </div><aside class="tsd-sources">
 <p>Inherited from <a href="_monocloud_auth-react.AuthState.html">AuthState</a>.<a href="_monocloud_auth-react.AuthState.html#isloading">isLoading</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/react/src/types.ts#L23">packages/react/src/types.ts:23</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/react/src/types.ts#L23">react/src/types.ts:23</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="refetchuserinfo"><span>refetch<wbr/>User<wbr/>Info</span><a href="#refetchuserinfo" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">refetchUserInfo</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">()</span> <span class="tsd-signature-symbol">=&gt;</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></div>
 <div class="tsd-comment tsd-typography"><p>Refetches the user's profile from the UserInfo endpoint and updates the session.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/react/src/types.ts#L77">packages/react/src/types.ts:77</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/react/src/types.ts#L77">react/src/types.ts:77</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="refreshsession"><span>refresh<wbr/>Session</span><a href="#refreshsession" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">refreshSession</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">refreshOptions</span><span class="tsd-signature-symbol">?:</span> <a href="_monocloud_auth-react.RefreshOptions.html" class="tsd-signature-type tsd-kind-interface">RefreshOptions</a><span class="tsd-signature-symbol">)</span> <span class="tsd-signature-symbol">=&gt;</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></div>
 <div class="tsd-comment tsd-typography"><p>Refreshes the current session using the Refresh Token Grant.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/react/src/types.ts#L72">packages/react/src/types.ts:72</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/react/src/types.ts#L72">react/src/types.ts:72</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="session"><code class="tsd-tag">Optional</code><span>session</span><a href="#session" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">session</span><span class="tsd-signature-symbol">?:</span> <a href="_monocloud_auth-react.MonoCloudSession.html" class="tsd-signature-type tsd-kind-interface">MonoCloudSession</a></div>
@@ -97,28 +97,28 @@
 </div><aside class="tsd-sources">
 <p>Inherited from <a href="_monocloud_auth-react.AuthState.html">AuthState</a>.<a href="_monocloud_auth-react.AuthState.html#session">session</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/react/src/types.ts#L43">packages/react/src/types.ts:43</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/react/src/types.ts#L43">react/src/types.ts:43</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="signin"><span>sign<wbr/>In</span><a href="#signin" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">signIn</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">signInOptions</span><span class="tsd-signature-symbol">?:</span> <a href="_monocloud_auth-react.SignInOptions.html" class="tsd-signature-type tsd-kind-interface">SignInOptions</a><span class="tsd-signature-symbol">)</span> <span class="tsd-signature-symbol">=&gt;</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></div>
 <div class="tsd-comment tsd-typography"><p>Initiates the sign-in flow.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/react/src/types.ts#L55">packages/react/src/types.ts:55</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/react/src/types.ts#L55">react/src/types.ts:55</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="signinsilent"><span>sign<wbr/>In<wbr/>Silent</span><a href="#signinsilent" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">signInSilent</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">(</span><br/>    <span class="tsd-kind-parameter">signInSilentOptions</span><span class="tsd-signature-symbol">?:</span> <a href="_monocloud_auth-react.SignInSilentOptions.html" class="tsd-signature-type tsd-kind-interface">SignInSilentOptions</a><span class="tsd-signature-symbol">,</span><br/><span class="tsd-signature-symbol">)</span> <span class="tsd-signature-symbol">=&gt;</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="_monocloud_auth-react.MonoCloudSession.html" class="tsd-signature-type tsd-kind-interface">MonoCloudSession</a><span class="tsd-signature-symbol">&gt;</span></div>
 <div class="tsd-comment tsd-typography"><p>Attempts to silently restore the session via a hidden iframe (<code>prompt=none</code>).</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/react/src/types.ts#L65">packages/react/src/types.ts:65</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/react/src/types.ts#L65">react/src/types.ts:65</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="signout"><span>sign<wbr/>Out</span><a href="#signout" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">signOut</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">signOutOptions</span><span class="tsd-signature-symbol">?:</span> <a href="_monocloud_auth-react.SignOutOptions.html" class="tsd-signature-type tsd-kind-interface">SignOutOptions</a><span class="tsd-signature-symbol">)</span> <span class="tsd-signature-symbol">=&gt;</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></div>
 <div class="tsd-comment tsd-typography"><p>Initiates the sign-out flow.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/react/src/types.ts#L60">packages/react/src/types.ts:60</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/react/src/types.ts#L60">react/src/types.ts:60</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="user"><code class="tsd-tag">Optional</code><span>user</span><a href="#user" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">user</span><span class="tsd-signature-symbol">?:</span> <a href="_monocloud_auth-react.MonoCloudUser.html" class="tsd-signature-type tsd-kind-interface">MonoCloudUser</a></div>
@@ -126,7 +126,7 @@
 </div><aside class="tsd-sources">
 <p>Inherited from <a href="_monocloud_auth-react.AuthState.html">AuthState</a>.<a href="_monocloud_auth-react.AuthState.html#user">user</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/react/src/types.ts#L38">packages/react/src/types.ts:38</a></li></ul></aside></section></section></details></div>
+<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/react/src/types.ts#L38">react/src/types.ts:38</a></li></ul></aside></section></section></details></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">

@@ -24,7 +24,7 @@ Code identifying why the token operation failed.
 
 ## Constructor
 
-> **new MonoCloudTokenError**(`message?`: `string`, `code?`: [`MonoCloudTokenErrorCode`](/sdks/fastify-backend/api-reference/enums/monocloudtokenerrorcode)): [`MonoCloudTokenError`](/sdks/fastify-backend/api-reference/error-classes/monocloudtokenerror)
+> **new MonoCloudTokenError**(`message?`: `string`, `code?`: [`MonoCloudTokenErrorCode`](/sdks/fastify-backend/api-reference/enums/monocloudtokenerrorcode), `raw?`: [`MonoCloudRawResponse`](/sdks/fastify-backend/api-reference/types/monocloudrawresponse)): [`MonoCloudTokenError`](/sdks/fastify-backend/api-reference/error-classes/monocloudtokenerror)
 
 ### Parameters
 
@@ -32,6 +32,7 @@ Code identifying why the token operation failed.
 | ---------- | -------------------------------------------------------------------------------------------------------- |
 | `message?` | `string`                                                                                                 |
 | `code?`    | [`MonoCloudTokenErrorCode`](/sdks/fastify-backend/api-reference/enums/monocloudtokenerrorcode) |
+| `raw?`     | [`MonoCloudRawResponse`](/sdks/fastify-backend/api-reference/types/monocloudrawresponse)                 |
 
 ### Returns
 
@@ -40,3 +41,14 @@ Code identifying why the token operation failed.
 ### Overrides
 
 [`MonoCloudAuthBaseError`](/sdks/fastify-backend/api-reference/error-classes/monocloudauthbaseerror).[`constructor`](/sdks/fastify-backend/api-reference/error-classes/monocloudauthbaseerror#constructor)
+
+---
+
+## raw
+> `readonly` `optional` **raw**: [`MonoCloudRawResponse`](/sdks/fastify-backend/api-reference/types/monocloudrawresponse)
+
+The raw HTTP response this error was derived from.
+
+### Inherited from
+
+[`MonoCloudAuthBaseError`](/sdks/fastify-backend/api-reference/error-classes/monocloudauthbaseerror).[`raw`](/sdks/fastify-backend/api-reference/error-classes/monocloudauthbaseerror#raw)

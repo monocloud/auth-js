@@ -18,6 +18,7 @@ import { AuthenticatedFastifyRequest } from '../../src/frameworks/fastify/types'
 import {
   baseOptions,
   clearEnvs,
+  httpError,
   mockValidateAccessToken,
   mockValidateAccessTokenRejection,
   setRequiredEnv,
@@ -364,9 +365,9 @@ describe('protectApi (fastify)', () => {
 
   it.each([
     ['network failure', new MonoCloudHttpError('fetch failed')],
-    ['a 500 from the server', new MonoCloudHttpError('boom', 500)],
-    ['a 502 from the server', new MonoCloudHttpError('boom', 502)],
-    ['a 429 from the server', new MonoCloudHttpError('boom', 429)],
+    ['a 500 from the server', httpError(500)],
+    ['a 502 from the server', httpError(502)],
+    ['a 429 from the server', httpError(429)],
   ])(
     'should return 503 without a challenge on a transient failure (%s)',
     async (_, error) => {
@@ -389,7 +390,7 @@ describe('protectApi (fastify)', () => {
   );
 
   it.each([
-    ['a 404 from the server', new MonoCloudHttpError('boom', 404)],
+    ['a 404 from the server', httpError(404)],
     [
       'rejected client credentials',
       new MonoCloudOPError('invalid_client', 'Client authentication failed'),

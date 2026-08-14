@@ -263,7 +263,7 @@ export class AuthorizationServerFetchBuilder {
       typeof options?.error !== 'undefined' ||
       typeof options?.error_description !== 'undefined'
     ) {
-      responseCode = 400;
+      responseCode = options?.responseCode ?? 400;
       body = {
         error: options.error ?? null,
         error_description: options.error_description ?? null,
@@ -306,7 +306,7 @@ export class AuthorizationServerFetchBuilder {
       typeof options?.error !== 'undefined' ||
       typeof options?.error_description !== 'undefined'
     ) {
-      responseCode = 400;
+      responseCode = options?.responseCode ?? 400;
       body = {
         error: options.error ?? null,
         error_description: options.error_description ?? null,
@@ -364,7 +364,7 @@ export class AuthorizationServerFetchBuilder {
       typeof options?.error !== 'undefined' ||
       typeof options?.error_description !== 'undefined'
     ) {
-      responseCode = 400;
+      responseCode = options?.responseCode ?? 400;
       body = {
         error: options.error ?? null,
         error_description: options.error_description ?? null,
@@ -435,7 +435,7 @@ export class AuthorizationServerFetchBuilder {
           'content-type': 'application/json',
         },
         body: JSON.stringify(
-          options?.responseCode === 400
+          options?.responseCode !== undefined && options.responseCode >= 400
             ? {
                 error: options.error,
                 error_description: options.error_description,
@@ -464,6 +464,7 @@ export class AuthorizationServerFetchBuilder {
   configureIntrospection(options?: {
     responseCode?: number;
     responseBody?: Record<string, unknown>;
+    rawResponseBody?: string;
     body?: string;
     accessToken?: string;
     tokenTypeHint?: string;
@@ -487,15 +488,17 @@ export class AuthorizationServerFetchBuilder {
         headers: {
           'content-type': 'application/json',
         },
-        body: JSON.stringify(
-          options?.responseBody ?? {
-            active: true,
-            iss: 'https://example.com',
-            aud: 'https://api.example.com',
-            sub: 'sub',
-            exp: 9999999999,
-          }
-        ),
+        body:
+          options?.rawResponseBody ??
+          JSON.stringify(
+            options?.responseBody ?? {
+              active: true,
+              iss: 'https://example.com',
+              aud: 'https://api.example.com',
+              sub: 'sub',
+              exp: 9999999999,
+            }
+          ),
       },
     });
 
@@ -553,7 +556,7 @@ export class AuthorizationServerFetchBuilder {
         response: {
           status: options?.responseCode ?? 200,
           body: JSON.stringify(
-            options?.responseCode === 400
+            options?.responseCode !== undefined && options.responseCode >= 400
               ? {
                   error: options?.error,
                   error_description: options.error_description,

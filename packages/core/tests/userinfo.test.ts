@@ -3,11 +3,11 @@ import { describe, expect, it, vi } from 'vitest';
 import {
   MonoCloudHttpError,
   MonoCloudOidcClient,
-  MonoCloudOPError,
+  MonoCloudTokenError,
   MonoCloudValidationError,
 } from '../src';
 import { fetchBuilder } from '@monocloud/auth-test-utils';
-import { assertError } from './utils';
+import { assertError, assertTokenError } from './utils';
 
 describe('MonoCloudOidcClient.userinfo()', () => {
   it('should fetch userinfo', async () => {
@@ -59,18 +59,17 @@ describe('MonoCloudOidcClient.userinfo()', () => {
 
       const promise = client.userinfo('at');
 
-      await assertError(
+      await assertTokenError(
         promise,
-        MonoCloudOPError,
-        e.error ?? 'userinfo_failed',
-        e.error_description ?? 'Userinfo authentication error'
+        `${e.error ?? 'userinfo_failed'}: ${e.error_description ?? 'Userinfo authentication error'}`,
+        'invalid_token'
       );
 
       fetchSpy.assert();
     }
   );
 
-  it('should return unauthorized if status is 401', async () => {
+  it('should return an invalid token error when a 401 carries no challenge header', async () => {
     const fetchSpy = fetchBuilder()
       .configureMetadata()
       .configureUserinfo({
@@ -82,10 +81,60 @@ describe('MonoCloudOidcClient.userinfo()', () => {
 
     const promise = client.userinfo('at');
 
-    await assertError(
+    await assertTokenError(
       promise,
-      MonoCloudHttpError,
-      'Error while fetching userinfo. Unexpected status code: 401'
+      'userinfo_failed: Userinfo authentication error',
+      'invalid_token'
+    );
+
+    fetchSpy.assert();
+  });
+
+  it('should return an insufficient scope error when the status is 403', async () => {
+    const fetchSpy = fetchBuilder()
+      .configureMetadata()
+      .configureUserinfo({
+        responseCode: 403,
+        responseHeaders: {
+          'WWW-Authenticate': 'Bearer error="insufficient_scope"',
+        },
+      })
+      .createSpy();
+
+    const client = new MonoCloudOidcClient('example.com', 'clientId');
+
+    const promise = client.userinfo('at');
+
+    await assertTokenError(
+      promise,
+      'insufficient_scope: Userinfo authentication error',
+      'insufficient_scope'
+    );
+
+    fetchSpy.assert();
+  });
+
+  it('should expose the raw response on a userinfo failure', async () => {
+    const fetchSpy = fetchBuilder()
+      .configureMetadata()
+      .configureUserinfo({
+        responseCode: 401,
+        responseHeaders: {
+          'WWW-Authenticate': 'Bearer error="invalid_token"',
+          'Set-Cookie': 'session=secret',
+        },
+      })
+      .createSpy();
+
+    const client = new MonoCloudOidcClient('example.com', 'clientId');
+
+    const error = await client.userinfo('at').catch((e: unknown) => e);
+
+    expect(error).toBeInstanceOf(MonoCloudTokenError);
+    expect((error as MonoCloudTokenError).raw?.status).toBe(401);
+    expect((error as MonoCloudTokenError).raw?.statusText).toBe('Unauthorized');
+    expect((error as MonoCloudTokenError).raw?.headers).not.toHaveProperty(
+      'set-cookie'
     );
 
     fetchSpy.assert();

@@ -38,6 +38,7 @@ framework: Express
 - [JwtClaims](/sdks/express-backend/api-reference/types/jwtclaims)
 - [MonoCloudBackendNodeClientOptions](/sdks/express-backend/api-reference/types/monocloudbackendnodeclientoptions)
 - [MonoCloudOidcBackendClientOptions](/sdks/express-backend/api-reference/types/monocloudoidcbackendclientoptions)
+- [MonoCloudRawResponse](/sdks/express-backend/api-reference/types/monocloudrawresponse)
 - [ProtectApiRequestOptions](/sdks/express-backend/api-reference/types/protectapirequestoptions)
 - [ProtectOptions](/sdks/express-backend/api-reference/types/protectoptions)
 - [ValidateAccessTokenOptions](/sdks/express-backend/api-reference/types/validateaccesstokenoptions)

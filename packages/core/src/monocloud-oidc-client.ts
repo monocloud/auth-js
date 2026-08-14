@@ -40,6 +40,7 @@ import { MonoCloudOidcClientBase } from './monocloud-oidc-client-base';
 import {
   assertMetadataProperty,
   deserializeJson,
+  readErrorResponse,
   innerFetch,
   JWT_ASSERTION_CLOCK_SKEW,
 } from './helper';
@@ -348,21 +349,22 @@ export class MonoCloudOidcClient extends MonoCloudOidcClientBase {
       this.fetcher
     );
 
-    if (response.status === 400) {
-      const standardBodyError = await deserializeJson(response);
+    if (response.status === 400 || response.status === 401) {
+      const { raw, json } = await readErrorResponse(response);
 
       throw new MonoCloudOPError(
-        standardBodyError.error ?? 'par_request_failed',
-        standardBodyError.error_description ??
-          'Pushed Authorization Request Failed'
+        json.error ?? 'par_request_failed',
+        json.error_description ?? 'Pushed Authorization Request Failed',
+        raw
       );
     }
 
     if (response.status !== 201) {
+      const { raw } = await readErrorResponse(response);
+
       throw new MonoCloudHttpError(
         `Error while performing pushed authorization request. Unexpected status code: ${response.status}`,
-        response.status,
-        response.statusText
+        raw
       );
     }
 
@@ -408,30 +410,35 @@ export class MonoCloudOidcClient extends MonoCloudOidcClientBase {
       this.fetcher
     );
 
-    if (response.status === 401) {
-      const authenticateError = response.headers.get('WWW-Authenticate');
+    if (response.status === 401 || response.status === 403) {
+      const { raw } = await readErrorResponse(response);
 
-      if (authenticateError) {
-        const errorMatch = /error="([^"]+)"/.exec(authenticateError);
-        const error = errorMatch ? errorMatch[1] : 'userinfo_failed';
+      const authenticateError = response.headers.get('WWW-Authenticate') ?? '';
 
-        const errorDescMatch = /error_description="([^"]+)"/.exec(
-          authenticateError
-        );
+      const errorMatch = /error="([^"]+)"/.exec(authenticateError);
+      const error = errorMatch ? errorMatch[1] : 'userinfo_failed';
 
-        const errorDescription = errorDescMatch
-          ? errorDescMatch[1]
-          : 'Userinfo authentication error';
+      const errorDescMatch = /error_description="([^"]+)"/.exec(
+        authenticateError
+      );
 
-        throw new MonoCloudOPError(error, errorDescription);
-      }
+      const errorDescription = errorDescMatch
+        ? errorDescMatch[1]
+        : 'Userinfo authentication error';
+
+      throw new MonoCloudTokenError(
+        `${error}: ${errorDescription}`,
+        error === 'insufficient_scope' ? 'insufficient_scope' : 'invalid_token',
+        raw
+      );
     }
 
     if (response.status !== 200) {
+      const { raw } = await readErrorResponse(response);
+
       throw new MonoCloudHttpError(
         `Error while fetching userinfo. Unexpected status code: ${response.status}`,
-        response.status,
-        response.statusText
+        raw
       );
     }
 
@@ -545,20 +552,22 @@ export class MonoCloudOidcClient extends MonoCloudOidcClientBase {
       this.fetcher
     );
 
-    if (response.status === 400) {
-      const standardBodyError = await deserializeJson(response);
+    if (response.status === 400 || response.status === 401) {
+      const { raw, json } = await readErrorResponse(response);
 
       throw new MonoCloudOPError(
-        standardBodyError.error ?? 'code_grant_failed',
-        standardBodyError.error_description ?? 'Authorization code grant failed'
+        json.error ?? 'code_grant_failed',
+        json.error_description ?? 'Authorization code grant failed',
+        raw
       );
     }
 
     if (response.status !== 200) {
+      const { raw } = await readErrorResponse(response);
+
       throw new MonoCloudHttpError(
         `Error while performing token grant. Unexpected status code: ${response.status}`,
-        response.status,
-        response.statusText
+        raw
       );
     }
 
@@ -632,20 +641,22 @@ export class MonoCloudOidcClient extends MonoCloudOidcClientBase {
       this.fetcher
     );
 
-    if (response.status === 400) {
-      const standardBodyError = await deserializeJson(response);
+    if (response.status === 400 || response.status === 401) {
+      const { raw, json } = await readErrorResponse(response);
 
       throw new MonoCloudOPError(
-        standardBodyError.error ?? 'refresh_grant_failed',
-        standardBodyError.error_description ?? 'Refresh token grant failed'
+        json.error ?? 'refresh_grant_failed',
+        json.error_description ?? 'Refresh token grant failed',
+        raw
       );
     }
 
     if (response.status !== 200) {
+      const { raw } = await readErrorResponse(response);
+
       throw new MonoCloudHttpError(
         `Error while performing refresh token grant. Unexpected status code: ${response.status}`,
-        response.status,
-        response.statusText
+        raw
       );
     }
 
@@ -1000,20 +1011,22 @@ export class MonoCloudOidcClient extends MonoCloudOidcClientBase {
       this.fetcher
     );
 
-    if (response.status === 400) {
-      const standardBodyError = await deserializeJson(response);
+    if (response.status === 400 || response.status === 401) {
+      const { raw, json } = await readErrorResponse(response);
 
       throw new MonoCloudOPError(
-        standardBodyError.error ?? 'revocation_failed',
-        standardBodyError.error_description ?? 'Token revocation failed'
+        json.error ?? 'revocation_failed',
+        json.error_description ?? 'Token revocation failed',
+        raw
       );
     }
 
     if (response.status !== 200) {
+      const { raw } = await readErrorResponse(response);
+
       throw new MonoCloudHttpError(
         `Error while performing revocation request. Unexpected status code: ${response.status}`,
-        response.status,
-        response.statusText
+        raw
       );
     }
   }
@@ -1259,21 +1272,22 @@ export class MonoCloudOidcClient extends MonoCloudOidcClientBase {
       this.fetcher
     );
 
-    if (response.status === 400) {
-      const standardBodyError = await deserializeJson(response);
+    if (response.status === 400 || response.status === 401) {
+      const { raw, json } = await readErrorResponse(response);
 
       throw new MonoCloudOPError(
-        standardBodyError.error ?? 'device_authorization_failed',
-        standardBodyError.error_description ??
-          'Device Authorization Request Failed'
+        json.error ?? 'device_authorization_failed',
+        json.error_description ?? 'Device Authorization Request Failed',
+        raw
       );
     }
 
     if (response.status !== 200) {
+      const { raw } = await readErrorResponse(response);
+
       throw new MonoCloudHttpError(
         `Error while performing device authorization request. Unexpected status code: ${response.status}`,
-        response.status,
-        response.statusText
+        raw
       );
     }
 
@@ -1329,20 +1343,22 @@ export class MonoCloudOidcClient extends MonoCloudOidcClientBase {
       this.fetcher
     );
 
-    if (response.status === 400) {
-      const standardBodyError = await deserializeJson(response);
+    if (response.status === 400 || response.status === 401) {
+      const { raw, json } = await readErrorResponse(response);
 
       throw new MonoCloudOPError(
-        standardBodyError.error ?? 'device_token_failed',
-        standardBodyError.error_description ?? 'Device code token grant failed'
+        json.error ?? 'device_token_failed',
+        json.error_description ?? 'Device code token grant failed',
+        raw
       );
     }
 
     if (response.status !== 200) {
+      const { raw } = await readErrorResponse(response);
+
       throw new MonoCloudHttpError(
         `Error while performing token grant. Unexpected status code: ${response.status}`,
-        response.status,
-        response.statusText
+        raw
       );
     }
 

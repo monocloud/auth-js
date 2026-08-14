@@ -17,7 +17,7 @@ Error thrown when a token operation fails.
 
 ### Constructor
 
-> **new MonoCloudTokenError**(`message?`: `string`, `code?`: [`MonoCloudTokenErrorCode`](/sdks/nodejs/api-reference/enums/monocloudtokenerrorcode)): `MonoCloudTokenError`
+> **new MonoCloudTokenError**(`message?`: `string`, `code?`: [`MonoCloudTokenErrorCode`](/sdks/nodejs/api-reference/enums/monocloudtokenerrorcode), `raw?`: [`MonoCloudRawResponse`](/sdks/nodejs/api-reference/types/monocloudrawresponse)): `MonoCloudTokenError`
 
 #### Parameters
 
@@ -25,6 +25,7 @@ Error thrown when a token operation fails.
 | ---------- | ----------------------------------------------------------------------------------------------------- |
 | `message?` | `string`                                                                                              |
 | `code?`    | [`MonoCloudTokenErrorCode`](/sdks/nodejs/api-reference/enums/monocloudtokenerrorcode) |
+| `raw?`     | [`MonoCloudRawResponse`](/sdks/nodejs/api-reference/types/monocloudrawresponse)                 |
 
 #### Returns
 
@@ -36,6 +37,7 @@ Error thrown when a token operation fails.
 
 ## Properties
 
-| Property                 | Type                                                                                                  | Description                                      |
-| ------------------------ | ----------------------------------------------------------------------------------------------------- | ------------------------------------------------ |
-| `code` | [`MonoCloudTokenErrorCode`](/sdks/nodejs/api-reference/enums/monocloudtokenerrorcode) | Code identifying why the token operation failed. |
+| Property                 | Type                                                                                                  | Description                                        |
+| ------------------------ | ----------------------------------------------------------------------------------------------------- | -------------------------------------------------- |
+| `code` | [`MonoCloudTokenErrorCode`](/sdks/nodejs/api-reference/enums/monocloudtokenerrorcode) | Code identifying why the token operation failed.   |
+| `raw?`  | [`MonoCloudRawResponse`](/sdks/nodejs/api-reference/types/monocloudrawresponse)                 | The raw HTTP response this error was derived from. |

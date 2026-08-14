@@ -13,16 +13,14 @@ export class MonoCloudHttpError extends MonoCloudAuthBaseError {
    *
    * Undefined when no response was received, such as a network failure.
    */
-  readonly status?: number;
+  get status(): number | undefined {
+    return this.raw?.status;
+  }
 
   /**
    * HTTP status text of the response that caused the error.
    */
-  readonly statusText?: string;
-
-  constructor(message?: string, status?: number, statusText?: string) {
-    super(message);
-    this.status = status;
-    this.statusText = statusText;
+  get statusText(): string | undefined {
+    return this.raw?.statusText;
   }
 }

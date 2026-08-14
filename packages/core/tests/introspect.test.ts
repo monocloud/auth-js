@@ -179,6 +179,137 @@ describe('MonoCloudOidcBackendClient.introspectAccessToken()', () => {
       fetchSpy.assert();
     });
 
+    it.each([
+      ['an empty body', ''],
+      ['a problem details body', '{"title":"Unauthorized","status":401}'],
+      ['a non-json body', '<html>Unauthorized</html>'],
+    ])(
+      'should report a 401 as invalid_client when the response has %s',
+      async (_, rawResponseBody) => {
+        const fetchSpy = fetchBuilder()
+          .configureMetadata()
+          .configureIntrospection({
+            responseCode: 401,
+            rawResponseBody,
+          })
+          .createSpy();
+
+        const client = new MonoCloudOidcBackendClient(
+          'example.com',
+          'https://api.example.com',
+          defaultClientOptions
+        );
+
+        await assertError(
+          client.introspectAccessToken('some-token'),
+          MonoCloudOPError,
+          'invalid_client',
+          'Token introspection failed'
+        );
+
+        fetchSpy.assert();
+      }
+    );
+
+    it('should prefer the standard error code over the 401 fallback', async () => {
+      const fetchSpy = fetchBuilder()
+        .configureMetadata()
+        .configureIntrospection({
+          responseCode: 401,
+          responseBody: {
+            error: 'invalid_request',
+            error_description: 'Malformed request',
+          },
+        })
+        .createSpy();
+
+      const client = new MonoCloudOidcBackendClient(
+        'example.com',
+        'https://api.example.com',
+        defaultClientOptions
+      );
+
+      await assertError(
+        client.introspectAccessToken('some-token'),
+        MonoCloudOPError,
+        'invalid_request',
+        'Malformed request'
+      );
+
+      fetchSpy.assert();
+    });
+
+    it('should report a bodiless 400 as introspection_failed', async () => {
+      const fetchSpy = fetchBuilder()
+        .configureMetadata()
+        .configureIntrospection({
+          responseCode: 400,
+          rawResponseBody: '',
+        })
+        .createSpy();
+
+      const client = new MonoCloudOidcBackendClient(
+        'example.com',
+        'https://api.example.com',
+        defaultClientOptions
+      );
+
+      await assertError(
+        client.introspectAccessToken('some-token'),
+        MonoCloudOPError,
+        'introspection_failed',
+        'Token introspection failed'
+      );
+
+      fetchSpy.assert();
+    });
+
+    it('should expose the raw response on an introspection failure', async () => {
+      const fetchSpy = fetchBuilder()
+        .configureMetadata()
+        .configureIntrospection({
+          responseCode: 401,
+          rawResponseBody: '{"title":"Unauthorized","status":401}',
+        })
+        .createSpy();
+
+      const client = new MonoCloudOidcBackendClient(
+        'example.com',
+        'https://api.example.com',
+        defaultClientOptions
+      );
+
+      const error = await client
+        .introspectAccessToken('some-token')
+        .catch((e: unknown) => e);
+
+      expect(error).toBeInstanceOf(MonoCloudOPError);
+      expect((error as MonoCloudOPError).raw?.status).toBe(401);
+      expect((error as MonoCloudOPError).raw?.body).toBe(
+        '{"title":"Unauthorized","status":401}'
+      );
+      expect((error as MonoCloudOPError).raw?.headers['content-type']).toBe(
+        'application/json'
+      );
+
+      fetchSpy.assert();
+    });
+
+    it('should not expose a raw response on a locally raised error', async () => {
+      const client = new MonoCloudOidcBackendClient(
+        'example.com',
+        'https://api.example.com',
+        defaultClientOptions
+      );
+
+      const error = await client
+        .introspectAccessToken('   ')
+        .catch((e: unknown) => e);
+
+      expect(error).toBeInstanceOf(MonoCloudValidationError);
+      expect((error as MonoCloudValidationError).raw).toBeUndefined();
+    });
+
     it('should expose the status of an unexpected introspection response', async () => {
       const fetchSpy = fetchBuilder()
         .configureMetadata()

@@ -96,4 +96,27 @@ describe('MonoCloudOidcClient.deviceAuthorizationGrant()', () => {
 
     fetchSpy.assert();
   });
+
+  it('should surface the oauth error when the server returns a 401', async () => {
+    const fetchSpy = fetchBuilder()
+      .configureMetadata()
+      .configureTokenEndpoint({
+        body: 'grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Adevice_code&device_code=device_code',
+        responseCode: 401,
+        error: 'invalid_client',
+        error_description: 'Client authentication failed',
+      })
+      .createSpy();
+
+    const client = new MonoCloudOidcClient('example.com', 'clientId');
+
+    await assertError(
+      client.deviceAuthorizationGrant('device_code'),
+      MonoCloudOPError,
+      'invalid_client',
+      'Client authentication failed'
+    );
+
+    fetchSpy.assert();
+  });
 });

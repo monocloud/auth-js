@@ -18,36 +18,60 @@ This error typically indicates a network failure, an unexpected HTTP response, o
 
 ## Constructor
 
-> **new MonoCloudHttpError**(`message?`: `string`, `status?`: `number`, `statusText?`: `string`): [`MonoCloudHttpError`](/sdks/fastify-backend/api-reference/error-classes/monocloudhttperror)
+> **new MonoCloudHttpError**(`message?`: `string`, `raw?`: [`MonoCloudRawResponse`](/sdks/fastify-backend/api-reference/types/monocloudrawresponse)): [`MonoCloudHttpError`](/sdks/fastify-backend/api-reference/error-classes/monocloudhttperror)
 
 ### Parameters
 
-| Parameter     | Type     |
-| ------------- | -------- |
-| `message?`    | `string` |
-| `status?`     | `number` |
-| `statusText?` | `string` |
+| Parameter  | Type                                                                                     |
+| ---------- | ---------------------------------------------------------------------------------------- |
+| `message?` | `string`                                                                                 |
+| `raw?`     | [`MonoCloudRawResponse`](/sdks/fastify-backend/api-reference/types/monocloudrawresponse) |
 
 ### Returns
 
 [`MonoCloudHttpError`](/sdks/fastify-backend/api-reference/error-classes/monocloudhttperror)
 
-### Overrides
+### Inherited from
 
 [`MonoCloudAuthBaseError`](/sdks/fastify-backend/api-reference/error-classes/monocloudauthbaseerror).[`constructor`](/sdks/fastify-backend/api-reference/error-classes/monocloudauthbaseerror#constructor)
 
 ---
 
+## raw
+> `readonly` `optional` **raw**: [`MonoCloudRawResponse`](/sdks/fastify-backend/api-reference/types/monocloudrawresponse)
+
+The raw HTTP response this error was derived from.
+
+### Inherited from
+
+[`MonoCloudAuthBaseError`](/sdks/fastify-backend/api-reference/error-classes/monocloudauthbaseerror).[`raw`](/sdks/fastify-backend/api-reference/error-classes/monocloudauthbaseerror#raw)
+
+---
+
 ## status
-> `readonly` `optional` **status**: `number`
+
+### Get Signature
+
+> **get** **status**(): `number` \| `undefined`
 
 HTTP status code of the response that caused the error.
 
 Undefined when no response was received, such as a network failure.
 
+#### Returns
+
+`number` \| `undefined`
+
 ---
 
 ## statusText
-> `readonly` `optional` **statusText**: `string`
+
+### Get Signature
+
+> **get** **statusText**(): `string` \| `undefined`
 
 HTTP status text of the response that caused the error.
+
+#### Returns
+
+`string` \| `undefined`

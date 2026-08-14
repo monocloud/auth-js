@@ -27,6 +27,7 @@ import { MonoCloudOidcClientBase } from './monocloud-oidc-client-base';
 import {
   deserializeJson,
   innerFetch,
+  readErrorResponse,
   JWT_ASSERTION_CLOCK_SKEW,
 } from './helper';
 
@@ -167,19 +168,24 @@ export class MonoCloudOidcBackendClient extends MonoCloudOidcClientBase {
     );
 
     if (response.status === 400 || response.status === 401) {
-      const standardBodyError = await deserializeJson(response);
+      const { raw, json } = await readErrorResponse(response);
+
+      const fallbackError =
+        response.status === 401 ? 'invalid_client' : 'introspection_failed';
 
       throw new MonoCloudOPError(
-        standardBodyError.error ?? 'introspection_failed',
-        standardBodyError.error_description ?? 'Token introspection failed'
+        json.error ?? fallbackError,
+        json.error_description ?? 'Token introspection failed',
+        raw
       );
     }
 
     if (response.status !== 200) {
+      const { raw } = await readErrorResponse(response);
+
       throw new MonoCloudHttpError(
         `Error while performing token introspection. Unexpected status code: ${response.status}`,
-        response.status,
-        response.statusText
+        raw
       );
     }
 

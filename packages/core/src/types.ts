@@ -1838,3 +1838,26 @@ export type MonoCloudTokenErrorCode =
   | 'insufficient_scope'
   /** The token's subject is not a member of the groups required for the request. */
   | 'insufficient_groups';
+
+/**
+ * The raw HTTP response an error was derived from. Only present on errors raised
+ * from an unsuccessful HTTP response. The body and headers are captured verbatim
+ * and may contain sensitive values, so avoid logging them as-is.
+ *
+ * @category Types
+ */
+export interface MonoCloudRawResponse {
+  /** HTTP status code of the response. */
+  status: number;
+
+  /** HTTP status text of the response. */
+  statusText: string;
+
+  /**
+   * Response headers.
+   */
+  headers: Record<string, string>;
+
+  /** Unparsed response body. */
+  body: string;
+}
