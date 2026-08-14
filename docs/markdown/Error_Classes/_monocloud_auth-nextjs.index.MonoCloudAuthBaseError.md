@@ -26,18 +26,25 @@ All errors thrown by the MonoCloud SDK extend this class, allowing applications 
 
 ### Constructor
 
-> **new MonoCloudAuthBaseError**(`message?`: `string`): `MonoCloudAuthBaseError`
+> **new MonoCloudAuthBaseError**(`message?`: `string`, `raw?`: [`MonoCloudRawResponse`](/sdks/nodejs/api-reference/types/monocloudrawresponse)): `MonoCloudAuthBaseError`
 
 #### Parameters
 
-| Parameter  | Type     |
-| ---------- | -------- |
-| `message?` | `string` |
+| Parameter  | Type                                                                                  |
+| ---------- | ------------------------------------------------------------------------------------- |
+| `message?` | `string`                                                                              |
+| `raw?`     | [`MonoCloudRawResponse`](/sdks/nodejs/api-reference/types/monocloudrawresponse) |
 
 #### Returns
 
 `MonoCloudAuthBaseError`
 
-#### Inherited from
+#### Overrides
 
 `Error.constructor`
+
+## Properties
+
+| Property                | Type                                                                                  | Description                                        |
+| ----------------------- | ------------------------------------------------------------------------------------- | -------------------------------------------------- |
+| `raw?` | [`MonoCloudRawResponse`](/sdks/nodejs/api-reference/types/monocloudrawresponse) | The raw HTTP response this error was derived from. |

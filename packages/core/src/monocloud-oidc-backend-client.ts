@@ -27,6 +27,7 @@ import { MonoCloudOidcClientBase } from './monocloud-oidc-client-base';
 import {
   deserializeJson,
   innerFetch,
+  readErrorResponse,
   JWT_ASSERTION_CLOCK_SKEW,
 } from './helper';
 
@@ -167,17 +168,24 @@ export class MonoCloudOidcBackendClient extends MonoCloudOidcClientBase {
     );
 
     if (response.status === 400 || response.status === 401) {
-      const standardBodyError = await deserializeJson(response);
+      const { raw, json } = await readErrorResponse(response);
+
+      const fallbackError =
+        response.status === 401 ? 'invalid_client' : 'introspection_failed';
 
       throw new MonoCloudOPError(
-        standardBodyError.error ?? 'introspection_failed',
-        standardBodyError.error_description ?? 'Token introspection failed'
+        json.error ?? fallbackError,
+        json.error_description ?? 'Token introspection failed',
+        raw
       );
     }
 
     if (response.status !== 200) {
+      const { raw } = await readErrorResponse(response);
+
       throw new MonoCloudHttpError(
-        `Error while performing token introspection. Unexpected status code: ${response.status}`
+        `Error while performing token introspection. Unexpected status code: ${response.status}`,
+        raw
       );
     }
 
@@ -326,7 +334,17 @@ export class MonoCloudOidcBackendClient extends MonoCloudOidcClientBase {
     this.clockTolerance = clockTolerance;
   }
 
-  private validateAccessTokenClaims(
+  /**
+   * Validates access token claims against the expected issuer, audience,
+   * time-based claims, and any required scopes and groups.
+   *
+   * @param claims - The access token claims to validate.
+   * @param scopes - Scopes the token must contain.
+   * @param groups - Groups the token's subject must belong to.
+   *
+   * @throws {@link MonoCloudTokenError} - If any claim validation fails.
+   */
+  protected validateAccessTokenClaims(
     claims: AccessTokenClaims,
     scopes?: string[],
     groups?: string[]
@@ -380,7 +398,10 @@ export class MonoCloudOidcBackendClient extends MonoCloudOidcClientBase {
 
       for (const requiredScope of scopes) {
         if (!tokenScopes.has(requiredScope)) {
-          throw new MonoCloudTokenError('Token is missing required scopes');
+          throw new MonoCloudTokenError(
+            'Token is missing required scopes',
+            'insufficient_scope'
+          );
         }
       }
     }
@@ -394,12 +415,25 @@ export class MonoCloudOidcBackendClient extends MonoCloudOidcClientBase {
           this.groupOptions?.matchAll
         )
       ) {
-        throw new MonoCloudTokenError('Token is missing required groups');
+        throw new MonoCloudTokenError(
+          'Token is missing required groups',
+          'insufficient_groups'
+        );
       }
     }
   }
 
-  private async validateCertificateBinding(
+  /**
+   * Validates that the access token is bound to the presented client
+   * certificate by comparing the `cnf` claim's `x5t#S256` thumbprint against
+   * the certificate's SHA-256 hash.
+   *
+   * @param accessTokenClaims - The access token claims containing the `cnf` claim.
+   * @param certificate - The client certificate presented with the request.
+   *
+   * @throws {@link MonoCloudTokenError} - If the certificate is missing or malformed, the `cnf` claim is missing or invalid, or the hashes do not match.
+   */
+  protected async validateCertificateBinding(
     accessTokenClaims: AccessTokenClaims,
     certificate?: string
   ): Promise<void> {

@@ -113,4 +113,27 @@ describe('MonoCloudOidcClient.exchangeAuthorizationCode()', () => {
 
     fetchSpy.assert();
   });
+
+  it('should surface the oauth error when the server returns a 401', async () => {
+    const fetchSpy = fetchBuilder()
+      .configureMetadata()
+      .configureTokenEndpoint({
+        body: 'grant_type=authorization_code&code=code&redirect_uri=redirect_uri&code_verifier=xyz',
+        responseCode: 401,
+        error: 'invalid_client',
+        error_description: 'Client authentication failed',
+      })
+      .createSpy();
+
+    const client = new MonoCloudOidcClient('example.com', 'clientId');
+
+    await assertError(
+      client.exchangeAuthorizationCode('code', 'redirect_uri', 'xyz'),
+      MonoCloudOPError,
+      'invalid_client',
+      'Client authentication failed'
+    );
+
+    fetchSpy.assert();
+  });
 });

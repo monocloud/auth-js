@@ -2,8 +2,8 @@
 import { describe, expect, it } from 'vitest';
 import { MonoCloudOidcClient } from '../src/monocloud-oidc-client';
 import { fetchBuilder } from '@monocloud/auth-test-utils';
-import { assertError } from './utils';
-import { MonoCloudOPError, MonoCloudValidationError } from '../src';
+import { assertError, assertTokenError } from './utils';
+import { MonoCloudValidationError } from '../src';
 
 describe('MonoCloudOidcClient.refetchUserInfo()', () => {
   it('should refetch the userinfo', async () => {
@@ -228,11 +228,10 @@ describe('MonoCloudOidcClient.refetchUserInfo()', () => {
       }
     );
 
-    await assertError(
+    await assertTokenError(
       promise,
-      MonoCloudOPError,
-      'token_failed',
-      'The token is expired or invalid'
+      'token_failed: The token is expired or invalid',
+      'invalid_token'
     );
 
     fetchSpy.assert();

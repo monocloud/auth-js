@@ -1,6 +1,11 @@
 /* eslint-disable import/no-extraneous-dependencies */
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { MonoCloudTokenError } from '@monocloud/auth-core';
+import {
+  MonoCloudHttpError,
+  MonoCloudOPError,
+  MonoCloudTokenError,
+  MonoCloudValidationError,
+} from '@monocloud/auth-core';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import {
   createMockRequest,
@@ -13,6 +18,7 @@ import { AuthenticatedFastifyRequest } from '../../src/frameworks/fastify/types'
 import {
   baseOptions,
   clearEnvs,
+  httpError,
   mockValidateAccessToken,
   mockValidateAccessTokenRejection,
   setRequiredEnv,
@@ -63,7 +69,7 @@ describe('protectApi (fastify)', () => {
     expect(validateSpy).toHaveBeenCalledWith('token-123', expect.any(Object));
   });
 
-  it('should return 401 when no token is provided', async () => {
+  it('should return 401 with a bearer challenge when no token is provided', async () => {
     const hook = protectApi()();
     const req = createMockRequest<FastifyRequest>();
     const reply = createMockResponse<ReplyMock>();
@@ -71,7 +77,23 @@ describe('protectApi (fastify)', () => {
     await hook(req, reply);
 
     expect(reply.status).toHaveBeenCalledWith(401);
+    expect(reply.header).toHaveBeenCalledWith('WWW-Authenticate', 'Bearer');
     expect(reply.send).toHaveBeenCalledWith({ message: 'unauthorized' });
+  });
+
+  it('should return 401 when the tokenResolver returns a whitespace-only token', async () => {
+    const tokenResolver = vi.fn().mockResolvedValue('   ');
+    const validateSpy = mockValidateAccessToken();
+
+    const hook = protectApi({ tokenResolver })();
+    const req = createMockRequest<FastifyRequest>();
+    const reply = createMockResponse<ReplyMock>();
+
+    await hook(req, reply);
+
+    expect(reply.status).toHaveBeenCalledWith(401);
+    expect(reply.header).toHaveBeenCalledWith('WWW-Authenticate', 'Bearer');
+    expect(validateSpy).not.toHaveBeenCalled();
   });
 
   it('should use the provided tokenResolver first', async () => {
@@ -214,7 +236,7 @@ describe('protectApi (fastify)', () => {
     });
   });
 
-  it('should return 401 when validation throws a generic error', async () => {
+  it('should return 401 with an invalid_token challenge when validation throws a generic error', async () => {
     mockValidateAccessTokenRejection(new Error('boom'));
 
     const hook = protectApi()();
@@ -226,12 +248,19 @@ describe('protectApi (fastify)', () => {
     await hook(req, reply);
 
     expect(reply.status).toHaveBeenCalledWith(401);
+    expect(reply.header).toHaveBeenCalledWith(
+      'WWW-Authenticate',
+      'Bearer error="invalid_token"'
+    );
     expect(reply.send).toHaveBeenCalledWith({ message: 'unauthorized' });
   });
 
   it('should return 403 when token is missing required scopes', async () => {
     mockValidateAccessTokenRejection(
-      new MonoCloudTokenError('Token is missing required scopes')
+      new MonoCloudTokenError(
+        'Token is missing required scopes',
+        'insufficient_scope'
+      )
     );
 
     const hook = protectApi()();
@@ -243,12 +272,19 @@ describe('protectApi (fastify)', () => {
     await hook(req, reply);
 
     expect(reply.status).toHaveBeenCalledWith(403);
+    expect(reply.header).toHaveBeenCalledWith(
+      'WWW-Authenticate',
+      'Bearer error="insufficient_scope"'
+    );
     expect(reply.send).toHaveBeenCalledWith({ message: 'forbidden' });
   });
 
   it('should return 403 when token is missing required groups', async () => {
     mockValidateAccessTokenRejection(
-      new MonoCloudTokenError('Token is missing required groups')
+      new MonoCloudTokenError(
+        'Token is missing required groups',
+        'insufficient_groups'
+      )
     );
 
     const hook = protectApi()();
@@ -260,10 +296,55 @@ describe('protectApi (fastify)', () => {
     await hook(req, reply);
 
     expect(reply.status).toHaveBeenCalledWith(403);
+    expect(reply.header).toHaveBeenCalledWith(
+      'WWW-Authenticate',
+      'Bearer error="insufficient_scope"'
+    );
     expect(reply.send).toHaveBeenCalledWith({ message: 'forbidden' });
   });
 
-  it('should return 401 on MonoCloudTokenError with a different message', async () => {
+  it.each(['insufficient_scope', 'insufficient_groups'] as const)(
+    'should return 403 based on the %s code even when the message differs',
+    async code => {
+      mockValidateAccessTokenRejection(
+        new MonoCloudTokenError('Some reworded message', code)
+      );
+
+      const hook = protectApi()();
+      const req = createMockRequest<FastifyRequest>({
+        headers: { authorization: 'Bearer t' },
+      });
+      const reply = createMockResponse<ReplyMock>();
+
+      await hook(req, reply);
+
+      expect(reply.status).toHaveBeenCalledWith(403);
+      expect(reply.header).toHaveBeenCalledWith(
+        'WWW-Authenticate',
+        'Bearer error="insufficient_scope"'
+      );
+      expect(reply.send).toHaveBeenCalledWith({ message: 'forbidden' });
+    }
+  );
+
+  it('should trim the token returned by the tokenResolver', async () => {
+    const tokenResolver = vi.fn().mockResolvedValue('  padded-token  ');
+    const validateSpy = mockValidateAccessToken();
+
+    const hook = protectApi({ tokenResolver })();
+    const req = createMockRequest<FastifyRequest>();
+    const reply = createMockResponse<ReplyMock>();
+
+    await hook(req, reply);
+
+    expect(validateSpy).toHaveBeenCalledWith(
+      'padded-token',
+      expect.any(Object)
+    );
+    expect(reply.status).not.toHaveBeenCalled();
+  });
+
+  it('should return 401 on MonoCloudTokenError with an invalid_token code', async () => {
     mockValidateAccessTokenRejection(new MonoCloudTokenError('Invalid Issuer'));
 
     const hook = protectApi()();
@@ -275,6 +356,69 @@ describe('protectApi (fastify)', () => {
     await hook(req, reply);
 
     expect(reply.status).toHaveBeenCalledWith(401);
+    expect(reply.header).toHaveBeenCalledWith(
+      'WWW-Authenticate',
+      'Bearer error="invalid_token"'
+    );
     expect(reply.send).toHaveBeenCalledWith({ message: 'unauthorized' });
   });
+
+  it.each([
+    ['network failure', new MonoCloudHttpError('fetch failed')],
+    ['a 500 from the server', httpError(500)],
+    ['a 502 from the server', httpError(502)],
+    ['a 429 from the server', httpError(429)],
+  ])(
+    'should return 503 without a challenge on a transient failure (%s)',
+    async (_, error) => {
+      mockValidateAccessTokenRejection(error);
+
+      const hook = protectApi()();
+      const req = createMockRequest<FastifyRequest>({
+        headers: { authorization: 'Bearer t' },
+      });
+      const reply = createMockResponse<ReplyMock>();
+
+      await hook(req, reply);
+
+      expect(reply.status).toHaveBeenCalledWith(503);
+      expect(reply.header).not.toHaveBeenCalled();
+      expect(reply.send).toHaveBeenCalledWith({
+        message: 'service unavailable',
+      });
+    }
+  );
+
+  it.each([
+    ['a 404 from the server', httpError(404)],
+    [
+      'rejected client credentials',
+      new MonoCloudOPError('invalid_client', 'Client authentication failed'),
+    ],
+    [
+      'missing configuration',
+      new MonoCloudValidationError(
+        'introspection_endpoint is required but not available in the issuer metadata'
+      ),
+    ],
+  ])(
+    'should return 500 without a challenge on a permanent failure (%s)',
+    async (_, error) => {
+      mockValidateAccessTokenRejection(error);
+
+      const hook = protectApi()();
+      const req = createMockRequest<FastifyRequest>({
+        headers: { authorization: 'Bearer t' },
+      });
+      const reply = createMockResponse<ReplyMock>();
+
+      await hook(req, reply);
+
+      expect(reply.status).toHaveBeenCalledWith(500);
+      expect(reply.header).not.toHaveBeenCalled();
+      expect(reply.send).toHaveBeenCalledWith({
+        message: 'internal server error',
+      });
+    }
+  );
 });

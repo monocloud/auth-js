@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   AccessTokenClaims,
   MonoCloudOidcBackendClient,
+  MonoCloudTokenError,
   MonoCloudValidationError,
 } from '@monocloud/auth-core';
 import { freeze, reset } from 'timekeeper';
@@ -153,6 +154,38 @@ describe('MonoCloudBackendNodeClient', () => {
         });
       });
 
+      it.each([
+        ['an opaque token', opaqueToken, false],
+        ['a JWT when introspectJwtTokens is enabled', jwtToken, true],
+      ])(
+        'should reject %s with a validation error when introspection is not configured',
+        async (_, token, introspectJwtTokens) => {
+          const cache: IIntrospectionCache = {
+            get: vi.fn(),
+            set: vi.fn(),
+            delete: vi.fn(),
+          };
+          const client = new MonoCloudBackendNodeClient({
+            tenantDomain: baseOptions.tenantDomain,
+            audience: baseOptions.audience,
+            introspectJwtTokens: introspectJwtTokens as boolean,
+            cache,
+          });
+
+          const introspectSpy = vi.spyOn(client, 'introspectAccessToken');
+
+          await expect(
+            client.validateAccessToken(token as string)
+          ).rejects.toThrow(
+            new MonoCloudValidationError(
+              'Token introspection is not configured'
+            )
+          );
+          expect(introspectSpy).not.toHaveBeenCalled();
+          expect(cache.get).not.toHaveBeenCalled();
+        }
+      );
+
       it('should forward validation options when dispatching to introspectAccessToken', async () => {
         const client = new MonoCloudBackendNodeClient(baseOptions);
         const introspectSpy = vi
@@ -204,6 +237,143 @@ describe('MonoCloudBackendNodeClient', () => {
         expect(result).toEqual(cached);
         expect(cache.get).toHaveBeenCalledWith(opaqueToken);
         expect(jwtSpy).not.toHaveBeenCalled();
+        expect(introspectSpy).not.toHaveBeenCalled();
+      });
+
+      it('should return cached claims when the required scopes and groups are satisfied', async () => {
+        const cached = buildClaims({
+          exp: now() + 60,
+          scope: 'read write',
+          groups: ['admin'],
+        });
+        const cache: IIntrospectionCache = {
+          get: vi.fn().mockResolvedValue(cached),
+          set: vi.fn(),
+          delete: vi.fn(),
+        };
+
+        const client = getClient(cache);
+
+        const introspectSpy = vi.spyOn(client, 'introspectAccessToken');
+
+        const result = await client.validateAccessToken(opaqueToken, {
+          scopes: ['read'],
+          groups: ['admin'],
+        });
+
+        expect(result).toEqual(cached);
+        expect(introspectSpy).not.toHaveBeenCalled();
+      });
+
+      it('should enforce required scopes on cached claims without re-introspecting', async () => {
+        const cached = buildClaims({ exp: now() + 60, scope: 'read' });
+        const cache: IIntrospectionCache = {
+          get: vi.fn().mockResolvedValue(cached),
+          set: vi.fn(),
+          delete: vi.fn(),
+        };
+
+        const client = getClient(cache);
+
+        const introspectSpy = vi.spyOn(client, 'introspectAccessToken');
+
+        const error = await client
+          .validateAccessToken(opaqueToken, { scopes: ['write'] })
+          .catch((e: unknown) => e);
+
+        expect(error).toBeInstanceOf(MonoCloudTokenError);
+        expect((error as MonoCloudTokenError).code).toBe('insufficient_scope');
+        expect(introspectSpy).not.toHaveBeenCalled();
+        expect(cache.set).not.toHaveBeenCalled();
+      });
+
+      it('should enforce required groups on cached claims without re-introspecting', async () => {
+        const cached = buildClaims({ exp: now() + 60, groups: ['user'] });
+        const cache: IIntrospectionCache = {
+          get: vi.fn().mockResolvedValue(cached),
+          set: vi.fn(),
+          delete: vi.fn(),
+        };
+
+        const client = getClient(cache);
+
+        const introspectSpy = vi.spyOn(client, 'introspectAccessToken');
+
+        const error = await client
+          .validateAccessToken(opaqueToken, { groups: ['admin'] })
+          .catch((e: unknown) => e);
+
+        expect(error).toBeInstanceOf(MonoCloudTokenError);
+        expect((error as MonoCloudTokenError).code).toBe('insufficient_groups');
+        expect(introspectSpy).not.toHaveBeenCalled();
+      });
+
+      it('should validate certificate binding on cached claims when requested', async () => {
+        const certificate = 'AQIDBAUGBwg=';
+        const certificateBinary = atob(certificate);
+        const certificateBytes = new Uint8Array(certificateBinary.length);
+
+        for (let i = 0; i < certificateBinary.length; i++) {
+          certificateBytes[i] = certificateBinary.charCodeAt(i);
+        }
+
+        const digest = await crypto.subtle.digest('SHA-256', certificateBytes);
+        const certificateHash = btoa(
+          String.fromCharCode(...new Uint8Array(digest))
+        )
+          .replace(/\+/g, '-')
+          .replace(/\//g, '_')
+          .replace(/=+$/, '');
+
+        const cached = buildClaims({
+          exp: now() + 60,
+          cnf: { 'x5t#S256': certificateHash },
+        });
+        const cache: IIntrospectionCache = {
+          get: vi.fn().mockResolvedValue(cached),
+          set: vi.fn(),
+          delete: vi.fn(),
+        };
+
+        const client = getClient(cache);
+
+        const introspectSpy = vi.spyOn(client, 'introspectAccessToken');
+
+        const result = await client.validateAccessToken(opaqueToken, {
+          validateCertificateBinding: true,
+          clientCertificate: certificate,
+        });
+
+        expect(result).toEqual(cached);
+        expect(introspectSpy).not.toHaveBeenCalled();
+      });
+
+      it('should throw when certificate binding is requested on a cache hit without a certificate', async () => {
+        const cached = buildClaims({
+          exp: now() + 60,
+          cnf: { 'x5t#S256': 'hash' },
+        });
+        const cache: IIntrospectionCache = {
+          get: vi.fn().mockResolvedValue(cached),
+          set: vi.fn(),
+          delete: vi.fn(),
+        };
+
+        const client = getClient(cache);
+
+        const introspectSpy = vi.spyOn(client, 'introspectAccessToken');
+
+        const error = await client
+          .validateAccessToken(opaqueToken, {
+            validateCertificateBinding: true,
+          })
+          .catch((e: unknown) => e);
+
+        expect(error).toBeInstanceOf(MonoCloudTokenError);
+        expect((error as MonoCloudTokenError).code).toBe('invalid_token');
+        expect((error as MonoCloudTokenError).message).toBe(
+          'Client certificate is not present'
+        );
         expect(introspectSpy).not.toHaveBeenCalled();
       });
 

@@ -17,13 +17,14 @@ Error thrown when validation fails.
 
 ### Constructor
 
-> **new MonoCloudValidationError**(`message?`: `string`): `MonoCloudValidationError`
+> **new MonoCloudValidationError**(`message?`: `string`, `raw?`: [`MonoCloudRawResponse`](/sdks/nodejs/api-reference/types/monocloudrawresponse)): `MonoCloudValidationError`
 
 #### Parameters
 
-| Parameter  | Type     |
-| ---------- | -------- |
-| `message?` | `string` |
+| Parameter  | Type                                                                                  |
+| ---------- | ------------------------------------------------------------------------------------- |
+| `message?` | `string`                                                                              |
+| `raw?`     | [`MonoCloudRawResponse`](/sdks/nodejs/api-reference/types/monocloudrawresponse) |
 
 #### Returns
 
@@ -32,3 +33,9 @@ Error thrown when validation fails.
 #### Inherited from
 
 [`MonoCloudAuthBaseError`](/sdks/nextjs/api-reference/error-classes/monocloudauthbaseerror).[`constructor`](/sdks/nextjs/api-reference/error-classes/monocloudauthbaseerror#constructor)
+
+## Properties
+
+| Property                | Type                                                                                  | Description                                        |
+| ----------------------- | ------------------------------------------------------------------------------------- | -------------------------------------------------- |
+| `raw?` | [`MonoCloudRawResponse`](/sdks/nodejs/api-reference/types/monocloudrawresponse) | The raw HTTP response this error was derived from. |

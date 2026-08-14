@@ -1,6 +1,11 @@
 /* eslint-disable import/no-extraneous-dependencies */
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { MonoCloudTokenError } from '@monocloud/auth-core';
+import {
+  MonoCloudHttpError,
+  MonoCloudOPError,
+  MonoCloudTokenError,
+  MonoCloudValidationError,
+} from '@monocloud/auth-core';
 import type { NextFunction, Request, Response } from 'express';
 import {
   createMockNext,
@@ -14,6 +19,7 @@ import { AuthenticatedExpressRequest } from '../../src/frameworks/express/types'
 import {
   baseOptions,
   clearEnvs,
+  httpError,
   mockValidateAccessToken,
   mockValidateAccessTokenRejection,
   setRequiredEnv,
@@ -68,7 +74,7 @@ describe('protectApi (express)', () => {
     expect(next).toHaveBeenCalledTimes(1);
   });
 
-  it('should return 401 when no token is provided', async () => {
+  it('should return 401 with a bearer challenge when no token is provided', async () => {
     const middleware = protectApi()();
     const req = createMockRequest<AuthenticatedExpressRequest>();
     const res = createMockResponse<ResMock>();
@@ -77,9 +83,27 @@ describe('protectApi (express)', () => {
     await middleware(req, res, next);
 
     expect(res.status).toHaveBeenCalledWith(401);
+    expect(res.set).toHaveBeenCalledWith('WWW-Authenticate', 'Bearer');
     expect(res.json).toHaveBeenCalledWith({ message: 'unauthorized' });
     expect(next).not.toHaveBeenCalled();
     expect(req.claims).toBeUndefined();
+  });
+
+  it('should return 401 when the tokenResolver returns a whitespace-only token', async () => {
+    const tokenResolver = vi.fn().mockResolvedValue('   ');
+    const validateSpy = mockValidateAccessToken();
+
+    const middleware = protectApi({ tokenResolver })();
+    const req = createMockRequest<AuthenticatedExpressRequest>();
+    const res = createMockResponse<ResMock>();
+    const next = createMockNext<NextFunction>();
+
+    await middleware(req, res, next);
+
+    expect(res.status).toHaveBeenCalledWith(401);
+    expect(res.set).toHaveBeenCalledWith('WWW-Authenticate', 'Bearer');
+    expect(validateSpy).not.toHaveBeenCalled();
+    expect(next).not.toHaveBeenCalled();
   });
 
   it('should use the provided tokenResolver first', async () => {
@@ -234,7 +258,7 @@ describe('protectApi (express)', () => {
     });
   });
 
-  it('should return 401 when validation throws a generic error', async () => {
+  it('should return 401 with an invalid_token challenge when validation throws a generic error', async () => {
     mockValidateAccessTokenRejection(new Error('boom'));
 
     const middleware = protectApi()();
@@ -247,6 +271,10 @@ describe('protectApi (express)', () => {
     await middleware(req, res, next);
 
     expect(res.status).toHaveBeenCalledWith(401);
+    expect(res.set).toHaveBeenCalledWith(
+      'WWW-Authenticate',
+      'Bearer error="invalid_token"'
+    );
     expect(res.json).toHaveBeenCalledWith({ message: 'unauthorized' });
     expect(next).not.toHaveBeenCalled();
     expect(req.claims).toBeUndefined();
@@ -254,7 +282,10 @@ describe('protectApi (express)', () => {
 
   it('should return 403 when token is missing required scopes', async () => {
     mockValidateAccessTokenRejection(
-      new MonoCloudTokenError('Token is missing required scopes')
+      new MonoCloudTokenError(
+        'Token is missing required scopes',
+        'insufficient_scope'
+      )
     );
 
     const middleware = protectApi()();
@@ -267,13 +298,20 @@ describe('protectApi (express)', () => {
     await middleware(req, res, next);
 
     expect(res.status).toHaveBeenCalledWith(403);
+    expect(res.set).toHaveBeenCalledWith(
+      'WWW-Authenticate',
+      'Bearer error="insufficient_scope"'
+    );
     expect(res.json).toHaveBeenCalledWith({ message: 'forbidden' });
     expect(req.claims).toBeUndefined();
   });
 
   it('should return 403 when token is missing required groups', async () => {
     mockValidateAccessTokenRejection(
-      new MonoCloudTokenError('Token is missing required groups')
+      new MonoCloudTokenError(
+        'Token is missing required groups',
+        'insufficient_groups'
+      )
     );
 
     const middleware = protectApi()();
@@ -286,11 +324,58 @@ describe('protectApi (express)', () => {
     await middleware(req, res, next);
 
     expect(res.status).toHaveBeenCalledWith(403);
+    expect(res.set).toHaveBeenCalledWith(
+      'WWW-Authenticate',
+      'Bearer error="insufficient_scope"'
+    );
     expect(res.json).toHaveBeenCalledWith({ message: 'forbidden' });
     expect(req.claims).toBeUndefined();
   });
 
-  it('should return 401 on MonoCloudTokenError with a different message', async () => {
+  it.each(['insufficient_scope', 'insufficient_groups'] as const)(
+    'should return 403 based on the %s code even when the message differs',
+    async code => {
+      mockValidateAccessTokenRejection(
+        new MonoCloudTokenError('Some reworded message', code)
+      );
+
+      const middleware = protectApi()();
+      const req = createMockRequest<AuthenticatedExpressRequest>({
+        headers: { authorization: 'Bearer t' },
+      });
+      const res = createMockResponse<ResMock>();
+      const next = createMockNext<NextFunction>();
+
+      await middleware(req, res, next);
+
+      expect(res.status).toHaveBeenCalledWith(403);
+      expect(res.set).toHaveBeenCalledWith(
+        'WWW-Authenticate',
+        'Bearer error="insufficient_scope"'
+      );
+      expect(res.json).toHaveBeenCalledWith({ message: 'forbidden' });
+    }
+  );
+
+  it('should trim the token returned by the tokenResolver', async () => {
+    const tokenResolver = vi.fn().mockResolvedValue('  padded-token  ');
+    const validateSpy = mockValidateAccessToken();
+
+    const middleware = protectApi({ tokenResolver })();
+    const req = createMockRequest<Request>();
+    const res = createMockResponse<ResMock>();
+    const next = createMockNext<NextFunction>();
+
+    await middleware(req, res, next);
+
+    expect(validateSpy).toHaveBeenCalledWith(
+      'padded-token',
+      expect.any(Object)
+    );
+    expect(next).toHaveBeenCalledTimes(1);
+  });
+
+  it('should return 401 on MonoCloudTokenError with an invalid_token code', async () => {
     mockValidateAccessTokenRejection(new MonoCloudTokenError('Invalid Issuer'));
 
     const middleware = protectApi()();
@@ -303,7 +388,74 @@ describe('protectApi (express)', () => {
     await middleware(req, res, next);
 
     expect(res.status).toHaveBeenCalledWith(401);
+    expect(res.set).toHaveBeenCalledWith(
+      'WWW-Authenticate',
+      'Bearer error="invalid_token"'
+    );
     expect(res.json).toHaveBeenCalledWith({ message: 'unauthorized' });
     expect(req.claims).toBeUndefined();
   });
+
+  it.each([
+    ['network failure', new MonoCloudHttpError('fetch failed')],
+    ['a 500 from the server', httpError(500)],
+    ['a 502 from the server', httpError(502)],
+    ['a 429 from the server', httpError(429)],
+  ])(
+    'should return 503 without a challenge on a transient failure (%s)',
+    async (_, error) => {
+      mockValidateAccessTokenRejection(error);
+
+      const middleware = protectApi()();
+      const req = createMockRequest<AuthenticatedExpressRequest>({
+        headers: { authorization: 'Bearer t' },
+      });
+      const res = createMockResponse<ResMock>();
+      const next = createMockNext<NextFunction>();
+
+      await middleware(req, res, next);
+
+      expect(res.status).toHaveBeenCalledWith(503);
+      expect(res.set).not.toHaveBeenCalled();
+      expect(res.json).toHaveBeenCalledWith({ message: 'service unavailable' });
+      expect(next).not.toHaveBeenCalled();
+      expect(req.claims).toBeUndefined();
+    }
+  );
+
+  it.each([
+    ['a 404 from the server', httpError(404)],
+    [
+      'rejected client credentials',
+      new MonoCloudOPError('invalid_client', 'Client authentication failed'),
+    ],
+    [
+      'missing configuration',
+      new MonoCloudValidationError(
+        'introspection_endpoint is required but not available in the issuer metadata'
+      ),
+    ],
+  ])(
+    'should return 500 without a challenge on a permanent failure (%s)',
+    async (_, error) => {
+      mockValidateAccessTokenRejection(error);
+
+      const middleware = protectApi()();
+      const req = createMockRequest<AuthenticatedExpressRequest>({
+        headers: { authorization: 'Bearer t' },
+      });
+      const res = createMockResponse<ResMock>();
+      const next = createMockNext<NextFunction>();
+
+      await middleware(req, res, next);
+
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.set).not.toHaveBeenCalled();
+      expect(res.json).toHaveBeenCalledWith({
+        message: 'internal server error',
+      });
+      expect(next).not.toHaveBeenCalled();
+      expect(req.claims).toBeUndefined();
+    }
+  );
 });

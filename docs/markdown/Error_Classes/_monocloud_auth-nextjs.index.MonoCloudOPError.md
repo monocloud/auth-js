@@ -2,14 +2,12 @@
 rootSdk: Next.js
 title: "MonoCloudOPError"
 category: Error Classes
-description: "OAuth error returned by the authorization server during an authentication or token request."
+description: "OAuth error returned by the authorization server."
 ---
 
 # Error Class: MonoCloudOPError
 
-OAuth error returned by the authorization server during an authentication or token request.
-
-These errors correspond to standard OAuth / OpenID Connect error responses such as `invalid_request`, `access_denied`, or `invalid_grant`.
+OAuth error returned by the authorization server.
 
 ## Extends
 
@@ -19,14 +17,15 @@ These errors correspond to standard OAuth / OpenID Connect error responses such 
 
 ### Constructor
 
-> **new MonoCloudOPError**(`error`: `string`, `errorDescription?`: `string`): `MonoCloudOPError`
+> **new MonoCloudOPError**(`error`: `string`, `errorDescription?`: `string`, `raw?`: [`MonoCloudRawResponse`](/sdks/nodejs/api-reference/types/monocloudrawresponse)): `MonoCloudOPError`
 
 #### Parameters
 
-| Parameter           | Type     |
-| ------------------- | -------- |
-| `error`             | `string` |
-| `errorDescription?` | `string` |
+| Parameter           | Type                                                                                  |
+| ------------------- | ------------------------------------------------------------------------------------- |
+| `error`             | `string`                                                                              |
+| `errorDescription?` | `string`                                                                              |
+| `raw?`              | [`MonoCloudRawResponse`](/sdks/nodejs/api-reference/types/monocloudrawresponse) |
 
 #### Returns
 
@@ -38,7 +37,8 @@ These errors correspond to standard OAuth / OpenID Connect error responses such 
 
 ## Properties
 
-| Property                                          | Type     | Description                                            |
-| ------------------------------------------------- | -------- | ------------------------------------------------------ |
-| `error`                        | `string` | OAuth error code returned by the authorization server. |
-| `errorDescription?` | `string` | Human-readable description of the error.               |
+| Property                                          | Type                                                                                  | Description                                                                                                                                                          |
+| ------------------------------------------------- | ------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `error`                        | `string`                                                                              | OAuth error code returned by the authorization server. When the response carries no readable error body, this is inferred from the endpoint and status code instead. |
+| `errorDescription?` | `string`                                                                              | Human-readable description of the error.                                                                                                                             |
+| `raw?`                           | [`MonoCloudRawResponse`](/sdks/nodejs/api-reference/types/monocloudrawresponse) | The raw HTTP response this error was derived from.                                                                                                                   |

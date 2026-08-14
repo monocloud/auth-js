@@ -23,6 +23,8 @@ export {
 
 export type {
   AccessTokenClaims,
+  MonoCloudTokenErrorCode,
+  MonoCloudRawResponse,
   ValidateJwtAccessTokenOptions,
   IntrospectOptions,
   IsUserInGroupOptions,

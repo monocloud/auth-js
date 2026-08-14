@@ -14,3 +14,9 @@ This error indicates an unexpected issue within the browser that does not fall u
 ## Extends
 
 - [`MonoCloudAuthBaseError`](/sdks/react/api-reference/error-classes/monocloudauthbaseerror)
+
+## Properties
+
+| Property                | Type                                                                                  | Description                                        |
+| ----------------------- | ------------------------------------------------------------------------------------- | -------------------------------------------------- |
+| `raw?` | [`MonoCloudRawResponse`](/sdks/nodejs/api-reference/types/monocloudrawresponse) | The raw HTTP response this error was derived from. |

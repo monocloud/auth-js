@@ -161,6 +161,18 @@ async function processFile(filePath, fileIndex, frameworkIndex) {
     hasChanges = true;
   }
 
+  // `raw` is declared once on MonoCloudAuthBaseError and surfaces on every error
+  // subclass page, where the backlink adds nothing. Drop it for this member
+  // only — every other inherited member keeps its attribution.
+  const rawInheritedStripped = content.replace(
+    /(\n## raw\??\n(?:(?!\n## )[\s\S])*?)\n### Inherited from\n+[^\n]+\n?/g,
+    '$1'
+  );
+  if (rawInheritedStripped !== content) {
+    content = rawInheritedStripped;
+    hasChanges = true;
+  }
+
   const stripped = content
     .replace(/^(#{1,6}\s+\S+)\?\s*$/gm, '$1')
     .replace(/\*\*([^*\s]+)\?\*\*(?=:)/g, '**$1**');

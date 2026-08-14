@@ -11,7 +11,12 @@ import { MonoCloudTokenError } from './errors/monocloud-token-error';
 import { MonoCloudAuthBaseError } from './errors/monocloud-auth-base-error';
 import { MonoCloudValidationError } from './errors/monocloud-validation-error';
 import { isMtlsClientAuthMethod } from './client-auth';
-import { assertMetadataProperty, deserializeJson, innerFetch } from './helper';
+import {
+  assertMetadataProperty,
+  deserializeJson,
+  innerFetch,
+  readRawResponse,
+} from './helper';
 
 /**
  * @category Classes
@@ -135,8 +140,11 @@ export class MonoCloudOidcClientBase {
       );
 
       if (response.status !== 200) {
+        const raw = await readRawResponse(response);
+
         throw new MonoCloudHttpError(
-          `Error while fetching metadata. Unexpected status code: ${response.status}`
+          `Error while fetching metadata. Unexpected status code: ${response.status}`,
+          raw
         );
       }
 
@@ -182,8 +190,11 @@ export class MonoCloudOidcClientBase {
       );
 
       if (response.status !== 200) {
+        const raw = await readRawResponse(response);
+
         throw new MonoCloudHttpError(
-          `Error while fetching JWKS. Unexpected status code: ${response.status}`
+          `Error while fetching JWKS. Unexpected status code: ${response.status}`,
+          raw
         );
       }
 

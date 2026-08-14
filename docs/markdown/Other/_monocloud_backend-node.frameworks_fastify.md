@@ -38,6 +38,7 @@ framework: Fastify
 - [JwtClaims](/sdks/fastify-backend/api-reference/types/jwtclaims)
 - [MonoCloudBackendNodeClientOptions](/sdks/fastify-backend/api-reference/types/monocloudbackendnodeclientoptions)
 - [MonoCloudOidcBackendClientOptions](/sdks/fastify-backend/api-reference/types/monocloudoidcbackendclientoptions)
+- [MonoCloudRawResponse](/sdks/fastify-backend/api-reference/types/monocloudrawresponse)
 - [ProtectApiRequestOptions](/sdks/fastify-backend/api-reference/types/protectapirequestoptions)
 - [ProtectOptions](/sdks/fastify-backend/api-reference/types/protectoptions)
 - [ValidateAccessTokenOptions](/sdks/fastify-backend/api-reference/types/validateaccesstokenoptions)
@@ -46,6 +47,7 @@ framework: Fastify
 ## Types (Enums)
 
 - [ClientAuthMethod](/sdks/fastify-backend/api-reference/enums/clientauthmethod)
+- [MonoCloudTokenErrorCode](/sdks/fastify-backend/api-reference/enums/monocloudtokenerrorcode)
 
 ## Types (Handler)
 

@@ -19,13 +19,14 @@ This error typically indicates a network failure, an unexpected HTTP response, o
 
 ### Constructor
 
-> **new MonoCloudHttpError**(`message?`: `string`): `MonoCloudHttpError`
+> **new MonoCloudHttpError**(`message?`: `string`, `raw?`: [`MonoCloudRawResponse`](/sdks/nodejs/api-reference/types/monocloudrawresponse)): `MonoCloudHttpError`
 
 #### Parameters
 
-| Parameter  | Type     |
-| ---------- | -------- |
-| `message?` | `string` |
+| Parameter  | Type                                                                                  |
+| ---------- | ------------------------------------------------------------------------------------- |
+| `message?` | `string`                                                                              |
+| `raw?`     | [`MonoCloudRawResponse`](/sdks/nodejs/api-reference/types/monocloudrawresponse) |
 
 #### Returns
 
@@ -34,3 +35,39 @@ This error typically indicates a network failure, an unexpected HTTP response, o
 #### Inherited from
 
 [`MonoCloudAuthBaseError`](/sdks/nextjs/api-reference/error-classes/monocloudauthbaseerror).[`constructor`](/sdks/nextjs/api-reference/error-classes/monocloudauthbaseerror#constructor)
+
+## Properties
+
+| Property                | Type                                                                                  | Description                                        |
+| ----------------------- | ------------------------------------------------------------------------------------- | -------------------------------------------------- |
+| `raw?` | [`MonoCloudRawResponse`](/sdks/nodejs/api-reference/types/monocloudrawresponse) | The raw HTTP response this error was derived from. |
+
+## Accessors
+
+### status
+
+#### Get Signature
+
+> **get** **status**(): `number` \| `undefined`
+
+HTTP status code of the response that caused the error.
+
+Undefined when no response was received, such as a network failure.
+
+##### Returns
+
+`number` \| `undefined`
+
+---
+
+### statusText
+
+#### Get Signature
+
+> **get** **statusText**(): `string` \| `undefined`
+
+HTTP status text of the response that caused the error.
+
+##### Returns
+
+`string` \| `undefined`

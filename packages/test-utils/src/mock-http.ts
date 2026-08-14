@@ -9,8 +9,11 @@ export interface MockHttpResponse {
   status: ReturnType<typeof vi.fn>;
   json: ReturnType<typeof vi.fn>;
   send: ReturnType<typeof vi.fn>;
+  set: ReturnType<typeof vi.fn>;
+  header: ReturnType<typeof vi.fn>;
   statusCode?: number;
   body?: unknown;
+  headers?: Record<string, string>;
 }
 
 export const createMockRequest = <T = MockHttpRequest>(
@@ -28,12 +31,22 @@ export const createMockResponse = <T = MockHttpResponse>(): T => {
     status: vi.fn(),
     json: vi.fn(),
     send: vi.fn(),
+    set: vi.fn(),
+    header: vi.fn(),
   };
 
   res.status.mockImplementation((code: number) => {
     res.statusCode = code;
     return res;
   });
+
+  const setHeader = (name: string, value: string): MockHttpResponse => {
+    res.headers = { ...res.headers, [name]: value };
+    return res;
+  };
+
+  res.set.mockImplementation(setHeader);
+  res.header.mockImplementation(setHeader);
 
   res.json.mockImplementation((body: unknown) => {
     res.body = body;

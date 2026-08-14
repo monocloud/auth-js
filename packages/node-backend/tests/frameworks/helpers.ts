@@ -1,6 +1,6 @@
 /* eslint-disable import/no-extraneous-dependencies */
 import { vi } from 'vitest';
-import { AccessTokenClaims } from '@monocloud/auth-core';
+import { AccessTokenClaims, MonoCloudHttpError } from '@monocloud/auth-core';
 import { MonoCloudBackendNodeClient } from '../../src/monocloud-backend-node-client';
 
 export const baseOptions = {
@@ -43,6 +43,14 @@ export const mockValidateAccessToken = (
   vi
     .spyOn(MonoCloudBackendNodeClient.prototype, 'validateAccessToken')
     .mockResolvedValue(resolved);
+
+export const httpError = (status: number): MonoCloudHttpError =>
+  new MonoCloudHttpError('boom', {
+    status,
+    statusText: '',
+    headers: {},
+    body: '',
+  });
 
 export const mockValidateAccessTokenRejection = (
   error: unknown
