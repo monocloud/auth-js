@@ -57,7 +57,3 @@ Human-readable description of the error.
 > `readonly` `optional` **raw**: [`MonoCloudRawResponse`](/sdks/fastify-backend/api-reference/types/monocloudrawresponse)
 
 The raw HTTP response this error was derived from.
-
-### Inherited from
-
-[`MonoCloudAuthBaseError`](/sdks/fastify-backend/api-reference/error-classes/monocloudauthbaseerror).[`raw`](/sdks/fastify-backend/api-reference/error-classes/monocloudauthbaseerror#raw)

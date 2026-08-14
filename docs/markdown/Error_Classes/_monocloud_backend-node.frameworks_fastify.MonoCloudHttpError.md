@@ -42,10 +42,6 @@ This error typically indicates a network failure, an unexpected HTTP response, o
 
 The raw HTTP response this error was derived from.
 
-### Inherited from
-
-[`MonoCloudAuthBaseError`](/sdks/fastify-backend/api-reference/error-classes/monocloudauthbaseerror).[`raw`](/sdks/fastify-backend/api-reference/error-classes/monocloudauthbaseerror#raw)
-
 ---
 
 ## status

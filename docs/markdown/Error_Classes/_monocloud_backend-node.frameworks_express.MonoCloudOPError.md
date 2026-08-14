@@ -57,7 +57,3 @@ Human-readable description of the error.
 > `readonly` `optional` **raw**: [`MonoCloudRawResponse`](/sdks/express-backend/api-reference/types/monocloudrawresponse)
 
 The raw HTTP response this error was derived from.
-
-### Inherited from
-
-[`MonoCloudAuthBaseError`](/sdks/express-backend/api-reference/error-classes/monocloudauthbaseerror).[`raw`](/sdks/express-backend/api-reference/error-classes/monocloudauthbaseerror#raw)
