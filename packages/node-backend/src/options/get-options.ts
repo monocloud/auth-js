@@ -40,6 +40,8 @@ export const getOptions = (
     process.env.MONOCLOUD_BACKEND_METADATA_CACHE_DURATION;
   const MONOCLOUD_BACKEND_INTROSPECT_JWT_TOKENS =
     process.env.MONOCLOUD_BACKEND_INTROSPECT_JWT_TOKENS;
+  const MONOCLOUD_BACKEND_RESPONSE_TIMEOUT =
+    process.env.MONOCLOUD_BACKEND_RESPONSE_TIMEOUT;
 
   const opt: MonoCloudBackendNodeClientOptions = {
     tenantDomain: options?.tenantDomain ?? MONOCLOUD_BACKEND_TENANT_DOMAIN!,
@@ -80,6 +82,10 @@ export const getOptions = (
       options?.introspectJwtTokens ??
       getBoolean(MONOCLOUD_BACKEND_INTROSPECT_JWT_TOKENS) ??
       DEFAULT_OPTIONS.introspectJwtTokens,
+    responseTimeout:
+      options?.responseTimeout ??
+      getNumber(MONOCLOUD_BACKEND_RESPONSE_TIMEOUT) ??
+      DEFAULT_OPTIONS.responseTimeout,
     fetcher: options?.fetcher,
     cache: options?.cache,
   };

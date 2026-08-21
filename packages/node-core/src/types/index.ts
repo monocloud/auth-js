@@ -474,7 +474,8 @@ export interface MonoCloudOptionsBase {
   clockTolerance: number;
 
   /**
-   * Maximum time (in milliseconds) to wait for responses from the MonoCloud authorization server.
+   * Maximum time (in milliseconds) to wait for responses from the MonoCloud authorization server
+   * before the request is aborted.
    *
    * @defaultValue 10000 (10 seconds)
    */

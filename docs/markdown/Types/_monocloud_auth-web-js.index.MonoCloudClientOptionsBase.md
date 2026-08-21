@@ -2,15 +2,15 @@
 rootSdk: JavaScript
 title: "MonoCloudClientOptionsBase"
 category: Types
-description: "Shared configuration options for MonoCloud OIDC clients. These options are common to both MonoCloudOidcClientOptions and MonoCloudOidcBackendClientOptions."
+description: "Shared configuration options for MonoCloud OIDC clients."
 ---
 
 # Type: MonoCloudClientOptionsBase
 
 Shared configuration options for MonoCloud OIDC clients.
 
-These options are common to both [MonoCloudOidcClientOptions](/sdks/nodejs/api-reference/types/monocloudoidcclientoptions)
-and [MonoCloudOidcBackendClientOptions](/sdks/nodejs/api-reference/types/monocloudoidcbackendclientoptions).
+These options are common to [MonoCloudOidcClientOptions](/sdks/nodejs/api-reference/types/monocloudoidcclientoptions),
+[MonoCloudOidcBackendClientOptions](/sdks/nodejs/api-reference/types/monocloudoidcbackendclientoptions), and [MonoCloudOidcClientBaseOptions](/sdks/nodejs/api-reference/types/monocloudoidcclientbaseoptions).
 
 ## Properties
 
@@ -23,4 +23,5 @@ and [MonoCloudOidcBackendClientOptions](/sdks/nodejs/api-reference/types/monoclo
 | `jwksResolver?`                   | () => [`Jwks`](/sdks/web-js/api-reference/types/jwks) \| `Promise`\<[`Jwks`](/sdks/web-js/api-reference/types/jwks)\>                                         | Optional custom resolver for the JSON Web Key Set (JWKS).                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
 | `metadataCacheDuration?` | `number`                                                                                                                                                    | Duration (in seconds) to cache OpenID Connect discovery metadata.                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
 | `metadataResolver?`           | () => [`IssuerMetadata`](/sdks/web-js/api-reference/types/issuermetadata) \| `Promise`\<[`IssuerMetadata`](/sdks/web-js/api-reference/types/issuermetadata)\> | Optional custom resolver for the issuer metadata (OpenID Connect discovery document).                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `responseTimeout?`             | `number`                                                                                                                                                    | Maximum time (in milliseconds) to wait for a response from the authorization server before the request is aborted.                                                                                                                                                                                                                                                                                                                                                                                                       |
 | `trustStoreId?`                   | `string`                                                                                                                                                    | Identifier of the trust store whose mTLS endpoint aliases should be used when authenticating with a mutual-TLS client authentication method.                                                                                                                                                                                                                                                                                                                                                                             |

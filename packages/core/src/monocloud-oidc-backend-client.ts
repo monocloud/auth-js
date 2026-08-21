@@ -72,6 +72,7 @@ export class MonoCloudOidcBackendClient extends MonoCloudOidcClientBase {
       metadataCacheDuration: options?.metadataCacheDuration,
       jwksCacheDuration: options?.jwksCacheDuration,
       fetcher: options?.fetcher,
+      responseTimeout: options?.responseTimeout,
       clientAuthMethod: options?.clientAuthMethod ?? 'client_secret_basic',
       trustStoreId: options?.trustStoreId,
       metadataResolver: options?.metadataResolver,
@@ -164,7 +165,8 @@ export class MonoCloudOidcBackendClient extends MonoCloudOidcClientBase {
         body: body.toString(),
         headers,
       },
-      this.fetcher
+      this.fetcher,
+      this.responseTimeout
     );
 
     if (response.status === 400 || response.status === 401) {

@@ -198,6 +198,18 @@ Optional custom resolver for the issuer metadata (OpenID Connect discovery docum
 
 ---
 
+## responseTimeout
+> `optional` **responseTimeout**: `number`
+
+Maximum time (in milliseconds) to wait for a response from the authorization server
+before the request is aborted.
+
+### Inherited from
+
+[`MonoCloudClientOptionsBase`](/sdks/nodejs/api-reference/types/monocloudclientoptionsbase).[`responseTimeout`](/sdks/nodejs/api-reference/types/monocloudclientoptionsbase#responsetimeout)
+
+---
+
 ## trustStoreId
 > `optional` **trustStoreId**: `string`
 

@@ -63,6 +63,12 @@ export class MonoCloudOidcClientBase {
   protected fetcher?: typeof fetch;
 
   /**
+   * Maximum time (in milliseconds) to wait for a response from the authorization server before
+   * aborting the request.
+   */
+  protected readonly responseTimeout?: number;
+
+  /**
    * Identifier of the trust store whose mTLS endpoint aliases should be used, if any.
    */
   protected readonly trustStoreId?: string;
@@ -105,6 +111,7 @@ export class MonoCloudOidcClientBase {
     }
 
     this.fetcher = options.fetcher;
+    this.responseTimeout = options.responseTimeout;
     this.trustStoreId = options.trustStoreId;
     this.metadataResolver = options.metadataResolver;
     this.jwksResolver = options.jwksResolver;
@@ -136,7 +143,8 @@ export class MonoCloudOidcClientBase {
       const response = await innerFetch(
         `${this.tenantDomain}/.well-known/openid-configuration`,
         undefined,
-        this.fetcher
+        this.fetcher,
+        this.responseTimeout
       );
 
       if (response.status !== 200) {
@@ -186,7 +194,8 @@ export class MonoCloudOidcClientBase {
       const response = await innerFetch(
         metadata.jwks_uri,
         undefined,
-        this.fetcher
+        this.fetcher,
+        this.responseTimeout
       );
 
       if (response.status !== 200) {

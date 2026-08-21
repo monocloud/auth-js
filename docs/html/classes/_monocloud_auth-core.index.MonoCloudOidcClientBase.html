@@ -12,7 +12,7 @@
 <li><a href="../modules/_monocloud_auth-core.index.html">index</a></li>
 <li><a href="" aria-current="page">MonoCloudOidcClientBase</a></li></ul>
 <h1>Class MonoCloudOidcClientBase</h1></div>
-<section class="tsd-panel tsd-hierarchy" data-refl="5311">
+<section class="tsd-panel tsd-hierarchy" data-refl="5330">
 <h4>Hierarchy</h4>
 <ul class="tsd-hierarchy">
 <li class="tsd-hierarchy-item"><span class="tsd-hierarchy-target">MonoCloudOidcClientBase</span>
@@ -45,6 +45,7 @@
 <a href="#metadatacacheduration" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>metadata<wbr/>Cache<wbr/>Duration</span></a>
 <a href="#metadatacacheexpiry" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>metadata<wbr/>Cache<wbr/>Expiry</span></a>
 <a href="#metadataresolver" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>metadata<wbr/>Resolver?</span></a>
+<a href="#responsetimeout" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>response<wbr/>Timeout?</span></a>
 <a href="#tenantdomain" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>tenant<wbr/>Domain</span></a>
 <a href="#truststoreid" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>trust<wbr/>Store<wbr/>Id?</span></a>
 <a href="#usesmtlsendpoints" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>uses<wbr/>Mtls<wbr/>Endpoints</span></a>
@@ -75,7 +76,7 @@
 </div></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="" class="tsd-signature-type tsd-kind-class">MonoCloudOidcClientBase</a></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/core/src/monocloud-oidc-client-base.ts#L93">monocloud-oidc-client-base.ts:93</a></li></ul></aside></div></li></ul></section></section></details>
+<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/core/src/monocloud-oidc-client-base.ts#L99">monocloud-oidc-client-base.ts:99</a></li></ul></aside></div></li></ul></section></section></details>
 <details class="tsd-panel-group tsd-member-group tsd-accordion" open><summary class="tsd-accordion-summary" data-key="section-Properties"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
 <h2 class="tsd-anchor-link" id="properties-1">Properties<a href="#properties-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2></summary>
 <section>
@@ -138,7 +139,7 @@
 <div class="tsd-comment tsd-typography"><p>Optional custom resolver for the JSON Web Key Set, used instead of the JWKS request.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/core/src/monocloud-oidc-client-base.ts#L80">monocloud-oidc-client-base.ts:80</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/core/src/monocloud-oidc-client-base.ts#L86">monocloud-oidc-client-base.ts:86</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="metadata"><code class="tsd-tag">Protected</code> <code class="tsd-tag">Optional</code><span>metadata</span><a href="#metadata" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">metadata</span><span class="tsd-signature-symbol">?:</span> <a href="../interfaces/_monocloud_auth-core.index.IssuerMetadata.html" class="tsd-signature-type tsd-kind-interface">IssuerMetadata</a></div>
@@ -166,7 +167,15 @@
 <div class="tsd-comment tsd-typography"><p>Optional custom resolver for the issuer metadata, used instead of the discovery request.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/core/src/monocloud-oidc-client-base.ts#L73">monocloud-oidc-client-base.ts:73</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/core/src/monocloud-oidc-client-base.ts#L79">monocloud-oidc-client-base.ts:79</a></li></ul></aside></section>
+<section class="tsd-panel tsd-member">
+<h3 class="tsd-anchor-link" id="responsetimeout"><code class="tsd-tag">Protected</code> <code class="tsd-tag">Optional</code> <code class="tsd-tag">Readonly</code><span>response<wbr/>Timeout</span><a href="#responsetimeout" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<div class="tsd-signature"><span class="tsd-kind-property">responseTimeout</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span></div>
+<div class="tsd-comment tsd-typography"><p>Maximum time (in milliseconds) to wait for a response from the authorization server before
+aborting the request.</p>
+</div><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/core/src/monocloud-oidc-client-base.ts#L69">monocloud-oidc-client-base.ts:69</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="tenantdomain"><code class="tsd-tag">Protected</code> <code class="tsd-tag">Readonly</code><span>tenant<wbr/>Domain</span><a href="#tenantdomain" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">tenantDomain</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
@@ -180,7 +189,7 @@
 <div class="tsd-comment tsd-typography"><p>Identifier of the trust store whose mTLS endpoint aliases should be used, if any.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/core/src/monocloud-oidc-client-base.ts#L68">monocloud-oidc-client-base.ts:68</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/core/src/monocloud-oidc-client-base.ts#L74">monocloud-oidc-client-base.ts:74</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="usesmtlsendpoints"><code class="tsd-tag">Protected</code> <code class="tsd-tag">Readonly</code><span>uses<wbr/>Mtls<wbr/>Endpoints</span><a href="#usesmtlsendpoints" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">usesMtlsEndpoints</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
@@ -188,7 +197,7 @@
 the mTLS endpoint aliases from the issuer metadata.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/core/src/monocloud-oidc-client-base.ts#L86">monocloud-oidc-client-base.ts:86</a></li></ul></aside></section></section></details>
+<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/core/src/monocloud-oidc-client-base.ts#L92">monocloud-oidc-client-base.ts:92</a></li></ul></aside></section></section></details>
 <details class="tsd-panel-group tsd-member-group tsd-accordion" open><summary class="tsd-accordion-summary" data-key="section-Methods"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
 <h2 class="tsd-anchor-link" id="methods-1">Methods<a href="#methods-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2></summary>
 <section>
@@ -216,7 +225,7 @@ the mTLS endpoint aliases from the issuer metadata.</p>
 <h4 class="tsd-anchor-link" id="throws">Throws<a href="#throws" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h4><p><a href="_monocloud_auth-core.index.MonoCloudTokenError.html" class="tsd-kind-class">MonoCloudTokenError</a> - If decoding fails</p>
 </div></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/core/src/monocloud-oidc-client-base.ts#L260">monocloud-oidc-client-base.ts:260</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/core/src/monocloud-oidc-client-base.ts#L269">monocloud-oidc-client-base.ts:269</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="getjwks"><span>get<wbr/>Jwks</span><a href="#getjwks" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -240,7 +249,7 @@ The JWKS is cached for 5 minutes by default.</p>
 unexpected status code during the request or a serialization error while processing the response.</p>
 </div></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/core/src/monocloud-oidc-client-base.ts#L172">monocloud-oidc-client-base.ts:172</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/core/src/monocloud-oidc-client-base.ts#L180">monocloud-oidc-client-base.ts:180</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="getmetadata"><span>get<wbr/>Metadata</span><a href="#getmetadata" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -264,7 +273,7 @@ The metadata is cached for 5 minutes by default.</p>
 unexpected status code during the request or a serialization error while processing the response.</p>
 </div></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/core/src/monocloud-oidc-client-base.ts#L126">monocloud-oidc-client-base.ts:126</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/core/src/monocloud-oidc-client-base.ts#L133">monocloud-oidc-client-base.ts:133</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="resolveendpoint"><code class="tsd-tag">Protected</code><span>resolve<wbr/>Endpoint</span><a href="#resolveendpoint" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -290,7 +299,7 @@ client authenticates over mTLS.</p>
 <h4 class="tsd-anchor-link" id="throws-3">Throws<a href="#throws-3" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h4><p><a href="_monocloud_auth-core.index.MonoCloudValidationError.html" class="tsd-kind-class">MonoCloudValidationError</a> - When the required endpoint is not available in the issuer metadata.</p>
 </div></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/core/src/monocloud-oidc-client-base.ts#L221">monocloud-oidc-client-base.ts:221</a></li></ul></aside></div></li></ul></section></section></details></div>
+<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/core/src/monocloud-oidc-client-base.ts#L230">monocloud-oidc-client-base.ts:230</a></li></ul></aside></div></li></ul></section></section></details></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">
@@ -304,7 +313,7 @@ client authenticates over mTLS.</p>
 <details open class="tsd-accordion tsd-page-navigation-section"><summary class="tsd-accordion-summary" data-key="section-Constructors"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>Constructors</summary>
 <div><a href="#constructor"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Constructor"><use href="../assets/icons.svg#icon-512"></use></svg><span>constructor</span></a></div></details>
 <details open class="tsd-accordion tsd-page-navigation-section"><summary class="tsd-accordion-summary" data-key="section-Properties"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>Properties</summary>
-<div><a href="#fetcher"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>fetcher</span></a><a href="#jwks"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>jwks</span></a><a href="#jwkscacheduration"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>jwks<wbr/>Cache<wbr/>Duration</span></a><a href="#jwkscacheexpiry"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>jwks<wbr/>Cache<wbr/>Expiry</span></a><a href="#jwksresolver"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>jwks<wbr/>Resolver</span></a><a href="#metadata"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>metadata</span></a><a href="#metadatacacheduration"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>metadata<wbr/>Cache<wbr/>Duration</span></a><a href="#metadatacacheexpiry"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>metadata<wbr/>Cache<wbr/>Expiry</span></a><a href="#metadataresolver"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>metadata<wbr/>Resolver</span></a><a href="#tenantdomain"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>tenant<wbr/>Domain</span></a><a href="#truststoreid"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>trust<wbr/>Store<wbr/>Id</span></a><a href="#usesmtlsendpoints"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>uses<wbr/>Mtls<wbr/>Endpoints</span></a></div></details>
+<div><a href="#fetcher"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>fetcher</span></a><a href="#jwks"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>jwks</span></a><a href="#jwkscacheduration"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>jwks<wbr/>Cache<wbr/>Duration</span></a><a href="#jwkscacheexpiry"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>jwks<wbr/>Cache<wbr/>Expiry</span></a><a href="#jwksresolver"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>jwks<wbr/>Resolver</span></a><a href="#metadata"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>metadata</span></a><a href="#metadatacacheduration"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>metadata<wbr/>Cache<wbr/>Duration</span></a><a href="#metadatacacheexpiry"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>metadata<wbr/>Cache<wbr/>Expiry</span></a><a href="#metadataresolver"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>metadata<wbr/>Resolver</span></a><a href="#responsetimeout"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>response<wbr/>Timeout</span></a><a href="#tenantdomain"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>tenant<wbr/>Domain</span></a><a href="#truststoreid"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>trust<wbr/>Store<wbr/>Id</span></a><a href="#usesmtlsendpoints"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>uses<wbr/>Mtls<wbr/>Endpoints</span></a></div></details>
 <details open class="tsd-accordion tsd-page-navigation-section"><summary class="tsd-accordion-summary" data-key="section-Methods"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>Methods</summary>
 <div><a href="#decodejwt"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>decode<wbr/>Jwt</span></a><a href="#getjwks"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Jwks</span></a><a href="#getmetadata"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Metadata</span></a><a href="#resolveendpoint"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>resolve<wbr/>Endpoint</span></a></div></details></div></details></div>
 <div class="site-menu">

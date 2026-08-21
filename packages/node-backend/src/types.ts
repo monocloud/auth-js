@@ -98,6 +98,7 @@ export interface ProtectApiRequestOptions<T> {
  * | `MONOCLOUD_BACKEND_CLOCK_SKEW` | Allowed clock drift (in seconds) when validating token timestamps. |
  * | `MONOCLOUD_BACKEND_CLOCK_TOLERANCE` | Additional time tolerance (in seconds) for time-based claim validation. |
  * | `MONOCLOUD_BACKEND_INTROSPECT_JWT_TOKENS` | When `true`, JWT tokens are introspected at the server instead of being validated locally. |
+ * | `MONOCLOUD_BACKEND_RESPONSE_TIMEOUT` | Maximum time (in milliseconds) to wait for responses from the MonoCloud authorization server. |
  *
  * ### Group Validation
  *
@@ -138,6 +139,14 @@ export interface MonoCloudBackendNodeClientOptions extends MonoCloudOidcBackendC
    * @defaultValue false
    */
   introspectJwtTokens?: boolean;
+
+  /**
+   * Maximum time (in milliseconds) to wait for responses from the MonoCloud authorization server
+   * before the request is aborted.
+   *
+   * @defaultValue 10000 (10 seconds)
+   */
+  responseTimeout?: number;
 }
 
 /**

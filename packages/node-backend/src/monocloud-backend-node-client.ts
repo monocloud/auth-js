@@ -44,6 +44,7 @@ export class MonoCloudBackendNodeClient extends MonoCloudOidcBackendClient {
       clockSkew: validatedOptions.clockSkew,
       clockTolerance: validatedOptions.clockTolerance,
       fetcher: validatedOptions.fetcher,
+      responseTimeout: validatedOptions.responseTimeout,
       jwksCacheDuration: validatedOptions.jwksCacheDuration,
       metadataCacheDuration: validatedOptions.metadataCacheDuration,
     });

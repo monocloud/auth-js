@@ -1619,55 +1619,18 @@ export interface PushedAuthorizationParams extends Omit<
  *
  * @category Types
  */
-export interface MonoCloudOidcClientBaseOptions {
+export interface MonoCloudOidcClientBaseOptions extends MonoCloudClientOptionsBase {
   /**
    * The tenant domain URL.
    */
   tenantDomain: string;
-
-  /**
-   * Duration (in seconds) to cache OpenID Connect discovery metadata.
-   * @defaultValue 300
-   */
-  metadataCacheDuration?: number;
-
-  /**
-   * Duration (in seconds) to cache the JSON Web Key Set (JWKS).
-   * @defaultValue 300
-   */
-  jwksCacheDuration?: number;
-
-  /**
-   * Custom `fetch` implementation used for making HTTP requests. Falls back to the global `fetch` if not provided.
-   */
-  fetcher?: typeof fetch;
-
-  /**
-   * Client authentication method. Determines whether mTLS-aliased endpoints are used.
-   */
-  clientAuthMethod?: ClientAuthMethod;
-
-  /**
-   * Identifier of the trust store whose mTLS endpoint aliases should be used.
-   */
-  trustStoreId?: string;
-
-  /**
-   * Optional custom resolver for the issuer metadata, replacing the default discovery request.
-   */
-  metadataResolver?: () => IssuerMetadata | Promise<IssuerMetadata>;
-
-  /**
-   * Optional custom resolver for the JSON Web Key Set (JWKS), replacing the default JWKS request.
-   */
-  jwksResolver?: () => Jwks | Promise<Jwks>;
 }
 
 /**
  * Shared configuration options for MonoCloud OIDC clients.
  *
- * These options are common to both {@link MonoCloudOidcClientOptions}
- * and {@link MonoCloudOidcBackendClientOptions}.
+ * These options are common to {@link MonoCloudOidcClientOptions},
+ * {@link MonoCloudOidcBackendClientOptions}, and {@link MonoCloudOidcClientBaseOptions}.
  *
  * @category Types
  */
@@ -1700,6 +1663,12 @@ export interface MonoCloudClientOptionsBase {
    * @defaultValue 300
    */
   metadataCacheDuration?: number;
+
+  /**
+   * Maximum time (in milliseconds) to wait for a response from the authorization server
+   * before the request is aborted.
+   */
+  responseTimeout?: number;
 
   /**
    * Optional custom `fetch` implementation used for network requests.

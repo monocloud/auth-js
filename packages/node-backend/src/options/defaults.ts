@@ -3,4 +3,5 @@ export const DEFAULT_OPTIONS = {
   clockTolerance: 60,
   clientAuthMethod: 'client_secret_post',
   introspectJwtTokens: false,
+  responseTimeout: 10000,
 };

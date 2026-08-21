@@ -52,6 +52,7 @@ export const optionsSchema: Joi.ObjectSchema<MonoCloudBackendNodeClientOptions> 
     jwksCacheDuration: numOptional.min(0),
     metadataCacheDuration: numOptional.min(0),
     introspectJwtTokens: boolOptional,
+    responseTimeout: numRequired.min(1000),
     fetcher: funcOptional,
     cache: Joi.object({
       set: Joi.function().required(),
