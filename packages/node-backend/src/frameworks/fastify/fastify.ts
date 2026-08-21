@@ -39,14 +39,12 @@ export function protectApi(
 
 export function protectApi(
   clientOrOptions?:
-    | ProtectApiRequestOptions<FastifyRequest>
-    | MonoCloudBackendNodeClient,
+    ProtectApiRequestOptions<FastifyRequest> | MonoCloudBackendNodeClient,
   requestOptions?: ProtectApiRequestOptions<FastifyRequest>
 ) {
   let client: MonoCloudBackendNodeClient;
   let certificateResolver:
-    | ClientCertificateResolver<FastifyRequest>
-    | undefined;
+    ClientCertificateResolver<FastifyRequest> | undefined;
   let tokenResolver: TokenResolver<FastifyRequest> | undefined;
 
   if (clientOrOptions instanceof MonoCloudBackendNodeClient) {

@@ -12,17 +12,19 @@ import type { MonoCloudAuthProviderProps } from '../src/types';
 import { useAuth } from '../src/use-auth';
 
 export type MockClient = {
-  [K in keyof Pick<
-    MonoCloudWebJSClient,
-    | 'processCallback'
-    | 'getSession'
-    | 'getTokens'
-    | 'signIn'
-    | 'signOut'
-    | 'signInSilent'
-    | 'refreshSession'
-    | 'refetchUserInfo'
-  >]: Mock;
+  [
+    K in keyof Pick<
+      MonoCloudWebJSClient,
+      | 'processCallback'
+      | 'getSession'
+      | 'getTokens'
+      | 'signIn'
+      | 'signOut'
+      | 'signInSilent'
+      | 'refreshSession'
+      | 'refetchUserInfo'
+    >
+  ]: Mock;
 } & {
   oidcClient: {
     [K in keyof Pick<MonoCloudWebJSClient['oidcClient'], 'revokeToken'>]: Mock;

@@ -39,8 +39,7 @@ export function protectApi(
 
 export function protectApi(
   clientOrOptions?:
-    | ProtectApiRequestOptions<Request>
-    | MonoCloudBackendNodeClient,
+    ProtectApiRequestOptions<Request> | MonoCloudBackendNodeClient,
   requestOptions?: ProtectApiRequestOptions<Request>
 ) {
   let client: MonoCloudBackendNodeClient;

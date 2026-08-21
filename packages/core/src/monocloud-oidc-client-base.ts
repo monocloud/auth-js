@@ -77,8 +77,7 @@ export class MonoCloudOidcClientBase {
    * Optional custom resolver for the issuer metadata, used instead of the discovery request.
    */
   protected readonly metadataResolver?: () =>
-    | IssuerMetadata
-    | Promise<IssuerMetadata>;
+    IssuerMetadata | Promise<IssuerMetadata>;
 
   /**
    * Optional custom resolver for the JSON Web Key Set, used instead of the JWKS request.
