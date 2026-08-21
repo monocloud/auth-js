@@ -1,5 +1,12 @@
 # @monocloud/auth-web-js
 
+## 0.2.6
+
+### Patch Changes
+
+- Updated dependencies [e19236d]
+  - @monocloud/auth-core@0.2.6
+
 ## 0.2.5
 
 ### Patch Changes

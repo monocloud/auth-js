@@ -1,5 +1,12 @@
 # @monocloud/backend-node
 
+## 0.3.7
+
+### Patch Changes
+
+- Updated dependencies [e19236d]
+  - @monocloud/auth-core@0.2.6
+
 ## 0.3.6
 
 ### Patch Changes

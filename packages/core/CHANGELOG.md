@@ -1,5 +1,11 @@
 # @monocloud/auth-core
 
+## 0.2.6
+
+### Patch Changes
+
+- e19236d: - added `validateLogoutToken()` to `MonoCloudOidcClient` for validating OpenID Connect Back-Channel Logout Tokens, throwing `MonoCloudTokenError` on failure. Exported the new `LogoutTokenClaims` type.
+
 ## 0.2.5
 
 ### Patch Changes
