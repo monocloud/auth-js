@@ -3,6 +3,7 @@ import {
   findToken,
   profileSync,
   getPublicSigKeyFromIssuerJwks,
+  isPresent,
   now,
   parseSpaceSeparated,
   parseSpaceSeparatedSet,
@@ -17,6 +18,7 @@ import {
   EndSessionParameters,
   IdTokenClaims,
   Jwk,
+  LogoutTokenClaims,
   SecurityAlgorithms,
   JwsHeaderParameters,
   MonoCloudOidcClientOptions,
@@ -1201,6 +1203,195 @@ export class MonoCloudOidcClient extends MonoCloudOidcClientBase {
 
     if (!audience.includes(this.clientId)) {
       throw new MonoCloudTokenError('Invalid audience claim');
+    }
+
+    return claims;
+  }
+
+  /**
+   * Validates an OpenID Connect Back-Channel Logout Token.
+   *
+   * @param logoutToken - The Logout Token JWT string to validate.
+   * @param clockSkew - Number of seconds to adjust the current time to account for clock differences.
+   * @param clockTolerance - Additional time tolerance in seconds for time-based claim validation.
+   *
+   * @returns Validated Logout Token claims.
+   *
+   * @throws {@link MonoCloudTokenError} - If Logout Token validation fails
+   *
+   * @throws {@link MonoCloudHttpError} - Thrown if there is a network error while fetching the issuer metadata or JWKS.
+   *
+   */
+  async validateLogoutToken(
+    logoutToken: string,
+    clockSkew: number,
+    clockTolerance: number
+  ): Promise<LogoutTokenClaims> {
+    if (typeof logoutToken !== 'string' || !isPresent(logoutToken)) {
+      throw new MonoCloudTokenError(
+        'Logout Token must be a valid non-empty string'
+      );
+    }
+
+    const {
+      0: protectedHeader,
+      1: payload,
+      2: encodedSignature,
+      length,
+    } = logoutToken.split('.');
+
+    if (length !== 3) {
+      throw new MonoCloudTokenError(
+        'Logout Token must have a header, payload and signature'
+      );
+    }
+
+    let header: JwsHeaderParameters;
+    try {
+      header = JSON.parse(decodeBase64Url(protectedHeader));
+    } catch {
+      throw new MonoCloudTokenError('Failed to parse JWT Header');
+    }
+
+    if (
+      header === null ||
+      typeof header !== 'object' ||
+      Array.isArray(header)
+    ) {
+      throw new MonoCloudTokenError('JWT Header must be a top level object');
+    }
+
+    if (this.idTokenSigningAlgorithm !== header.alg) {
+      throw new MonoCloudTokenError('Invalid signing alg');
+    }
+
+    if (header.crit !== undefined) {
+      throw new MonoCloudTokenError('Unexpected JWT "crit" header parameter');
+    }
+
+    const binary = decodeBase64Url(encodedSignature);
+
+    const signature = new Uint8Array(binary.length);
+
+    for (let i = 0; i < binary.length; i++) {
+      signature[i] = binary.charCodeAt(i);
+    }
+
+    const jwks = await this.getJwks();
+
+    const key = await getPublicSigKeyFromIssuerJwks(jwks.keys, header);
+
+    const input = `${protectedHeader}.${payload}`;
+
+    const verified = await crypto.subtle.verify(
+      keyToSubtle(key),
+      key,
+      signature,
+      stringToArrayBuffer(input) as BufferSource
+    );
+
+    if (!verified) {
+      throw new MonoCloudTokenError('JWT signature verification failed');
+    }
+
+    let claims: LogoutTokenClaims;
+
+    try {
+      claims = JSON.parse(decodeBase64Url(payload));
+    } catch {
+      throw new MonoCloudTokenError('Failed to parse JWT Payload');
+    }
+
+    if (
+      claims === null ||
+      typeof claims !== 'object' ||
+      Array.isArray(claims)
+    ) {
+      throw new MonoCloudTokenError('JWT Payload must be a top level object');
+    }
+
+    const metadata = await this.getMetadata();
+
+    if (claims.iss !== metadata.issuer) {
+      throw new MonoCloudTokenError('Invalid Issuer');
+    }
+
+    const audience = Array.isArray(claims.aud) ? claims.aud : [claims.aud];
+
+    if (!audience.includes(this.clientId)) {
+      throw new MonoCloudTokenError('Invalid audience claim');
+    }
+
+    if (claims.iat === undefined) {
+      throw new MonoCloudTokenError('Missing JWT "iat" (issued at) claim');
+    }
+
+    if (typeof claims.iat !== 'number') {
+      throw new MonoCloudTokenError(
+        'Unexpected JWT "iat" (issued at) claim type'
+      );
+    }
+
+    const current = now() + clockSkew;
+
+    if (claims.exp !== undefined) {
+      if (typeof claims.exp !== 'number') {
+        throw new MonoCloudTokenError(
+          'Unexpected JWT "exp" (expiration time) claim type'
+        );
+      }
+
+      if (claims.exp <= current - clockTolerance) {
+        throw new MonoCloudTokenError(
+          'Unexpected JWT "exp" (expiration time) claim value, timestamp is <= now()'
+        );
+      }
+    }
+
+    if (claims.nbf !== undefined) {
+      if (typeof claims.nbf !== 'number') {
+        throw new MonoCloudTokenError(
+          'Unexpected JWT "nbf" (not before) claim type'
+        );
+      }
+
+      if (claims.nbf > current + clockTolerance) {
+        throw new MonoCloudTokenError(
+          'Unexpected JWT "nbf" (not before) claim value, timestamp is > now()'
+        );
+      }
+    }
+
+    if (!claims.sub && !claims.sid) {
+      throw new MonoCloudTokenError(
+        'Logout Token must contain a "sub" (subject) or "sid" (session ID) claim'
+      );
+    }
+
+    if (claims.nonce !== undefined) {
+      throw new MonoCloudTokenError(
+        'Logout Token must not contain a "nonce" claim'
+      );
+    }
+
+    const { events } = claims as Record<string, unknown>;
+
+    if (
+      events === null ||
+      typeof events !== 'object' ||
+      Array.isArray(events)
+    ) {
+      throw new MonoCloudTokenError('Invalid JWT "events" claim');
+    }
+
+    const event = (events as Record<string, unknown>)[
+      'http://schemas.openid.net/event/backchannel-logout'
+    ];
+
+    if (event === null || typeof event !== 'object' || Array.isArray(event)) {
+      throw new MonoCloudTokenError(
+        'Logout Token must contain the back-channel logout event'
+      );
     }
 
     return claims;

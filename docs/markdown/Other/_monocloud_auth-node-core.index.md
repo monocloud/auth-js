@@ -26,6 +26,7 @@ category: Other
 - [AuthenticateOptions](/sdks/nodejs-core/api-reference/types/authenticateoptions)
 - [AuthorizationParams](/sdks/nodejs-core/api-reference/types/authorizationparams)
 - [AuthState](/sdks/nodejs-core/api-reference/types/authstate)
+- [BackChannelLogoutOptions](/sdks/nodejs-core/api-reference/types/backchannellogoutoptions)
 - [CallbackOptions](/sdks/nodejs-core/api-reference/types/callbackoptions)
 - [CallbackParams](/sdks/nodejs-core/api-reference/types/callbackparams)
 - [CookieOptions](/sdks/nodejs-core/api-reference/types/cookieoptions)

@@ -2,18 +2,20 @@
 rootSdk: Next.js
 title: "monoCloudAuth"
 category: Functions
-description: "Creates a Next.js catch-all auth route handler (Pages Router and App Router) for the built-in routes (/signin, /callback, /userinfo, /signout)."
+description: "Creates a Next.js catch-all auth route handler (Pages Router and App Router) for the built-in routes"
 ---
 
 # Function: monoCloudAuth
 
 > **monoCloudAuth**(`options?`: [`MonoCloudAuthOptions`](/sdks/nextjs/api-reference/types/monocloudauthoptions)): [`MonoCloudAuthHandler`](/sdks/nextjs/api-reference/handler-types/monocloudauthhandler)
 
-Creates a Next.js catch-all auth route handler (Pages Router and App Router) for the built-in routes (`/signin`, `/callback`, `/userinfo`, `/signout`).
+Creates a Next.js catch-all auth route handler (Pages Router and App Router) for the built-in routes (`/signin`, `/callback`, `/userinfo`, `/signout`, `/backchannel-logout`).
 
 Mount this handler on a catch-all route (e.g. `/api/auth/[...monocloud]`).
 
 > If you already use `authMiddleware()`, you typically don’t need this handler. Use `monoCloudAuth()` when middleware cannot be used or when auth routes need customization.
+
+> Both the `form_post` response mode and back-channel logout deliver requests to the auth routes as `POST`. If you configure either, export the handler for `POST` as well as `GET`.
 
 ## Parameters
 

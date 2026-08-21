@@ -1,4 +1,3 @@
-import { v4 as uuid } from 'uuid';
 import { serialize } from 'cookie';
 import { decrypt, encrypt } from '@monocloud/auth-core/utils';
 import type { MonoCloudSession, MonoCloudUser } from '@monocloud/auth-core';
@@ -22,7 +21,7 @@ export class MonoCloudSessionService {
     session: MonoCloudSession
   ): Promise<string> {
     // Generate a session Id
-    const key = uuid();
+    const key = crypto.randomUUID();
 
     // Set the issued and updated time
     const iat = now();

@@ -19,7 +19,7 @@ and <a href="_monocloud_auth-core.index.MonoCloudOidcBackendClientOptions.html" 
 </div></section>
 <div class="tsd-signature"><span class="tsd-signature-keyword">interface</span> <span class="tsd-kind-interface">MonoCloudClientOptionsBase</span> <span class="tsd-signature-symbol">{</span><br/>    <a class="tsd-kind-property" href="#clientauthmethod">clientAuthMethod</a><span class="tsd-signature-symbol">?:</span> <a href="../types/_monocloud_auth-web-js.index.ClientAuthMethod.html" class="tsd-signature-type tsd-kind-type-alias">ClientAuthMethod</a><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#clientsecret">clientSecret</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span> <span class="tsd-signature-symbol">|</span> <a href="_monocloud_auth-web-js.index.Jwk.html" class="tsd-signature-type tsd-kind-interface">Jwk</a><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#fetcher">fetcher</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-symbol">(</span><br/>        <span class="tsd-kind-parameter">input</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">URL</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">RequestInfo</span><span class="tsd-signature-symbol">,</span><br/>        <span class="tsd-kind-parameter">init</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">RequestInit</span><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-signature-symbol">)</span> <span class="tsd-signature-symbol">=&gt;</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Response</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#jwkscacheduration">jwksCacheDuration</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#jwksresolver">jwksResolver</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-symbol">()</span> <span class="tsd-signature-symbol">=&gt;</span> <a href="_monocloud_auth-web-js.index.Jwks.html" class="tsd-signature-type tsd-kind-interface">Jwks</a> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="_monocloud_auth-web-js.index.Jwks.html" class="tsd-signature-type tsd-kind-interface">Jwks</a><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#metadatacacheduration">metadataCacheDuration</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#metadataresolver">metadataResolver</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-symbol">()</span> <span class="tsd-signature-symbol">=&gt;</span> <a href="_monocloud_auth-web-js.index.IssuerMetadata.html" class="tsd-signature-type tsd-kind-interface">IssuerMetadata</a> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="_monocloud_auth-web-js.index.IssuerMetadata.html" class="tsd-signature-type tsd-kind-interface">IssuerMetadata</a><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#truststoreid">trustStoreId</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">;</span><br/><span class="tsd-signature-symbol">}</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/core/src/types.ts#L1617">core/src/types.ts:1617</a></li></ul></aside>
+<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/core/src/types.ts#L1674">core/src/types.ts:1674</a></li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-accordion" open><summary class="tsd-accordion-summary tsd-index-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
@@ -51,7 +51,7 @@ and <a href="_monocloud_auth-core.index.MonoCloudOidcBackendClientOptions.html" 
 
 </div></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/core/src/types.ts#L1633">core/src/types.ts:1633</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/core/src/types.ts#L1690">core/src/types.ts:1690</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="clientsecret"><code class="tsd-tag">Optional</code><span>client<wbr/>Secret</span><a href="#clientsecret" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">clientSecret</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span> <span class="tsd-signature-symbol">|</span> <a href="_monocloud_auth-web-js.index.Jwk.html" class="tsd-signature-type tsd-kind-interface">Jwk</a></div>
@@ -61,7 +61,7 @@ and <a href="_monocloud_auth-core.index.MonoCloudOidcBackendClientOptions.html" 
 <p>When <code>clientAuthMethod</code> is <code>spiffe_jwt</code>, provide the SPIFFE JWT-SVID (obtained from the SPIFFE Workload API) as the plain-text string; it is sent as the <code>client_assertion</code>.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/core/src/types.ts#L1627">core/src/types.ts:1627</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/core/src/types.ts#L1684">core/src/types.ts:1684</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="fetcher"><code class="tsd-tag">Optional</code><span>fetcher</span><a href="#fetcher" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">fetcher</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">input</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">URL</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">RequestInfo</span><span class="tsd-signature-symbol">,</span> <span class="tsd-kind-parameter">init</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">RequestInit</span><span class="tsd-signature-symbol">)</span> <span class="tsd-signature-symbol">=&gt;</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Response</span><span class="tsd-signature-symbol">&gt;</span></div>
@@ -83,7 +83,7 @@ and <a href="_monocloud_auth-core.index.MonoCloudOidcBackendClientOptions.html" 
 <li><span><code class="tsd-tag">Optional</code><span class="tsd-kind-parameter">init</span>: <span class="tsd-signature-type">RequestInit</span></span></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Response</span><span class="tsd-signature-symbol">&gt;</span></h4></li></ul></li></ul></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/core/src/types.ts#L1650">core/src/types.ts:1650</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/core/src/types.ts#L1707">core/src/types.ts:1707</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="jwkscacheduration"><code class="tsd-tag">Optional</code><span>jwks<wbr/>Cache<wbr/>Duration</span><a href="#jwkscacheduration" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">jwksCacheDuration</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span></div>
@@ -96,14 +96,14 @@ and <a href="_monocloud_auth-core.index.MonoCloudOidcBackendClientOptions.html" 
 
 </div></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/core/src/types.ts#L1639">core/src/types.ts:1639</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/core/src/types.ts#L1696">core/src/types.ts:1696</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="jwksresolver"><code class="tsd-tag">Optional</code><span>jwks<wbr/>Resolver</span><a href="#jwksresolver" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">jwksResolver</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-symbol">()</span> <span class="tsd-signature-symbol">=&gt;</span> <a href="_monocloud_auth-web-js.index.Jwks.html" class="tsd-signature-type tsd-kind-interface">Jwks</a> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="_monocloud_auth-web-js.index.Jwks.html" class="tsd-signature-type tsd-kind-interface">Jwks</a><span class="tsd-signature-symbol">&gt;</span></div>
 <div class="tsd-comment tsd-typography"><p>Optional custom resolver for the JSON Web Key Set (JWKS).</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/core/src/types.ts#L1666">core/src/types.ts:1666</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/core/src/types.ts#L1723">core/src/types.ts:1723</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="metadatacacheduration"><code class="tsd-tag">Optional</code><span>metadata<wbr/>Cache<wbr/>Duration</span><a href="#metadatacacheduration" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">metadataCacheDuration</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span></div>
@@ -116,14 +116,14 @@ and <a href="_monocloud_auth-core.index.MonoCloudOidcBackendClientOptions.html" 
 
 </div></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/core/src/types.ts#L1645">core/src/types.ts:1645</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/core/src/types.ts#L1702">core/src/types.ts:1702</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="metadataresolver"><code class="tsd-tag">Optional</code><span>metadata<wbr/>Resolver</span><a href="#metadataresolver" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">metadataResolver</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-symbol">()</span> <span class="tsd-signature-symbol">=&gt;</span> <a href="_monocloud_auth-web-js.index.IssuerMetadata.html" class="tsd-signature-type tsd-kind-interface">IssuerMetadata</a> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="_monocloud_auth-web-js.index.IssuerMetadata.html" class="tsd-signature-type tsd-kind-interface">IssuerMetadata</a><span class="tsd-signature-symbol">&gt;</span></div>
 <div class="tsd-comment tsd-typography"><p>Optional custom resolver for the issuer metadata (OpenID Connect discovery document).</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/core/src/types.ts#L1661">core/src/types.ts:1661</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/core/src/types.ts#L1718">core/src/types.ts:1718</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="truststoreid"><code class="tsd-tag">Optional</code><span>trust<wbr/>Store<wbr/>Id</span><a href="#truststoreid" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">trustStoreId</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span></div>
@@ -131,7 +131,7 @@ and <a href="_monocloud_auth-core.index.MonoCloudOidcBackendClientOptions.html" 
 authenticating with a mutual-TLS client authentication method.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/core/src/types.ts#L1656">core/src/types.ts:1656</a></li></ul></aside></section></section></details></div>
+<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/core/src/types.ts#L1713">core/src/types.ts:1713</a></li></ul></aside></section></section></details></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">

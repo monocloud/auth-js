@@ -342,6 +342,8 @@ export interface MonoCloudRoutes {
   /**
    * Route that handles OpenID Connect back-channel logout requests initiated by MonoCloud.
    *
+   * The route is only active when an `onBackChannelLogout` callback is configured; it responds with `404` otherwise.
+   *
    * @defaultValue '/api/auth/backchannel-logout'
    */
   backChannelLogout: string;
@@ -891,7 +893,7 @@ export interface MonoCloudTokens extends AccessToken {
 }
 
 /**
- * Defines a callback invoked when an unexpected error occurs during execution of authentication endpoints such as sign-in, callback, sign-out, or userinfo.
+ * Defines a callback invoked when an unexpected error occurs during execution of authentication endpoints such as sign-in, callback, sign-out, userinfo, or back-channel logout.
  *
  * This handler allows applications to log, transform, or respond to errors before the SDK applies its default error handling behavior.
  *
@@ -984,6 +986,18 @@ export interface SignOutOptions extends EndSessionParameters {
 
   /**
    * Callback invoked if an unexpected error occurs during the sign-out flow.
+   */
+  onError?: OnError;
+}
+
+/**
+ * Options used to customize the behavior of the back-channel logout handler.
+ *
+ * @category Types
+ */
+export interface BackChannelLogoutOptions {
+  /**
+   * Callback invoked if an unexpected error occurs while processing a back-channel logout notification.
    */
   onError?: OnError;
 }

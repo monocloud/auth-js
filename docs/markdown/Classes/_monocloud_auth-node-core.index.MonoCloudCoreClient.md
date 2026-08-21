@@ -33,7 +33,7 @@ description: "MonoCloudCoreClient is a class in the MonoCloud Node.js Core SDK."
 
 ### backChannelLogout()
 
-> **backChannelLogout**(`request`: [`MonoCloudRequest`](/sdks/nodejs-core/api-reference/types/monocloudrequest), `response`: [`MonoCloudResponse`](/sdks/nodejs-core/api-reference/types/monocloudresponse)): `Promise`\<`any`\>
+> **backChannelLogout**(`request`: [`MonoCloudRequest`](/sdks/nodejs-core/api-reference/types/monocloudrequest), `response`: [`MonoCloudResponse`](/sdks/nodejs-core/api-reference/types/monocloudresponse), `backChannelLogoutOptions?`: [`BackChannelLogoutOptions`](/sdks/nodejs-core/api-reference/types/backchannellogoutoptions)): `Promise`\<`any`\>
 
 Handles Back-Channel Logout notifications from the identity provider.
 
@@ -41,20 +41,17 @@ Validates the Logout Token and triggers the `onBackChannelLogout` callback defin
 
 #### Parameters
 
-| Parameter  | Type                                                                                 | Description                |
-| ---------- | ------------------------------------------------------------------------------------ | -------------------------- |
-| `request`  | [`MonoCloudRequest`](/sdks/nodejs-core/api-reference/types/monocloudrequest)   | MonoCloud request object.  |
-| `response` | [`MonoCloudResponse`](/sdks/nodejs-core/api-reference/types/monocloudresponse) | MonoCloud response object. |
+| Parameter                   | Type                                                                                               | Description                                                 |
+| --------------------------- | -------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
+| `request`                   | [`MonoCloudRequest`](/sdks/nodejs-core/api-reference/types/monocloudrequest)                 | MonoCloud request object.                                   |
+| `response`                  | [`MonoCloudResponse`](/sdks/nodejs-core/api-reference/types/monocloudresponse)               | MonoCloud response object.                                  |
+| `backChannelLogoutOptions?` | [`BackChannelLogoutOptions`](/sdks/nodejs-core/api-reference/types/backchannellogoutoptions) | Optional configuration for the back-channel logout handler. |
 
 #### Returns
 
 `Promise`\<`any`\>
 
 A promise that resolves when the logout notification has been processed.
-
-#### Throws
-
-[MonoCloudValidationError](/sdks/nodejs-core/api-reference/error-classes/monocloudvalidationerror) If the logout token is missing or invalid.
 
 ---
 

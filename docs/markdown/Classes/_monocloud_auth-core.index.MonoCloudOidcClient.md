@@ -554,3 +554,33 @@ Validated ID Token claims.
 #### Throws
 
 [MonoCloudTokenError](/sdks/nodejs/api-reference/error-classes/monocloudtokenerror) - If ID Token validation fails
+
+---
+
+### validateLogoutToken()
+
+> **validateLogoutToken**(`logoutToken`: `string`, `clockSkew`: `number`, `clockTolerance`: `number`): `Promise`\<[`LogoutTokenClaims`](/sdks/nodejs/api-reference/types/logouttokenclaims)\>
+
+Validates an OpenID Connect Back-Channel Logout Token.
+
+#### Parameters
+
+| Parameter        | Type     | Description                                                                    |
+| ---------------- | -------- | ------------------------------------------------------------------------------ |
+| `logoutToken`    | `string` | The Logout Token JWT string to validate.                                       |
+| `clockSkew`      | `number` | Number of seconds to adjust the current time to account for clock differences. |
+| `clockTolerance` | `number` | Additional time tolerance in seconds for time-based claim validation.          |
+
+#### Returns
+
+`Promise`\<[`LogoutTokenClaims`](/sdks/nodejs/api-reference/types/logouttokenclaims)\>
+
+Validated Logout Token claims.
+
+#### Throws
+
+[MonoCloudTokenError](/sdks/nodejs/api-reference/error-classes/monocloudtokenerror) - If Logout Token validation fails
+
+#### Throws
+
+[MonoCloudHttpError](/sdks/nodejs/api-reference/error-classes/monocloudhttperror) - Thrown if there is a network error while fetching the issuer metadata or JWKS.
