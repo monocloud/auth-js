@@ -3716,7 +3716,7 @@ describe('MonoCloud Base Instance', () => {
 
         await instance.backChannelLogout(req, res);
 
-        expect(res.res.statusCode).toBe(500);
+        expect(res.res.statusCode).toBe(400);
       });
 
       it('should return a method not allowed if the request was not a post', async () => {
@@ -3735,7 +3735,7 @@ describe('MonoCloud Base Instance', () => {
         expect(res.res.statusCode).toBe(405);
       });
 
-      it('should return internal server error if the logout token was not found in the body', async () => {
+      it('should return bad request if the logout token was not found in the body', async () => {
         const instance = getConfiguredInstance({
           onBackChannelLogout: () => {},
         });
@@ -3749,10 +3749,14 @@ describe('MonoCloud Base Instance', () => {
         await instance.backChannelLogout(req, res);
 
         expect(res.res.noCacheSet).toBe(true);
-        expect(res.res.statusCode).toBe(500);
+        expect(res.res.statusCode).toBe(400);
+        expect(res.res.body).toEqual({
+          error: 'invalid_request',
+          error_description: 'The logout token is missing or invalid.',
+        });
       });
 
-      it('should return internal server error if the event is not an object', async () => {
+      it('should return bad request if the event is not an object', async () => {
         const backchannelLogoutToken = await createBackchannelLogout({
           events: {
             'http://schemas.openid.net/event/backchannel-logout': null,
@@ -3781,7 +3785,7 @@ describe('MonoCloud Base Instance', () => {
         await instance.backChannelLogout(req, res);
 
         expect(res.res.noCacheSet).toBe(true);
-        expect(res.res.statusCode).toBe(500);
+        expect(res.res.statusCode).toBe(400);
       });
 
       [
@@ -3815,11 +3819,13 @@ describe('MonoCloud Base Instance', () => {
           await instance.backChannelLogout(req, res);
 
           expect(res.res.noCacheSet).toBe(true);
-          expect(res.res.statusCode).toBe(500);
+          expect(res.res.statusCode).toBe(400);
         });
       });
 
-      it('should return bad request if there is an op error', async () => {
+      it('should return internal server error if there is an op error', async () => {
+        const backchannelLogoutToken = await createBackchannelLogout();
+
         nock(testConfig.tenantDomain)
           .get('/.well-known/openid-configuration')
           .reply(400, {
@@ -3834,13 +3840,157 @@ describe('MonoCloud Base Instance', () => {
 
         const req = new TestReq({
           method: 'POST',
-          body: { logout_token: 'token' },
+          body: { logout_token: backchannelLogoutToken.token },
         });
         const res = new TestRes();
 
         await instance.backChannelLogout(req, res);
 
         expect(res.res.statusCode).toBe(500);
+      });
+
+      it('should return internal server error if the jwks could not be fetched', async () => {
+        const backchannelLogoutToken = await createBackchannelLogout();
+        nock('https://example.com')
+          .get('/jwks')
+          .replyWithError('connection refused');
+
+        setupDiscovery({ jwks_uri: 'https://example.com/jwks' });
+
+        const instance = getConfiguredInstance({
+          idTokenSigningAlg: 'ES256',
+          onBackChannelLogout: () => {},
+        });
+
+        const req = new TestReq({
+          method: 'POST',
+          body: { logout_token: backchannelLogoutToken.token },
+        });
+        const res = new TestRes();
+
+        await instance.backChannelLogout(req, res);
+
+        expect(res.res.statusCode).toBe(500);
+      });
+
+      it('should execute custom onError function if provided', async () => {
+        const instance = getConfiguredInstance({
+          onBackChannelLogout: () => {},
+        });
+
+        const req = new TestReq({ method: 'POST', body: {} });
+        const res = new TestRes();
+
+        const onError = vi.fn();
+
+        await instance.backChannelLogout(req, res, { onError });
+
+        expect(onError).toHaveBeenCalledTimes(1);
+        expect(onError.mock.calls[0][0]).toBeInstanceOf(
+          MonoCloudValidationError
+        );
+        expect(res.res.statusCode).toBeUndefined();
+        expect(res.res.done).toBeUndefined();
+      });
+
+      it('should return the result of the custom onError function', async () => {
+        const instance = getConfiguredInstance({
+          onBackChannelLogout: () => {},
+        });
+
+        const req = new TestReq({ method: 'POST', body: {} });
+        const res = new TestRes();
+
+        const result = await instance.backChannelLogout(req, res, {
+          onError: () => 'handled',
+        });
+
+        expect(result).toBe('handled');
+      });
+
+      it('should execute the custom onError function if the back channel handler throws', async () => {
+        const backchannelLogoutToken = await createBackchannelLogout();
+        nock('https://example.com')
+          .get('/jwks')
+          .reply(200, { keys: [backchannelLogoutToken.key] });
+
+        setupDiscovery({ jwks_uri: 'https://example.com/jwks' });
+
+        const instance = getConfiguredInstance({
+          idTokenSigningAlg: 'ES256',
+          onBackChannelLogout: () => {
+            throw new Error('session store unavailable');
+          },
+        });
+
+        const req = new TestReq({
+          method: 'POST',
+          body: { logout_token: backchannelLogoutToken.token },
+        });
+        const res = new TestRes();
+
+        const onError = vi.fn();
+
+        await instance.backChannelLogout(req, res, { onError });
+
+        expect(onError).toHaveBeenCalledTimes(1);
+        expect(res.res.statusCode).toBeUndefined();
+      });
+
+      it('should not execute the custom onError function on a successful logout', async () => {
+        const backchannelLogoutToken = await createBackchannelLogout();
+        nock('https://example.com')
+          .get('/jwks')
+          .reply(200, { keys: [backchannelLogoutToken.key] });
+
+        setupDiscovery({ jwks_uri: 'https://example.com/jwks' });
+
+        const instance = getConfiguredInstance({
+          idTokenSigningAlg: 'ES256',
+          onBackChannelLogout: () => {},
+        });
+
+        const req = new TestReq({
+          method: 'POST',
+          body: { logout_token: backchannelLogoutToken.token },
+        });
+        const res = new TestRes();
+
+        const onError = vi.fn();
+
+        await instance.backChannelLogout(req, res, { onError });
+
+        expect(onError).not.toHaveBeenCalled();
+        expect(res.res.statusCode).toBe(204);
+      });
+
+      it('should not execute the custom onError function when no back channel handler is configured', async () => {
+        const instance = getConfiguredInstance();
+
+        const res = new TestRes();
+
+        const onError = vi.fn();
+
+        await instance.backChannelLogout(new TestReq(), res, { onError });
+
+        expect(onError).not.toHaveBeenCalled();
+        expect(res.res.statusCode).toBe(404);
+      });
+
+      it('should not execute the custom onError function for an unsupported method', async () => {
+        const instance = getConfiguredInstance({
+          onBackChannelLogout: () => {},
+        });
+
+        const req = new TestReq({ method: 'GET', body: {} });
+        const res = new TestRes();
+
+        const onError = vi.fn();
+
+        await instance.backChannelLogout(req, res, { onError });
+
+        expect(onError).not.toHaveBeenCalled();
+        expect(res.res.statusCode).toBe(405);
       });
     });
   });

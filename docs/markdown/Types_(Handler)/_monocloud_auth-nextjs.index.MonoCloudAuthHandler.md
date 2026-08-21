@@ -11,7 +11,7 @@ description: "Handler function returned by monoCloudAuth()."
 
 Handler function returned by [monoCloudAuth()](/sdks/nextjs/api-reference/functions/monocloudauth).
 
-This handler processes authentication routes such as sign-in, callback, sign-out, and userinfo across supported Next.js runtimes (App Router, Pages Router, and API routes).
+This handler processes authentication routes such as sign-in, callback, sign-out, userinfo, and back-channel logout across supported Next.js runtimes (App Router, Pages Router, and API routes).
 
 ## Parameters
 

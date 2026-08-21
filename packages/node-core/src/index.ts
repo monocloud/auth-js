@@ -3,6 +3,7 @@ export type {
   SignOutOptions,
   CallbackOptions,
   UserInfoOptions,
+  BackChannelLogoutOptions,
   MonoCloudTokens,
   GetSessionOptions,
   GetTokensOptions,

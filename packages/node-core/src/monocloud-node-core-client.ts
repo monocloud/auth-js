@@ -1,4 +1,3 @@
-import { createRemoteJWKSet, JWTPayload, jwtVerify } from 'jose';
 import {
   ensureLeadingSlash,
   findToken,
@@ -23,7 +22,7 @@ import type {
   Authenticators,
   AuthorizationParams,
   DisplayOptions,
-  IssuerMetadata,
+  LogoutTokenClaims,
   MonoCloudSession,
   Prompt,
 } from '@monocloud/auth-core';
@@ -38,6 +37,7 @@ import { MonoCloudStateService } from './monocloud-state-service';
 import { getOptions } from './options/get-options';
 import {
   ApplicationState,
+  BackChannelLogoutOptions,
   CallbackOptions,
   GetSessionOptions,
   GetTokensOptions,
@@ -809,16 +809,19 @@ export class MonoCloudCoreClient {
    *
    * @param request - MonoCloud request object.
    * @param response - MonoCloud response object.
+   * @param backChannelLogoutOptions - Optional configuration for the back-channel logout handler.
    *
    * @returns A promise that resolves when the logout notification has been processed.
    *
-   * @throws {@link MonoCloudValidationError} If the logout token is missing or invalid.
    */
   async backChannelLogout(
     request: MonoCloudRequest,
-    response: MonoCloudResponse
+    response: MonoCloudResponse,
+    backChannelLogoutOptions?: BackChannelLogoutOptions
   ): Promise<any> {
     this.debug('Starting back-channel logout handler');
+
+    let invalidLogoutToken = false;
 
     try {
       this.validateOptions();
@@ -841,18 +844,44 @@ export class MonoCloudCoreClient {
       const logoutToken = params.get('logout_token');
 
       if (!logoutToken) {
+        invalidLogoutToken = true;
         throw new MonoCloudValidationError('Missing Logout Token');
       }
 
-      const metadata = await this.oidcClient.getMetadata();
+      let payload: LogoutTokenClaims;
 
-      const { sid, sub } = await this.verifyLogoutToken(logoutToken, metadata);
+      try {
+        payload = await this.oidcClient.validateLogoutToken(
+          logoutToken,
+          this.options.clockSkew,
+          this.options.clockTolerance
+        );
+      } catch (error) {
+        invalidLogoutToken = error instanceof MonoCloudTokenError;
+        throw error;
+      }
 
-      await this.options.onBackChannelLogout(sub, sid as any);
+      const { sid, sub } = payload;
+
+      await this.options.onBackChannelLogout(sub, sid);
 
       response.noContent();
     } catch (error) {
-      this.handleCatchAll(error as Error, response);
+      if (typeof backChannelLogoutOptions?.onError === 'function') {
+        return backChannelLogoutOptions.onError(error as Error);
+      } else if (invalidLogoutToken) {
+        // eslint-disable-next-line no-console
+        console.error(error);
+        response.sendJson(
+          {
+            error: 'invalid_request',
+            error_description: 'The logout token is missing or invalid.',
+          },
+          400
+        );
+      } else {
+        this.handleCatchAll(error as Error, response);
+      }
     }
 
     return response.done();
@@ -1127,41 +1156,6 @@ export class MonoCloudCoreClient {
       refreshToken,
       isExpired: token.accessTokenExpiration - 30 < now(),
     };
-  }
-
-  private async verifyLogoutToken(
-    token: string,
-    metadata: IssuerMetadata
-  ): Promise<JWTPayload> {
-    const jwks = createRemoteJWKSet(new URL(metadata.jwks_uri));
-
-    const { payload } = await jwtVerify(token, jwks, {
-      issuer: metadata.issuer,
-      audience: this.options.clientId,
-      algorithms: [this.options.idTokenSigningAlg],
-      requiredClaims: ['iat'],
-      clockTolerance: this.options.clockTolerance,
-      currentDate: new Date((now() + this.options.clockSkew) * 1000),
-    });
-
-    if (
-      (!payload.sid && !payload.sub) ||
-      payload.nonce ||
-      !payload.events ||
-      typeof payload.events !== 'object'
-    ) {
-      throw new MonoCloudValidationError('Invalid logout token');
-    }
-
-    const event = (payload.events as any)[
-      'http://schemas.openid.net/event/backchannel-logout'
-    ];
-
-    if (!event || typeof event !== 'object') {
-      throw new MonoCloudValidationError('Invalid logout token');
-    }
-
-    return payload;
   }
 
   private handleCatchAll(error: Error, res: MonoCloudResponse): void {

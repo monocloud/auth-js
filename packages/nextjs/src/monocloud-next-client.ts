@@ -172,6 +172,8 @@ import MonoCloudPageRouterResponse from './responses/monocloud-page-router-respo
  * });
  * ```
  *
+ * > To enable the back-channel logout endpoint, supply an `onBackChannelLogout` callback here. The callback has no environment variable equivalent, and the route responds with `404` until it is configured.
+ *
  * ### Modifying default routes
  *
  * If you customize any of the default auth route paths:
@@ -249,6 +251,9 @@ export class MonoCloudNextClient {
 
   /**
    * @see {@link monoCloudAuth} for full docs and examples.
+   *
+   * > Both the `form_post` response mode and back-channel logout deliver requests to the auth routes as `POST`. If you configure either, export the handler for `POST` as well as `GET`.
+   *
    * @param options Optional configuration for the auth handler.
    * @returns Returns a Next.js-compatible handler for App Router route handlers or Pages Router API routes.
    */
@@ -971,6 +976,11 @@ export class MonoCloudNextClient {
 
       case ensureLeadingSlash(routes!.signOut):
         return this.coreClient.signOut(request, response, {
+          onError,
+        });
+
+      case ensureLeadingSlash(routes!.backChannelLogout):
+        return this.coreClient.backChannelLogout(request, response, {
           onError,
         });
 

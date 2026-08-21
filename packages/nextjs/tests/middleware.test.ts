@@ -1,6 +1,6 @@
 /* eslint-disable import/no-extraneous-dependencies */
 import { NextRequest, NextResponse } from 'next/server';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { NextFetchEvent } from 'next/dist/server/web/spec-extension/fetch-event';
 import { MonoCloudNextClient } from '../src';
 import {
@@ -13,10 +13,14 @@ import {
   userWithGroupsSessionCookieValue,
 } from './common-helper';
 import {
+  backChannelLogoutSid,
+  backChannelLogoutSub,
+  createBackChannelLogoutToken,
   defaultAppUserInfoResponse,
   defaultDiscovery,
   noBodyDiscoverySuccess,
   noTokenAndUserInfo,
+  setupBackChannelLogoutOp,
   setupOp,
 } from './op-helpers.js';
 
@@ -993,5 +997,208 @@ describe('MonoCloud Middleware', () => {
 
     expect(res.status).toBe(403);
     expect(await res.getBody()).toBe('forbidden');
+  });
+  describe('back-channel logout', () => {
+    const defaultRoute = '/api/auth/backchannel-logout';
+
+    const backChannelLogoutRequest = (
+      logoutToken?: string,
+      { path = defaultRoute, method = 'POST' } = {}
+    ): NextRequest => {
+      const headers = new Headers();
+      headers.set('content-type', 'application/x-www-form-urlencoded');
+
+      return new NextRequest(
+        new Request(`http://localhost:3000${path}`, {
+          method,
+          body:
+            method === 'POST'
+              ? new URLSearchParams(
+                  logoutToken ? { logout_token: logoutToken } : {}
+                ).toString()
+              : undefined,
+          headers,
+        })
+      );
+    };
+
+    it('should process a back-channel logout request', async () => {
+      setupBackChannelLogoutOp();
+
+      const onBackChannelLogout = vi.fn();
+
+      const middleware = new MonoCloudNextClient({
+        onBackChannelLogout,
+      }).authMiddleware();
+
+      const response = await middleware(
+        backChannelLogoutRequest(await createBackChannelLogoutToken()),
+        defaultEvent()
+      );
+
+      const res = new TestAppRes(response);
+
+      expect(res.status).toBe(204);
+      expect(onBackChannelLogout).toHaveBeenCalledExactlyOnceWith(
+        backChannelLogoutSub,
+        backChannelLogoutSid
+      );
+    });
+
+    it('should process a back-channel logout request even when every route is protected', async () => {
+      setupBackChannelLogoutOp();
+
+      const onBackChannelLogout = vi.fn();
+
+      const middleware = new MonoCloudNextClient({
+        onBackChannelLogout,
+      }).authMiddleware({ protectedRoutes: ['.*'] });
+
+      const response = await middleware(
+        backChannelLogoutRequest(await createBackChannelLogoutToken()),
+        defaultEvent()
+      );
+
+      const res = new TestAppRes(response);
+
+      expect(res.status).toBe(204);
+      expect(res.locationHeader.href).toBe('');
+      expect(onBackChannelLogout).toHaveBeenCalledOnce();
+    });
+
+    it('should return 404 when no back-channel logout callback is configured', async () => {
+      const middleware = monoCloud.authMiddleware();
+
+      const response = await middleware(
+        backChannelLogoutRequest(await createBackChannelLogoutToken()),
+        defaultEvent()
+      );
+
+      const res = new TestAppRes(response);
+
+      expect(res.status).toBe(404);
+    });
+
+    it('should honor a custom back-channel logout route', async () => {
+      setupBackChannelLogoutOp();
+
+      const onBackChannelLogout = vi.fn();
+
+      const middleware = new MonoCloudNextClient({
+        onBackChannelLogout,
+        routes: { backChannelLogout: '/api/auth/custom_backchannel_logout' },
+      }).authMiddleware();
+
+      const response = await middleware(
+        backChannelLogoutRequest(await createBackChannelLogoutToken(), {
+          path: '/api/auth/custom_backchannel_logout',
+        }),
+        defaultEvent()
+      );
+
+      const res = new TestAppRes(response);
+
+      expect(res.status).toBe(204);
+      expect(onBackChannelLogout).toHaveBeenCalledOnce();
+    });
+
+    ['GET', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'HEAD'].forEach(method => {
+      it(`should return 405 on ${defaultRoute} for request type ${method}`, async () => {
+        const onBackChannelLogout = vi.fn();
+
+        const middleware = new MonoCloudNextClient({
+          onBackChannelLogout,
+        }).authMiddleware();
+
+        const response = await middleware(
+          backChannelLogoutRequest(undefined, { method }),
+          defaultEvent()
+        );
+
+        const res = new TestAppRes(response);
+
+        expect(res.status).toBe(405);
+        expect(onBackChannelLogout).not.toHaveBeenCalled();
+      });
+    });
+
+    it('should return 400 when the logout token is missing from the body', async () => {
+      const onBackChannelLogout = vi.fn();
+
+      const middleware = new MonoCloudNextClient({
+        onBackChannelLogout,
+      }).authMiddleware();
+
+      const response = await middleware(
+        backChannelLogoutRequest(),
+        defaultEvent()
+      );
+
+      const res = new TestAppRes(response);
+
+      expect(res.status).toBe(400);
+      expect(await res.getBody()).toEqual({
+        error: 'invalid_request',
+        error_description: 'The logout token is missing or invalid.',
+      });
+      expect(onBackChannelLogout).not.toHaveBeenCalled();
+    });
+
+    it('should return 400 for an invalid logout token', async () => {
+      setupBackChannelLogoutOp();
+
+      const onBackChannelLogout = vi.fn();
+
+      const middleware = new MonoCloudNextClient({
+        onBackChannelLogout,
+      }).authMiddleware();
+
+      const response = await middleware(
+        backChannelLogoutRequest(
+          await createBackChannelLogoutToken({ events: undefined })
+        ),
+        defaultEvent()
+      );
+
+      const res = new TestAppRes(response);
+
+      expect(res.status).toBe(400);
+      expect(onBackChannelLogout).not.toHaveBeenCalled();
+    });
+
+    it('can pass onError to authMiddleware() to handle back-channel logout errors', async () => {
+      const middleware = new MonoCloudNextClient({
+        onBackChannelLogout: vi.fn(),
+      }).authMiddleware({
+        onError: () => Promise.resolve(NextResponse.json({ custom: true })),
+      });
+
+      const response = await middleware(
+        backChannelLogoutRequest(),
+        defaultEvent()
+      );
+
+      const res = new TestAppRes(response);
+
+      expect(res.status).toBe(200);
+      expect(await res.getBody()).toEqual({ custom: true });
+    });
+
+    it('should return 500 for authorization server errors', async () => {
+      setupBackChannelLogoutOp({ body: {} });
+
+      const middleware = new MonoCloudNextClient({
+        onBackChannelLogout: vi.fn(),
+      }).authMiddleware();
+
+      const response = await middleware(
+        backChannelLogoutRequest(await createBackChannelLogoutToken()),
+        defaultEvent()
+      );
+
+      const res = new TestAppRes(response);
+
+      expect(res.status).toBe(500);
+    });
   });
 });

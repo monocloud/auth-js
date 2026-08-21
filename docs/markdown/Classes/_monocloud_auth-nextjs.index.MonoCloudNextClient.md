@@ -93,6 +93,8 @@ export const monoCloud = new MonoCloudNextClient({
 });
 ```
 
+> To enable the back-channel logout endpoint, supply an `onBackChannelLogout` callback here. The callback has no environment variable equivalent, and the route responds with `404` until it is configured.
+
 ### Modifying default routes
 
 If you customize any of the default auth route paths:
@@ -592,6 +594,8 @@ Returns a Next.js-compatible handler for App Router route handlers or Pages Rout
 #### See
 
 [monoCloudAuth](/sdks/nextjs/api-reference/functions/monocloudauth) for full docs and examples.
+
+> Both the `form_post` response mode and back-channel logout deliver requests to the auth routes as `POST`. If you configure either, export the handler for `POST` as well as `GET`.
 
 ---
 

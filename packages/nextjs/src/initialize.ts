@@ -46,11 +46,13 @@ const getInstance = (): MonoCloudNextClient => {
 };
 
 /**
- * Creates a Next.js catch-all auth route handler (Pages Router and App Router) for the built-in routes (`/signin`, `/callback`, `/userinfo`, `/signout`).
+ * Creates a Next.js catch-all auth route handler (Pages Router and App Router) for the built-in routes (`/signin`, `/callback`, `/userinfo`, `/signout`, `/backchannel-logout`).
  *
  * Mount this handler on a catch-all route (e.g. `/api/auth/[...monocloud]`).
  *
  * > If you already use `authMiddleware()`, you typically don’t need this handler. Use `monoCloudAuth()` when middleware cannot be used or when auth routes need customization.
+ *
+ * > Both the `form_post` response mode and back-channel logout deliver requests to the auth routes as `POST`. If you configure either, export the handler for `POST` as well as `GET`.
  *
  * @example App Router
  * ```tsx:src/app/api/auth/[...monocloud]/route.ts tab="App Router" tab-group="monoCloudAuth"

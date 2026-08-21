@@ -41,6 +41,7 @@ category: Other
 - [Jwks](/sdks/nodejs/api-reference/types/jwks)
 - [JwsHeaderParameters](/sdks/nodejs/api-reference/types/jwsheaderparameters)
 - [JwtClaims](/sdks/nodejs/api-reference/types/jwtclaims)
+- [LogoutTokenClaims](/sdks/nodejs/api-reference/types/logouttokenclaims)
 - [MonoCloudClientOptionsBase](/sdks/nodejs/api-reference/types/monocloudclientoptionsbase)
 - [MonoCloudOidcBackendClientOptions](/sdks/nodejs/api-reference/types/monocloudoidcbackendclientoptions)
 - [MonoCloudOidcClientBaseOptions](/sdks/nodejs/api-reference/types/monocloudoidcclientbaseoptions)

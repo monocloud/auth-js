@@ -1,3 +1,4 @@
+/* eslint-disable import/no-extraneous-dependencies */
 /* eslint-disable @typescript-eslint/consistent-indexed-object-style */
 import * as jose from 'jose';
 import { SerializeOptions } from 'cookie';

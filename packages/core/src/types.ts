@@ -884,6 +884,63 @@ export interface IdTokenClaims extends UserinfoResponse, JwtClaims {
 }
 
 /**
+ * Claims contained in a validated OpenID Connect Back-Channel Logout Token.
+ *
+ * @category Types
+ */
+export interface LogoutTokenClaims {
+  /**
+   * Issuer identifier - the authorization server that issued the token.
+   */
+  iss: string;
+
+  /**
+   * Intended audience(s) of the token.
+   */
+  aud: string | string[];
+
+  /**
+   * Time at which the token was issued (Unix epoch seconds).
+   */
+  iat: number;
+
+  /**
+   * Expiration time of the token (Unix epoch seconds).
+   */
+  exp?: number;
+
+  /**
+   * Not-before time (Unix epoch seconds).
+   */
+  nbf?: number;
+
+  /**
+   * Unique identifier of the token.
+   */
+  jti?: string;
+
+  /**
+   * Subject identifier of the user whose sessions are being terminated.
+   */
+  sub?: string;
+
+  /**
+   * Session identifier of the session being terminated.
+   */
+  sid?: string;
+
+  /**
+   * Events claim declaring the JWT as a Logout Token.
+   */
+  events: Record<string, unknown>;
+
+  /**
+   * Additional custom or provider-specific claims.
+   */
+  [key: string]: unknown;
+}
+
+/**
  * Claims contained in a validated OAuth 2.0 access token.
  *
  * @category Types

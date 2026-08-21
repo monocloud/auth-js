@@ -47,6 +47,58 @@ export const createTestIdToken = async (
   };
 };
 
+export const defaultDiscoveryBody = {
+  issuer: 'https://op.example.com',
+  authorization_endpoint: 'https://op.example.com/connect/authorize',
+  token_endpoint: 'https://op.example.com/connect/token',
+  userinfo_endpoint: 'https://op.example.com/connect/userinfo',
+  jwks_uri: 'https://op.example.com/.well-known/openid-configuration/jwks',
+  end_session_endpoint: 'https://op.example.com/connect/endsession',
+};
+
+export const setupBackChannelLogoutOp = (
+  discovery: { body?: object; status?: number } | undefined = undefined
+): void => {
+  nock('https://op.example.com')
+    .get('/.well-known/openid-configuration')
+    .reply(discovery?.status ?? 200, discovery?.body ?? defaultDiscoveryBody);
+
+  nock('https://op.example.com')
+    .get('/.well-known/openid-configuration/jwks')
+    .reply(200, { keys: [idTokenPublicKey] });
+};
+
+export const backChannelLogoutSub = 'sub';
+export const backChannelLogoutSid = 'sid';
+
+export const createBackChannelLogoutToken = async (
+  claims: Record<string, any> = {},
+  { includeIssuedAt = true, expiresIn = '1m' } = {}
+): Promise<string> => {
+  const jose = await import('jose');
+
+  const key = await jose.importJWK(idTokenPrivateKey, 'RS256');
+
+  let jwt = new jose.SignJWT({
+    sub: backChannelLogoutSub,
+    sid: backChannelLogoutSid,
+    events: {
+      'http://schemas.openid.net/event/backchannel-logout': {},
+    },
+    ...claims,
+  })
+    .setProtectedHeader({ alg: 'RS256' })
+    .setIssuer('https://op.example.com')
+    .setAudience('__test_client_id__')
+    .setExpirationTime(expiresIn);
+
+  if (includeIssuedAt) {
+    jwt = jwt.setIssuedAt();
+  }
+
+  return jwt.sign(key);
+};
+
 export const setupOp = async (
   discovery: { body?: object; status?: number } | undefined = undefined,
   enable: {
@@ -58,18 +110,7 @@ export const setupOp = async (
 ): Promise<void> => {
   nock('https://op.example.com')
     .get('/.well-known/openid-configuration')
-    .reply(
-      discovery?.status ?? 200,
-      discovery?.body ?? {
-        issuer: 'https://op.example.com',
-        authorization_endpoint: 'https://op.example.com/connect/authorize',
-        token_endpoint: 'https://op.example.com/connect/token',
-        userinfo_endpoint: 'https://op.example.com/connect/userinfo',
-        jwks_uri:
-          'https://op.example.com/.well-known/openid-configuration/jwks',
-        end_session_endpoint: 'https://op.example.com/connect/endsession',
-      }
-    );
+    .reply(discovery?.status ?? 200, discovery?.body ?? defaultDiscoveryBody);
 
   let idToken;
 

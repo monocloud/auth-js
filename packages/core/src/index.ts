@@ -17,6 +17,7 @@ export type {
   EndSessionParameters,
   Group,
   IdTokenClaims,
+  LogoutTokenClaims,
   IssuerMetadata,
   MtlsEndpointAliases,
   MonoCloudOidcClientBaseOptions,
