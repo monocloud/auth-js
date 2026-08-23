@@ -1837,7 +1837,7 @@ export interface TokenValidationOptionsBase {
  * @category Types (Enums)
  */
 export type CertificateBindingValidation =
-  /** Validates certificate binding only when the token carries a `cnf` (confirmation) claim. */
+  /** Validates certificate binding only when the token's `cnf` (confirmation) claim contains an `x5t#S256` certificate thumbprint. */
   | 'when_present'
   /** Always validates certificate binding, rejecting tokens without a `cnf` claim. */
   | 'required'

@@ -32,6 +32,29 @@ import {
   JWT_ASSERTION_CLOCK_SKEW,
 } from './helper';
 
+const isCertificateBoundCnf = (cnf: unknown): boolean => {
+  if (cnf === undefined || cnf === null) {
+    return false;
+  }
+
+  let value: unknown = cnf;
+
+  if (typeof value === 'string') {
+    try {
+      value = JSON.parse(value) as unknown;
+    } catch {
+      return true;
+    }
+  }
+
+  // A `cnf` that cannot be parsed is treated as certificate-bound, so that validation runs and rejects it rather than silently skipping a broken claim.
+  if (value === null || typeof value !== 'object' || Array.isArray(value)) {
+    return true;
+  }
+
+  return 'x5t#S256' in value;
+};
+
 /**
  * @category Classes
  */
@@ -451,7 +474,7 @@ export class MonoCloudOidcBackendClient extends MonoCloudOidcClientBase {
   ): Promise<void> {
     if (
       mode !== 'required' &&
-      !(mode === 'when_present' && accessTokenClaims.cnf != null)
+      !(mode === 'when_present' && isCertificateBoundCnf(accessTokenClaims.cnf))
     ) {
       return;
     }

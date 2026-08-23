@@ -1276,6 +1276,116 @@ AQIDBAUGBwg=
       fetchSpy.assert();
     });
 
+    it("should skip binding under 'when_present' when the cnf claim uses a different confirmation method", async () => {
+      const fetchSpy = fetchBuilder()
+        .configureMetadata()
+        .configureIntrospection({
+          responseBody: {
+            ...baseClaims,
+            cnf: { jkt: 'dpop-thumbprint' },
+          },
+        })
+        .createSpy();
+
+      const client = new MonoCloudOidcBackendClient(
+        'example.com',
+        'https://api.example.com',
+        defaultClientOptions
+      );
+
+      const result = await client.introspectAccessToken('some-token', {
+        validateCertificateBinding: 'when_present',
+      });
+
+      expect(result.sub).toBe('user123');
+
+      fetchSpy.assert();
+    });
+
+    it("should skip binding under 'when_present' when a string cnf claim uses a different confirmation method", async () => {
+      const fetchSpy = fetchBuilder()
+        .configureMetadata()
+        .configureIntrospection({
+          responseBody: {
+            ...baseClaims,
+            cnf: JSON.stringify({ jkt: 'dpop-thumbprint' }),
+          },
+        })
+        .createSpy();
+
+      const client = new MonoCloudOidcBackendClient(
+        'example.com',
+        'https://api.example.com',
+        defaultClientOptions
+      );
+
+      const result = await client.introspectAccessToken('some-token', {
+        validateCertificateBinding: 'when_present',
+      });
+
+      expect(result.sub).toBe('user123');
+
+      fetchSpy.assert();
+    });
+
+    it("should throw under 'when_present' when the cnf claim is not an object", async () => {
+      const fetchSpy = fetchBuilder()
+        .configureMetadata()
+        .configureIntrospection({
+          responseBody: {
+            ...baseClaims,
+            cnf: ['x5t#S256'],
+          },
+        })
+        .createSpy();
+
+      const client = new MonoCloudOidcBackendClient(
+        'example.com',
+        'https://api.example.com',
+        defaultClientOptions
+      );
+
+      await assertTokenError(
+        client.introspectAccessToken('some-token', {
+          validateCertificateBinding: 'when_present',
+          clientCertificate: 'AQIDBAUGBwg=',
+        }),
+        "The 'cnf' claim could not be parsed"
+      );
+
+      fetchSpy.assert();
+    });
+
+    it("should reject a token whose cnf lacks x5t#S256 under 'required'", async () => {
+      const certificate = 'AQIDBAUGBwg=';
+
+      const fetchSpy = fetchBuilder()
+        .configureMetadata()
+        .configureIntrospection({
+          responseBody: {
+            ...baseClaims,
+            cnf: { jkt: 'dpop-thumbprint' },
+          },
+        })
+        .createSpy();
+
+      const client = new MonoCloudOidcBackendClient(
+        'example.com',
+        'https://api.example.com',
+        defaultClientOptions
+      );
+
+      await assertTokenError(
+        client.introspectAccessToken('some-token', {
+          validateCertificateBinding: 'required',
+          clientCertificate: certificate,
+        }),
+        "The 'cnf' claim does not contain an 'x5t#S256' member specifying the certificate hash for binding"
+      );
+
+      fetchSpy.assert();
+    });
+
     it("should skip binding under 'when_present' when the token has no cnf claim", async () => {
       const fetchSpy = fetchBuilder()
         .configureMetadata()

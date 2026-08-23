@@ -703,6 +703,18 @@ describe('MonoCloudBackendNodeClient', () => {
           expect(await client.validateAccessToken(opaqueToken)).toEqual(claims);
         });
 
+        it('should accept a token bound with a different confirmation method by default', async () => {
+          const client = getClient(mkCache());
+          const claims = buildClaims({
+            exp: now() + 60,
+            cnf: { jkt: 'dpop-thumbprint' },
+          });
+
+          vi.spyOn(client, 'introspectAccessToken').mockResolvedValue(claims);
+
+          expect(await client.validateAccessToken(opaqueToken)).toEqual(claims);
+        });
+
         it("should reject a token without a cnf claim when the mode is 'required'", async () => {
           const client = getClient(mkCache(), {
             validateCertificateBinding: 'required',
