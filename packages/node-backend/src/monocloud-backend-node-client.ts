@@ -1,6 +1,8 @@
 import {
   AccessTokenClaims,
+  CertificateBindingValidation,
   MonoCloudOidcBackendClient,
+  MonoCloudTokenError,
   MonoCloudValidationError,
 } from '@monocloud/auth-core';
 import {
@@ -25,6 +27,11 @@ export class MonoCloudBackendNodeClient extends MonoCloudOidcBackendClient {
   private readonly introspectJwtToken: boolean | undefined;
 
   private readonly introspectionConfigured: boolean;
+
+  private readonly introspectionCacheDuration: number | undefined;
+
+  private readonly certificateBindingValidation:
+    CertificateBindingValidation | undefined;
 
   /**
    * Creates a new instance of MonoCloudBackendNodeClient.
@@ -51,6 +58,10 @@ export class MonoCloudBackendNodeClient extends MonoCloudOidcBackendClient {
 
     this.introspectJwtToken = validatedOptions?.introspectJwtTokens;
     this.introspectionConfigured = isPresent(validatedOptions.clientId);
+    this.introspectionCacheDuration =
+      validatedOptions.introspectionCacheDuration;
+    this.certificateBindingValidation =
+      validatedOptions.validateCertificateBinding;
 
     if (validatedOptions.cache) {
       this.cache = validatedOptions.cache;
@@ -93,7 +104,7 @@ export class MonoCloudBackendNodeClient extends MonoCloudOidcBackendClient {
       claims = await this.validateJwtAccessToken(accessToken, {
         scopes: options?.scopes,
         groups: options?.groups,
-        validateCertificateBinding: options?.validateCertificateBinding,
+        validateCertificateBinding: this.certificateBindingValidation,
         clientCertificate: options?.clientCertificate,
       });
     } else {
@@ -103,40 +114,75 @@ export class MonoCloudBackendNodeClient extends MonoCloudOidcBackendClient {
         );
       }
 
-      if (this.cache) {
-        const cached = await this.cache.get(accessToken);
-        if (
-          cached &&
-          typeof cached.exp === 'number' &&
-          cached.exp > now() + this.clockSkew - this.clockTolerance
-        ) {
-          this.validateAccessTokenClaims(
-            cached,
-            options?.scopes,
-            options?.groups
-          );
+      const cacheDuration = this.introspectionCacheDuration;
+      const cache = cacheDuration ? this.cache : undefined;
 
-          if (options?.validateCertificateBinding) {
-            await this.validateCertificateBinding(
-              cached,
-              options.clientCertificate
+      let cached: AccessTokenClaims | null | undefined;
+
+      if (cache) {
+        cached = await cache.get(accessToken);
+      }
+
+      if (cached?.active === false) {
+        if (typeof cached.exp === 'number' && cached.exp > now()) {
+          throw new MonoCloudTokenError(
+            'Token is not active. A cached introspection result reported active=false',
+            'inactive_token'
+          );
+        }
+
+        cached = undefined;
+      }
+
+      if (
+        cached &&
+        (cached.exp === undefined ||
+          (typeof cached.exp === 'number' &&
+            cached.exp > now() + this.clockSkew - this.clockTolerance))
+      ) {
+        claims = cached;
+      } else {
+        try {
+          claims = await this.introspectAccessToken(accessToken);
+        } catch (error) {
+          if (
+            cache &&
+            cacheDuration &&
+            error instanceof MonoCloudTokenError &&
+            error.code === 'inactive_token'
+          ) {
+            const expiresAt = now() + cacheDuration;
+
+            await cache.set(
+              accessToken,
+              {
+                active: false,
+                exp: expiresAt,
+              } as unknown as AccessTokenClaims,
+              expiresAt
             );
           }
 
-          return cached;
+          throw error;
+        }
+
+        if (cache && cacheDuration) {
+          const entryExpiry =
+            typeof claims.exp === 'number'
+              ? Math.min(claims.exp, now() + cacheDuration)
+              : now() + cacheDuration;
+
+          await cache.set(accessToken, claims, entryExpiry);
         }
       }
 
-      claims = await this.introspectAccessToken(accessToken, {
-        scopes: options?.scopes,
-        groups: options?.groups,
-        validateCertificateBinding: options?.validateCertificateBinding,
-        clientCertificate: options?.clientCertificate,
-      });
+      this.validateAccessTokenClaims(claims, options?.scopes, options?.groups);
 
-      if (this.cache && typeof claims.exp === 'number') {
-        await this.cache.set(accessToken, claims, claims.exp);
-      }
+      await this.validateCertificateBinding(
+        claims,
+        this.certificateBindingValidation,
+        options?.clientCertificate
+      );
     }
 
     return claims;

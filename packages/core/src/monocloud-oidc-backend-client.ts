@@ -11,6 +11,7 @@ import { isUserInGroup } from './utils';
 import { clientAuth, keyToSubtle } from './client-auth';
 import {
   AccessTokenClaims,
+  CertificateBindingValidation,
   ClientAuthMethod,
   IntrospectOptions,
   IsUserInGroupOptions,
@@ -196,16 +197,21 @@ export class MonoCloudOidcBackendClient extends MonoCloudOidcClientBase {
     >(response);
 
     if (!introspectionResponse.active) {
-      throw new MonoCloudTokenError('Token is not active');
+      throw new MonoCloudTokenError(
+        'Token is not active. The introspection endpoint returned active=false',
+        'inactive_token'
+      );
     }
 
     const { active: _, ...claims } = introspectionResponse;
 
     this.validateAccessTokenClaims(claims, options?.scopes, options?.groups);
 
-    if (options?.validateCertificateBinding) {
-      await this.validateCertificateBinding(claims, options.clientCertificate);
-    }
+    await this.validateCertificateBinding(
+      claims,
+      options?.validateCertificateBinding,
+      options?.clientCertificate
+    );
 
     return claims;
   }
@@ -311,9 +317,11 @@ export class MonoCloudOidcBackendClient extends MonoCloudOidcClientBase {
 
     this.validateAccessTokenClaims(claims, options?.scopes, options?.groups);
 
-    if (options?.validateCertificateBinding) {
-      await this.validateCertificateBinding(claims, options.clientCertificate);
-    }
+    await this.validateCertificateBinding(
+      claims,
+      options?.validateCertificateBinding,
+      options?.clientCertificate
+    );
 
     return claims;
   }
@@ -431,14 +439,23 @@ export class MonoCloudOidcBackendClient extends MonoCloudOidcClientBase {
    * the certificate's SHA-256 hash.
    *
    * @param accessTokenClaims - The access token claims containing the `cnf` claim.
+   * @param mode - Controls whether certificate binding is validated.
    * @param certificate - The client certificate presented with the request.
    *
    * @throws {@link MonoCloudTokenError} - If the certificate is missing or malformed, the `cnf` claim is missing or invalid, or the hashes do not match.
    */
   protected async validateCertificateBinding(
     accessTokenClaims: AccessTokenClaims,
+    mode?: CertificateBindingValidation,
     certificate?: string
   ): Promise<void> {
+    if (
+      mode !== 'required' &&
+      !(mode === 'when_present' && accessTokenClaims.cnf != null)
+    ) {
+      return;
+    }
+
     if (typeof certificate !== 'string' || certificate.trim().length === 0) {
       throw new MonoCloudTokenError('Client certificate is not present');
     }

@@ -1825,12 +1825,24 @@ export interface TokenValidationOptionsBase {
   clientCertificate?: string;
 
   /**
-   * When `true`, validates certificate binding for certificate-bound access tokens.
-   *
-   * @defaultValue false
+   * Controls whether the access token's certificate binding is validated against the
+   * client certificate.
    */
-  validateCertificateBinding?: boolean;
+  validateCertificateBinding?: CertificateBindingValidation;
 }
+
+/**
+ * Controls how certificate binding is validated for certificate-bound access tokens.
+ *
+ * @category Types (Enums)
+ */
+export type CertificateBindingValidation =
+  /** Validates certificate binding only when the token carries a `cnf` (confirmation) claim. */
+  | 'when_present'
+  /** Always validates certificate binding, rejecting tokens without a `cnf` claim. */
+  | 'required'
+  /** Never validates certificate binding, even when the token carries a `cnf` claim. */
+  | 'dangerously_ignore';
 
 /**
  * Options for validating a JWT access token.
@@ -1860,6 +1872,8 @@ export interface IntrospectOptions extends TokenValidationOptionsBase {}
 export type MonoCloudTokenErrorCode =
   /** The token is missing, malformed, expired, revoked, or otherwise failed validation. */
   | 'invalid_token'
+  /** The introspection endpoint reported the token as not active. */
+  | 'inactive_token'
   /** The token does not contain the scopes required for the request. */
   | 'insufficient_scope'
   /** The token's subject is not a member of the groups required for the request. */

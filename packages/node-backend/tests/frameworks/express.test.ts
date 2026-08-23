@@ -165,13 +165,11 @@ describe('protectApi (express)', () => {
     expect(req.claims).toBeUndefined();
   });
 
-  it('should resolve the client certificate when validateCertificateBinding is true', async () => {
+  it('should resolve the client certificate whenever a resolver is configured', async () => {
     const certificateResolver = vi.fn().mockResolvedValue('cert-value');
     const validateSpy = mockValidateAccessToken();
 
-    const middleware = protectApi({ certificateResolver })({
-      validateCertificateBinding: true,
-    });
+    const middleware = protectApi({ certificateResolver })();
     const req = createMockRequest<Request>({
       headers: { authorization: 'Bearer some-token' },
     });
@@ -183,17 +181,15 @@ describe('protectApi (express)', () => {
     expect(certificateResolver).toHaveBeenCalledWith(req);
     expect(validateSpy).toHaveBeenCalledWith('some-token', {
       clientCertificate: 'cert-value',
-      validateCertificateBinding: true,
       groups: undefined,
       scopes: undefined,
     });
   });
 
-  it('should not call the certificate resolver when validateCertificateBinding is falsy', async () => {
-    const certificateResolver = vi.fn();
-    mockValidateAccessToken();
+  it('should pass an undefined certificate when no resolver is configured', async () => {
+    const validateSpy = mockValidateAccessToken();
 
-    const middleware = protectApi({ certificateResolver })();
+    const middleware = protectApi()();
     const req = createMockRequest<Request>({
       headers: { authorization: 'Bearer some-token' },
     });
@@ -202,7 +198,11 @@ describe('protectApi (express)', () => {
 
     await middleware(req, res, next);
 
-    expect(certificateResolver).not.toHaveBeenCalled();
+    expect(validateSpy).toHaveBeenCalledWith('some-token', {
+      clientCertificate: undefined,
+      groups: undefined,
+      scopes: undefined,
+    });
   });
 
   it('should use the provided client and request options together', async () => {
@@ -216,7 +216,7 @@ describe('protectApi (express)', () => {
     const middleware = protectApi(client, {
       tokenResolver,
       certificateResolver,
-    })({ validateCertificateBinding: true });
+    })();
 
     const req = createMockRequest<Request>();
     const res = createMockResponse<ResMock>();
@@ -228,7 +228,6 @@ describe('protectApi (express)', () => {
     expect(certificateResolver).toHaveBeenCalled();
     expect(validateSpy).toHaveBeenCalledWith('injected', {
       clientCertificate: 'cert',
-      validateCertificateBinding: true,
       groups: undefined,
       scopes: undefined,
     });
@@ -458,4 +457,29 @@ describe('protectApi (express)', () => {
       expect(req.claims).toBeUndefined();
     }
   );
+
+  it('should answer an inactive token with 401 and error="invalid_token"', async () => {
+    mockValidateAccessTokenRejection(
+      new MonoCloudTokenError(
+        'Token is not active. The introspection endpoint returned active=false',
+        'inactive_token'
+      )
+    );
+
+    const middleware = protectApi()();
+    const req = createMockRequest<Request>({
+      headers: { authorization: 'Bearer some-token' },
+    });
+    const res = createMockResponse<ResMock>();
+    const next = createMockNext<NextFunction>();
+
+    await middleware(req, res, next);
+
+    expect(res.status).toHaveBeenCalledWith(401);
+    expect(res.set).toHaveBeenCalledWith(
+      'WWW-Authenticate',
+      'Bearer error="invalid_token"'
+    );
+    expect(next).not.toHaveBeenCalled();
+  });
 });

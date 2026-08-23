@@ -45,6 +45,7 @@ export type {
   DeviceAuthorizationParams,
   DeviceAuthorizationResponse,
   MonoCloudTokenErrorCode,
+  CertificateBindingValidation,
   MonoCloudRawResponse,
 } from './types';
 

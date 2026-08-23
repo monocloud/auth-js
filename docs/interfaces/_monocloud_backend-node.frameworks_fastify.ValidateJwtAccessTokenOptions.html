@@ -15,15 +15,15 @@
 <section class="tsd-panel tsd-comment">
 <div class="tsd-comment tsd-typography"><p>Options for validating a JWT access token.</p>
 </div></section>
-<div class="tsd-signature"><span class="tsd-signature-keyword">interface</span> <span class="tsd-kind-interface">ValidateJwtAccessTokenOptions</span> <span class="tsd-signature-symbol">{</span><br/>    <a class="tsd-kind-property" href="#clientcertificate">clientCertificate</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#groups">groups</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#jwks">jwks</a><span class="tsd-signature-symbol">?:</span> <a href="_monocloud_backend-node.index.Jwks.html" class="tsd-signature-type tsd-kind-interface">Jwks</a><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#scopes">scopes</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#validatecertificatebinding">validateCertificateBinding</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">;</span><br/><span class="tsd-signature-symbol">}</span></div>
-<section class="tsd-panel tsd-hierarchy" data-refl="9253">
+<div class="tsd-signature"><span class="tsd-signature-keyword">interface</span> <span class="tsd-kind-interface">ValidateJwtAccessTokenOptions</span> <span class="tsd-signature-symbol">{</span><br/>    <a class="tsd-kind-property" href="#clientcertificate">clientCertificate</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#groups">groups</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#jwks">jwks</a><span class="tsd-signature-symbol">?:</span> <a href="_monocloud_backend-node.index.Jwks.html" class="tsd-signature-type tsd-kind-interface">Jwks</a><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#scopes">scopes</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#validatecertificatebinding">validateCertificateBinding</a><span class="tsd-signature-symbol">?:</span> <a href="../types/_monocloud_backend-node.index.CertificateBindingValidation.html" class="tsd-signature-type tsd-kind-type-alias">CertificateBindingValidation</a><span class="tsd-signature-symbol">;</span><br/><span class="tsd-signature-symbol">}</span></div>
+<section class="tsd-panel tsd-hierarchy" data-refl="9270">
 <h4>Hierarchy</h4>
 <ul class="tsd-hierarchy">
 <li class="tsd-hierarchy-item"><a href="_monocloud_auth-core.index.TokenValidationOptionsBase.html" class="tsd-signature-type tsd-kind-interface">TokenValidationOptionsBase</a>
 <ul class="tsd-hierarchy">
 <li class="tsd-hierarchy-item"><span class="tsd-hierarchy-target">ValidateJwtAccessTokenOptions</span></li></ul></li></ul></section><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/core/src/types.ts#L1840">core/src/types.ts:1840</a></li></ul></aside>
+<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/core/src/types.ts#L1852">core/src/types.ts:1852</a></li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-accordion" open><summary class="tsd-accordion-summary tsd-index-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
@@ -59,7 +59,7 @@
 <div class="tsd-comment tsd-typography"><p>Pre-fetched JSON Web Key Set to use for signature verification instead of fetching from the server.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/core/src/types.ts#L1844">core/src/types.ts:1844</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/core/src/types.ts#L1856">core/src/types.ts:1856</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="scopes"><code class="tsd-tag">Optional</code><span>scopes</span><a href="#scopes" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">scopes</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span></div>
@@ -70,18 +70,13 @@
 <li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/core/src/types.ts#L1815">core/src/types.ts:1815</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="validatecertificatebinding"><code class="tsd-tag">Optional</code><span>validate<wbr/>Certificate<wbr/>Binding</span><a href="#validatecertificatebinding" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">validateCertificateBinding</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span></div>
-<div class="tsd-comment tsd-typography"><p>When <code>true</code>, validates certificate binding for certificate-bound access tokens.</p>
-</div>
-<div class="tsd-comment tsd-typography">
-<div class="tsd-tag-defaultValue">
-<h4 class="tsd-anchor-link" id="default-value">Default Value<a href="#default-value" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h4><pre><code class="ts"><span class="hl-5">false</span>
-</code><button type="button">Copy</button></pre>
-
-</div></div><aside class="tsd-sources">
+<div class="tsd-signature"><span class="tsd-kind-property">validateCertificateBinding</span><span class="tsd-signature-symbol">?:</span> <a href="../types/_monocloud_backend-node.index.CertificateBindingValidation.html" class="tsd-signature-type tsd-kind-type-alias">CertificateBindingValidation</a></div>
+<div class="tsd-comment tsd-typography"><p>Controls whether the access token's certificate binding is validated against the
+client certificate.</p>
+</div><aside class="tsd-sources">
 <p>Inherited from <a href="_monocloud_auth-core.index.TokenValidationOptionsBase.html">TokenValidationOptionsBase</a>.<a href="_monocloud_auth-core.index.TokenValidationOptionsBase.html#validatecertificatebinding">validateCertificateBinding</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/core/src/types.ts#L1832">core/src/types.ts:1832</a></li></ul></aside></section></section></div>
+<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/core/src/types.ts#L1831">core/src/types.ts:1831</a></li></ul></aside></section></section></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">

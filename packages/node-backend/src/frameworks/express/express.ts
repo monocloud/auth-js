@@ -63,10 +63,7 @@ export function protectApi(
       next: NextFunction
     ): Promise<void> => {
       try {
-        let clientCertificate: string | undefined;
-        if (validateOptions?.validateCertificateBinding) {
-          clientCertificate = await certificateResolver?.(request);
-        }
+        const clientCertificate = await certificateResolver?.(request);
 
         const accessToken = (
           (await tokenResolver?.(request)) ??
@@ -84,8 +81,6 @@ export function protectApi(
         (request as AuthenticatedExpressRequest).claims =
           await client.validateAccessToken(accessToken, {
             clientCertificate,
-            validateCertificateBinding:
-              validateOptions?.validateCertificateBinding,
             groups: validateOptions?.groups,
             scopes: validateOptions?.scopes,
           });

@@ -19,7 +19,7 @@ Redis, Memcached, or an in-memory cache.</p>
 </div></section>
 <div class="tsd-signature"><span class="tsd-signature-keyword">interface</span> <span class="tsd-kind-interface">IIntrospectionCache</span> <span class="tsd-signature-symbol">{</span><br/>    <a class="tsd-kind-call-signature" href="#delete-1">delete</a><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">key</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-call-signature" href="#get-1">get</a><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">key</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="_monocloud_backend-node.index.AccessTokenClaims.html" class="tsd-signature-type tsd-kind-interface">AccessTokenClaims</a> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">null</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-call-signature" href="#set-1">set</a><span class="tsd-signature-symbol">(</span><br/>        <span class="tsd-kind-parameter">key</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span><br/>        <span class="tsd-kind-parameter">claims</span><span class="tsd-signature-symbol">:</span> <a href="_monocloud_backend-node.index.AccessTokenClaims.html" class="tsd-signature-type tsd-kind-interface">AccessTokenClaims</a><span class="tsd-signature-symbol">,</span><br/>        <span class="tsd-kind-parameter">expiresAt</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">;</span><br/><span class="tsd-signature-symbol">}</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/node-backend/src/types.ts#L160">node-backend/src/types.ts:160</a></li></ul></aside>
+<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/node-backend/src/types.ts#L178">node-backend/src/types.ts:178</a></li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-accordion" open><summary class="tsd-accordion-summary tsd-index-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
@@ -50,7 +50,7 @@ Redis, Memcached, or an in-memory cache.</p>
 </div></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/node-backend/src/types.ts#L181">node-backend/src/types.ts:181</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/node-backend/src/types.ts#L199">node-backend/src/types.ts:199</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="get"><span>get</span><a href="#get" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -68,7 +68,7 @@ Redis, Memcached, or an in-memory cache.</p>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="_monocloud_backend-node.index.AccessTokenClaims.html" class="tsd-signature-type tsd-kind-interface">AccessTokenClaims</a> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">null</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol">&gt;</span></h4><p>The cached claims, or <code>null</code>/<code>undefined</code> if the entry does not exist or has expired.</p>
 <aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/node-backend/src/types.ts#L175">node-backend/src/types.ts:175</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/node-backend/src/types.ts#L193">node-backend/src/types.ts:193</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="set"><span>set</span><a href="#set" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -87,11 +87,11 @@ Redis, Memcached, or an in-memory cache.</p>
 <div class="tsd-comment tsd-typography"><p>The introspected access token claims to cache.</p>
 </div></li>
 <li><span><span class="tsd-kind-parameter">expiresAt</span>: <span class="tsd-signature-type">number</span></span>
-<div class="tsd-comment tsd-typography"><p>The token's expiration time as a Unix epoch timestamp (seconds).</p>
+<div class="tsd-comment tsd-typography"><p>The time the entry expires, as a Unix epoch timestamp (seconds).</p>
 </div></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/node-backend/src/types.ts#L168">node-backend/src/types.ts:168</a></li></ul></aside></div></li></ul></section></section></details></div>
+<li>Defined in <a href="https://github.com/monocloud/auth-js/blob/main/packages/node-backend/src/types.ts#L186">node-backend/src/types.ts:186</a></li></ul></aside></div></li></ul></section></section></details></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">
