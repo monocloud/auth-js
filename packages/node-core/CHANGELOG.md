@@ -1,5 +1,15 @@
 # @monocloud/auth-node-core
 
+## 0.2.8
+
+### Patch Changes
+
+- a877d9a: - `responseTimeout` (and `MONOCLOUD_AUTH_RESPONSE_TIMEOUT`) is now applied to authorization server requests.
+- Updated dependencies [a877d9a]
+- Updated dependencies [a877d9a]
+- Updated dependencies [a877d9a]
+  - @monocloud/auth-core@0.2.7
+
 ## 0.2.7
 
 ### Patch Changes

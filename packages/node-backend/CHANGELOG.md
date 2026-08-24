@@ -1,5 +1,18 @@
 # @monocloud/backend-node
 
+## 0.3.8
+
+### Patch Changes
+
+- a877d9a: - `validateCertificateBinding` is now a client option (`MONOCLOUD_BACKEND_VALIDATE_CERTIFICATE_BINDING`) taking `'when_present'` (default), `'required'`, or `'dangerously_ignore'`, and is removed from `ProtectOptions`; tokens whose `cnf` claim carries an `x5t#S256` thumbprint are now validated by default.
+  - introspection results are cached as soon as they are returned; scope, group, and certificate binding checks run per route on the cached claims.
+  - added `introspectionCacheDuration` (`MONOCLOUD_BACKEND_INTROSPECTION_CACHE_DURATION`, default 300 seconds), capping cached claims and also caching `active: false` verdicts; `0` disables caching.
+- a877d9a: - added a `responseTimeout` option and `MONOCLOUD_BACKEND_RESPONSE_TIMEOUT` environment variable, defaulting to `10000` milliseconds, bounding the discovery, JWKS, and introspection requests made while validating an access token.
+- Updated dependencies [a877d9a]
+- Updated dependencies [a877d9a]
+- Updated dependencies [a877d9a]
+  - @monocloud/auth-core@0.2.7
+
 ## 0.3.7
 
 ### Patch Changes
