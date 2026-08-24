@@ -304,8 +304,7 @@ export const isUserInGroup = (
   matchAll = false
 ): boolean => {
   const userGroups = (user[groupsClaim] ?? []) as (
-    | string
-    | { id: string; name: string }
+    string | { id: string; name: string }
   )[];
 
   if (!Array.isArray(groups) || groups.length === 0) {

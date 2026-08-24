@@ -19,6 +19,7 @@ export {
 export type {
   AccessTokenClaims,
   MonoCloudTokenErrorCode,
+  CertificateBindingValidation,
   MonoCloudRawResponse,
   ValidateJwtAccessTokenOptions,
   IntrospectOptions,

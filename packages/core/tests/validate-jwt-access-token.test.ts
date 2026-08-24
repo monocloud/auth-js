@@ -500,7 +500,7 @@ AQIDBAUGBwg=
       );
 
       const result = await client.validateJwtAccessToken(jwt, {
-        validateCertificateBinding: true,
+        validateCertificateBinding: 'required',
         clientCertificate: certificate,
       });
 

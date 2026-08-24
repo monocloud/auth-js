@@ -43,7 +43,10 @@ const MATRIX = [
 
 const CONSUMER_TS = `import express from 'express';
 import Fastify from 'fastify';
-import { MonoCloudBackendNodeClient } from '@monocloud/backend-node';
+import {
+  MonoCloudBackendNodeClient,
+  type CertificateBindingValidation,
+} from '@monocloud/backend-node';
 import {
   protectApi as expressProtectApi,
   type AuthenticatedExpressRequest,
@@ -55,9 +58,13 @@ import {
   type ProtectHook,
 } from '@monocloud/backend-node/fastify';
 
+const bindingMode: CertificateBindingValidation = 'required';
+
 const client = new MonoCloudBackendNodeClient({
   tenantDomain: 'https://tenant.example.com',
   audience: 'https://api.example.com',
+  validateCertificateBinding: bindingMode,
+  introspectionCacheDuration: 300,
 });
 
 // Express surface
@@ -79,7 +86,6 @@ app.get(
   protectWithClient({
     scopes: ['data:write'],
     groups: ['engineering'],
-    validateCertificateBinding: true,
   }),
   (_req, res) => {
     res.status(200).send('ok');

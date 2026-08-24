@@ -4002,6 +4002,38 @@ describe('MonoCloud Base Instance', () => {
       expect(instance.getOptions()).toEqual(getOptions(defaultConfig));
     });
 
+    it('should apply the configured response timeout to authorization server requests', async () => {
+      const inits: (RequestInit | undefined)[] = [];
+
+      const fetcher = vi.fn((_input: any, init?: RequestInit) => {
+        inits.push(init);
+
+        return Promise.resolve(
+          new Response(
+            JSON.stringify({
+              issuer: testConfig.tenantDomain,
+              authorization_endpoint: 'https://example.com/connect/authorize',
+            }),
+            { headers: { 'content-type': 'application/json' } }
+          )
+        );
+      });
+
+      const instance = getConfiguredInstance({
+        responseTimeout: 1000,
+        fetcher: fetcher as unknown as typeof fetch,
+      });
+
+      const cookies = {};
+      const req = new TestReq({ cookies, method: 'GET' });
+      const res = new TestRes(cookies);
+
+      await instance.signIn(req, res);
+
+      expect(fetcher).toHaveBeenCalled();
+      expect(inits[0]?.signal).toBeInstanceOf(AbortSignal);
+    });
+
     it('should not throw validation error during runtime if already validated', () => {
       const instance = new MonoCloudCoreClient({});
 

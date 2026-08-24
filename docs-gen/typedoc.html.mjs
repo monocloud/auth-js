@@ -32,7 +32,7 @@ const config = {
   includeHierarchySummary: false,
   sortEntryPoints: false,
   entryPointStrategy: 'packages',
-  out: '../docs/html',
+  out: '../docs',
   name: 'MonoCloud Authentication SDK',
   readme: '../README.md',
   hideGenerator: true,

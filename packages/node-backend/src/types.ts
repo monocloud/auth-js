@@ -1,5 +1,6 @@
 import {
   AccessTokenClaims,
+  CertificateBindingValidation,
   IntrospectOptions,
   MonoCloudOidcBackendClientOptions,
 } from '@monocloud/auth-core';
@@ -98,6 +99,8 @@ export interface ProtectApiRequestOptions<T> {
  * | `MONOCLOUD_BACKEND_CLOCK_SKEW` | Allowed clock drift (in seconds) when validating token timestamps. |
  * | `MONOCLOUD_BACKEND_CLOCK_TOLERANCE` | Additional time tolerance (in seconds) for time-based claim validation. |
  * | `MONOCLOUD_BACKEND_INTROSPECT_JWT_TOKENS` | When `true`, JWT tokens are introspected at the server instead of being validated locally. |
+ * | `MONOCLOUD_BACKEND_VALIDATE_CERTIFICATE_BINDING` | Controls certificate binding validation for access tokens. |
+ * | `MONOCLOUD_BACKEND_RESPONSE_TIMEOUT` | Maximum time (in milliseconds) to wait for responses from the MonoCloud authorization server. |
  *
  * ### Group Validation
  *
@@ -112,6 +115,7 @@ export interface ProtectApiRequestOptions<T> {
  * |----------------------|-------------|
  * | `MONOCLOUD_BACKEND_JWKS_CACHE_DURATION` | Duration (in seconds) to cache the JSON Web Key Set (JWKS) used to verify tokens. |
  * | `MONOCLOUD_BACKEND_METADATA_CACHE_DURATION` | Duration (in seconds) to cache the OpenID Connect discovery metadata. |
+ * | `MONOCLOUD_BACKEND_INTROSPECTION_CACHE_DURATION` | Duration (in seconds) to cache token introspection results. |
  *
  * @category Types
  */
@@ -138,6 +142,29 @@ export interface MonoCloudBackendNodeClientOptions extends MonoCloudOidcBackendC
    * @defaultValue false
    */
   introspectJwtTokens?: boolean;
+
+  /**
+   * Controls whether access tokens are validated as being bound to the client certificate
+   * presented with the request.
+   *
+   * @defaultValue 'when_present'
+   */
+  validateCertificateBinding?: CertificateBindingValidation;
+
+  /**
+   * Duration (in seconds) to cache token introspection results.
+   *
+   * @defaultValue 300 (5 minutes)
+   */
+  introspectionCacheDuration?: number;
+
+  /**
+   * Maximum time (in milliseconds) to wait for responses from the MonoCloud authorization server
+   * before the request is aborted.
+   *
+   * @defaultValue 10000 (10 seconds)
+   */
+  responseTimeout?: number;
 }
 
 /**
@@ -154,7 +181,7 @@ export interface IIntrospectionCache {
    *
    * @param key - The cache key (access token).
    * @param claims - The introspected access token claims to cache.
-   * @param expiresAt - The token's expiration time as a Unix epoch timestamp (seconds).
+   * @param expiresAt - The time the entry expires, as a Unix epoch timestamp (seconds).
    */
   set(key: string, claims: AccessTokenClaims, expiresAt: number): Promise<void>;
   /**
@@ -178,7 +205,10 @@ export interface IIntrospectionCache {
  * @category Types
  */
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
-export interface ValidateAccessTokenOptions extends IntrospectOptions {}
+export interface ValidateAccessTokenOptions extends Omit<
+  IntrospectOptions,
+  'validateCertificateBinding'
+> {}
 
 /**
  * Options for protecting APIs.

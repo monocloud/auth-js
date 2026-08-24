@@ -1,6 +1,7 @@
 import { MonoCloudHttpError } from './errors/monocloud-http-error';
 import { MonoCloudValidationError } from './errors/monocloud-validation-error';
 import { IssuerMetadata, MonoCloudRawResponse } from './types';
+import { isPresent } from './utils/internal';
 
 export const JWT_ASSERTION_CLOCK_SKEW = 5;
 
@@ -18,16 +19,41 @@ export function assertMetadataProperty<K extends keyof IssuerMetadata>(
 export const innerFetch = async (
   input: string,
   reqInit: RequestInit = {},
-  customFetch?: typeof fetch
+  customFetch?: typeof fetch,
+  timeout?: number
 ): Promise<Response> => {
+  const fetcher = customFetch ?? fetch;
+
+  let timedOut = false;
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  let init = { ...reqInit };
+
+  if (isPresent(timeout) && timeout > 0) {
+    const controller = new AbortController();
+
+    init = { ...init, signal: controller.signal };
+
+    timer = setTimeout(() => {
+      timedOut = true;
+      controller.abort();
+    }, timeout);
+  }
+
   try {
-    const fetcher = customFetch ?? fetch;
-    return await fetcher(input, reqInit);
+    return await fetcher(input, init);
   } catch (e) {
+    if (timedOut) {
+      throw new MonoCloudHttpError(
+        `Request to ${input} timed out after ${timeout}ms`
+      );
+    }
+
     /* v8 ignore next -- @preserve */
     throw new MonoCloudHttpError(
       (e as any).message ?? 'Unexpected Network Error'
     );
+  } finally {
+    clearTimeout(timer);
   }
 };
 

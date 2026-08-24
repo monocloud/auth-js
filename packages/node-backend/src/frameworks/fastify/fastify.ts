@@ -39,14 +39,12 @@ export function protectApi(
 
 export function protectApi(
   clientOrOptions?:
-    | ProtectApiRequestOptions<FastifyRequest>
-    | MonoCloudBackendNodeClient,
+    ProtectApiRequestOptions<FastifyRequest> | MonoCloudBackendNodeClient,
   requestOptions?: ProtectApiRequestOptions<FastifyRequest>
 ) {
   let client: MonoCloudBackendNodeClient;
   let certificateResolver:
-    | ClientCertificateResolver<FastifyRequest>
-    | undefined;
+    ClientCertificateResolver<FastifyRequest> | undefined;
   let tokenResolver: TokenResolver<FastifyRequest> | undefined;
 
   if (clientOrOptions instanceof MonoCloudBackendNodeClient) {
@@ -66,10 +64,7 @@ export function protectApi(
       // eslint-disable-next-line consistent-return
     ): Promise<void> => {
       try {
-        let clientCertificate: string | undefined;
-        if (validateOptions?.validateCertificateBinding) {
-          clientCertificate = await certificateResolver?.(request);
-        }
+        const clientCertificate = await certificateResolver?.(request);
 
         const accessToken = (
           (await tokenResolver?.(request)) ??
@@ -86,8 +81,6 @@ export function protectApi(
         (request as AuthenticatedFastifyRequest).claims =
           await client.validateAccessToken(accessToken, {
             clientCertificate,
-            validateCertificateBinding:
-              validateOptions?.validateCertificateBinding,
             groups: validateOptions?.groups,
             scopes: validateOptions?.scopes,
           });

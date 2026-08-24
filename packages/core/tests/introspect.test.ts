@@ -374,7 +374,8 @@ describe('MonoCloudOidcBackendClient.introspectAccessToken()', () => {
 
       await assertTokenError(
         client.introspectAccessToken('some-token'),
-        'Token is not active'
+        'Token is not active. The introspection endpoint returned active=false',
+        'inactive_token'
       );
 
       fetchSpy.assert();
@@ -398,7 +399,8 @@ describe('MonoCloudOidcBackendClient.introspectAccessToken()', () => {
 
       await assertTokenError(
         client.introspectAccessToken('some-token'),
-        'Token is not active'
+        'Token is not active. The introspection endpoint returned active=false',
+        'inactive_token'
       );
 
       fetchSpy.assert();
@@ -956,7 +958,7 @@ describe('MonoCloudOidcBackendClient.introspectAccessToken()', () => {
 
       await assertTokenError(
         client.introspectAccessToken('some-token', {
-          validateCertificateBinding: true,
+          validateCertificateBinding: 'required',
         }),
         'Client certificate is not present'
       );
@@ -983,7 +985,7 @@ describe('MonoCloudOidcBackendClient.introspectAccessToken()', () => {
 
       await assertTokenError(
         client.introspectAccessToken('some-token', {
-          validateCertificateBinding: true,
+          validateCertificateBinding: 'required',
           clientCertificate: '@@@invalid-base64@@@',
         }),
         'Client certificate is malformed'
@@ -1014,7 +1016,7 @@ AQIDBAUGBwg=
 
       await assertTokenError(
         client.introspectAccessToken('some-token', {
-          validateCertificateBinding: true,
+          validateCertificateBinding: 'required',
           clientCertificate: certificate,
         }),
         "Access token does not contain a 'cnf' (confirmation) claim for certificate binding"
@@ -1046,7 +1048,7 @@ AQIDBAUGBwg=
 
       await assertTokenError(
         client.introspectAccessToken('some-token', {
-          validateCertificateBinding: true,
+          validateCertificateBinding: 'required',
           clientCertificate: certificate,
         }),
         "Malformed 'cnf' claim for certificate binding"
@@ -1078,7 +1080,7 @@ AQIDBAUGBwg=
 
       await assertTokenError(
         client.introspectAccessToken('some-token', {
-          validateCertificateBinding: true,
+          validateCertificateBinding: 'required',
           clientCertificate: certificate,
         }),
         "The 'cnf' claim could not be parsed"
@@ -1110,7 +1112,7 @@ AQIDBAUGBwg=
 
       await assertTokenError(
         client.introspectAccessToken('some-token', {
-          validateCertificateBinding: true,
+          validateCertificateBinding: 'required',
           clientCertificate: certificate,
         }),
         "The 'cnf' claim does not contain an 'x5t#S256' member specifying the certificate hash for binding"
@@ -1144,7 +1146,7 @@ AQIDBAUGBwg=
 
       await assertTokenError(
         client.introspectAccessToken('some-token', {
-          validateCertificateBinding: true,
+          validateCertificateBinding: 'required',
           clientCertificate: certificate,
         }),
         'The certificate hash in the access token does not match the presented client certificate (certificate binding validation failed)'
@@ -1176,9 +1178,284 @@ AQIDBAUGBwg=
       );
 
       const result = await client.introspectAccessToken('some-token', {
-        validateCertificateBinding: true,
+        validateCertificateBinding: 'required',
         clientCertificate: certificate,
       });
+
+      expect(result.sub).toBe('user123');
+
+      fetchSpy.assert();
+    });
+
+    it("should validate binding under 'when_present' when the token carries a cnf claim", async () => {
+      const certificate = `-----BEGIN CERTIFICATE-----
+AQIDBAUGBwg=
+-----END CERTIFICATE-----`;
+      const certificateHash = await getCertificateHash(certificate);
+
+      const fetchSpy = fetchBuilder()
+        .configureMetadata()
+        .configureIntrospection({
+          responseBody: {
+            ...baseClaims,
+            cnf: { 'x5t#S256': certificateHash },
+          },
+        })
+        .createSpy();
+
+      const client = new MonoCloudOidcBackendClient(
+        'example.com',
+        'https://api.example.com',
+        defaultClientOptions
+      );
+
+      const result = await client.introspectAccessToken('some-token', {
+        validateCertificateBinding: 'when_present',
+        clientCertificate: certificate,
+      });
+
+      expect(result.sub).toBe('user123');
+
+      fetchSpy.assert();
+    });
+
+    it("should throw under 'when_present' when the token carries a cnf claim but no certificate is presented", async () => {
+      const fetchSpy = fetchBuilder()
+        .configureMetadata()
+        .configureIntrospection({
+          responseBody: {
+            ...baseClaims,
+            cnf: { 'x5t#S256': 'hash' },
+          },
+        })
+        .createSpy();
+
+      const client = new MonoCloudOidcBackendClient(
+        'example.com',
+        'https://api.example.com',
+        defaultClientOptions
+      );
+
+      await assertTokenError(
+        client.introspectAccessToken('some-token', {
+          validateCertificateBinding: 'when_present',
+        }),
+        'Client certificate is not present'
+      );
+
+      fetchSpy.assert();
+    });
+
+    it("should throw under 'when_present' when the cnf claim is malformed", async () => {
+      const certificate = 'AQIDBAUGBwg=';
+
+      const fetchSpy = fetchBuilder()
+        .configureMetadata()
+        .configureIntrospection({
+          responseBody: {
+            ...baseClaims,
+            cnf: '{"x5t#S256"',
+          },
+        })
+        .createSpy();
+
+      const client = new MonoCloudOidcBackendClient(
+        'example.com',
+        'https://api.example.com',
+        defaultClientOptions
+      );
+
+      await assertTokenError(
+        client.introspectAccessToken('some-token', {
+          validateCertificateBinding: 'when_present',
+          clientCertificate: certificate,
+        }),
+        "Malformed 'cnf' claim for certificate binding"
+      );
+
+      fetchSpy.assert();
+    });
+
+    it("should skip binding under 'when_present' when the cnf claim uses a different confirmation method", async () => {
+      const fetchSpy = fetchBuilder()
+        .configureMetadata()
+        .configureIntrospection({
+          responseBody: {
+            ...baseClaims,
+            cnf: { jkt: 'dpop-thumbprint' },
+          },
+        })
+        .createSpy();
+
+      const client = new MonoCloudOidcBackendClient(
+        'example.com',
+        'https://api.example.com',
+        defaultClientOptions
+      );
+
+      const result = await client.introspectAccessToken('some-token', {
+        validateCertificateBinding: 'when_present',
+      });
+
+      expect(result.sub).toBe('user123');
+
+      fetchSpy.assert();
+    });
+
+    it("should skip binding under 'when_present' when a string cnf claim uses a different confirmation method", async () => {
+      const fetchSpy = fetchBuilder()
+        .configureMetadata()
+        .configureIntrospection({
+          responseBody: {
+            ...baseClaims,
+            cnf: JSON.stringify({ jkt: 'dpop-thumbprint' }),
+          },
+        })
+        .createSpy();
+
+      const client = new MonoCloudOidcBackendClient(
+        'example.com',
+        'https://api.example.com',
+        defaultClientOptions
+      );
+
+      const result = await client.introspectAccessToken('some-token', {
+        validateCertificateBinding: 'when_present',
+      });
+
+      expect(result.sub).toBe('user123');
+
+      fetchSpy.assert();
+    });
+
+    it("should throw under 'when_present' when the cnf claim is not an object", async () => {
+      const fetchSpy = fetchBuilder()
+        .configureMetadata()
+        .configureIntrospection({
+          responseBody: {
+            ...baseClaims,
+            cnf: ['x5t#S256'],
+          },
+        })
+        .createSpy();
+
+      const client = new MonoCloudOidcBackendClient(
+        'example.com',
+        'https://api.example.com',
+        defaultClientOptions
+      );
+
+      await assertTokenError(
+        client.introspectAccessToken('some-token', {
+          validateCertificateBinding: 'when_present',
+          clientCertificate: 'AQIDBAUGBwg=',
+        }),
+        "The 'cnf' claim could not be parsed"
+      );
+
+      fetchSpy.assert();
+    });
+
+    it("should reject a token whose cnf lacks x5t#S256 under 'required'", async () => {
+      const certificate = 'AQIDBAUGBwg=';
+
+      const fetchSpy = fetchBuilder()
+        .configureMetadata()
+        .configureIntrospection({
+          responseBody: {
+            ...baseClaims,
+            cnf: { jkt: 'dpop-thumbprint' },
+          },
+        })
+        .createSpy();
+
+      const client = new MonoCloudOidcBackendClient(
+        'example.com',
+        'https://api.example.com',
+        defaultClientOptions
+      );
+
+      await assertTokenError(
+        client.introspectAccessToken('some-token', {
+          validateCertificateBinding: 'required',
+          clientCertificate: certificate,
+        }),
+        "The 'cnf' claim does not contain an 'x5t#S256' member specifying the certificate hash for binding"
+      );
+
+      fetchSpy.assert();
+    });
+
+    it("should skip binding under 'when_present' when the token has no cnf claim", async () => {
+      const fetchSpy = fetchBuilder()
+        .configureMetadata()
+        .configureIntrospection({
+          responseBody: {
+            ...baseClaims,
+          },
+        })
+        .createSpy();
+
+      const client = new MonoCloudOidcBackendClient(
+        'example.com',
+        'https://api.example.com',
+        defaultClientOptions
+      );
+
+      const result = await client.introspectAccessToken('some-token', {
+        validateCertificateBinding: 'when_present',
+      });
+
+      expect(result.sub).toBe('user123');
+
+      fetchSpy.assert();
+    });
+
+    it("should skip binding under 'dangerously_ignore' even for a bound token with a mismatched certificate", async () => {
+      const fetchSpy = fetchBuilder()
+        .configureMetadata()
+        .configureIntrospection({
+          responseBody: {
+            ...baseClaims,
+            cnf: { 'x5t#S256': 'some-other-hash' },
+          },
+        })
+        .createSpy();
+
+      const client = new MonoCloudOidcBackendClient(
+        'example.com',
+        'https://api.example.com',
+        defaultClientOptions
+      );
+
+      const result = await client.introspectAccessToken('some-token', {
+        validateCertificateBinding: 'dangerously_ignore',
+        clientCertificate: 'AQIDBAUGBwg=',
+      });
+
+      expect(result.sub).toBe('user123');
+
+      fetchSpy.assert();
+    });
+
+    it('should skip binding when no mode is provided', async () => {
+      const fetchSpy = fetchBuilder()
+        .configureMetadata()
+        .configureIntrospection({
+          responseBody: {
+            ...baseClaims,
+            cnf: { 'x5t#S256': 'some-other-hash' },
+          },
+        })
+        .createSpy();
+
+      const client = new MonoCloudOidcBackendClient(
+        'example.com',
+        'https://api.example.com',
+        defaultClientOptions
+      );
+
+      const result = await client.introspectAccessToken('some-token');
 
       expect(result.sub).toBe('user123');
 
@@ -1206,7 +1483,7 @@ AQIDBAUGBwg=
       );
 
       const result = await client.introspectAccessToken('some-token', {
-        validateCertificateBinding: true,
+        validateCertificateBinding: 'required',
         clientCertificate: certificate,
       });
 

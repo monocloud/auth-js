@@ -95,8 +95,7 @@ export class TestPageRes implements TestResponse {
     const sessionCookie = this.cookieJar
       .serializeSync()!
       .cookies.find(x => x.key === 'session') as
-      | ({ value: string } & ParsedCookie['options'])
-      | undefined;
+      ({ value: string } & ParsedCookie['options']) | undefined;
 
     return {
       value: sessionCookie?.value,

@@ -89,6 +89,7 @@ export class MonoCloudOidcClient extends MonoCloudOidcClientBase {
       metadataCacheDuration: options?.metadataCacheDuration,
       jwksCacheDuration: options?.jwksCacheDuration,
       fetcher: options?.fetcher,
+      responseTimeout: options?.responseTimeout,
       clientAuthMethod: options?.clientAuthMethod ?? 'client_secret_basic',
       trustStoreId: options?.trustStoreId,
       metadataResolver: options?.metadataResolver,
@@ -348,7 +349,8 @@ export class MonoCloudOidcClient extends MonoCloudOidcClientBase {
         method: 'POST',
         headers,
       },
-      this.fetcher
+      this.fetcher,
+      this.responseTimeout
     );
 
     if (response.status === 400 || response.status === 401) {
@@ -409,7 +411,8 @@ export class MonoCloudOidcClient extends MonoCloudOidcClientBase {
           authorization: `Bearer ${accessToken}`,
         },
       },
-      this.fetcher
+      this.fetcher,
+      this.responseTimeout
     );
 
     if (response.status === 401 || response.status === 403) {
@@ -551,7 +554,8 @@ export class MonoCloudOidcClient extends MonoCloudOidcClientBase {
         body: body.toString(),
         headers,
       },
-      this.fetcher
+      this.fetcher,
+      this.responseTimeout
     );
 
     if (response.status === 400 || response.status === 401) {
@@ -640,7 +644,8 @@ export class MonoCloudOidcClient extends MonoCloudOidcClientBase {
         body: body.toString(),
         headers,
       },
-      this.fetcher
+      this.fetcher,
+      this.responseTimeout
     );
 
     if (response.status === 400 || response.status === 401) {
@@ -1010,7 +1015,8 @@ export class MonoCloudOidcClient extends MonoCloudOidcClientBase {
         body: body.toString(),
         headers,
       },
-      this.fetcher
+      this.fetcher,
+      this.responseTimeout
     );
 
     if (response.status === 400 || response.status === 401) {
@@ -1460,7 +1466,8 @@ export class MonoCloudOidcClient extends MonoCloudOidcClientBase {
         method: 'POST',
         headers,
       },
-      this.fetcher
+      this.fetcher,
+      this.responseTimeout
     );
 
     if (response.status === 400 || response.status === 401) {
@@ -1531,7 +1538,8 @@ export class MonoCloudOidcClient extends MonoCloudOidcClientBase {
         body: body.toString(),
         headers,
       },
-      this.fetcher
+      this.fetcher,
+      this.responseTimeout
     );
 
     if (response.status === 400 || response.status === 401) {

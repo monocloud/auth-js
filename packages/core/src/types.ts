@@ -1619,55 +1619,18 @@ export interface PushedAuthorizationParams extends Omit<
  *
  * @category Types
  */
-export interface MonoCloudOidcClientBaseOptions {
+export interface MonoCloudOidcClientBaseOptions extends MonoCloudClientOptionsBase {
   /**
    * The tenant domain URL.
    */
   tenantDomain: string;
-
-  /**
-   * Duration (in seconds) to cache OpenID Connect discovery metadata.
-   * @defaultValue 300
-   */
-  metadataCacheDuration?: number;
-
-  /**
-   * Duration (in seconds) to cache the JSON Web Key Set (JWKS).
-   * @defaultValue 300
-   */
-  jwksCacheDuration?: number;
-
-  /**
-   * Custom `fetch` implementation used for making HTTP requests. Falls back to the global `fetch` if not provided.
-   */
-  fetcher?: typeof fetch;
-
-  /**
-   * Client authentication method. Determines whether mTLS-aliased endpoints are used.
-   */
-  clientAuthMethod?: ClientAuthMethod;
-
-  /**
-   * Identifier of the trust store whose mTLS endpoint aliases should be used.
-   */
-  trustStoreId?: string;
-
-  /**
-   * Optional custom resolver for the issuer metadata, replacing the default discovery request.
-   */
-  metadataResolver?: () => IssuerMetadata | Promise<IssuerMetadata>;
-
-  /**
-   * Optional custom resolver for the JSON Web Key Set (JWKS), replacing the default JWKS request.
-   */
-  jwksResolver?: () => Jwks | Promise<Jwks>;
 }
 
 /**
  * Shared configuration options for MonoCloud OIDC clients.
  *
- * These options are common to both {@link MonoCloudOidcClientOptions}
- * and {@link MonoCloudOidcBackendClientOptions}.
+ * These options are common to {@link MonoCloudOidcClientOptions},
+ * {@link MonoCloudOidcBackendClientOptions}, and {@link MonoCloudOidcClientBaseOptions}.
  *
  * @category Types
  */
@@ -1700,6 +1663,12 @@ export interface MonoCloudClientOptionsBase {
    * @defaultValue 300
    */
   metadataCacheDuration?: number;
+
+  /**
+   * Maximum time (in milliseconds) to wait for a response from the authorization server
+   * before the request is aborted.
+   */
+  responseTimeout?: number;
 
   /**
    * Optional custom `fetch` implementation used for network requests.
@@ -1856,12 +1825,24 @@ export interface TokenValidationOptionsBase {
   clientCertificate?: string;
 
   /**
-   * When `true`, validates certificate binding for certificate-bound access tokens.
-   *
-   * @defaultValue false
+   * Controls whether the access token's certificate binding is validated against the
+   * client certificate.
    */
-  validateCertificateBinding?: boolean;
+  validateCertificateBinding?: CertificateBindingValidation;
 }
+
+/**
+ * Controls how certificate binding is validated for certificate-bound access tokens.
+ *
+ * @category Types (Enums)
+ */
+export type CertificateBindingValidation =
+  /** Validates certificate binding only when the token's `cnf` (confirmation) claim contains an `x5t#S256` certificate thumbprint. */
+  | 'when_present'
+  /** Always validates certificate binding, rejecting tokens without a `cnf` claim. */
+  | 'required'
+  /** Never validates certificate binding, even when the token carries a `cnf` claim. */
+  | 'dangerously_ignore';
 
 /**
  * Options for validating a JWT access token.
@@ -1891,6 +1872,8 @@ export interface IntrospectOptions extends TokenValidationOptionsBase {}
 export type MonoCloudTokenErrorCode =
   /** The token is missing, malformed, expired, revoked, or otherwise failed validation. */
   | 'invalid_token'
+  /** The introspection endpoint reported the token as not active. */
+  | 'inactive_token'
   /** The token does not contain the scopes required for the request. */
   | 'insufficient_scope'
   /** The token's subject is not a member of the groups required for the request. */

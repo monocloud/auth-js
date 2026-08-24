@@ -148,13 +148,11 @@ describe('protectApi (fastify)', () => {
     expect(reply.send).toHaveBeenCalledWith({ message: 'unauthorized' });
   });
 
-  it('should resolve the client certificate when validateCertificateBinding is true', async () => {
+  it('should resolve the client certificate whenever a resolver is configured', async () => {
     const certificateResolver = vi.fn().mockResolvedValue('cert-value');
     const validateSpy = mockValidateAccessToken();
 
-    const hook = protectApi({ certificateResolver })({
-      validateCertificateBinding: true,
-    });
+    const hook = protectApi({ certificateResolver })();
     const req = createMockRequest<FastifyRequest>({
       headers: { authorization: 'Bearer some-token' },
     });
@@ -165,17 +163,15 @@ describe('protectApi (fastify)', () => {
     expect(certificateResolver).toHaveBeenCalledWith(req);
     expect(validateSpy).toHaveBeenCalledWith('some-token', {
       clientCertificate: 'cert-value',
-      validateCertificateBinding: true,
       groups: undefined,
       scopes: undefined,
     });
   });
 
-  it('should not call the certificate resolver when validateCertificateBinding is falsy', async () => {
-    const certificateResolver = vi.fn();
-    mockValidateAccessToken();
+  it('should pass an undefined certificate when no resolver is configured', async () => {
+    const validateSpy = mockValidateAccessToken();
 
-    const hook = protectApi({ certificateResolver })();
+    const hook = protectApi()();
     const req = createMockRequest<FastifyRequest>({
       headers: { authorization: 'Bearer some-token' },
     });
@@ -183,7 +179,11 @@ describe('protectApi (fastify)', () => {
 
     await hook(req, reply);
 
-    expect(certificateResolver).not.toHaveBeenCalled();
+    expect(validateSpy).toHaveBeenCalledWith('some-token', {
+      clientCertificate: undefined,
+      groups: undefined,
+      scopes: undefined,
+    });
   });
 
   it('should use the provided client and request options together', async () => {
@@ -197,7 +197,7 @@ describe('protectApi (fastify)', () => {
     const hook = protectApi(client, {
       tokenResolver,
       certificateResolver,
-    })({ validateCertificateBinding: true });
+    })();
 
     const req = createMockRequest<FastifyRequest>();
     const reply = createMockResponse<ReplyMock>();
@@ -208,7 +208,6 @@ describe('protectApi (fastify)', () => {
     expect(certificateResolver).toHaveBeenCalled();
     expect(validateSpy).toHaveBeenCalledWith('injected', {
       clientCertificate: 'cert',
-      validateCertificateBinding: true,
       groups: undefined,
       scopes: undefined,
     });
@@ -421,4 +420,27 @@ describe('protectApi (fastify)', () => {
       });
     }
   );
+  it('should answer an inactive token with 401 and error="invalid_token"', async () => {
+    mockValidateAccessTokenRejection(
+      new MonoCloudTokenError(
+        'Token is not active. The introspection endpoint returned active=false',
+        'inactive_token'
+      )
+    );
+
+    const hook = protectApi()();
+    const request = createMockRequest<FastifyRequest>({
+      headers: { authorization: 'Bearer some-token' },
+    });
+    const reply = createMockResponse<ReplyMock>();
+
+    await hook(request, reply);
+
+    expect(reply.status).toHaveBeenCalledWith(401);
+    expect(reply.header).toHaveBeenCalledWith(
+      'WWW-Authenticate',
+      'Bearer error="invalid_token"'
+    );
+    expect(reply.send).toHaveBeenCalledWith({ message: 'unauthorized' });
+  });
 });

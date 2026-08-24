@@ -359,9 +359,7 @@ export const getPublicSigKeyFromIssuerJwks = async (
   }
 
   let algorithm:
-    | RsaHashedImportParams
-    | EcKeyImportParams
-    | AlgorithmIdentifier;
+    RsaHashedImportParams | EcKeyImportParams | AlgorithmIdentifier;
 
   switch (alg) {
     case 'PS256': // Fall through

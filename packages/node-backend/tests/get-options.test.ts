@@ -43,6 +43,9 @@ describe('Configuration Options', () => {
     addEnv('MONOCLOUD_BACKEND_JWKS_CACHE_DURATION', '60');
     addEnv('MONOCLOUD_BACKEND_METADATA_CACHE_DURATION', '90');
     addEnv('MONOCLOUD_BACKEND_INTROSPECT_JWT_TOKENS', 'true');
+    addEnv('MONOCLOUD_BACKEND_RESPONSE_TIMEOUT', '3000');
+    addEnv('MONOCLOUD_BACKEND_INTROSPECTION_CACHE_DURATION', '30');
+    addEnv('MONOCLOUD_BACKEND_VALIDATE_CERTIFICATE_BINDING', 'required');
     addEnv('MONOCLOUD_BACKEND_GROUPS_CLAIM', 'roles');
     addEnv('MONOCLOUD_BACKEND_GROUPS_MATCH_ALL', 'true');
     addEnv('MONOCLOUD_BACKEND_TRUST_STORE_ID', 'trust-store-1');
@@ -60,6 +63,9 @@ describe('Configuration Options', () => {
     expect(options.jwksCacheDuration).toBe(60);
     expect(options.metadataCacheDuration).toBe(90);
     expect(options.introspectJwtTokens).toBe(true);
+    expect(options.responseTimeout).toBe(3000);
+    expect(options.introspectionCacheDuration).toBe(30);
+    expect(options.validateCertificateBinding).toBe('required');
     expect(options.groupOptions?.groupsClaim).toBe('roles');
     expect(options.groupOptions?.matchAll).toBe(true);
   });
@@ -73,6 +79,9 @@ describe('Configuration Options', () => {
     expect(options.clockTolerance).toBe(60);
     expect(options.clientAuthMethod).toBe('client_secret_post');
     expect(options.introspectJwtTokens).toBe(false);
+    expect(options.responseTimeout).toBe(10000);
+    expect(options.introspectionCacheDuration).toBe(300);
+    expect(options.validateCertificateBinding).toBe('when_present');
   });
 
   it('should prefer constructor options over environment variables', () => {
@@ -84,6 +93,7 @@ describe('Configuration Options', () => {
     addEnv('MONOCLOUD_BACKEND_JWKS_CACHE_DURATION', '60');
     addEnv('MONOCLOUD_BACKEND_METADATA_CACHE_DURATION', '90');
     addEnv('MONOCLOUD_BACKEND_INTROSPECT_JWT_TOKENS', 'true');
+    addEnv('MONOCLOUD_BACKEND_RESPONSE_TIMEOUT', '3000');
     addEnv('MONOCLOUD_BACKEND_GROUPS_CLAIM', 'roles');
     addEnv('MONOCLOUD_BACKEND_GROUPS_MATCH_ALL', 'true');
     addEnv('MONOCLOUD_BACKEND_TRUST_STORE_ID', 'env-trust-store');
@@ -105,6 +115,9 @@ describe('Configuration Options', () => {
       jwksCacheDuration: 30,
       metadataCacheDuration: 45,
       introspectJwtTokens: false,
+      responseTimeout: 2000,
+      introspectionCacheDuration: 15,
+      validateCertificateBinding: 'dangerously_ignore',
       groupOptions: { groupsClaim: 'groups', matchAll: false },
     });
 
@@ -121,6 +134,9 @@ describe('Configuration Options', () => {
     expect(options.jwksCacheDuration).toBe(30);
     expect(options.metadataCacheDuration).toBe(45);
     expect(options.introspectJwtTokens).toBe(false);
+    expect(options.responseTimeout).toBe(2000);
+    expect(options.introspectionCacheDuration).toBe(15);
+    expect(options.validateCertificateBinding).toBe('dangerously_ignore');
     expect(options.groupOptions?.groupsClaim).toBe('groups');
     expect(options.groupOptions?.matchAll).toBe(false);
   });
@@ -164,6 +180,31 @@ describe('Configuration Options', () => {
     setRequiredEnv();
 
     expect(() => getOptions({ clockSkew: -1 })).toThrow(
+      MonoCloudValidationError
+    );
+  });
+
+  it('should throw if the response timeout is below the minimum', () => {
+    setRequiredEnv();
+
+    expect(() => getOptions({ responseTimeout: 999 })).toThrow(
+      MonoCloudValidationError
+    );
+  });
+
+  it('should throw if the certificate binding validation mode is invalid', () => {
+    setRequiredEnv();
+
+    expect(() =>
+      // @ts-expect-error FOR TEST -- invalid mode
+      getOptions({ validateCertificateBinding: 'nope' })
+    ).toThrow(MonoCloudValidationError);
+  });
+
+  it('should throw if the introspection cache duration is negative', () => {
+    setRequiredEnv();
+
+    expect(() => getOptions({ introspectionCacheDuration: -1 })).toThrow(
       MonoCloudValidationError
     );
   });

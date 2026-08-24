@@ -96,6 +96,7 @@ export class MonoCloudCoreClient {
         metadataResolver: this.options.metadataResolver,
         jwksResolver: this.options.jwksResolver,
         fetcher: this.options.fetcher,
+        responseTimeout: this.options.responseTimeout,
         jwksCacheDuration: this.options.jwksCacheDuration,
         metadataCacheDuration: this.options.metadataCacheDuration,
       }

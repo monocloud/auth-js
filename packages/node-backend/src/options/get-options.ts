@@ -8,6 +8,7 @@ import {
 import { DEFAULT_OPTIONS } from './defaults';
 import { optionsSchema } from './validation';
 import {
+  CertificateBindingValidation,
   ClientAuthMethod,
   MonoCloudValidationError,
 } from '@monocloud/auth-core';
@@ -40,6 +41,12 @@ export const getOptions = (
     process.env.MONOCLOUD_BACKEND_METADATA_CACHE_DURATION;
   const MONOCLOUD_BACKEND_INTROSPECT_JWT_TOKENS =
     process.env.MONOCLOUD_BACKEND_INTROSPECT_JWT_TOKENS;
+  const MONOCLOUD_BACKEND_VALIDATE_CERTIFICATE_BINDING =
+    process.env.MONOCLOUD_BACKEND_VALIDATE_CERTIFICATE_BINDING;
+  const MONOCLOUD_BACKEND_RESPONSE_TIMEOUT =
+    process.env.MONOCLOUD_BACKEND_RESPONSE_TIMEOUT;
+  const MONOCLOUD_BACKEND_INTROSPECTION_CACHE_DURATION =
+    process.env.MONOCLOUD_BACKEND_INTROSPECTION_CACHE_DURATION;
 
   const opt: MonoCloudBackendNodeClientOptions = {
     tenantDomain: options?.tenantDomain ?? MONOCLOUD_BACKEND_TENANT_DOMAIN!,
@@ -80,6 +87,18 @@ export const getOptions = (
       options?.introspectJwtTokens ??
       getBoolean(MONOCLOUD_BACKEND_INTROSPECT_JWT_TOKENS) ??
       DEFAULT_OPTIONS.introspectJwtTokens,
+    validateCertificateBinding:
+      options?.validateCertificateBinding ??
+      (MONOCLOUD_BACKEND_VALIDATE_CERTIFICATE_BINDING as CertificateBindingValidation) ??
+      DEFAULT_OPTIONS.validateCertificateBinding,
+    responseTimeout:
+      options?.responseTimeout ??
+      getNumber(MONOCLOUD_BACKEND_RESPONSE_TIMEOUT) ??
+      DEFAULT_OPTIONS.responseTimeout,
+    introspectionCacheDuration:
+      options?.introspectionCacheDuration ??
+      getNumber(MONOCLOUD_BACKEND_INTROSPECTION_CACHE_DURATION) ??
+      DEFAULT_OPTIONS.introspectionCacheDuration,
     fetcher: options?.fetcher,
     cache: options?.cache,
   };

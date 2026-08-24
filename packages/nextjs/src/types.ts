@@ -59,10 +59,7 @@ export type MonoCloudAuthHandler = (
    * Response object or App Router context.
    */
   resOrCtx?:
-    | Response
-    | NextResponse<any>
-    | NextApiResponse<any>
-    | AppRouterContext
+    Response | NextResponse<any> | NextApiResponse<any> | AppRouterContext
 ) => Promise<Response | NextResponse | void | any>;
 
 /**
@@ -71,11 +68,7 @@ export type MonoCloudAuthHandler = (
  * @category Types
  */
 export type NextMiddlewareResult =
-  | NextResponse
-  | Response
-  | null
-  | undefined
-  | void;
+  NextResponse | Response | null | undefined | void;
 
 /**
  * Handler invoked when access is denied during Next.js middleware execution.
@@ -220,8 +213,7 @@ export interface MonoCloudAuthOptions {
  * @category Types
  */
 export type ProtectedRoutes =
-  | ProtectedRouteMatcher[]
-  | CustomProtectedRouteMatcher;
+  ProtectedRouteMatcher[] | CustomProtectedRouteMatcher;
 
 /**
  * Options for configuring {@link authMiddleware | authMiddleware()}.
