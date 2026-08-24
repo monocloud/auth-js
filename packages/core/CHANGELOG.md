@@ -1,5 +1,14 @@
 # @monocloud/auth-core
 
+## 0.2.7
+
+### Patch Changes
+
+- a877d9a: - `introspectAccessToken()` now throws the new `inactive_token` error code when the authorization server reports `active: false`.
+- a877d9a: - `validateCertificateBinding` on the token validation options is now the exported `CertificateBindingValidation` union instead of a boolean; `true` becomes `'required'`.
+- a877d9a: - added an optional `responseTimeout` (in milliseconds) client option. Requests to the authorization server are aborted once it elapses, throwing `MonoCloudHttpError`.
+  - `MonoCloudOidcClientBaseOptions` now extends `MonoCloudClientOptionsBase` instead of redeclaring the eight fields they shared. It additionally accepts `clientSecret`, which `MonoCloudOidcClientBase` ignores.
+
 ## 0.2.6
 
 ### Patch Changes
