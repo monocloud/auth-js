@@ -92,7 +92,7 @@
     "@monocloud/auth-test-utils": "workspace:*",
     "@types/express": "^5.0.6",
     "eslint": "10.7.0",
-    "fastify": "^5.10.0"
+    "fastify": "^5.12.1"
   },
   "peerDependencies": {
     "express": "^4.17.0 || ^5.0.0",
