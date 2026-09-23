@@ -1025,7 +1025,7 @@ AQIDBAUGBwg=
       fetchSpy.assert();
     });
 
-    it("should throw if the 'cnf' claim is malformed JSON", async () => {
+    it("should throw if the 'cnf' claim is a string", async () => {
       const certificate = `-----BEGIN CERTIFICATE-----
 AQIDBAUGBwg=
 -----END CERTIFICATE-----`;
@@ -1051,7 +1051,7 @@ AQIDBAUGBwg=
           validateCertificateBinding: 'required',
           clientCertificate: certificate,
         }),
-        "Malformed 'cnf' claim for certificate binding"
+        "The 'cnf' claim could not be parsed"
       );
 
       fetchSpy.assert();
@@ -1246,7 +1246,7 @@ AQIDBAUGBwg=
       fetchSpy.assert();
     });
 
-    it("should throw under 'when_present' when the cnf claim is malformed", async () => {
+    it("should throw under 'when_present' when the cnf claim is a string", async () => {
       const certificate = 'AQIDBAUGBwg=';
 
       const fetchSpy = fetchBuilder()
@@ -1270,7 +1270,7 @@ AQIDBAUGBwg=
           validateCertificateBinding: 'when_present',
           clientCertificate: certificate,
         }),
-        "Malformed 'cnf' claim for certificate binding"
+        "The 'cnf' claim could not be parsed"
       );
 
       fetchSpy.assert();
@@ -1283,32 +1283,6 @@ AQIDBAUGBwg=
           responseBody: {
             ...baseClaims,
             cnf: { jkt: 'dpop-thumbprint' },
-          },
-        })
-        .createSpy();
-
-      const client = new MonoCloudOidcBackendClient(
-        'example.com',
-        'https://api.example.com',
-        defaultClientOptions
-      );
-
-      const result = await client.introspectAccessToken('some-token', {
-        validateCertificateBinding: 'when_present',
-      });
-
-      expect(result.sub).toBe('user123');
-
-      fetchSpy.assert();
-    });
-
-    it("should skip binding under 'when_present' when a string cnf claim uses a different confirmation method", async () => {
-      const fetchSpy = fetchBuilder()
-        .configureMetadata()
-        .configureIntrospection({
-          responseBody: {
-            ...baseClaims,
-            cnf: JSON.stringify({ jkt: 'dpop-thumbprint' }),
           },
         })
         .createSpy();
@@ -1462,7 +1436,7 @@ AQIDBAUGBwg=
       fetchSpy.assert();
     });
 
-    it('should validate certificate binding with base64 certificate and string cnf claim', async () => {
+    it('should validate certificate binding with a bare base64 certificate', async () => {
       const certificate = 'AQIDBAUGBwg=';
       const certificateHash = await getCertificateHash(certificate);
 
@@ -1471,7 +1445,7 @@ AQIDBAUGBwg=
         .configureIntrospection({
           responseBody: {
             ...baseClaims,
-            cnf: JSON.stringify({ 'x5t#S256': certificateHash }),
+            cnf: { 'x5t#S256': certificateHash },
           },
         })
         .createSpy();

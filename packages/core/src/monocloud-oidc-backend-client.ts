@@ -37,22 +37,11 @@ const isCertificateBoundCnf = (cnf: unknown): boolean => {
     return false;
   }
 
-  let value: unknown = cnf;
-
-  if (typeof value === 'string') {
-    try {
-      value = JSON.parse(value) as unknown;
-    } catch {
-      return true;
-    }
-  }
-
-  // A `cnf` that cannot be parsed is treated as certificate-bound, so that validation runs and rejects it rather than silently skipping a broken claim.
-  if (value === null || typeof value !== 'object' || Array.isArray(value)) {
+  if (typeof cnf !== 'object' || Array.isArray(cnf)) {
     return true;
   }
 
-  return 'x5t#S256' in value;
+  return 'x5t#S256' in cnf;
 };
 
 /**
@@ -515,7 +504,7 @@ export class MonoCloudOidcBackendClient extends MonoCloudOidcClientBase {
       new Uint8Array(certificateDigest)
     );
 
-    let cnfClaimValue: unknown = accessTokenClaims.cnf;
+    const cnfClaimValue: unknown = accessTokenClaims.cnf;
 
     if (cnfClaimValue === undefined || cnfClaimValue === null) {
       throw new MonoCloudTokenError(
@@ -523,21 +512,7 @@ export class MonoCloudOidcBackendClient extends MonoCloudOidcClientBase {
       );
     }
 
-    if (typeof cnfClaimValue === 'string') {
-      try {
-        cnfClaimValue = JSON.parse(cnfClaimValue) as unknown;
-      } catch {
-        throw new MonoCloudTokenError(
-          "Malformed 'cnf' claim for certificate binding"
-        );
-      }
-    }
-
-    if (
-      cnfClaimValue === null ||
-      typeof cnfClaimValue !== 'object' ||
-      Array.isArray(cnfClaimValue)
-    ) {
+    if (typeof cnfClaimValue !== 'object' || Array.isArray(cnfClaimValue)) {
       throw new MonoCloudTokenError("The 'cnf' claim could not be parsed");
     }
 
