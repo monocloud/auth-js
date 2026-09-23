@@ -72,7 +72,7 @@
     "@monocloud/auth-core": "workspace:*",
     "cookie": "1.1.1",
     "debug": "4.4.3",
-    "joi": "18.2.3"
+    "joi": "18.2.5"
   },
   "devDependencies": {
     "@monocloud/auth-test-utils": "workspace:*",
