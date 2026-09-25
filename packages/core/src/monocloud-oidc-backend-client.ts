@@ -1,6 +1,7 @@
 import {
   arrayBufferToBase64,
   decodeBase64Url,
+  decodeBase64UrlUtf8,
   getPublicSigKeyFromIssuerJwks,
   now,
   parseSpaceSeparated,
@@ -269,7 +270,7 @@ export class MonoCloudOidcBackendClient extends MonoCloudOidcClientBase {
 
     let header: JwsHeaderParameters;
     try {
-      header = JSON.parse(decodeBase64Url(protectedHeader));
+      header = JSON.parse(decodeBase64UrlUtf8(protectedHeader));
     } catch {
       throw new MonoCloudTokenError('Failed to parse JWT Header');
     }
@@ -314,7 +315,7 @@ export class MonoCloudOidcBackendClient extends MonoCloudOidcClientBase {
     let claims: AccessTokenClaims;
 
     try {
-      claims = JSON.parse(decodeBase64Url(payload));
+      claims = JSON.parse(decodeBase64UrlUtf8(payload));
     } catch {
       throw new MonoCloudTokenError('Failed to parse JWT Payload');
     }
