@@ -1,5 +1,6 @@
 import {
   decodeBase64Url,
+  decodeBase64UrlUtf8,
   findToken,
   profileSync,
   getPublicSigKeyFromIssuerJwks,
@@ -1083,7 +1084,7 @@ export class MonoCloudOidcClient extends MonoCloudOidcClientBase {
 
     let header: JwsHeaderParameters;
     try {
-      header = JSON.parse(decodeBase64Url(protectedHeader));
+      header = JSON.parse(decodeBase64UrlUtf8(protectedHeader));
     } catch {
       throw new MonoCloudTokenError('Failed to parse JWT Header');
     }
@@ -1130,7 +1131,7 @@ export class MonoCloudOidcClient extends MonoCloudOidcClientBase {
     let claims: IdTokenClaims;
 
     try {
-      claims = JSON.parse(decodeBase64Url(payload));
+      claims = JSON.parse(decodeBase64UrlUtf8(payload));
     } catch {
       throw new MonoCloudTokenError('Failed to parse JWT Payload');
     }
@@ -1254,7 +1255,7 @@ export class MonoCloudOidcClient extends MonoCloudOidcClientBase {
 
     let header: JwsHeaderParameters;
     try {
-      header = JSON.parse(decodeBase64Url(protectedHeader));
+      header = JSON.parse(decodeBase64UrlUtf8(protectedHeader));
     } catch {
       throw new MonoCloudTokenError('Failed to parse JWT Header');
     }
@@ -1303,7 +1304,7 @@ export class MonoCloudOidcClient extends MonoCloudOidcClientBase {
     let claims: LogoutTokenClaims;
 
     try {
-      claims = JSON.parse(decodeBase64Url(payload));
+      claims = JSON.parse(decodeBase64UrlUtf8(payload));
     } catch {
       throw new MonoCloudTokenError('Failed to parse JWT Payload');
     }

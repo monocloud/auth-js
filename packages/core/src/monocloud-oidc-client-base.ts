@@ -1,4 +1,4 @@
-import { decodeBase64Url, now } from './utils/internal';
+import { decodeBase64UrlUtf8, now } from './utils/internal';
 import {
   JwtClaims,
   IssuerMetadata,
@@ -273,7 +273,7 @@ export class MonoCloudOidcClientBase {
         throw new MonoCloudTokenError('JWT does not contain payload');
       }
 
-      const decoded = decodeBase64Url(payload);
+      const decoded = decodeBase64UrlUtf8(payload);
 
       if (!decoded.startsWith('{')) {
         throw new MonoCloudTokenError('Payload is not an object');

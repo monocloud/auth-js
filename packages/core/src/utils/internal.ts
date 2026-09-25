@@ -169,7 +169,7 @@ export const stringToArrayBuffer = (str: string): Uint8Array => {
  * @returns The decoded string.
  */
 export const arrayBufferToString = (buffer: ArrayBuffer): string => {
-  const decoder = new TextDecoder();
+  const decoder = new TextDecoder('utf-8', { fatal: true });
   return decoder.decode(buffer);
 };
 
@@ -244,6 +244,19 @@ export const fromB64Url = (input: string): string => {
  */
 export const decodeBase64Url = (input: string): string =>
   atob(fromB64Url(input).replace(/\s/g, ''));
+
+/**
+ * @ignore
+ * Decodes a Base64URL encoded string and reads the resulting bytes as UTF-8.
+ *
+ * @param input - The Base64URL string to decode.
+ *
+ * @returns The decoded UTF-8 string.
+ */
+export const decodeBase64UrlUtf8 = (input: string): string =>
+  arrayBufferToString(
+    Uint8Array.from(decodeBase64Url(input), c => c.charCodeAt(0)).buffer
+  );
 
 /**
  * @ignore

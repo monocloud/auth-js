@@ -27,6 +27,7 @@ import {
   arrayBufferToString,
   profileSync,
   decodeBase64Url,
+  decodeBase64UrlUtf8,
   encodeBase64,
   encodeBase64Url,
   ensureLeadingSlash,
@@ -765,6 +766,20 @@ describe('decodeBase64Url', () => {
     ['cGxhaW4tdGV4dA', 'plain-text'],
   ])('should decode Base64Url %s encoded %s', (encodedValue, expected) => {
     expect(decodeBase64Url(encodedValue)).toBe(expected);
+  });
+});
+
+describe('decodeBase64UrlUtf8', () => {
+  it.each([
+    ['cGxhaW4tdGV4dA', 'plain-text'],
+    ['Sm9zw6kgTcO8bGxlcg', 'José Müller'],
+    ['4KSc4KWL4KS4', 'जोस'],
+  ])('should decode Base64Url %s as UTF-8 %s', (encodedValue, expected) => {
+    expect(decodeBase64UrlUtf8(encodedValue)).toBe(expected);
+  });
+
+  it('should throw for bytes that are not valid UTF-8', () => {
+    expect(() => decodeBase64UrlUtf8('_w')).toThrow(TypeError);
   });
 });
 
