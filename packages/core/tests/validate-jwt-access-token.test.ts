@@ -7,14 +7,16 @@ import {
   fetchBuilder,
 } from '@monocloud/auth-test-utils';
 import { MonoCloudOidcBackendClient, MonoCloudValidationError } from '../src';
-import { assertError, assertTokenError } from './utils';
+import {
+  assertError,
+  assertTokenError,
+  invalidUtf8Header,
+  toBase64Url,
+} from './utils';
 
 const defaultClientOptions = {
   clientId: 'clientId',
 };
-
-const toBase64Url = (value: string): string =>
-  btoa(value).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 
 const toBase64UrlBytes = (bytes: Uint8Array): string =>
   btoa(String.fromCharCode(...bytes))
@@ -95,6 +97,19 @@ describe('MonoCloudOidcBackendClient.validateJwtAccessToken()', () => {
 
       await assertTokenError(
         client.validateJwtAccessToken('.payload.signature'),
+        'Failed to parse JWT Header'
+      );
+    });
+
+    it('should not validate a JWT whose header is not valid UTF-8', async () => {
+      const client = new MonoCloudOidcBackendClient(
+        'example.com',
+        'https://api.example.com',
+        defaultClientOptions
+      );
+
+      await assertTokenError(
+        client.validateJwtAccessToken(`${invalidUtf8Header}.payload.signature`),
         'Failed to parse JWT Header'
       );
     });
@@ -254,6 +269,46 @@ describe('MonoCloudOidcBackendClient.validateJwtAccessToken()', () => {
 
       fetchSpy.assert();
       cryptoSpy.mockClear();
+    });
+
+    it('should fail if the JWT payload is not valid UTF-8', async () => {
+      const cryptoSpy = vi
+        .spyOn(crypto.subtle, 'verify')
+        .mockReturnValue(Promise.resolve(true));
+
+      const encoder = new TextEncoder();
+      const payload = toBase64UrlBytes(
+        new Uint8Array([
+          ...encoder.encode(
+            `{"iss":"https://example.com","aud":"https://api.example.com","exp":${now() + 60},"sub":"`
+          ),
+          0xff,
+          ...encoder.encode('"}'),
+        ])
+      );
+
+      let jwt = await generateIdToken();
+      const [header, , signature] = jwt.split('.');
+      jwt = `${header}.${payload}.${signature}`;
+
+      const fetchSpy = fetchBuilder()
+        .configureMetadata()
+        .configureJwks()
+        .createSpy();
+
+      const client = new MonoCloudOidcBackendClient(
+        'example.com',
+        'https://api.example.com',
+        defaultClientOptions
+      );
+
+      await assertTokenError(
+        client.validateJwtAccessToken(jwt),
+        'Failed to parse JWT Payload'
+      );
+
+      fetchSpy.assert();
+      cryptoSpy.mockRestore();
     });
   });
 
@@ -543,6 +598,40 @@ AQIDBAUGBwg=
       expect(result.exp).toBe(exp);
       expect(result.iat).toBe(iat);
       expect(result.custom).toBe('value');
+
+      fetchSpy.assert();
+    });
+
+    it('should decode non-ASCII claims as UTF-8', async () => {
+      const jwt = await generateIdToken({
+        claims: {
+          aud: 'https://api.example.com',
+          iss: 'https://example.com',
+          exp: now() + 60,
+          name: 'José Müller',
+          given_name: 'जोस',
+          groups: ['Développeurs'],
+        },
+      });
+
+      const fetchSpy = fetchBuilder()
+        .configureMetadata()
+        .configureJwks()
+        .createSpy();
+
+      const client = new MonoCloudOidcBackendClient(
+        'example.com',
+        'https://api.example.com',
+        defaultClientOptions
+      );
+
+      const result = await client.validateJwtAccessToken(jwt, {
+        groups: ['Développeurs'],
+      });
+
+      expect(result.name).toBe('José Müller');
+      expect(result.given_name).toBe('जोस');
+      expect(result.groups).toEqual(['Développeurs']);
 
       fetchSpy.assert();
     });

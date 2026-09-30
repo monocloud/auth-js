@@ -4,7 +4,7 @@ import { MonoCloudOidcClient } from '../src/monocloud-oidc-client';
 import { now } from '../src/utils/internal';
 import { generateIdToken, idTokenPublicKey } from '@monocloud/auth-test-utils';
 import { MonoCloudTokenError } from '../src';
-import { assertError } from './utils';
+import { assertError, invalidUtf8Header, toBase64Url } from './utils';
 
 const assertTokenError = async (
   promise: Promise<unknown>,
@@ -79,6 +79,19 @@ describe('MonoCloudOidcClient.validateIdToken()', () => {
     );
 
     await assertTokenError(promise, 'Unexpected JWT "crit" header parameter');
+  });
+
+  it('should not validate an id token whose header is not valid UTF-8', async () => {
+    let idToken = await generateIdToken();
+    const [, payload, signature] = idToken.split('.');
+
+    idToken = `${invalidUtf8Header}.${payload}.${signature}`;
+
+    const client = new MonoCloudOidcClient('example.com', 'clientId');
+
+    const promise = client.validateIdToken(idToken, [idTokenPublicKey], 0, 0);
+
+    await assertTokenError(promise, 'Failed to parse JWT Header');
   });
 
   it('should return a failed result if the id token signature is invalid', async () => {
@@ -453,6 +466,52 @@ describe('MonoCloudOidcClient.validateIdToken()', () => {
     });
   });
 
+  it('should extract non-ASCII claims from id tokens as UTF-8', async () => {
+    const exp = now() + 1;
+    const iat = now();
+
+    const idToken = await generateIdToken({
+      claims: {
+        aud: 'clientId',
+        iss: 'https://example.com',
+        custom: true,
+        num: 1,
+        name: 'José Müller',
+        given_name: 'जोस',
+        exp,
+        iat,
+        nbf: iat,
+      },
+      nonce: 'nonce',
+    });
+
+    const client = new MonoCloudOidcClient('example.com', 'clientId');
+
+    const result = await client.validateIdToken(
+      idToken,
+      [idTokenPublicKey],
+      0,
+      0,
+      undefined,
+      'nonce'
+    );
+
+    expect(result).toEqual({
+      num: 1,
+      custom: true,
+      name: 'José Müller',
+      given_name: 'जोस',
+      aud: 'clientId',
+      iss: 'https://example.com',
+      nonce: 'nonce',
+      sub: 'sub',
+      sub_jwk: expect.any(Object),
+      exp,
+      iat,
+      nbf: iat,
+    });
+  });
+
   it('should throw an error if paylaod is empty', () => {
     try {
       MonoCloudOidcClient.decodeJwt('head..signature');
@@ -460,6 +519,31 @@ describe('MonoCloudOidcClient.validateIdToken()', () => {
     } catch (e) {
       expect(e).instanceof(MonoCloudTokenError);
       expect((e as any).message).toBe('JWT does not contain payload');
+    }
+  });
+
+  it('should decode non-ASCII claims as UTF-8', async () => {
+    const idToken = await generateIdToken({
+      claims: { name: 'José Müller', given_name: 'जोस' },
+    });
+
+    expect(MonoCloudOidcClient.decodeJwt(idToken)).toMatchObject({
+      name: 'José Müller',
+      given_name: 'जोस',
+    });
+  });
+
+  it('should throw an error if the payload is not valid UTF-8', () => {
+    try {
+      MonoCloudOidcClient.decodeJwt(
+        `header.${toBase64Url('{"name":"\xff"}')}.signature`
+      );
+      throw new Error();
+    } catch (e) {
+      expect(e).instanceof(MonoCloudTokenError);
+      expect((e as any).message).toBe(
+        'Could not parse payload. Malformed payload'
+      );
     }
   });
 });

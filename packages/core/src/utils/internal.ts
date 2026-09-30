@@ -236,14 +236,47 @@ export const fromB64Url = (input: string): string => {
 
 /**
  * @ignore
- * Decodes a Base64URL encoded string.
+ * Decodes a Base64URL encoded string into a binary string, one character per
+ * byte. It is not text: use `decodeBase64UrlUtf8` for text and
+ * `decodeBase64UrlBytes` for bytes.
  *
  * @param input - The Base64URL string to decode.
  *
- * @returns The decoded plaintext string.
+ * @returns The decoded binary string.
  */
 export const decodeBase64Url = (input: string): string =>
   atob(fromB64Url(input).replace(/\s/g, ''));
+
+/**
+ * @ignore
+ * Decodes a Base64URL encoded string into its bytes.
+ *
+ * @param input - The Base64URL string to decode.
+ *
+ * @returns The decoded bytes.
+ */
+export const decodeBase64UrlBytes = (input: string): Uint8Array => {
+  const binary = decodeBase64Url(input);
+  const bytes = new Uint8Array(binary.length);
+
+  for (let i = 0; i < binary.length; i++) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+
+  return bytes;
+};
+
+/**
+ * @ignore
+ * Decodes a Base64URL encoded string and reads the resulting bytes as UTF-8.
+ * Bytes that are not valid UTF-8 throw a `TypeError` instead of being replaced.
+ *
+ * @param input - The Base64URL string to decode.
+ *
+ * @returns The decoded UTF-8 string.
+ */
+export const decodeBase64UrlUtf8 = (input: string): string =>
+  new TextDecoder('utf-8', { fatal: true }).decode(decodeBase64UrlBytes(input));
 
 /**
  * @ignore
