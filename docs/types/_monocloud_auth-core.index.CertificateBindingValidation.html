@@ -19,7 +19,7 @@
 <h4>Type Declaration</h4>
 <ul>
 <li><span class="tsd-signature-type">&quot;when_present&quot;</span>
-<div class="tsd-comment tsd-typography"><p>Validates certificate binding only when the token carries a <code>cnf</code> (confirmation) claim.</p>
+<div class="tsd-comment tsd-typography"><p>Validates certificate binding only when the token's <code>cnf</code> (confirmation) claim contains an <code>x5t#S256</code> certificate thumbprint.</p>
 </div></li>
 <li><span class="tsd-signature-type">&quot;required&quot;</span>
 <div class="tsd-comment tsd-typography"><p>Always validates certificate binding, rejecting tokens without a <code>cnf</code> claim.</p>

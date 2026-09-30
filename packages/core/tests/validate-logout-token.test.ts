@@ -10,7 +10,7 @@ import {
 } from '@monocloud/auth-test-utils';
 import { MonoCloudTokenError } from '../src';
 import type { IssuerMetadata, Jwks, MonoCloudOidcClientOptions } from '../src';
-import { assertError } from './utils';
+import { assertError, invalidUtf8Header } from './utils';
 
 const assertTokenError = async (
   promise: Promise<unknown>,
@@ -106,6 +106,19 @@ describe('MonoCloudOidcClient.validateLogoutToken()', () => {
     );
 
     await assertTokenError(promise, 'Unexpected JWT "crit" header parameter');
+  });
+
+  it('should not validate a logout token whose header is not valid UTF-8', async () => {
+    let logoutToken = await generateLogoutToken();
+    const [, payload, signature] = logoutToken.split('.');
+
+    logoutToken = `${invalidUtf8Header}.${payload}.${signature}`;
+
+    const client = getClient();
+
+    const promise = client.validateLogoutToken(logoutToken, 0, 0);
+
+    await assertTokenError(promise, 'Failed to parse JWT Header');
   });
 
   it('should return a failed result if the logout token signature is invalid', async () => {
@@ -435,5 +448,19 @@ describe('MonoCloudOidcClient.validateLogoutToken()', () => {
     expect(claims.jti).toBe('jti');
     expect(claims.iat).toEqual(expect.any(Number));
     expect(claims.events).toEqual({ [backChannelLogoutEvent]: {} });
+  });
+
+  it('should decode non-ASCII claims in a logout token as UTF-8', async () => {
+    const logoutToken = await generateLogoutToken({
+      sid: 'José Müller',
+      jti: 'जोस',
+    });
+
+    const client = getClient();
+
+    const claims = await client.validateLogoutToken(logoutToken, 0, 0);
+
+    expect(claims.sid).toBe('José Müller');
+    expect(claims.jti).toBe('जोस');
   });
 });

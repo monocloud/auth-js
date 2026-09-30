@@ -27,6 +27,8 @@ import {
   arrayBufferToString,
   profileSync,
   decodeBase64Url,
+  decodeBase64UrlBytes,
+  decodeBase64UrlUtf8,
   encodeBase64,
   encodeBase64Url,
   ensureLeadingSlash,
@@ -747,6 +749,12 @@ describe('arrayBufferToString', () => {
     );
     expect(result).toBe('string');
   });
+
+  it('should replace bytes that are not valid UTF-8 instead of throwing', () => {
+    const result = arrayBufferToString(new Uint8Array([111, 107, 255]).buffer);
+
+    expect(result).toBe('ok�');
+  });
 });
 
 describe('encodeBase64Url', () => {
@@ -765,6 +773,28 @@ describe('decodeBase64Url', () => {
     ['cGxhaW4tdGV4dA', 'plain-text'],
   ])('should decode Base64Url %s encoded %s', (encodedValue, expected) => {
     expect(decodeBase64Url(encodedValue)).toBe(expected);
+  });
+});
+
+describe('decodeBase64UrlBytes', () => {
+  it('should decode Base64Url to its bytes, even when they are not UTF-8', () => {
+    expect(decodeBase64UrlBytes('AP-A_g')).toEqual(
+      new Uint8Array([0, 255, 128, 254])
+    );
+  });
+});
+
+describe('decodeBase64UrlUtf8', () => {
+  it.each([
+    ['cGxhaW4tdGV4dA', 'plain-text'],
+    ['Sm9zw6kgTcO8bGxlcg', 'José Müller'],
+    ['4KSc4KWL4KS4', 'जोस'],
+  ])('should decode Base64Url %s as UTF-8 %s', (encodedValue, expected) => {
+    expect(decodeBase64UrlUtf8(encodedValue)).toBe(expected);
+  });
+
+  it('should throw for bytes that are not valid UTF-8', () => {
+    expect(() => decodeBase64UrlUtf8('_w')).toThrow(TypeError);
   });
 });
 

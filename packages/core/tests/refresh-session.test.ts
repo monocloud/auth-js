@@ -786,7 +786,7 @@ describe('MonoCloudOidcClient.refreshSession()', () => {
     const fetchSpy = fetchBuilder()
       .configureMetadata()
       .configureRefreshToken({
-        idToken: 'header.payload.signature',
+        idToken: 'header.WzEsMl0.signature',
         body: 'grant_type=refresh_token&refresh_token=rt_old',
       })
       .createSpy();

@@ -64,3 +64,8 @@ export const assertTokenError = async (
     expect((e as MonoCloudTokenError).code).toBe(code);
   }
 };
+
+export const toBase64Url = (value: string): string =>
+  btoa(value).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+
+export const invalidUtf8Header = toBase64Url('{"alg":"RS256","kid":"\xff"}');

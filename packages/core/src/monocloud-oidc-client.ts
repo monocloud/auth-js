@@ -1,5 +1,6 @@
 import {
-  decodeBase64Url,
+  decodeBase64UrlBytes,
+  decodeBase64UrlUtf8,
   findToken,
   profileSync,
   getPublicSigKeyFromIssuerJwks,
@@ -1083,7 +1084,7 @@ export class MonoCloudOidcClient extends MonoCloudOidcClientBase {
 
     let header: JwsHeaderParameters;
     try {
-      header = JSON.parse(decodeBase64Url(protectedHeader));
+      header = JSON.parse(decodeBase64UrlUtf8(protectedHeader));
     } catch {
       throw new MonoCloudTokenError('Failed to parse JWT Header');
     }
@@ -1104,13 +1105,7 @@ export class MonoCloudOidcClient extends MonoCloudOidcClientBase {
       throw new MonoCloudTokenError('Unexpected JWT "crit" header parameter');
     }
 
-    const binary = decodeBase64Url(encodedSignature);
-
-    const signature = new Uint8Array(binary.length);
-
-    for (let i = 0; i < binary.length; i++) {
-      signature[i] = binary.charCodeAt(i);
-    }
+    const signature = decodeBase64UrlBytes(encodedSignature);
 
     const key = await getPublicSigKeyFromIssuerJwks(jwks, header);
 
@@ -1119,7 +1114,7 @@ export class MonoCloudOidcClient extends MonoCloudOidcClientBase {
     const verified = await crypto.subtle.verify(
       keyToSubtle(key),
       key,
-      signature,
+      signature as BufferSource,
       stringToArrayBuffer(input) as BufferSource
     );
 
@@ -1130,7 +1125,7 @@ export class MonoCloudOidcClient extends MonoCloudOidcClientBase {
     let claims: IdTokenClaims;
 
     try {
-      claims = JSON.parse(decodeBase64Url(payload));
+      claims = JSON.parse(decodeBase64UrlUtf8(payload));
     } catch {
       throw new MonoCloudTokenError('Failed to parse JWT Payload');
     }
@@ -1254,7 +1249,7 @@ export class MonoCloudOidcClient extends MonoCloudOidcClientBase {
 
     let header: JwsHeaderParameters;
     try {
-      header = JSON.parse(decodeBase64Url(protectedHeader));
+      header = JSON.parse(decodeBase64UrlUtf8(protectedHeader));
     } catch {
       throw new MonoCloudTokenError('Failed to parse JWT Header');
     }
@@ -1275,13 +1270,7 @@ export class MonoCloudOidcClient extends MonoCloudOidcClientBase {
       throw new MonoCloudTokenError('Unexpected JWT "crit" header parameter');
     }
 
-    const binary = decodeBase64Url(encodedSignature);
-
-    const signature = new Uint8Array(binary.length);
-
-    for (let i = 0; i < binary.length; i++) {
-      signature[i] = binary.charCodeAt(i);
-    }
+    const signature = decodeBase64UrlBytes(encodedSignature);
 
     const jwks = await this.getJwks();
 
@@ -1292,7 +1281,7 @@ export class MonoCloudOidcClient extends MonoCloudOidcClientBase {
     const verified = await crypto.subtle.verify(
       keyToSubtle(key),
       key,
-      signature,
+      signature as BufferSource,
       stringToArrayBuffer(input) as BufferSource
     );
 
@@ -1303,7 +1292,7 @@ export class MonoCloudOidcClient extends MonoCloudOidcClientBase {
     let claims: LogoutTokenClaims;
 
     try {
-      claims = JSON.parse(decodeBase64Url(payload));
+      claims = JSON.parse(decodeBase64UrlUtf8(payload));
     } catch {
       throw new MonoCloudTokenError('Failed to parse JWT Payload');
     }
