@@ -3,6 +3,7 @@ import type {
   MonoCloudSession,
   MonoCloudTokens,
   MonoCloudWebJSClient,
+  SessionChangeListener,
 } from '@monocloud/auth-web-js';
 import { render, type RenderResult } from '@testing-library/react';
 import React from 'react';
@@ -23,28 +24,71 @@ export type MockClient = {
       | 'signInSilent'
       | 'refreshSession'
       | 'refetchUserInfo'
+      | 'onSessionChange'
     >
   ]: Mock;
 } & {
   oidcClient: {
     [K in keyof Pick<MonoCloudWebJSClient['oidcClient'], 'revokeToken'>]: Mock;
   };
+  emit: (session?: MonoCloudSession) => void;
 };
 
 export const makeMockClient = (
   overrides: Partial<MockClient> = {}
-): MockClient => ({
-  processCallback: vi.fn().mockResolvedValue(undefined),
-  getSession: vi.fn().mockResolvedValue(undefined),
-  getTokens: vi.fn().mockResolvedValue({ isExpired: false } as MonoCloudTokens),
-  signIn: vi.fn().mockResolvedValue(undefined),
-  signOut: vi.fn().mockResolvedValue(undefined),
-  signInSilent: vi.fn().mockResolvedValue(undefined),
-  refreshSession: vi.fn().mockResolvedValue(undefined),
-  refetchUserInfo: vi.fn().mockResolvedValue(undefined),
-  oidcClient: { revokeToken: vi.fn().mockResolvedValue(undefined) },
-  ...overrides,
-});
+): MockClient => {
+  const listeners = new Set<SessionChangeListener>();
+
+  const client: MockClient = {
+    processCallback: vi.fn().mockResolvedValue(undefined),
+    getSession: vi.fn().mockResolvedValue(undefined),
+    getTokens: vi
+      .fn()
+      .mockResolvedValue({ isExpired: false } as MonoCloudTokens),
+    signIn: vi.fn().mockResolvedValue(undefined),
+    signOut: vi.fn().mockResolvedValue(undefined),
+    signInSilent: vi.fn().mockResolvedValue(undefined),
+    refreshSession: vi.fn().mockResolvedValue(undefined),
+    refetchUserInfo: vi.fn().mockResolvedValue(undefined),
+    onSessionChange: vi.fn((listener: SessionChangeListener) => {
+      listeners.add(listener);
+      void client.getSession().then((session?: MonoCloudSession) => {
+        if (listeners.has(listener)) {
+          listener(session);
+        }
+      });
+      return () => {
+        listeners.delete(listener);
+      };
+    }),
+    emit: session => listeners.forEach(listener => listener(session)),
+    oidcClient: { revokeToken: vi.fn().mockResolvedValue(undefined) },
+    ...overrides,
+  };
+
+  return client;
+};
+
+export interface Deferred<T> {
+  promise: Promise<T>;
+  resolve: (value: T) => void;
+  reject: (reason: unknown) => void;
+}
+
+export const deferred = <T = void,>(): Deferred<T> => {
+  let resolve!: (value: T) => void;
+  let reject!: (reason: unknown) => void;
+  const promise = new Promise<T>((res, rej) => {
+    resolve = res;
+    reject = rej;
+  });
+  return { promise, resolve, reject };
+};
+
+export const flush = (): Promise<void> =>
+  new Promise(resolve => {
+    setTimeout(resolve, 0);
+  });
 
 export const setMockClient = (client: MockClient): void => {
   (globalThis as Record<string, unknown>).mcMockClient = client;

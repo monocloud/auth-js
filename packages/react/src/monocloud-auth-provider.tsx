@@ -96,34 +96,31 @@ export const MonoCloudAuthProvider = ({
     () => new MonoCloudWebJSClient(clientOptions)
   );
 
-  const syncSession = useCallback(async (): Promise<void> => {
-    const session = await client.getSession();
-    setState({
-      isLoading: false,
-      isAuthenticated: !!session,
-      user: session?.user,
-      session,
-      error: undefined,
-    });
-  }, [client]);
+  useEffect(
+    () =>
+      client.onSessionChange(session =>
+        setState({
+          isLoading: false,
+          isAuthenticated: !!session,
+          user: session?.user,
+          session,
+          error: undefined,
+        })
+      ),
+    [client]
+  );
 
   const processCallback = useCallback(async (): Promise<void> => {
     setState(prev => ({ ...prev, isLoading: true }));
 
     try {
       await client.processCallback();
-      await syncSession();
+      setState(prev => ({ ...prev, isLoading: false }));
     } catch (e) {
-      setState({
-        isLoading: false,
-        isAuthenticated: false,
-        user: undefined,
-        session: undefined,
-        error: e as Error,
-      });
+      setState(prev => ({ ...prev, isLoading: false, error: e as Error }));
       throw e;
     }
-  }, [client, syncSession]);
+  }, [client]);
 
   const initialized = useRef(false);
   useEffect(() => {
@@ -136,22 +133,20 @@ export const MonoCloudAuthProvider = ({
 
     if (autoProcessCallback) {
       processCallback().catch(() => {});
-    } else {
-      syncSession();
     }
-  }, [autoProcessCallback, processCallback, syncSession]);
+  }, [autoProcessCallback, processCallback]);
 
   const signIn = useCallback(
     async (signInOptions?: SignInOptions): Promise<void> => {
       setState(prev => ({ ...prev, isLoading: true }));
       try {
         await client.signIn(signInOptions);
-        await syncSession();
+        setState(prev => ({ ...prev, isLoading: false }));
       } catch (e) {
         setState(prev => ({ ...prev, isLoading: false, error: e as Error }));
       }
     },
-    [client, syncSession]
+    [client]
   );
 
   const signOut = useCallback(
@@ -159,45 +154,35 @@ export const MonoCloudAuthProvider = ({
       setState(prev => ({ ...prev, isLoading: true }));
       try {
         await client.signOut(signOutOptions);
-        await syncSession();
+        setState(prev => ({ ...prev, isLoading: false }));
       } catch (e) {
         setState(prev => ({ ...prev, isLoading: false, error: e as Error }));
       }
     },
-    [client, syncSession]
+    [client]
   );
 
   const signInSilent = useCallback(
-    async (
-      signInSilentOptions?: SignInSilentOptions
-    ): Promise<MonoCloudSession> => {
-      const session = await client.signInSilent(signInSilentOptions);
-      await syncSession();
-      return session;
-    },
-    [client, syncSession]
+    (signInSilentOptions?: SignInSilentOptions): Promise<MonoCloudSession> =>
+      client.signInSilent(signInSilentOptions),
+    [client]
   );
 
   const refreshSession = useCallback(
-    async (refreshOptions?: RefreshOptions): Promise<void> => {
-      await client.refreshSession(refreshOptions);
-      await syncSession();
-    },
-    [client, syncSession]
+    (refreshOptions?: RefreshOptions): Promise<void> =>
+      client.refreshSession(refreshOptions),
+    [client]
   );
 
-  const refetchUserInfo = useCallback(async (): Promise<void> => {
-    await client.refetchUserInfo();
-    await syncSession();
-  }, [client, syncSession]);
+  const refetchUserInfo = useCallback(
+    (): Promise<void> => client.refetchUserInfo(),
+    [client]
+  );
 
   const getTokens = useCallback(
-    async (options?: GetTokensOptions): Promise<MonoCloudTokens> => {
-      const tokens = await client.getTokens(options);
-      await syncSession();
-      return tokens;
-    },
-    [client, syncSession]
+    (options?: GetTokensOptions): Promise<MonoCloudTokens> =>
+      client.getTokens(options),
+    [client]
   );
 
   const value = useMemo<MonoCloudAuth>(
