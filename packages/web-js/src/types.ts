@@ -355,6 +355,22 @@ export type InteractionMode =
 export type PostCallback = (state: CallbackState) => Promise<void> | void;
 
 /**
+ * Listener registered with {@link MonoCloudWebJSClient.onSessionChange | onSessionChange()} to follow the stored session.
+ *
+ * It is called once with the current session, and then every time the client writes a new session or removes it.
+ *
+ * @category Types (Handler)
+ *
+ * @param session The stored session, or `undefined` when there is none.
+ */
+export type SessionChangeListener = (
+  /**
+   * The stored session, or `undefined` when there is none.
+   */
+  session: MonoCloudSession | undefined
+) => void;
+
+/**
  * Options used to customize the sign-in flow.
  *
  * @category Types

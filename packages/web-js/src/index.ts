@@ -61,6 +61,7 @@ export type {
   SignOutOptions,
   CallbackState,
   PostCallback,
+  SessionChangeListener,
   GetTokensOptions,
   DefaultAuthParams,
 } from './types';

@@ -32,6 +32,7 @@ import type {
   PostCallback,
   PostMessageResult,
   RefreshOptions,
+  SessionChangeListener,
   SignInOptions,
   SignInSilentOptions,
   SignOutOptions,
@@ -113,6 +114,12 @@ export class MonoCloudWebJSClient {
   };
 
   private readonly onSessionCreating?: OnSessionCreating;
+
+  private readonly sessionListeners = new Set<SessionChangeListener>();
+
+  private initialSessionsDelivered: Promise<unknown> = Promise.resolve();
+
+  private callbackExchange?: Promise<void>;
 
   private get filteredIdTokenClaims(): string[] {
     return (
@@ -373,23 +380,10 @@ export class MonoCloudWebJSClient {
       return;
     }
 
-    const callbackState = this.redirectCallbackState;
-    this.redirectCallbackState = undefined;
-
-    if (!callbackState) {
-      return;
-    }
-
-    if (isSignInPath && !callbackState.signOut) {
-      await this.internalProcessSignInCallback(
-        window.location.href,
-        callbackState
-      );
-    } else if (isSignOutPath && callbackState.signOut) {
-      await this.internalProcessSignOutCallback(
-        window.location.href,
-        callbackState
-      );
+    try {
+      await this.completeRedirectCallback(isSignInPath, isSignOutPath);
+    } finally {
+      await this.initialSessionsDelivered;
     }
   }
 
@@ -540,6 +534,7 @@ export class MonoCloudWebJSClient {
       const callbackUrl = await this.authWindow(url, ref);
 
       await this.internalProcessSignOutCallback(callbackUrl, callbackState);
+      await this.postCallbackFn(callbackState);
     } finally {
       ref?.close();
     }
@@ -858,13 +853,89 @@ export class MonoCloudWebJSClient {
     return JSON.parse(value);
   }
 
+  /**
+   * Subscribes to changes to the session stored by this client.
+   *
+   * @remarks
+   * The listener is called once with the session currently in storage, and
+   * then with the new value every time the client writes one: sign-in and
+   * sign-out (including their callbacks), `refreshSession()`, `refetchUserInfo()`,
+   * and `getTokens()` when it refreshes. It receives `undefined` when the session is
+   * removed. Calls that leave the session unchanged do not notify.
+   *
+   * @example Usage
+   * ```typescript:src/app.ts
+   * const unsubscribe = client.onSessionChange(session => {
+   *   console.log('Signed in as:', session?.user.sub);
+   * });
+   *
+   * // Stop listening, for example when the view is torn down.
+   * unsubscribe();
+   * ```
+   *
+   * @param listener Called with the stored session, or `undefined` when there is none.
+   * @returns A function that removes the listener.
+   */
+  onSessionChange(listener: SessionChangeListener): () => void {
+    let notified = false;
+
+    const subscriber: SessionChangeListener = session => {
+      notified = true;
+      listener(session);
+    };
+
+    this.sessionListeners.add(subscriber);
+
+    const delivery = this.readInitialSession().then(session => {
+      if (!notified && this.sessionListeners.has(subscriber)) {
+        this.notifySessionListener(subscriber, session);
+      }
+    });
+
+    this.initialSessionsDelivered = Promise.all([
+      this.initialSessionsDelivered,
+      delivery,
+    ]);
+
+    return () => {
+      this.sessionListeners.delete(subscriber);
+    };
+  }
+
+  private async readInitialSession(): Promise<MonoCloudSession | undefined> {
+    const session = await this.getSession().catch((error: unknown) => {
+      // eslint-disable-next-line no-console
+      console.error(error);
+      return undefined;
+    });
+
+    await this.callbackExchange?.catch(() => undefined);
+
+    return session;
+  }
+
+  private notifySessionListener(
+    listener: SessionChangeListener,
+    session: MonoCloudSession | undefined
+  ): void {
+    try {
+      listener(session);
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error(error);
+    }
+  }
+
   private async setSession(session?: MonoCloudSession): Promise<void> {
-    if (!session) {
+    if (session) {
+      await this.storage.setItem(this.sessionKey, JSON.stringify(session));
+    } else {
       await this.storage.removeItem(this.sessionKey);
-      return;
     }
 
-    await this.storage.setItem(this.sessionKey, JSON.stringify(session));
+    this.sessionListeners.forEach(listener =>
+      this.notifySessionListener(listener, session)
+    );
   }
 
   private async buildAuthRequest(
@@ -961,9 +1032,49 @@ export class MonoCloudWebJSClient {
 
       const callbackUrl = await this.authWindow(url, ref);
       await this.internalProcessSignInCallback(callbackUrl, callbackState);
+      await this.postCallbackFn(callbackState);
     } finally {
       ref.close();
     }
+  }
+
+  private async completeRedirectCallback(
+    isSignInPath: boolean,
+    isSignOutPath: boolean
+  ): Promise<void> {
+    if (this.callbackExchange) {
+      await this.callbackExchange;
+      return;
+    }
+
+    const callbackState = this.redirectCallbackState;
+    this.redirectCallbackState = undefined;
+
+    if (!callbackState) {
+      return;
+    }
+
+    if (isSignInPath && !callbackState.signOut) {
+      this.callbackExchange = this.internalProcessSignInCallback(
+        window.location.href,
+        callbackState
+      );
+    } else if (isSignOutPath && callbackState.signOut) {
+      this.callbackExchange = this.internalProcessSignOutCallback(
+        window.location.href,
+        callbackState
+      );
+    } else {
+      return;
+    }
+
+    try {
+      await this.callbackExchange;
+    } finally {
+      this.callbackExchange = undefined;
+    }
+
+    await this.postCallbackFn(callbackState);
   }
 
   private async internalProcessSignInCallback(
@@ -1185,8 +1296,6 @@ export class MonoCloudWebJSClient {
       );
 
       await this.setSession(session);
-
-      await this.postCallbackFn(callbackState);
       return;
     }
 
@@ -1213,8 +1322,6 @@ export class MonoCloudWebJSClient {
     );
 
     await this.setSession(session);
-
-    await this.postCallbackFn(callbackState);
   }
 
   private async internalProcessSignOutCallback(
@@ -1240,8 +1347,6 @@ export class MonoCloudWebJSClient {
     if (callbackState.state && callbackParams.state !== callbackState.state) {
       throw new MonoCloudValidationError('Sign out states mismatch');
     }
-
-    await this.postCallbackFn(callbackState);
   }
 
   private postCallbackToParent(): void {
