@@ -1,5 +1,13 @@
 # @monocloud/auth-react
 
+## 0.2.10
+
+### Patch Changes
+
+- c6f0843: `<MonoCloudAuthProvider>` now follows the client's session changes instead of re-reading storage after every action.
+- Updated dependencies [c6f0843]
+  - @monocloud/auth-web-js@0.2.10
+
 ## 0.2.9
 
 ### Patch Changes

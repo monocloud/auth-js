@@ -1,5 +1,11 @@
 # @monocloud/auth-web-js
 
+## 0.2.10
+
+### Patch Changes
+
+- c6f0843: - Added `onSessionChange(listener)` to `MonoCloudWebJSClient`, with the exported `SessionChangeListener` type. The listener receives the stored session once, then every session the client writes (or `undefined` when it is removed), in write order and before `postCallback` runs. It returns a function that removes the listener.
+
 ## 0.2.9
 
 ### Patch Changes
