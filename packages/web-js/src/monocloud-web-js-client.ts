@@ -121,6 +121,12 @@ export class MonoCloudWebJSClient {
 
   private callbackExchange?: Promise<void>;
 
+  private markRedirectCallbackProcessed!: () => void;
+
+  private readonly redirectCallbackProcessed = new Promise<void>(resolve => {
+    this.markRedirectCallbackProcessed = resolve;
+  });
+
   private get filteredIdTokenClaims(): string[] {
     return (
       this.options.filteredIdTokenClaims ?? [
@@ -222,12 +228,7 @@ export class MonoCloudWebJSClient {
       return undefined;
     }
 
-    try {
-      return JSON.parse(stored);
-    } catch (error) {
-      window.sessionStorage.removeItem(this.callbackStateKey);
-      throw error;
-    }
+    return JSON.parse(stored);
   }
 
   private get popupWindowWidth(): number {
@@ -283,6 +284,39 @@ export class MonoCloudWebJSClient {
 
   private get mainWindow(): boolean {
     return !this.isIframe && !this.isPopup;
+  }
+
+  private get hasUnprocessedRedirectCallback(): boolean {
+    let callbackState: CallbackState | undefined;
+
+    try {
+      callbackState = this.redirectCallbackState;
+    } catch {
+      return false;
+    }
+
+    if (!this.mainWindow || !callbackState) {
+      return false;
+    }
+
+    const currentUrl = new URL(window.location.href);
+    const currentPath = removeTrailingSlash(
+      `${currentUrl.origin}${currentUrl.pathname}`
+    );
+    const callbackPath = callbackState.signOut
+      ? this.signOutRedirectUri
+      : this.redirectUri;
+    const callbackParams = parseCallbackParams(
+      callbackState.signOut || callbackState.responseType === 'code'
+        ? currentUrl.search
+        : currentUrl.hash
+    );
+
+    return (
+      currentPath === callbackPath &&
+      isPresent(callbackParams.state) &&
+      (!callbackState.state || callbackParams.state === callbackState.state)
+    );
   }
 
   /**
@@ -383,6 +417,7 @@ export class MonoCloudWebJSClient {
     try {
       await this.completeRedirectCallback(isSignInPath, isSignOutPath);
     } finally {
+      this.markRedirectCallbackProcessed();
       await this.initialSessionsDelivered;
     }
   }
@@ -909,6 +944,10 @@ export class MonoCloudWebJSClient {
       return undefined;
     });
 
+    if (this.hasUnprocessedRedirectCallback) {
+      await this.redirectCallbackProcessed;
+    }
+
     await this.callbackExchange?.catch(() => undefined);
 
     return session;
@@ -1047,8 +1086,13 @@ export class MonoCloudWebJSClient {
       return;
     }
 
-    const callbackState = this.redirectCallbackState;
-    this.redirectCallbackState = undefined;
+    let callbackState: CallbackState | undefined;
+
+    try {
+      callbackState = this.redirectCallbackState;
+    } finally {
+      this.redirectCallbackState = undefined;
+    }
 
     if (!callbackState) {
       return;

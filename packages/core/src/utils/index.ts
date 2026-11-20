@@ -291,7 +291,7 @@ export const decryptAuthState = async <T extends AuthState>(
  * Checks if a user is a member of a specified group or groups.
  *
  * @param user - The user.
- * @param groups - An array of group names or IDs to check membership against.
+ * @param groups - A group name or ID, or an array of group names or IDs, to check membership against. A string is treated as a single group.
  * @param groupsClaim - The claim in the user object that contains groups.
  * @param matchAll - If `true`, requires the user to be in all specified groups; if `false`, checks if the user is in at least one of the groups.
  *
@@ -299,7 +299,7 @@ export const decryptAuthState = async <T extends AuthState>(
  */
 export const isUserInGroup = (
   user: MonoCloudUser | IdTokenClaims,
-  groups: string[],
+  groups: string | string[],
   groupsClaim = 'groups',
   matchAll = false
 ): boolean => {
@@ -307,7 +307,9 @@ export const isUserInGroup = (
     string | { id: string; name: string }
   )[];
 
-  if (!Array.isArray(groups) || groups.length === 0) {
+  const expectedGroups = typeof groups === 'string' ? [groups] : groups;
+
+  if (!Array.isArray(expectedGroups) || expectedGroups.length === 0) {
     return true;
   }
 
@@ -317,7 +319,7 @@ export const isUserInGroup = (
 
   let matched = false;
 
-  for (const expectedGroup of groups) {
+  for (const expectedGroup of expectedGroups) {
     const userInGroup = userGroups.some(
       g =>
         (typeof g === 'string' && g === expectedGroup) ||

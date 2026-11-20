@@ -13,6 +13,7 @@ import type {
   MonoCloudWebJSClientOptions,
 } from '../src';
 import {
+  callbackStateKey,
   ensureLockManagerStub,
   sessionKey,
   setSession,
@@ -666,6 +667,235 @@ describe('onSessionChange()', () => {
           reason: expect.objectContaining({ message: 'exchange failed' }),
         },
       ]);
+    });
+  });
+
+  describe('redirect callback not processed yet', () => {
+    const codeState: CallbackState = {
+      state: 'xyz',
+      nonce: 'nonce',
+      codeVerifier: 'codeVerifier',
+      mode: 'redirect',
+      scopes: 'openid',
+      responseType: 'code',
+    };
+
+    const codeCallbackClient = ({
+      pathname = '/callback',
+      search = '?code=abc&state=xyz',
+      hash = '',
+      stored = codeState as CallbackState | null,
+    } = {}): MonoCloudWebJSClient => {
+      mockWindow.setPathname(pathname).setSearch(search).setHash(hash).assert();
+
+      if (stored) {
+        mockStorage.setCallbackState(stored);
+      }
+
+      return testInstance({
+        storage: mockStorage,
+        validateIdToken: false,
+        fetchUserinfo: false,
+        postCallback: vi.fn(),
+      });
+    };
+
+    it('does not call a listener added before processCallback() until it runs', async () => {
+      const idToken = await generateIdToken();
+
+      const fetchSpy = fetchBuilder()
+        .configureMetadata()
+        .configureTokenEndpoint({ accessToken: 'new-at', idToken })
+        .createSpy();
+
+      const instance = codeCallbackClient();
+
+      const listener = vi.fn();
+      instance.onSessionChange(listener);
+      await flush();
+
+      expect(listener).not.toHaveBeenCalled();
+
+      await instance.processCallback();
+
+      const session = await instance.getSession();
+      expect(session?.accessTokens?.[0].accessToken).toBe('new-at');
+      expect(listener).toHaveBeenCalledExactlyOnceWith(session);
+      fetchSpy.assert();
+    });
+
+    it('delivers only the new session after a successful sign-in callback', async () => {
+      await setSession(mockStorage, storedSession());
+
+      const instance = signInCallbackClient();
+
+      const listener = vi.fn();
+      instance.onSessionChange(listener);
+      await flush();
+
+      await instance.processCallback();
+
+      const session = await instance.getSession();
+      expect(session?.accessTokens?.[0].accessToken).toBe('new-at');
+      expect(listener).toHaveBeenCalledExactlyOnceWith(session);
+    });
+
+    it('delivers only the removal after a successful sign-out callback', async () => {
+      mockWindow.setSearch('?state=state').setPathname('/signout').assert();
+
+      const state: CallbackState = {
+        mode: 'redirect',
+        signOut: true,
+        state: 'state',
+      };
+
+      mockStorage.setCallbackState(state);
+      await setSession(mockStorage, storedSession());
+
+      const instance = testInstance({
+        storage: mockStorage,
+        postCallback: vi.fn(),
+      });
+
+      const listener = vi.fn();
+      instance.onSessionChange(listener);
+      await flush();
+
+      await instance.processCallback();
+
+      expect(listener).toHaveBeenCalledExactlyOnceWith(undefined);
+      mockStorage.expectNoSession();
+    });
+
+    it('holds the first value when the stored state has no OAuth state to match', async () => {
+      mockWindow
+        .setHash('#state=any&access_token=new-at&expires_in=600&scope=openid')
+        .setPathname('/callback')
+        .assert();
+
+      const state: CallbackState = {
+        mode: 'redirect',
+        scopes: 'openid',
+        responseType: 'token',
+      };
+
+      mockStorage.setCallbackState(state);
+      await setSession(mockStorage, storedSession());
+
+      const instance = testInstance({
+        storage: mockStorage,
+        fetchUserinfo: false,
+        postCallback: vi.fn(),
+      });
+
+      const listener = vi.fn();
+      instance.onSessionChange(listener);
+      await flush();
+
+      await instance.processCallback();
+
+      const session = await instance.getSession();
+      expect(session?.accessTokens?.[0].accessToken).toBe('new-at');
+      expect(listener).toHaveBeenCalledExactlyOnceWith(session);
+    });
+
+    it('delivers the stored session before processCallback() rejects after a failed callback', async () => {
+      await setSession(mockStorage, storedSession());
+
+      const instance = codeCallbackClient({
+        search: '?error=access_denied&state=xyz',
+      });
+
+      const listener = vi.fn();
+      instance.onSessionChange(listener);
+      await flush();
+
+      expect(listener).not.toHaveBeenCalled();
+
+      const rejected = vi.fn();
+      await instance.processCallback().catch(rejected);
+
+      expect(rejected).toHaveBeenCalledExactlyOnceWith(
+        expect.objectContaining({ error: 'access_denied' })
+      );
+      expect(listener).toHaveBeenCalledExactlyOnceWith(
+        await instance.getSession()
+      );
+      expect(listener.mock.calls[0][0]).toEqual(
+        expect.objectContaining({ refreshToken: 'rt' })
+      );
+      expect(listener.mock.invocationCallOrder[0]).toBeLessThan(
+        rejected.mock.invocationCallOrder[0]
+      );
+    });
+
+    it.each([
+      { context: 'in a popup', frame: 'popup' },
+      { context: 'in an iframe', frame: 'silent' },
+      { context: 'on a non-callback path', pathname: '/dashboard' },
+      {
+        context: 'on the sign-out path for a sign-in state',
+        pathname: '/signout',
+      },
+      { context: 'without a stored callback state', stored: null },
+      { context: 'without a state in the URL', search: '?code=abc' },
+      {
+        context: 'without a state in the URL or the stored callback state',
+        search: '?code=abc',
+        stored: { ...codeState, state: undefined },
+      },
+      {
+        context: 'with the state outside the query for the code flow',
+        search: '',
+        hash: '#code=abc&state=xyz',
+      },
+      {
+        context: 'with a different state in the URL',
+        search: '?code=abc&state=other',
+      },
+    ])(
+      'does not hold the first value $context',
+      async ({ frame, pathname, search, hash, stored }) => {
+        if (frame) {
+          mockWindow.mockParentSide(frame);
+        }
+
+        await setSession(mockStorage, storedSession());
+
+        const instance = codeCallbackClient({ pathname, search, hash, stored });
+
+        const listener = vi.fn();
+        instance.onSessionChange(listener);
+        await flush();
+
+        expect(listener).toHaveBeenCalledExactlyOnceWith(
+          await instance.getSession()
+        );
+        expect(listener.mock.calls[0][0]).toEqual(
+          expect.objectContaining({ refreshToken: 'rt' })
+        );
+      }
+    );
+
+    it('leaves a stored callback state that cannot be parsed for processCallback() to reject', async () => {
+      mockWindow
+        .setSearch('?code=abc&state=xyz')
+        .setPathname('/callback')
+        .assert();
+
+      window.sessionStorage.setItem(callbackStateKey(), '{ malformed_json');
+
+      const instance = testInstance({ storage: mockStorage });
+
+      const listener = vi.fn();
+      instance.onSessionChange(listener);
+      await flush();
+
+      expect(listener).toHaveBeenCalledExactlyOnceWith(undefined);
+      mockStorage.expectCallbackState();
+
+      await expect(instance.processCallback()).rejects.toThrow(SyntaxError);
+      mockStorage.expectCallbackStateRemoved();
     });
   });
 
