@@ -1,5 +1,11 @@
 # @monocloud/auth-core
 
+## 0.2.10
+
+### Patch Changes
+
+- fe97e45: `isUserInGroup()` now treats a string `groups` value as a single group. Previously, a string passed by an untyped caller skipped the check and returned `true` for every user.
+
 ## 0.2.9
 
 ### Patch Changes
