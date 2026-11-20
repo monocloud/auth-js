@@ -1,5 +1,13 @@
 # @monocloud/auth-web-js
 
+## 0.2.11
+
+### Patch Changes
+
+- fe97e45: While the page is a redirect callback that `processCallback()` has not processed yet, `onSessionChange()` now holds back a listener's first value until it has.
+- Updated dependencies [fe97e45]
+  - @monocloud/auth-core@0.2.10
+
 ## 0.2.10
 
 ### Patch Changes
