@@ -431,6 +431,30 @@ describe('isUserInGroup', () => {
     expect(result).toBe(true);
   });
 
+  it('should return true when the user is in the group passed as a string', () => {
+    const result = isUserInGroup({ sub: 'sun', groups: ['admin'] }, 'admin');
+    expect(result).toBe(true);
+  });
+
+  it('should return false when the user is not in the group passed as a string', () => {
+    const result = isUserInGroup({ sub: 'sun', groups: ['editor'] }, 'admin');
+    expect(result).toBe(false);
+  });
+
+  it('should treat a string group as a one-item array when matching all groups', () => {
+    const member = { sub: 'sun', groups: ['admin', 'editor'] };
+    const nonMember = { sub: 'sun', groups: ['editor'] };
+
+    expect(isUserInGroup(member, 'admin', undefined, true)).toBe(
+      isUserInGroup(member, ['admin'], undefined, true)
+    );
+    expect(isUserInGroup(nonMember, 'admin', undefined, true)).toBe(
+      isUserInGroup(nonMember, ['admin'], undefined, true)
+    );
+    expect(isUserInGroup(member, 'admin', undefined, true)).toBe(true);
+    expect(isUserInGroup(nonMember, 'admin', undefined, true)).toBe(false);
+  });
+
   it('should be able to take in custom groups claim name', () => {
     const result = isUserInGroup(
       { sub: 'sun', custom_groups: ['test'] },
